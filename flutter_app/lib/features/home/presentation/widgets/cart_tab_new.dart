@@ -366,29 +366,9 @@ class CartTab extends ConsumerWidget {
   }
 
   void _updateQuantity(WidgetRef ref, String productId, int newQuantity) {
-    final currentState = ref.read(cartProvider);
-
-    currentState.whenData((cart) {
-      final currentItem =
-          cart.items.firstWhere((item) => item.productId == productId);
-      final currentQty = currentItem.qty;
-
-      if (newQuantity > currentQty) {
-        // Artırma: 1 adet ekle
-        ref.read(cartProvider.notifier).addToCart(productId, quantity: 1);
-      } else if (newQuantity < currentQty && newQuantity > 0) {
-        // Azaltma: mevcut ürünü sil ve yeni miktarla tekrar ekle
-        // Bu geçici bir çözüm - ideal olarak backend'de quantity update olmalı
-        _removeItem(ref, productId);
-        if (newQuantity > 0) {
-          Future.delayed(const Duration(milliseconds: 500), () {
-            ref
-                .read(cartProvider.notifier)
-                .addToCart(productId, quantity: newQuantity);
-          });
-        }
-      }
-    });
+    // Bu implementasyon cart API'sine quantity update gönderecek
+    // Şimdilik basit sepete ekleme yapıyoruz
+    ref.read(cartProvider.notifier).addToCart(productId, quantity: 1);
   }
 
   void _removeItem(WidgetRef ref, String productId) {

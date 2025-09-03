@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../home/presentation/pages/home_page.dart';
+import '../../providers/auth_provider.dart';
+import 'register_page.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
   bool _obscurePassword = true;
 
   @override
@@ -24,28 +26,67 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+      // Clear any previous errors
+      ref.read(authProvider.notifier).clearError();
 
-      // TODO: Implement Firebase Auth login
-      await Future.delayed(const Duration(seconds: 2));
+      final success = await ref.read(authProvider.notifier).login(
+            _emailController.text.trim(),
+            _passwordController.text,
+          );
 
-      setState(() {
-        _isLoading = false;
-      });
-
-      // Navigate to home page
-      if (mounted) {
+      if (success && mounted) {
+        // Navigate to home page
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const HomePage()),
         );
+      } else if (mounted) {
+        // Show error message
+        final error = ref.read(authErrorProvider);
+        if (error != null) {
+          String userFriendlyError;
+
+          // Convert API errors to user-friendly messages
+          if (error.contains('ApiException')) {
+            final apiException = error;
+            if (apiException.contains('UNAUTHORIZED') ||
+                apiException.contains('401')) {
+              userFriendlyError = 'E-posta veya şifre hatalı';
+            } else if (apiException.contains('NO_INTERNET')) {
+              userFriendlyError = 'İnternet bağlantısı bulunamadı';
+            } else if (apiException.contains('CONNECTION_TIMEOUT')) {
+              userFriendlyError = 'Bağlantı zaman aşımına uğradı';
+            } else {
+              userFriendlyError = 'Giriş yapılırken bir hata oluştu';
+            }
+          } else {
+            userFriendlyError = 'Giriş yapılırken bir hata oluştu';
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(userFriendlyError),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    final isLoading = authState.isLoading;
+
+    // Listen to auth state changes
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      if (next.isAuthenticated && mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      }
+    });
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -145,11 +186,11 @@ class _LoginPageState extends State<LoginPage> {
 
                   // Login Button
                   ElevatedButton(
-                    onPressed: _isLoading ? null : _login,
+                    onPressed: isLoading ? null : _login,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: _isLoading
+                    child: isLoading
                         ? const SizedBox(
                             height: 20,
                             width: 20,
@@ -163,10 +204,9 @@ class _LoginPageState extends State<LoginPage> {
                   // Register Link
                   TextButton(
                     onPressed: () {
-                      // TODO: Navigate to register page
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Kayıt özelliği yakında eklenecek')),
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => const RegisterPage()),
                       );
                     },
                     child: const Text('Hesabınız yok mu? Kayıt olun'),

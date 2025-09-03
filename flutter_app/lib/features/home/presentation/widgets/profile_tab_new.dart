@@ -88,7 +88,9 @@ class ProfileTab extends ConsumerWidget {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
-                                  currentUser?.role == 'admin' ? 'Admin' : 'Aktif Üye',
+                                  currentUser?.role == 'admin'
+                                      ? 'Admin'
+                                      : 'Aktif Üye',
                                   style: const TextStyle(
                                     color: Colors.green,
                                     fontSize: 12,
@@ -117,7 +119,8 @@ class ProfileTab extends ConsumerWidget {
                         onTap: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Siparişler sayfası yakında eklenecek'),
+                              content:
+                                  Text('Siparişler sayfası yakında eklenecek'),
                             ),
                           );
                         },
@@ -145,7 +148,8 @@ class ProfileTab extends ConsumerWidget {
                         onTap: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Randevular sayfası yakında eklenecek'),
+                              content:
+                                  Text('Randevular sayfası yakında eklenecek'),
                             ),
                           );
                         },
@@ -181,7 +185,8 @@ class ProfileTab extends ConsumerWidget {
                         onTap: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Ayarlar sayfası yakında eklenecek'),
+                              content:
+                                  Text('Ayarlar sayfası yakında eklenecek'),
                             ),
                           );
                         },
@@ -272,7 +277,8 @@ class ProfileTab extends ConsumerWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Çıkış Yap'),
-          content: const Text('Hesabınızdan çıkış yapmak istediğinize emin misiniz?'),
+          content: const Text(
+              'Hesabınızdan çıkış yapmak istediğinize emin misiniz?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),

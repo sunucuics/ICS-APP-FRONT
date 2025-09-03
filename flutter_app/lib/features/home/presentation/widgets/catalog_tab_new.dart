@@ -1,10 +1,7 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../products/providers/products_provider.dart';
-import '../../../products/presentation/pages/product_detail_page.dart';
-import '../../../cart/providers/cart_provider.dart';
 import '../../../../core/models/product_model.dart';
 
 class CatalogTab extends ConsumerStatefulWidget {
@@ -15,13 +12,6 @@ class CatalogTab extends ConsumerStatefulWidget {
 }
 
 class _CatalogTabState extends ConsumerState<CatalogTab> {
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
-  bool _isSearchVisible = false;
-
-  // For debouncing search
-  Timer? _searchTimer;
-
   // Category icons mapping
   final Map<String, IconData> categoryIcons = {
     'elektronik': Icons.phone_android,
@@ -32,24 +22,6 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
     'oyuncak': Icons.toys,
     'default': Icons.category,
   };
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _searchTimer?.cancel();
-    super.dispose();
-  }
-
-  void _onSearchChanged(String value) {
-    _searchTimer?.cancel();
-    _searchTimer = Timer(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        setState(() {
-          _searchQuery = value.toLowerCase();
-        });
-      }
-    });
-  }
 
   IconData _getCategoryIcon(String categoryName) {
     final lowerName = categoryName.toLowerCase();
@@ -69,32 +41,15 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
 
     return Scaffold(
       appBar: AppBar(
-        title: _isSearchVisible
-            ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Ürün ara...',
-                  border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.white70),
-                ),
-                style: const TextStyle(color: Colors.white),
-                onChanged: _onSearchChanged,
-              )
-            : const Text('Mağaza'),
+        title: const Text('Mağaza'),
         actions: [
           IconButton(
-            icon: Icon(_isSearchVisible ? Icons.close : Icons.search),
+            icon: const Icon(Icons.search),
             onPressed: () {
-              setState(() {
-                if (_isSearchVisible) {
-                  _isSearchVisible = false;
-                  _searchController.clear();
-                  _searchQuery = '';
-                } else {
-                  _isSearchVisible = true;
-                }
-              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Arama özelliği yakında eklenecek')),
+              );
             },
           ),
           IconButton(
@@ -223,52 +178,6 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                   );
                 }
 
-                // Filter products based on search query
-                final filteredProducts = _searchQuery.isEmpty
-                    ? products
-                    : products.where((product) {
-                        return product.title
-                                .toLowerCase()
-                                .contains(_searchQuery) ||
-                            product.description
-                                    ?.toLowerCase()
-                                    .contains(_searchQuery) ==
-                                true ||
-                            product.categoryName
-                                    ?.toLowerCase()
-                                    .contains(_searchQuery) ==
-                                true;
-                      }).toList();
-
-                if (filteredProducts.isEmpty && _searchQuery.isNotEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.search_off,
-                            size: 64, color: Colors.grey[400]),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Aradığınız ürün bulunamadı',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '"$_searchQuery" için sonuç bulunamadı',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
                 return GridView.builder(
                   padding: const EdgeInsets.all(16),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -277,9 +186,9 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
                   ),
-                  itemCount: filteredProducts.length,
+                  itemCount: products.length,
                   itemBuilder: (context, index) {
-                    final product = filteredProducts[index];
+                    final product = products[index];
                     return _ProductCard(product: product);
                   },
                 );
@@ -314,13 +223,13 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
   }
 }
 
-class _ProductCard extends ConsumerWidget {
+class _ProductCard extends StatelessWidget {
   final Product product;
 
   const _ProductCard({required this.product});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final displayPrice = product.finalPrice ?? product.price;
     final hasDiscount =
         product.finalPrice != null && product.finalPrice! < product.price;
@@ -331,10 +240,9 @@ class _ProductCard extends ConsumerWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => ProductDetailPage(product: product),
-            ),
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('${product.title} detayı yakında eklenecek')),
           );
         },
         child: Padding(
@@ -433,27 +341,6 @@ class _ProductCard extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  // Add to Cart Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: product.stock > 0
-                          ? () => _addToCart(context, ref, product)
-                          : null,
-                      icon: const Icon(Icons.shopping_cart_outlined, size: 16),
-                      label: Text(
-                        product.stock > 0 ? 'Sepete Ekle' : 'Stokta Yok',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ],
@@ -461,39 +348,6 @@ class _ProductCard extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  void _addToCart(BuildContext context, WidgetRef ref, Product product) async {
-    try {
-      await ref.read(cartProvider.notifier).addToCart(product.id, quantity: 1);
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${product.title} sepete eklendi'),
-            duration: const Duration(seconds: 2),
-            action: SnackBarAction(
-              label: 'Sepeti Gör',
-              onPressed: () {
-                // Navigate to cart tab - bu parent widget'ta handle edilmeli
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Sepet sekmesine geçin')),
-                );
-              },
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Hata: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 }
 

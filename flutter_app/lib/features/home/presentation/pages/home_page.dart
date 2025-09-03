@@ -15,13 +15,25 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  final List<Widget> _tabs = [
-    const HomeTab(),
-    const ServicesTab(),
-    const CatalogTab(),
-    const CartTab(),
-    const ProfileTab(),
-  ];
+  void _switchToTab(int tabIndex) {
+    setState(() {
+      _currentIndex = tabIndex;
+    });
+  }
+
+  late final List<Widget> _tabs;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabs = [
+      HomeTab(onNavigateToTab: _switchToTab),
+      const ServicesTab(),
+      const CatalogTab(),
+      const CartTab(),
+      const ProfileTab(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
