@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../products/providers/products_provider.dart';
 import '../../../services/providers/services_provider.dart';
 import '../../../auth/providers/auth_provider.dart';
@@ -87,54 +88,235 @@ class HomeTab extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
 
-            // Quick Actions
-            Row(
+            // Quick Actions - 3 large buttons stacked vertically
+            Column(
               children: [
-                Expanded(
-                  child: Card(
+                // Services Button
+                Card(
+                  elevation: 6,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.blue.shade400,
+                          Colors.purple.shade500,
+                          Colors.indigo.shade600,
+                        ],
+                      ),
+                    ),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16),
                       onTap: () {
                         // Navigate to services tab (index 1)
                         onNavigateToTab?.call(1);
                       },
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24.0),
+                        child: Row(
                           children: [
-                            Icon(Icons.work,
-                                size: 40,
-                                color: Theme.of(context).primaryColor),
-                            const SizedBox(height: 8),
-                            const Text('Hizmetler',
-                                style: TextStyle(fontWeight: FontWeight.w500)),
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.work,
+                                size: 32,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Hizmetler',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      shadows: [
+                                        Shadow(
+                                          offset: const Offset(0, 1),
+                                          blurRadius: 2,
+                                          color: Colors.black.withOpacity(0.3),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Profesyonel hizmetlerimizi keşfedin',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: Colors.white.withOpacity(0.9),
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward_ios,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Card(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () {
-                        // Navigate to catalog tab (index 2)
-                        onNavigateToTab?.call(2);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          children: [
-                            Icon(Icons.store,
-                                size: 40,
-                                color: Theme.of(context).primaryColor),
-                            const SizedBox(height: 8),
-                            const Text('Mağaza',
-                                style: TextStyle(fontWeight: FontWeight.w500)),
-                          ],
-                        ),
+                const SizedBox(height: 16),
+
+                // Store Button
+                Card(
+                  elevation: 4,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () {
+                      // Navigate to catalog tab (index 2)
+                      onNavigateToTab?.call(2);
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.store,
+                              size: 32,
+                              color: Colors.orange,
+                            ),
+                          ),
+                          const SizedBox(width: 20),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Mağaza',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.orange,
+                                      ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Kaliteli ürünlerimizi inceleyin',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: Colors.grey[600],
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.grey[400],
+                            size: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // WhatsApp Button
+                Card(
+                  elevation: 4,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () {
+                      _launchWhatsApp(context);
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.chat,
+                              size: 32,
+                              color: Colors.green,
+                            ),
+                          ),
+                          const SizedBox(width: 20),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'WhatsApp',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.green,
+                                      ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Hemen iletişime geçin',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: Colors.grey[600],
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.grey[400],
+                            size: 20,
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -288,6 +470,30 @@ class HomeTab extends ConsumerWidget {
       return words[0][0].toUpperCase();
     }
     return 'U';
+  }
+
+  Future<void> _launchWhatsApp(BuildContext context) async {
+    const phoneNumber = '+905333734218';
+    const message = 'Merhaba! ICS App üzerinden iletişime geçmek istiyorum.';
+    final url =
+        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}';
+
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'WhatsApp açılamadı';
+      }
+    } catch (e) {
+      // Fallback: Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('WhatsApp açılamadı: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }
 
