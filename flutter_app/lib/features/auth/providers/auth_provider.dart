@@ -85,17 +85,23 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   // Login
   Future<bool> login(String email, String password) async {
+    print('🔐 AuthProvider - Starting login for: $email');
     state = state.copyWith(isLoading: true, error: null);
 
     try {
       final response = await _authRepository.login(email, password);
+      print(
+          '🔐 AuthProvider - Login successful, user: ${response.user?.email}');
       state = state.copyWith(
         user: response.user,
         isAuthenticated: true,
         isLoading: false,
       );
+      print(
+          '🔐 AuthProvider - State updated, isAuthenticated: ${state.isAuthenticated}');
       return true;
     } catch (e) {
+      print('🔐 AuthProvider - Login failed: $e');
       state = state.copyWith(
         error: e.toString(),
         isLoading: false,

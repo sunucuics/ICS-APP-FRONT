@@ -22,7 +22,7 @@ class UserProfile with _$UserProfile {
 @freezed
 class Address with _$Address {
   const factory Address({
-    required String id,
+    String? id, // Made optional since backend might not return it
     String? label,
     String? name,
     required String city,
@@ -98,7 +98,7 @@ class AuthResponse with _$AuthResponse {
   factory AuthResponse.fromJson(Map<String, dynamic> json) =>
       _$AuthResponseFromJson({
         'userId': json['user_id'],
-        'user': json['user'],
+        'user': json['user'], // This will be set manually in AuthApiService
         'idToken': json['id_token'],
         'refreshToken': json['refresh_token'],
         'expiresIn': json['expires_in'],

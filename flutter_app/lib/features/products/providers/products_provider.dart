@@ -41,11 +41,22 @@ final selectedCategoryProvider = StateProvider<String?>((ref) => null);
 final filteredProductsProvider =
     FutureProvider.autoDispose<List<Product>>((ref) {
   final selectedCategory = ref.watch(selectedCategoryProvider);
+  print('🛍️ Fetching products for category: ${selectedCategory ?? "All"}');
   return ref.watch(productsProvider(selectedCategory)).when(
-        data: (products) => products,
-        loading: () => <Product>[],
-        error: (error, stack) => throw error,
-      );
+    data: (products) {
+      print('✅ Successfully loaded ${products.length} products');
+      return products;
+    },
+    loading: () {
+      print('⏳ Loading products...');
+      return <Product>[];
+    },
+    error: (error, stack) {
+      print('❌ Error loading products: $error');
+      // Return empty list instead of throwing to prevent app crash
+      return <Product>[];
+    },
+  );
 });
 
 // Convenience provider for product search/filter

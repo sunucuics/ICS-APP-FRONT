@@ -11,6 +11,10 @@ class AuthWrapper extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
 
+    // Debug: Print auth state
+    print(
+        '🔐 AuthWrapper - isAuthenticated: ${authState.isAuthenticated}, isLoading: ${authState.isLoading}, user: ${authState.user?.email}');
+
     if (authState.isLoading) {
       return const Scaffold(
         body: Center(
@@ -27,8 +31,10 @@ class AuthWrapper extends ConsumerWidget {
     }
 
     if (authState.isAuthenticated) {
+      print('🔐 AuthWrapper - Navigating to HomePage');
       return const HomePage();
     } else {
+      print('🔐 AuthWrapper - Navigating to LoginPage');
       return const LoginPage();
     }
   }

@@ -305,7 +305,8 @@ Address _$AddressFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Address {
-  String get id => throw _privateConstructorUsedError;
+  String? get id =>
+      throw _privateConstructorUsedError; // Made optional since backend might not return it
   String? get label => throw _privateConstructorUsedError;
   String? get name => throw _privateConstructorUsedError;
   String get city => throw _privateConstructorUsedError;
@@ -333,7 +334,7 @@ abstract class $AddressCopyWith<$Res> {
       _$AddressCopyWithImpl<$Res, Address>;
   @useResult
   $Res call(
-      {String id,
+      {String? id,
       String? label,
       String? name,
       String city,
@@ -362,7 +363,7 @@ class _$AddressCopyWithImpl<$Res, $Val extends Address>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
+    Object? id = freezed,
     Object? label = freezed,
     Object? name = freezed,
     Object? city = null,
@@ -376,10 +377,10 @@ class _$AddressCopyWithImpl<$Res, $Val extends Address>
     Object? note = freezed,
   }) {
     return _then(_value.copyWith(
-      id: null == id
+      id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       label: freezed == label
           ? _value.label
           : label // ignore: cast_nullable_to_non_nullable
@@ -436,7 +437,7 @@ abstract class _$$AddressImplCopyWith<$Res> implements $AddressCopyWith<$Res> {
   @override
   @useResult
   $Res call(
-      {String id,
+      {String? id,
       String? label,
       String? name,
       String city,
@@ -463,7 +464,7 @@ class __$$AddressImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
+    Object? id = freezed,
     Object? label = freezed,
     Object? name = freezed,
     Object? city = null,
@@ -477,10 +478,10 @@ class __$$AddressImplCopyWithImpl<$Res>
     Object? note = freezed,
   }) {
     return _then(_$AddressImpl(
-      id: null == id
+      id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       label: freezed == label
           ? _value.label
           : label // ignore: cast_nullable_to_non_nullable
@@ -533,7 +534,7 @@ class __$$AddressImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$AddressImpl implements _Address {
   const _$AddressImpl(
-      {required this.id,
+      {this.id,
       this.label,
       this.name,
       required this.city,
@@ -550,7 +551,8 @@ class _$AddressImpl implements _Address {
       _$$AddressImplFromJson(json);
 
   @override
-  final String id;
+  final String? id;
+// Made optional since backend might not return it
   @override
   final String? label;
   @override
@@ -625,7 +627,7 @@ class _$AddressImpl implements _Address {
 
 abstract class _Address implements Address {
   const factory _Address(
-      {required final String id,
+      {final String? id,
       final String? label,
       final String? name,
       required final String city,
@@ -641,7 +643,7 @@ abstract class _Address implements Address {
   factory _Address.fromJson(Map<String, dynamic> json) = _$AddressImpl.fromJson;
 
   @override
-  String get id;
+  String? get id; // Made optional since backend might not return it
   @override
   String? get label;
   @override

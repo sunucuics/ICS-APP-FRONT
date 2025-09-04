@@ -1,6 +1,6 @@
 class ApiEndpoints {
   // Base URL - Backend 0.0.0.0 ile çalışıyor, gerçek IP kullanıyoruz
-  static const String baseUrl = 'http://192.168.1.143:8000';
+  static const String baseUrl = 'http://192.168.1.115:8000';
 
   // Debug mode flag
   static const bool isDebug = true;

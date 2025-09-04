@@ -392,7 +392,7 @@ class _ProductCard extends ConsumerWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  Wrap(
                     children: [
                       Text(
                         '₺${displayPrice.toStringAsFixed(2)}',
@@ -416,7 +416,7 @@ class _ProductCard extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Row(
+                  Wrap(
                     children: [
                       Icon(
                         product.stock > 0 ? Icons.check_circle : Icons.cancel,

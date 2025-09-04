@@ -34,12 +34,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             _passwordController.text,
           );
 
-      if (success && mounted) {
-        // Navigate to home page
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
-      } else if (mounted) {
+      // Navigation will be handled by ref.listen() below
+      // Don't navigate manually here to avoid conflicts
+
+      if (!success && mounted) {
         // Show error message
         final error = ref.read(authErrorProvider);
         if (error != null) {

@@ -33,7 +33,7 @@ Map<String, dynamic> _$$UserProfileImplToJson(_$UserProfileImpl instance) =>
 
 _$AddressImpl _$$AddressImplFromJson(Map<String, dynamic> json) =>
     _$AddressImpl(
-      id: json['id'] as String,
+      id: json['id'] as String?,
       label: json['label'] as String?,
       name: json['name'] as String?,
       city: json['city'] as String,
