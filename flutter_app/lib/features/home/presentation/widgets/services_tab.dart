@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../services/providers/services_provider.dart';
+import '../../../auth/providers/anonymous_auth_provider.dart' as anonymous;
+import '../../../auth/presentation/pages/guest_upgrade_page.dart';
 import '../../../../core/models/service_model.dart';
 
 class ServicesTab extends ConsumerWidget {
@@ -94,19 +96,19 @@ class ServicesTab extends ConsumerWidget {
   }
 }
 
-class _ServiceCard extends StatelessWidget {
+class _ServiceCard extends ConsumerWidget {
   final Service service;
 
   const _ServiceCard({required this.service});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          _showServiceDetail(context, service);
+          _showServiceDetail(context, ref, service);
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -205,7 +207,7 @@ class _ServiceCard extends StatelessWidget {
                         Expanded(
                           child: OutlinedButton(
                             onPressed: () {
-                              _showServiceDetail(context, service);
+                              _showServiceDetail(context, ref, service);
                             },
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -222,7 +224,7 @@ class _ServiceCard extends StatelessWidget {
                             onPressed: service.isUpcoming
                                 ? null
                                 : () {
-                                    _bookAppointment(context, service);
+                                    _bookAppointment(context, ref, service);
                                   },
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -245,7 +247,8 @@ class _ServiceCard extends StatelessWidget {
     );
   }
 
-  void _showServiceDetail(BuildContext context, Service service) {
+  void _showServiceDetail(
+      BuildContext context, WidgetRef ref, Service service) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -360,7 +363,7 @@ class _ServiceCard extends StatelessWidget {
                       ? null
                       : () {
                           Navigator.pop(context);
-                          _bookAppointment(context, service);
+                          _bookAppointment(context, ref, service);
                         },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -383,7 +386,14 @@ class _ServiceCard extends StatelessWidget {
     );
   }
 
-  void _bookAppointment(BuildContext context, Service service) {
+  void _bookAppointment(BuildContext context, WidgetRef ref, Service service) {
+    // Check if user is anonymous
+    final isAnonymous = ref.read(anonymous.isAnonymousProvider);
+
+    if (isAnonymous) {
+      _showGuestUpgradeDialog(context);
+      return;
+    }
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -420,6 +430,42 @@ class _ServiceCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showGuestUpgradeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Hesap Gerekli'),
+          content: const Text(
+            'Randevu almak için hesap oluşturmanız gerekiyor. '
+            'Hesap oluşturmak ister misiniz?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('İptal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const GuestUpgradePage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Hesap Oluştur'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

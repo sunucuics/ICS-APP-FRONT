@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../cart/providers/cart_provider.dart';
+import '../../../auth/providers/anonymous_auth_provider.dart' as anonymous;
+import '../../../auth/presentation/pages/guest_upgrade_page.dart';
 import '../../../../core/models/cart_model.dart';
 import '../../../payment/presentation/pages/payment_method_page.dart';
 
@@ -425,11 +427,55 @@ class CartTab extends ConsumerWidget {
   }
 
   void _proceedToCheckout(BuildContext context, WidgetRef ref, Cart cart) {
+    // Check if user is anonymous
+    final isAnonymous = ref.read(anonymous.isAnonymousProvider);
+
+    if (isAnonymous) {
+      _showGuestUpgradeDialog(context);
+      return;
+    }
+
     // Navigate to payment method selection
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const PaymentMethodPage(),
       ),
+    );
+  }
+
+  void _showGuestUpgradeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Hesap Gerekli'),
+          content: const Text(
+            'Sipariş vermek için hesap oluşturmanız gerekiyor. '
+            'Hesap oluşturmak ister misiniz?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('İptal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const GuestUpgradePage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Hesap Oluştur'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

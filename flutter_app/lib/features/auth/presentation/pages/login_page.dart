@@ -26,6 +26,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
+      print('🔐 LoginPage - Starting login process');
       // Clear any previous errors
       ref.read(authProvider.notifier).clearError();
 
@@ -34,10 +35,26 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             _passwordController.text,
           );
 
-      // Navigation will be handled by ref.listen() below
-      // Don't navigate manually here to avoid conflicts
+      print('🔐 LoginPage - Login result: $success');
+      print(
+          '🔐 LoginPage - Auth state: ${ref.read(authProvider).isAuthenticated}');
 
-      if (!success && mounted) {
+      if (success && mounted) {
+        print('🔐 LoginPage - Login successful, navigating to HomePage');
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Giriş başarılı!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 1),
+          ),
+        );
+
+        // Navigate immediately - AuthWrapper will handle the rest
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      } else if (!success && mounted) {
         // Show error message
         final error = ref.read(authErrorProvider);
         if (error != null) {
@@ -76,14 +93,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final authState = ref.watch(authProvider);
     final isLoading = authState.isLoading;
 
-    // Listen to auth state changes
-    ref.listen<AuthState>(authProvider, (previous, next) {
-      if (next.isAuthenticated && mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
-      }
-    });
+    // AuthWrapper will handle navigation automatically
 
     return Scaffold(
       body: SafeArea(

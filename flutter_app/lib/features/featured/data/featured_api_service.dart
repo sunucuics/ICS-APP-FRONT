@@ -93,11 +93,13 @@ class FeaturedApiService {
     }
   }
 
-  /// Get featured products for public display
+  /// Get featured products for public display (using regular products endpoint)
   Future<List<FeaturedProduct>> getFeaturedProducts() async {
     try {
-      final response = await _dio.get(ApiEndpoints.featuredProducts);
+      // Use regular products endpoint since featured endpoint doesn't exist
+      final response = await _dio.get('/products');
       return (response.data as List)
+          .take(3) // Get first 3 products as featured
           .map((json) => FeaturedProduct.fromJson(json))
           .toList();
     } on DioException catch (e) {
@@ -105,11 +107,13 @@ class FeaturedApiService {
     }
   }
 
-  /// Get featured services for public display
+  /// Get featured services for public display (using regular services endpoint)
   Future<List<FeaturedService>> getFeaturedServices() async {
     try {
-      final response = await _dio.get(ApiEndpoints.featuredServices);
+      // Use regular services endpoint since featured endpoint doesn't exist
+      final response = await _dio.get('/services');
       return (response.data as List)
+          .take(3) // Get first 3 services as featured
           .map((json) => FeaturedService.fromJson(json))
           .toList();
     } on DioException catch (e) {

@@ -4,6 +4,7 @@ import '../../../../core/models/payment_model.dart';
 import '../../../../core/models/order_model.dart';
 import '../../providers/payment_provider.dart';
 import '../../../addresses/providers/addresses_provider.dart';
+import '../../../addresses/presentation/pages/add_address_page.dart';
 import '../../../cart/providers/cart_provider.dart';
 
 class CheckoutPage extends ConsumerStatefulWidget {
@@ -23,6 +24,15 @@ class CheckoutPage extends ConsumerStatefulWidget {
 class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   final _noteController = TextEditingController();
   bool _simulateSuccess = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Refresh current address when page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(currentAddressDataProvider);
+    });
+  }
 
   @override
   void dispose() {
@@ -287,16 +297,34 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             ),
             const SizedBox(height: 12),
             if (currentAddress != null) ...[
-              Text(
-                currentAddress.name ?? 'Adres',
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                _formatAddress(currentAddress),
-                style: TextStyle(
-                  color: Colors.grey[600],
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          currentAddress.name ?? 'Adres',
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _formatAddress(currentAddress),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () {
+                      _showAddressSelectionDialog(context, ref);
+                    },
+                    icon: const Icon(Icons.edit, size: 16),
+                    label: const Text('Değiştir'),
+                  ),
+                ],
               ),
             ] else ...[
               Text(
@@ -306,13 +334,35 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                 ),
               ),
               const SizedBox(height: 8),
-              ElevatedButton.icon(
-                onPressed: () {
-                  // Navigate to addresses page
-                  Navigator.of(context).pop();
-                },
-                icon: const Icon(Icons.add_location),
-                label: const Text('Adres Ekle'),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        // Navigate to add address page
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const AddAddressPage(),
+                          ),
+                        );
+                        // Refresh current address after returning from add address page
+                        ref.invalidate(currentAddressDataProvider);
+                      },
+                      icon: const Icon(Icons.add_location),
+                      label: const Text('Adres Ekle'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        _showAddressSelectionDialog(context, ref);
+                      },
+                      icon: const Icon(Icons.list),
+                      label: const Text('Adres Seç'),
+                    ),
+                  ),
+                ],
               ),
             ],
           ],
@@ -413,7 +463,30 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               borderRadius: BorderRadius.circular(8),
               color: Colors.grey[200],
             ),
-            child: const Icon(Icons.image_not_supported),
+            child: item.image != null && item.image!.isNotEmpty
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      item.image!,
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(Icons.image_not_supported);
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return const Center(
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                : const Icon(Icons.image_not_supported),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -421,11 +494,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.name ?? 'Ürün',
+                  item.title ?? 'Ürün',
                   style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
                 Text(
-                  'Adet: ${item.quantity}',
+                  'Adet: ${item.qty}',
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 12,
@@ -435,7 +508,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             ),
           ),
           Text(
-            '₺${(item.price * item.quantity).toStringAsFixed(2)}',
+            '₺${((item.finalPrice ?? item.price) * item.qty).toStringAsFixed(2)}',
             style: const TextStyle(fontWeight: FontWeight.w500),
           ),
         ],
@@ -631,5 +704,78 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     if (order != null && context.mounted) {
       // Success is handled in the build method
     }
+  }
+
+  void _showAddressSelectionDialog(BuildContext context, WidgetRef ref) {
+    final addressesAsync = ref.watch(addressesProvider);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Teslimat Adresi Seç'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 400,
+          child: addressesAsync.when(
+            data: (addresses) => addresses.isEmpty
+                ? const Center(
+                    child: Text('Henüz adres eklenmemiş'),
+                  )
+                : ListView.builder(
+                    itemCount: addresses.length,
+                    itemBuilder: (context, index) {
+                      final address = addresses[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        child: ListTile(
+                          title: Text(address.name ?? 'Adres'),
+                          subtitle: Text(_formatAddress(address)),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.check_circle),
+                            onPressed: () async {
+                              // Set as current address
+                              try {
+                                await ref
+                                    .read(currentAddressProvider.notifier)
+                                    .setCurrentAddress(address.id!);
+
+                                if (context.mounted) {
+                                  Navigator.of(context).pop();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Teslimat adresi seçildi'),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Hata: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(
+              child: Text('Hata: $error'),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('İptal'),
+          ),
+        ],
+      ),
+    );
   }
 }

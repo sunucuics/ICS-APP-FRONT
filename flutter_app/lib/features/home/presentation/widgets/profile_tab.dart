@@ -231,28 +231,38 @@ class ProfileTab extends ConsumerWidget {
                         context,
                         icon: Icons.shopping_bag,
                         title: 'Siparişlerim',
-                        subtitle: 'Geçmiş siparişleri görüntüle',
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const OrdersListPage(),
-                            ),
-                          );
-                        },
+                        subtitle: isAnonymous
+                            ? 'Hesap oluşturun'
+                            : 'Geçmiş siparişleri görüntüle',
+                        onTap: isAnonymous
+                            ? () => _showGuestUpgradeDialog(context)
+                            : () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const OrdersListPage(),
+                                  ),
+                                );
+                              },
                       ),
                       const Divider(height: 1),
                       _buildMenuItem(
                         context,
                         icon: Icons.location_on,
                         title: 'Adreslerim',
-                        subtitle: 'Teslimat adreslerini yönet',
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const AddressesListPage(),
-                            ),
-                          );
-                        },
+                        subtitle: isAnonymous
+                            ? 'Hesap oluşturun'
+                            : 'Teslimat adreslerini yönet',
+                        onTap: isAnonymous
+                            ? () => _showGuestUpgradeDialog(context)
+                            : () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const AddressesListPage(),
+                                  ),
+                                );
+                              },
                       ),
                       const Divider(height: 1),
                       _buildMenuItem(
@@ -402,13 +412,61 @@ class ProfileTab extends ConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 Navigator.of(context).pop();
-                await ref.read(authProvider.notifier).logout();
+
+                // Check if user is anonymous
+                final isAnonymous = ref.read(anonymous.isAnonymousProvider);
+
+                if (isAnonymous) {
+                  // For anonymous users, use anonymous auth provider
+                  await ref
+                      .read(anonymous.anonymousAuthProvider.notifier)
+                      .signOut();
+                } else {
+                  // For registered users, use regular auth provider
+                  await ref.read(authProvider.notifier).logout();
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
               ),
               child: const Text('Çıkış Yap'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showGuestUpgradeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Hesap Gerekli'),
+          content: const Text(
+            'Bu özelliği kullanmak için hesap oluşturmanız gerekiyor. '
+            'Hesap oluşturmak ister misiniz?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('İptal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const GuestUpgradePage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Hesap Oluştur'),
             ),
           ],
         );

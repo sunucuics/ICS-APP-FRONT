@@ -485,12 +485,12 @@ mixin _$AddressCreateRequest {
   String get label => throw _privateConstructorUsedError;
   String get city => throw _privateConstructorUsedError;
   String get district => throw _privateConstructorUsedError;
-  String get neighborhood => throw _privateConstructorUsedError;
-  String get street => throw _privateConstructorUsedError;
-  String get buildingNo => throw _privateConstructorUsedError;
+  String? get neighborhood => throw _privateConstructorUsedError;
+  String? get street => throw _privateConstructorUsedError;
+  String? get buildingNo => throw _privateConstructorUsedError;
   String? get apartment => throw _privateConstructorUsedError;
   String? get floor => throw _privateConstructorUsedError;
-  String? get zipCode => throw _privateConstructorUsedError;
+  String get zipCode => throw _privateConstructorUsedError;
   String? get note => throw _privateConstructorUsedError;
 
   /// Serializes this AddressCreateRequest to a JSON map.
@@ -514,12 +514,12 @@ abstract class $AddressCreateRequestCopyWith<$Res> {
       String label,
       String city,
       String district,
-      String neighborhood,
-      String street,
-      String buildingNo,
+      String? neighborhood,
+      String? street,
+      String? buildingNo,
       String? apartment,
       String? floor,
-      String? zipCode,
+      String zipCode,
       String? note});
 }
 
@@ -543,12 +543,12 @@ class _$AddressCreateRequestCopyWithImpl<$Res,
     Object? label = null,
     Object? city = null,
     Object? district = null,
-    Object? neighborhood = null,
-    Object? street = null,
-    Object? buildingNo = null,
+    Object? neighborhood = freezed,
+    Object? street = freezed,
+    Object? buildingNo = freezed,
     Object? apartment = freezed,
     Object? floor = freezed,
-    Object? zipCode = freezed,
+    Object? zipCode = null,
     Object? note = freezed,
   }) {
     return _then(_value.copyWith(
@@ -568,18 +568,18 @@ class _$AddressCreateRequestCopyWithImpl<$Res,
           ? _value.district
           : district // ignore: cast_nullable_to_non_nullable
               as String,
-      neighborhood: null == neighborhood
+      neighborhood: freezed == neighborhood
           ? _value.neighborhood
           : neighborhood // ignore: cast_nullable_to_non_nullable
-              as String,
-      street: null == street
+              as String?,
+      street: freezed == street
           ? _value.street
           : street // ignore: cast_nullable_to_non_nullable
-              as String,
-      buildingNo: null == buildingNo
+              as String?,
+      buildingNo: freezed == buildingNo
           ? _value.buildingNo
           : buildingNo // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       apartment: freezed == apartment
           ? _value.apartment
           : apartment // ignore: cast_nullable_to_non_nullable
@@ -588,10 +588,10 @@ class _$AddressCreateRequestCopyWithImpl<$Res,
           ? _value.floor
           : floor // ignore: cast_nullable_to_non_nullable
               as String?,
-      zipCode: freezed == zipCode
+      zipCode: null == zipCode
           ? _value.zipCode
           : zipCode // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as String,
       note: freezed == note
           ? _value.note
           : note // ignore: cast_nullable_to_non_nullable
@@ -613,12 +613,12 @@ abstract class _$$AddressCreateRequestImplCopyWith<$Res>
       String label,
       String city,
       String district,
-      String neighborhood,
-      String street,
-      String buildingNo,
+      String? neighborhood,
+      String? street,
+      String? buildingNo,
       String? apartment,
       String? floor,
-      String? zipCode,
+      String zipCode,
       String? note});
 }
 
@@ -639,12 +639,12 @@ class __$$AddressCreateRequestImplCopyWithImpl<$Res>
     Object? label = null,
     Object? city = null,
     Object? district = null,
-    Object? neighborhood = null,
-    Object? street = null,
-    Object? buildingNo = null,
+    Object? neighborhood = freezed,
+    Object? street = freezed,
+    Object? buildingNo = freezed,
     Object? apartment = freezed,
     Object? floor = freezed,
-    Object? zipCode = freezed,
+    Object? zipCode = null,
     Object? note = freezed,
   }) {
     return _then(_$AddressCreateRequestImpl(
@@ -664,18 +664,18 @@ class __$$AddressCreateRequestImplCopyWithImpl<$Res>
           ? _value.district
           : district // ignore: cast_nullable_to_non_nullable
               as String,
-      neighborhood: null == neighborhood
+      neighborhood: freezed == neighborhood
           ? _value.neighborhood
           : neighborhood // ignore: cast_nullable_to_non_nullable
-              as String,
-      street: null == street
+              as String?,
+      street: freezed == street
           ? _value.street
           : street // ignore: cast_nullable_to_non_nullable
-              as String,
-      buildingNo: null == buildingNo
+              as String?,
+      buildingNo: freezed == buildingNo
           ? _value.buildingNo
           : buildingNo // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       apartment: freezed == apartment
           ? _value.apartment
           : apartment // ignore: cast_nullable_to_non_nullable
@@ -684,10 +684,10 @@ class __$$AddressCreateRequestImplCopyWithImpl<$Res>
           ? _value.floor
           : floor // ignore: cast_nullable_to_non_nullable
               as String?,
-      zipCode: freezed == zipCode
+      zipCode: null == zipCode
           ? _value.zipCode
           : zipCode // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as String,
       note: freezed == note
           ? _value.note
           : note // ignore: cast_nullable_to_non_nullable
@@ -704,12 +704,12 @@ class _$AddressCreateRequestImpl implements _AddressCreateRequest {
       required this.label,
       required this.city,
       required this.district,
-      required this.neighborhood,
-      required this.street,
-      required this.buildingNo,
+      this.neighborhood,
+      this.street,
+      this.buildingNo,
       this.apartment,
       this.floor,
-      this.zipCode,
+      required this.zipCode,
       this.note});
 
   factory _$AddressCreateRequestImpl.fromJson(Map<String, dynamic> json) =>
@@ -724,17 +724,17 @@ class _$AddressCreateRequestImpl implements _AddressCreateRequest {
   @override
   final String district;
   @override
-  final String neighborhood;
+  final String? neighborhood;
   @override
-  final String street;
+  final String? street;
   @override
-  final String buildingNo;
+  final String? buildingNo;
   @override
   final String? apartment;
   @override
   final String? floor;
   @override
-  final String? zipCode;
+  final String zipCode;
   @override
   final String? note;
 
@@ -794,12 +794,12 @@ abstract class _AddressCreateRequest implements AddressCreateRequest {
       required final String label,
       required final String city,
       required final String district,
-      required final String neighborhood,
-      required final String street,
-      required final String buildingNo,
+      final String? neighborhood,
+      final String? street,
+      final String? buildingNo,
       final String? apartment,
       final String? floor,
-      final String? zipCode,
+      required final String zipCode,
       final String? note}) = _$AddressCreateRequestImpl;
 
   factory _AddressCreateRequest.fromJson(Map<String, dynamic> json) =
@@ -814,17 +814,17 @@ abstract class _AddressCreateRequest implements AddressCreateRequest {
   @override
   String get district;
   @override
-  String get neighborhood;
+  String? get neighborhood;
   @override
-  String get street;
+  String? get street;
   @override
-  String get buildingNo;
+  String? get buildingNo;
   @override
   String? get apartment;
   @override
   String? get floor;
   @override
-  String? get zipCode;
+  String get zipCode;
   @override
   String? get note;
 

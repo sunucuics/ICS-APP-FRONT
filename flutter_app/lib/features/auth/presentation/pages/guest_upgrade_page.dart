@@ -3,7 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/anonymous_auth_provider.dart';
 
 class GuestUpgradePage extends ConsumerStatefulWidget {
-  const GuestUpgradePage({super.key});
+  final String? email;
+  final String? password;
+  final String? name;
+
+  const GuestUpgradePage({
+    super.key,
+    this.email,
+    this.password,
+    this.name,
+  });
 
   @override
   ConsumerState<GuestUpgradePage> createState() => _GuestUpgradePageState();
@@ -20,6 +29,22 @@ class _GuestUpgradePageState extends ConsumerState<GuestUpgradePage> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill with provided data
+    if (widget.email != null) {
+      _emailController.text = widget.email!;
+    }
+    if (widget.name != null) {
+      _nameController.text = widget.name!;
+    }
+    if (widget.password != null) {
+      _passwordController.text = widget.password!;
+      _confirmPasswordController.text = widget.password!;
+    }
+  }
 
   @override
   void dispose() {

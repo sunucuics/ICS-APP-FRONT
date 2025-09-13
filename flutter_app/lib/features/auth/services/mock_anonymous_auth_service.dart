@@ -138,8 +138,15 @@ class MockAnonymousAuthService {
 
   /// Listen to auth state changes (mock stream)
   Stream<MockUser?> get authStateChanges async* {
+    // Emit current user immediately
     yield _currentUser;
+
     // In a real implementation, this would emit changes when auth state changes
+    // For mock, we'll use a simple periodic check
+    while (true) {
+      await Future.delayed(const Duration(milliseconds: 100));
+      yield _currentUser;
+    }
   }
 
   /// Listen to ID token changes (mock stream)

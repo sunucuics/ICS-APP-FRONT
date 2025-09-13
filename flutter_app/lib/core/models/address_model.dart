@@ -36,12 +36,12 @@ class AddressCreateRequest with _$AddressCreateRequest {
     required String label,
     required String city,
     required String district,
-    required String neighborhood,
-    required String street,
-    required String buildingNo,
+    String? neighborhood,
+    String? street,
+    String? buildingNo,
     String? apartment,
     String? floor,
-    String? zipCode,
+    required String zipCode,
     String? note,
   }) = _AddressCreateRequest;
 

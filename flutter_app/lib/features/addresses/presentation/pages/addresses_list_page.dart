@@ -147,7 +147,7 @@ class AddressesListPage extends ConsumerWidget {
                         onPressed: () =>
                             _setCurrentAddress(context, ref, address),
                         icon: const Icon(Icons.check_circle_outline, size: 16),
-                        label: const Text('Aktif Yap'),
+                        label: const Text('Varsayılan Seç'),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 8),
                         ),

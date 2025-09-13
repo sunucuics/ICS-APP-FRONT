@@ -89,9 +89,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
+      print('🔐 AuthProvider - Calling auth repository login...');
       final response = await _authRepository.login(email, password);
       print(
           '🔐 AuthProvider - Login successful, user: ${response.user?.email}');
+      print('🔐 AuthProvider - User ID: ${response.userId}');
+      print('🔐 AuthProvider - Token exists: ${response.idToken != null}');
+
       state = state.copyWith(
         user: response.user,
         isAuthenticated: true,
@@ -99,9 +103,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       print(
           '🔐 AuthProvider - State updated, isAuthenticated: ${state.isAuthenticated}');
+      print('🔐 AuthProvider - User in state: ${state.user?.email}');
       return true;
     } catch (e) {
       print('🔐 AuthProvider - Login failed: $e');
+      print('🔐 AuthProvider - Error type: ${e.runtimeType}');
       state = state.copyWith(
         error: e.toString(),
         isLoading: false,

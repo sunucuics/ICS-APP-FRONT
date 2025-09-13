@@ -79,7 +79,20 @@ class AddressesApiService {
   /// Get current address
   Future<Address?> getCurrentAddress() async {
     try {
-      final response = await _dio.get(ApiEndpoints.currentAddress);
+      final response = await _dio.get(
+        ApiEndpoints.currentAddress,
+        options: Options(
+          validateStatus: (status) {
+            return status != null &&
+                status < 500; // Accept 4xx as valid responses
+          },
+        ),
+      );
+
+      if (response.statusCode == 404) {
+        return null; // No current address - this is normal
+      }
+
       return Address.fromJson(response.data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {

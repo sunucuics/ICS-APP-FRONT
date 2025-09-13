@@ -20,7 +20,7 @@ class ApiEndpoints {
   // Address endpoints
   static const String addresses = '/users/me/addresses';
   static String address(String addressId) => '/users/me/addresses/$addressId';
-  static const String currentAddress = '/users/me/current-address';
+  static const String currentAddress = '/users/me/addresses/current';
 
   // Categories endpoints
   static const String categories = '/categories';

@@ -55,12 +55,12 @@ _$AddressCreateRequestImpl _$$AddressCreateRequestImplFromJson(
       label: json['label'] as String,
       city: json['city'] as String,
       district: json['district'] as String,
-      neighborhood: json['neighborhood'] as String,
-      street: json['street'] as String,
-      buildingNo: json['buildingNo'] as String,
+      neighborhood: json['neighborhood'] as String?,
+      street: json['street'] as String?,
+      buildingNo: json['buildingNo'] as String?,
       apartment: json['apartment'] as String?,
       floor: json['floor'] as String?,
-      zipCode: json['zipCode'] as String?,
+      zipCode: json['zipCode'] as String,
       note: json['note'] as String?,
     );
 

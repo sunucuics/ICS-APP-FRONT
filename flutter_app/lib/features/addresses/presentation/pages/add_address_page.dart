@@ -477,9 +477,7 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
         floor: _floorController.text.trim().isEmpty
             ? null
             : _floorController.text.trim(),
-        zipCode: _zipCodeController.text.trim().isEmpty
-            ? null
-            : _zipCodeController.text.trim(),
+        zipCode: _zipCodeController.text.trim(),
         note: _noteController.text.trim().isEmpty
             ? null
             : _noteController.text.trim(),

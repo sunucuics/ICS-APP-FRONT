@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../home/presentation/pages/home_page.dart';
 import '../../providers/auth_provider.dart';
+import 'guest_upgrade_page.dart';
+import '../../../home/presentation/pages/home_page.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -12,67 +13,596 @@ class RegisterPage extends ConsumerStatefulWidget {
 
 class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _nameController = TextEditingController();
+  bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
-  Future<void> _register() async {
-    if (_formKey.currentState!.validate()) {
-      // Clear any previous errors
-      ref.read(authProvider.notifier).clearError();
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Hesap Oluştur'),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 32),
 
-      final success = await ref.read(authProvider.notifier).register(
-            name: _nameController.text.trim(),
-            phone: _phoneController.text.trim(),
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
+                // Welcome Text
+                Text(
+                  'Hesabınızı Oluşturun',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  'Ücretsiz hesap oluşturun ve tüm özelliklerden yararlanın',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 48),
+
+                // Name Field
+                TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Ad Soyad',
+                    prefixIcon: Icon(Icons.person_outline),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Ad soyad gerekli';
+                    }
+                    if (value.trim().length < 2) {
+                      return 'Ad soyad en az 2 karakter olmalı';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                // Email Field
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    labelText: 'E-posta',
+                    prefixIcon: Icon(Icons.email_outlined),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'E-posta gerekli';
+                    }
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                        .hasMatch(value)) {
+                      return 'Geçerli bir e-posta adresi girin';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                // Password Field
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
+                    labelText: 'Şifre',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Şifre gerekli';
+                    }
+                    if (value.length < 6) {
+                      return 'Şifre en az 6 karakter olmalı';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                // Confirm Password Field
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  obscureText: _obscureConfirmPassword,
+                  decoration: InputDecoration(
+                    labelText: 'Şifre Tekrar',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureConfirmPassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureConfirmPassword = !_obscureConfirmPassword;
+                        });
+                      },
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Şifre tekrarı gerekli';
+                    }
+                    if (value != _passwordController.text) {
+                      return 'Şifreler eşleşmiyor';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 32),
+
+                // Register Button
+                SizedBox(
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _register,
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : const Text(
+                            'Hesap Oluştur',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Divider
+                Row(
+                  children: [
+                    const Expanded(child: Divider()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'veya',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const Expanded(child: Divider()),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                // Guest Mode Button
+                SizedBox(
+                  height: 50,
+                  child: OutlinedButton(
+                    onPressed: () => _continueAsGuest(),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Misafir Olarak Devam Et',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Sign In Link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Zaten hesabınız var mı? '),
+                    TextButton(
+                      onPressed: () => _navigateToSignIn(),
+                      child: const Text(
+                        'Giriş yapın',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _register() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Simulate registration process
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (mounted) {
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Hesabınız başarıyla oluşturuldu!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Navigate to guest upgrade page to link account
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => GuestUpgradePage(
+              email: _emailController.text.trim(),
+              password: _passwordController.text,
+              name: _nameController.text.trim(),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Kayıt başarısız: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _continueAsGuest() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const GuestUpgradePage(),
+      ),
+    );
+  }
+
+  void _navigateToSignIn() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const SignInPage(),
+      ),
+    );
+  }
+}
+
+class SignInPage extends ConsumerStatefulWidget {
+  const SignInPage({super.key});
+
+  @override
+  ConsumerState<SignInPage> createState() => _SignInPageState();
+}
+
+class _SignInPageState extends ConsumerState<SignInPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Giriş Yap'),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 32),
+
+                // Welcome Text
+                Text(
+                  'Hesabınıza Giriş Yapın',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  'E-posta ve şifrenizi girerek giriş yapın',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 48),
+
+                // Email Field
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    labelText: 'E-posta',
+                    prefixIcon: Icon(Icons.email_outlined),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'E-posta gerekli';
+                    }
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                        .hasMatch(value)) {
+                      return 'Geçerli bir e-posta adresi girin';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                // Password Field
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
+                    labelText: 'Şifre',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Şifre gerekli';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                // Forgot Password
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => _showForgotPassword(),
+                    child: const Text('Şifremi Unuttum'),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                // Sign In Button
+                SizedBox(
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _signIn,
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : const Text(
+                            'Giriş Yap',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Divider
+                Row(
+                  children: [
+                    const Expanded(child: Divider()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'veya',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const Expanded(child: Divider()),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                // Guest Mode Button
+                SizedBox(
+                  height: 50,
+                  child: OutlinedButton(
+                    onPressed: () => _continueAsGuest(),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Misafir Olarak Devam Et',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Register Link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Hesabınız yok mu? '),
+                    TextButton(
+                      onPressed: () => _navigateToRegister(),
+                      child: const Text(
+                        'Hesap oluşturun',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _signIn() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Use real auth provider
+      final success = await ref.read(authProvider.notifier).login(
+            _emailController.text.trim(),
+            _passwordController.text,
           );
 
-      if (success && mounted) {
-        // Navigate to home page
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
-      } else if (mounted) {
-        // Show error message
-        final error = ref.read(authErrorProvider);
-        if (error != null) {
-          String userFriendlyError;
+      if (mounted) {
+        if (success) {
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Giriş başarılı!'),
+              backgroundColor: Colors.green,
+            ),
+          );
 
-          // Convert API errors to user-friendly messages
-          if (error.contains('ApiException')) {
-            final apiException = error;
-            if (apiException.contains('BAD_REQUEST') ||
-                apiException.contains('400')) {
-              userFriendlyError =
-                  'Girilen bilgiler geçersiz. Lütfen kontrol edin';
-            } else if (apiException.contains('VALIDATION_ERROR') ||
-                apiException.contains('422')) {
-              userFriendlyError =
-                  'E-posta adresi zaten kullanımda veya geçersiz';
-            } else if (apiException.contains('NO_INTERNET')) {
+          // Navigate to home page
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        } else {
+          // Show error message
+          final error = ref.read(authErrorProvider);
+          String userFriendlyError = 'Giriş yapılırken bir hata oluştu';
+
+          if (error != null) {
+            if (error.contains('UNAUTHORIZED') || error.contains('401')) {
+              userFriendlyError = 'E-posta veya şifre hatalı';
+            } else if (error.contains('NO_INTERNET')) {
               userFriendlyError = 'İnternet bağlantısı bulunamadı';
-            } else if (apiException.contains('CONNECTION_TIMEOUT')) {
-              userFriendlyError = 'Bağlantı zaman aşımına uğradı';
-            } else {
-              userFriendlyError = 'Kayıt olurken bir hata oluştu';
             }
-          } else {
-            userFriendlyError = 'Kayıt olurken bir hata oluştu';
           }
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -83,266 +613,55 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           );
         }
       }
-    }
-  }
-
-  String? _validatePhone(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Telefon numarası gerekli';
-    }
-
-    // Remove spaces and check format: 555 123 4567
-    final cleanPhone = value.replaceAll(' ', '');
-    if (cleanPhone.length != 10) {
-      return 'Telefon numarası 10 haneli olmalı';
-    }
-
-    // Check if all characters are digits
-    if (!RegExp(r'^\d+$').hasMatch(cleanPhone)) {
-      return 'Telefon numarası sadece rakam içermeli';
-    }
-
-    return null;
-  }
-
-  String _formatPhone(String value) {
-    // Remove all non-digits
-    final digits = value.replaceAll(RegExp(r'\D'), '');
-
-    // Format as 555 123 4567
-    if (digits.length >= 6) {
-      return '${digits.substring(0, 3)} ${digits.substring(3, 6)} ${digits.substring(6, digits.length > 10 ? 10 : digits.length)}';
-    } else if (digits.length >= 3) {
-      return '${digits.substring(0, 3)} ${digits.substring(3)}';
-    }
-    return digits;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
-    final isLoading = authState.isLoading;
-
-    // Listen to auth state changes
-    ref.listen<AuthState>(authProvider, (previous, next) {
-      if (next.isAuthenticated && mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomePage()),
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Giriş başarısız: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
-    });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Kayıt Ol'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+  void _continueAsGuest() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const GuestUpgradePage(),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Welcome message
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.person_add,
-                            size: 48,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Yeni Hesap Oluştur',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Hemen üye olun ve alışverişe başlayın',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+    );
+  }
 
-                  // Name Field
-                  TextFormField(
-                    controller: _nameController,
-                    textCapitalization: TextCapitalization.words,
-                    decoration: const InputDecoration(
-                      labelText: 'Ad Soyad',
-                      prefixIcon: Icon(Icons.person),
-                      hintText: 'Adınız ve soyadınız',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Ad soyad gerekli';
-                      }
-                      if (value.trim().length < 2) {
-                        return 'Ad soyad en az 2 karakter olmalı';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
+  void _navigateToRegister() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const RegisterPage(),
+      ),
+    );
+  }
 
-                  // Phone Field
-                  TextFormField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      labelText: 'Telefon Numarası',
-                      prefixIcon: Icon(Icons.phone),
-                      hintText: '555 123 4567',
-                    ),
-                    onChanged: (value) {
-                      final formatted = _formatPhone(value);
-                      if (formatted != value) {
-                        _phoneController.value = TextEditingValue(
-                          text: formatted,
-                          selection:
-                              TextSelection.collapsed(offset: formatted.length),
-                        );
-                      }
-                    },
-                    validator: _validatePhone,
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Email Field
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      labelText: 'E-posta',
-                      prefixIcon: Icon(Icons.email),
-                      hintText: 'ornek@email.com',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'E-posta gerekli';
-                      }
-                      if (!value.contains('@')) {
-                        return 'Geçerli e-posta girin';
-                      }
-                      // More comprehensive email validation
-                      if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                        return 'Geçerli e-posta girin';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Password Field
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      labelText: 'Şifre',
-                      prefixIcon: const Icon(Icons.lock),
-                      hintText: 'En az 6 karakter',
-                      suffixIcon: IconButton(
-                        icon: Icon(_obscurePassword
-                            ? Icons.visibility
-                            : Icons.visibility_off),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Şifre gerekli';
-                      }
-                      if (value.length < 6) {
-                        return 'Şifre en az 6 karakter olmalı';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Confirm Password Field
-                  TextFormField(
-                    controller: _confirmPasswordController,
-                    obscureText: _obscureConfirmPassword,
-                    decoration: InputDecoration(
-                      labelText: 'Şifre Tekrar',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      hintText: 'Şifrenizi tekrar girin',
-                      suffixIcon: IconButton(
-                        icon: Icon(_obscureConfirmPassword
-                            ? Icons.visibility
-                            : Icons.visibility_off),
-                        onPressed: () {
-                          setState(() {
-                            _obscureConfirmPassword = !_obscureConfirmPassword;
-                          });
-                        },
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Şifre tekrarı gerekli';
-                      }
-                      if (value != _passwordController.text) {
-                        return 'Şifreler eşleşmiyor';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Register Button
-                  ElevatedButton(
-                    onPressed: isLoading ? null : _register,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Kayıt Ol',
-                            style: TextStyle(fontSize: 16)),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Login Link
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Zaten hesabınız var mı? Giriş yapın'),
-                  ),
-
-                  const SizedBox(height: 24),
-                ],
-              ),
-            ),
-          ),
+  void _showForgotPassword() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Şifremi Unuttum'),
+        content: const Text(
+          'Şifre sıfırlama özelliği yakında eklenecek. '
+          'Şimdilik misafir olarak devam edebilirsiniz.',
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Tamam'),
+          ),
+        ],
       ),
     );
   }

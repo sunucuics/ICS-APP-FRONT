@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../services/anonymous_auth_service.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 import '../services/mock_anonymous_auth_service.dart';
 
 // Anonymous Auth Service Provider - Using Mock for development
@@ -14,9 +13,19 @@ final currentUserProvider = StreamProvider<MockUser?>((ref) {
   return authService.authStateChanges;
 });
 
-// Auth State Provider - Using MockUser
+// Alternative current user provider that uses the notifier state
+final currentUserFromNotifierProvider = Provider<MockUser?>((ref) {
+  final userAsync = ref.watch(anonymousAuthProvider);
+  return userAsync.when(
+    data: (user) => user,
+    loading: () => null,
+    error: (error, stack) => null,
+  );
+});
+
+// Auth State Provider
 final authStateProvider = Provider<AuthState>((ref) {
-  final userAsync = ref.watch(currentUserProvider);
+  final userAsync = ref.watch(anonymousAuthProvider);
 
   return userAsync.when(
     data: (user) {
@@ -110,24 +119,20 @@ final anonymousAuthProvider =
 
 // Convenience Providers
 final isAuthenticatedProvider = Provider<bool>((ref) {
-  final authState = ref.watch(authStateProvider);
-  return authState.when(
-    authenticated: (user) => true,
-    anonymous: (user) => true,
-    unauthenticated: () => false,
+  final userAsync = ref.watch(anonymousAuthProvider);
+  return userAsync.when(
+    data: (user) => user != null,
     loading: () => false,
-    error: (error) => false,
+    error: (error, stack) => false,
   );
 });
 
 final isAnonymousProvider = Provider<bool>((ref) {
-  final authState = ref.watch(authStateProvider);
-  return authState.when(
-    authenticated: (user) => false,
-    anonymous: (user) => true,
-    unauthenticated: () => false,
+  final userAsync = ref.watch(anonymousAuthProvider);
+  return userAsync.when(
+    data: (user) => user?.isAnonymous ?? false,
     loading: () => false,
-    error: (error) => false,
+    error: (error, stack) => false,
   );
 });
 

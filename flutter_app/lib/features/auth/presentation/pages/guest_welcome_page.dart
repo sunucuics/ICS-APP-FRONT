@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/anonymous_auth_provider.dart';
 import '../../../../core/widgets/auth_wrapper.dart';
+import '../../../home/presentation/pages/home_page.dart';
+import 'register_page.dart';
 
 class GuestWelcomePage extends ConsumerWidget {
   const GuestWelcomePage({super.key});
@@ -272,10 +274,10 @@ class GuestWelcomePage extends ConsumerWidget {
     try {
       await authNotifier.signInAnonymously();
       if (context.mounted) {
-        // Navigate to main app
+        // Navigate directly to HomePage
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => const AuthWrapper(),
+            builder: (context) => const HomePage(),
           ),
         );
       }
@@ -292,19 +294,17 @@ class GuestWelcomePage extends ConsumerWidget {
   }
 
   void _navigateToRegister(BuildContext context) {
-    // TODO: Navigate to register page
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Kayıt sayfası yakında eklenecek'),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const RegisterPage(),
       ),
     );
   }
 
   void _navigateToSignIn(BuildContext context) {
-    // TODO: Navigate to sign in page
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Giriş sayfası yakında eklenecek'),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const SignInPage(),
       ),
     );
   }

@@ -5,6 +5,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../products/providers/products_provider.dart';
 import '../../../products/presentation/pages/product_detail_page.dart';
 import '../../../cart/providers/cart_provider.dart';
+import '../../../auth/providers/anonymous_auth_provider.dart' as anonymous;
+import '../../../auth/presentation/pages/guest_upgrade_page.dart';
 import '../../../../core/models/product_model.dart';
 
 class CatalogTab extends ConsumerStatefulWidget {
@@ -464,6 +466,14 @@ class _ProductCard extends ConsumerWidget {
   }
 
   void _addToCart(BuildContext context, WidgetRef ref, Product product) async {
+    // Check if user is anonymous
+    final isAnonymous = ref.read(anonymous.isAnonymousProvider);
+
+    if (isAnonymous) {
+      _showGuestUpgradeDialog(context);
+      return;
+    }
+
     try {
       await ref.read(cartProvider.notifier).addToCart(product.id, quantity: 1);
 
@@ -494,6 +504,42 @@ class _ProductCard extends ConsumerWidget {
         );
       }
     }
+  }
+
+  void _showGuestUpgradeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Hesap Gerekli'),
+          content: const Text(
+            'Sepete ürün eklemek için hesap oluşturmanız gerekiyor. '
+            'Hesap oluşturmak ister misiniz?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('İptal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const GuestUpgradePage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Hesap Oluştur'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
