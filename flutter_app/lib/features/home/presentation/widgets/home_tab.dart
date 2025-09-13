@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../products/providers/products_provider.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../featured/providers/featured_provider.dart';
 import '../../../../core/models/product_model.dart';
@@ -496,6 +495,7 @@ class _ServiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 160,
+      height: 200, // Fixed height to prevent overflow
       margin: const EdgeInsets.only(right: 16),
       child: Card(
         child: InkWell(
@@ -505,14 +505,14 @@ class _ServiceCard extends StatelessWidget {
             onNavigateToServices?.call();
           },
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12), // Reduced padding
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Service image or icon
                 Container(
                   width: double.infinity,
-                  height: 80,
+                  height: 70, // Reduced height
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     color: Colors.grey[200],
@@ -528,7 +528,7 @@ class _ServiceCard extends StatelessWidget {
                               child: Icon(
                                 Icons.work,
                                 color: Theme.of(context).primaryColor,
-                                size: 32,
+                                size: 28, // Reduced size
                               ),
                             ),
                             errorWidget: (context, url, error) => Container(
@@ -536,54 +536,44 @@ class _ServiceCard extends StatelessWidget {
                               child: Icon(
                                 Icons.work,
                                 color: Theme.of(context).primaryColor,
-                                size: 32,
+                                size: 28, // Reduced size
                               ),
                             ),
                           ),
                         )
                       : Icon(
                           Icons.work,
-                          size: 48,
+                          size: 40, // Reduced size
                           color: Theme.of(context).primaryColor,
                         ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12), // Reduced spacing
                 // Service title
                 Text(
                   service.title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        // Smaller text
                         fontWeight: FontWeight.w600,
                       ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6), // Reduced spacing
                 // Service description
                 Expanded(
                   child: Text(
                     service.description,
-                    style: Theme.of(context).textTheme.bodySmall,
-                    maxLines: 3,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          // Smaller text
+                          fontSize: 11,
+                        ),
+                    maxLines: 2, // Reduced lines
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  void _showServiceDetail(BuildContext context, Service service) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${service.title} detayları'),
-        action: SnackBarAction(
-          label: 'Hizmetler',
-          onPressed: () {
-            onNavigateToServices?.call();
-          },
         ),
       ),
     );
@@ -607,6 +597,7 @@ class _ProductCard extends StatelessWidget {
 
     return Container(
       width: 160,
+      height: 240, // Fixed height to prevent overflow
       margin: const EdgeInsets.only(right: 16),
       child: Card(
         child: InkWell(
@@ -616,14 +607,14 @@ class _ProductCard extends StatelessWidget {
             onNavigateToCatalog?.call();
           },
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12), // Reduced padding
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Product image
                 Container(
                   width: double.infinity,
-                  height: 100,
+                  height: 80, // Reduced height
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     color: Colors.grey[200],
@@ -639,7 +630,7 @@ class _ProductCard extends StatelessWidget {
                               child: Icon(
                                 Icons.inventory,
                                 color: Theme.of(context).primaryColor,
-                                size: 32,
+                                size: 28, // Reduced size
                               ),
                             ),
                             errorWidget: (context, url, error) => Container(
@@ -647,28 +638,29 @@ class _ProductCard extends StatelessWidget {
                               child: Icon(
                                 Icons.inventory,
                                 color: Theme.of(context).primaryColor,
-                                size: 32,
+                                size: 28, // Reduced size
                               ),
                             ),
                           ),
                         )
                       : Icon(
                           Icons.inventory,
-                          size: 48,
+                          size: 40, // Reduced size
                           color: Theme.of(context).primaryColor,
                         ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12), // Reduced spacing
                 // Product title
                 Text(
                   product.title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        // Smaller text
                         fontWeight: FontWeight.w600,
                       ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6), // Reduced spacing
                 // Product price
                 Row(
                   children: [
@@ -677,6 +669,7 @@ class _ProductCard extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).primaryColor,
+                        fontSize: 14, // Smaller text
                       ),
                     ),
                     if (hasDiscount) ...[
@@ -686,39 +679,25 @@ class _ProductCard extends StatelessWidget {
                         style: const TextStyle(
                           decoration: TextDecoration.lineThrough,
                           color: Colors.grey,
-                          fontSize: 10,
+                          fontSize: 9, // Smaller text
                         ),
                       ),
                     ],
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6), // Reduced spacing
                 // Stock status
                 Text(
                   product.stock > 0 ? 'Stokta' : 'Tükendi',
                   style: TextStyle(
                     color: product.stock > 0 ? Colors.green : Colors.red,
-                    fontSize: 12,
+                    fontSize: 11, // Smaller text
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  void _showProductDetail(BuildContext context, Product product) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${product.title} detayları'),
-        action: SnackBarAction(
-          label: 'Mağaza',
-          onPressed: () {
-            onNavigateToCatalog?.call();
-          },
         ),
       ),
     );
@@ -742,6 +721,7 @@ class _FeaturedProductCard extends StatelessWidget {
 
     return Container(
       width: 160,
+      height: 240, // Fixed height to prevent overflow
       margin: const EdgeInsets.only(right: 16),
       child: Card(
         child: InkWell(
@@ -751,14 +731,14 @@ class _FeaturedProductCard extends StatelessWidget {
             onNavigateToCatalog?.call();
           },
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12), // Reduced padding
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Product image
                 Container(
                   width: double.infinity,
-                  height: 100,
+                  height: 80, // Reduced height
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     color: Colors.grey[200],
@@ -774,7 +754,7 @@ class _FeaturedProductCard extends StatelessWidget {
                               child: Icon(
                                 Icons.inventory,
                                 color: Theme.of(context).primaryColor,
-                                size: 32,
+                                size: 28, // Reduced size
                               ),
                             ),
                             errorWidget: (context, url, error) => Container(
@@ -782,28 +762,29 @@ class _FeaturedProductCard extends StatelessWidget {
                               child: Icon(
                                 Icons.inventory,
                                 color: Theme.of(context).primaryColor,
-                                size: 32,
+                                size: 28, // Reduced size
                               ),
                             ),
                           ),
                         )
                       : Icon(
                           Icons.inventory,
-                          size: 48,
+                          size: 40, // Reduced size
                           color: Theme.of(context).primaryColor,
                         ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12), // Reduced spacing
                 // Product title
                 Text(
                   featuredProduct.title ?? 'Ürün',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        // Smaller text
                         fontWeight: FontWeight.w600,
                       ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6), // Reduced spacing
                 // Product price
                 if (featuredProduct.price != null) ...[
                   Row(
@@ -813,6 +794,7 @@ class _FeaturedProductCard extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).primaryColor,
+                          fontSize: 14, // Smaller text
                         ),
                       ),
                       if (hasDiscount) ...[
@@ -822,13 +804,13 @@ class _FeaturedProductCard extends StatelessWidget {
                           style: const TextStyle(
                             decoration: TextDecoration.lineThrough,
                             color: Colors.grey,
-                            fontSize: 10,
+                            fontSize: 9, // Smaller text
                           ),
                         ),
                       ],
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6), // Reduced spacing
                 ],
                 // Category
                 if (featuredProduct.categoryName != null) ...[
@@ -836,27 +818,27 @@ class _FeaturedProductCard extends StatelessWidget {
                     featuredProduct.categoryName!,
                     style: TextStyle(
                       color: Colors.grey[600],
-                      fontSize: 12,
+                      fontSize: 11, // Smaller text
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6), // Reduced spacing
                 ],
                 // Upcoming badge
                 if (featuredProduct.isUpcoming == true)
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6, vertical: 3), // Reduced padding
                     decoration: BoxDecoration(
                       color: Colors.orange[100],
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       'Yakında',
                       style: TextStyle(
                         color: Colors.orange[800],
-                        fontSize: 10,
+                        fontSize: 9, // Smaller text
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -883,6 +865,7 @@ class _FeaturedServiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 160,
+      height: 200, // Fixed height to prevent overflow
       margin: const EdgeInsets.only(right: 16),
       child: Card(
         child: InkWell(
@@ -892,14 +875,14 @@ class _FeaturedServiceCard extends StatelessWidget {
             onNavigateToServices?.call();
           },
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12), // Reduced padding
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Service image
                 Container(
                   width: double.infinity,
-                  height: 100,
+                  height: 70, // Reduced height
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     color: Colors.grey[200],
@@ -915,7 +898,7 @@ class _FeaturedServiceCard extends StatelessWidget {
                               child: Icon(
                                 Icons.work,
                                 color: Theme.of(context).primaryColor,
-                                size: 32,
+                                size: 28, // Reduced size
                               ),
                             ),
                             errorWidget: (context, url, error) => Container(
@@ -923,55 +906,58 @@ class _FeaturedServiceCard extends StatelessWidget {
                               child: Icon(
                                 Icons.work,
                                 color: Theme.of(context).primaryColor,
-                                size: 32,
+                                size: 28, // Reduced size
                               ),
                             ),
                           ),
                         )
                       : Icon(
                           Icons.work,
-                          size: 48,
+                          size: 40, // Reduced size
                           color: Theme.of(context).primaryColor,
                         ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12), // Reduced spacing
                 // Service title
                 Text(
                   featuredService.title ?? 'Hizmet',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        // Smaller text
                         fontWeight: FontWeight.w600,
                       ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6), // Reduced spacing
                 // Service description
                 if (featuredService.description != null) ...[
-                  Text(
-                    featuredService.description!,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
+                  Expanded(
+                    child: Text(
+                      featuredService.description!,
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 11, // Smaller text
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6), // Reduced spacing
                 ],
                 // Upcoming badge
                 if (featuredService.isUpcoming == true)
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6, vertical: 3), // Reduced padding
                     decoration: BoxDecoration(
                       color: Colors.orange[100],
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       'Yakında',
                       style: TextStyle(
                         color: Colors.orange[800],
-                        fontSize: 10,
+                        fontSize: 9, // Smaller text
                         fontWeight: FontWeight.w500,
                       ),
                     ),
