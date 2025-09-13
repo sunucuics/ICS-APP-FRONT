@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:firebase_auth/firebase_auth.dart'; // Geçici olarak kapalı
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'api_endpoints.dart';
@@ -191,3 +192,8 @@ class ApiClient {
     }
   }
 }
+
+// Riverpod Provider for ApiClient
+final apiClientProvider = Provider<Dio>((ref) {
+  return ApiClient.instance.dio;
+});
