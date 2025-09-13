@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/providers/auth_provider.dart';
+import '../../../auth/providers/anonymous_auth_provider.dart' as anonymous;
+import '../../../auth/presentation/pages/guest_upgrade_page.dart';
 import '../../../orders/presentation/pages/orders_list_page.dart';
 import '../../../addresses/presentation/pages/addresses_list_page.dart';
 
@@ -11,6 +13,7 @@ class ProfileTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final currentUser = ref.watch(currentUserProvider);
+    final isAnonymous = ref.watch(anonymous.isAnonymousProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -35,9 +38,13 @@ class ProfileTab extends ConsumerWidget {
                       children: [
                         CircleAvatar(
                           radius: 40,
-                          backgroundColor: Theme.of(context).primaryColor,
+                          backgroundColor: isAnonymous
+                              ? Colors.orange
+                              : Theme.of(context).primaryColor,
                           child: Text(
-                            _getInitials(currentUser?.name ?? 'U'),
+                            isAnonymous
+                                ? 'M'
+                                : _getInitials(currentUser?.name ?? 'U'),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 24,
@@ -51,7 +58,9 @@ class ProfileTab extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                currentUser?.name ?? 'Kullanıcı',
+                                isAnonymous
+                                    ? 'Misafir Kullanıcı'
+                                    : (currentUser?.name ?? 'Kullanıcı'),
                                 style: Theme.of(context)
                                     .textTheme
                                     .headlineSmall
@@ -61,7 +70,10 @@ class ProfileTab extends ConsumerWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                currentUser?.email ?? 'email@example.com',
+                                isAnonymous
+                                    ? 'Misafir olarak giriş yaptınız'
+                                    : (currentUser?.email ??
+                                        'email@example.com'),
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium
@@ -69,7 +81,30 @@ class ProfileTab extends ConsumerWidget {
                                       color: Colors.grey[600],
                                     ),
                               ),
-                              if (currentUser?.phone != null) ...[
+                              if (isAnonymous) ...[
+                                const SizedBox(height: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.orange.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.orange.withOpacity(0.3),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Misafir Modu',
+                                    style: TextStyle(
+                                      color: Colors.orange,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ] else if (currentUser?.phone != null) ...[
                                 const SizedBox(height: 4),
                                 Text(
                                   currentUser!.phone,
@@ -108,6 +143,85 @@ class ProfileTab extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
+
+                // Guest Upgrade Banner (only for anonymous users)
+                if (isAnonymous) ...[
+                  Card(
+                    color: Colors.orange.withOpacity(0.05),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.star,
+                                color: Colors.orange,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Hesap Oluşturun',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.orange[800],
+                                          ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Sipariş geçmişinizi, favorilerinizi ve daha fazlasını kaydedin',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: Colors.orange[700],
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const GuestUpgradePage(),
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Text(
+                                'Hesap Oluştur',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
 
                 // Menu Items
                 Card(

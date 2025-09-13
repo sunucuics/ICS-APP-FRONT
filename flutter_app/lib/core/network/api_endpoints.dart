@@ -55,6 +55,11 @@ class ApiEndpoints {
   static const String comments = '/comments';
   static String comment(String commentId) => '/comments/$commentId';
 
+  // Featured endpoints
+  static const String featured = '/featured';
+  static const String featuredProducts = '/featured/products';
+  static const String featuredServices = '/featured/services';
+
   // Admin endpoints (not needed for mobile app, but kept for reference)
   static const String adminCategories = '/admin/categories';
   static const String adminProducts = '/admin/products';
@@ -63,4 +68,5 @@ class ApiEndpoints {
   static const String adminAppointments = '/admin/appointments';
   static const String adminDiscounts = '/admin/discounts';
   static const String adminComments = '/admin/comments';
+  static const String adminFeatured = '/admin/featured';
 }

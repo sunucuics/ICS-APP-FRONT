@@ -3,10 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../products/providers/products_provider.dart';
-import '../../../services/providers/services_provider.dart';
 import '../../../auth/providers/auth_provider.dart';
+import '../../../featured/providers/featured_provider.dart';
 import '../../../../core/models/product_model.dart';
 import '../../../../core/models/service_model.dart';
+import '../../../../core/models/featured_model.dart';
 
 class HomeTab extends ConsumerWidget {
   final void Function(int tabIndex)? onNavigateToTab;
@@ -16,8 +17,8 @@ class HomeTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
-    final featuredServices = ref.watch(featuredServicesProvider);
-    final productsAsync = ref.watch(productsProvider(null)); // All products
+    final featuredServices = ref.watch(featuredServicesListProvider);
+    final featuredProducts = ref.watch(featuredProductsListProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('ICS App'),
@@ -375,8 +376,8 @@ class HomeTab extends ConsumerWidget {
                       itemCount: featuredServices.length,
                       itemBuilder: (context, index) {
                         final service = featuredServices[index];
-                        return _ServiceCard(
-                          service: service,
+                        return _FeaturedServiceCard(
+                          featuredService: service,
                           onNavigateToServices: () => onNavigateToTab?.call(1),
                         );
                       },
@@ -394,12 +395,8 @@ class HomeTab extends ConsumerWidget {
             const SizedBox(height: 16),
             SizedBox(
               height: 240,
-              child: productsAsync.when(
-                data: (products) {
-                  final featuredProducts = products.take(3).toList();
-
-                  if (featuredProducts.isEmpty) {
-                    return Center(
+              child: featuredProducts.isEmpty
+                  ? Center(
                       child: Card(
                         child: Container(
                           width: 200,
@@ -414,7 +411,7 @@ class HomeTab extends ConsumerWidget {
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                'Henüz ürün yok',
+                                'Henüz öne çıkan ürün yok',
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontWeight: FontWeight.w500,
@@ -432,29 +429,18 @@ class HomeTab extends ConsumerWidget {
                           ),
                         ),
                       ),
-                    );
-                  }
-
-                  return ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: featuredProducts.length,
-                    itemBuilder: (context, index) {
-                      final product = featuredProducts[index];
-                      return _ProductCard(
-                        product: product,
-                        onNavigateToCatalog: () => onNavigateToTab?.call(2),
-                      );
-                    },
-                  );
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => Center(
-                  child: Text(
-                    'Ürünler yüklenemedi',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ),
-              ),
+                    )
+                  : ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: featuredProducts.length,
+                      itemBuilder: (context, index) {
+                        final featuredProduct = featuredProducts[index];
+                        return _FeaturedProductCard(
+                          featuredProduct: featuredProduct,
+                          onNavigateToCatalog: () => onNavigateToTab?.call(2),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -733,6 +719,266 @@ class _ProductCard extends StatelessWidget {
           onPressed: () {
             onNavigateToCatalog?.call();
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _FeaturedProductCard extends StatelessWidget {
+  final FeaturedProduct featuredProduct;
+  final VoidCallback? onNavigateToCatalog;
+
+  const _FeaturedProductCard({
+    required this.featuredProduct,
+    this.onNavigateToCatalog,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final displayPrice = featuredProduct.finalPrice ?? featuredProduct.price;
+    final hasDiscount = featuredProduct.finalPrice != null &&
+        featuredProduct.finalPrice! < featuredProduct.price!;
+
+    return Container(
+      width: 160,
+      margin: const EdgeInsets.only(right: 16),
+      child: Card(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            // Navigate directly to catalog tab on tap
+            onNavigateToCatalog?.call();
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Product image
+                Container(
+                  width: double.infinity,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.grey[200],
+                  ),
+                  child: featuredProduct.images.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: CachedNetworkImage(
+                            imageUrl: featuredProduct.images.first,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              color: Colors.grey[200],
+                              child: Icon(
+                                Icons.inventory,
+                                color: Theme.of(context).primaryColor,
+                                size: 32,
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: Colors.grey[200],
+                              child: Icon(
+                                Icons.inventory,
+                                color: Theme.of(context).primaryColor,
+                                size: 32,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Icon(
+                          Icons.inventory,
+                          size: 48,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                ),
+                const SizedBox(height: 16),
+                // Product title
+                Text(
+                  featuredProduct.title ?? 'Ürün',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                // Product price
+                if (featuredProduct.price != null) ...[
+                  Row(
+                    children: [
+                      Text(
+                        '₺${displayPrice?.toStringAsFixed(2) ?? '0.00'}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      if (hasDiscount) ...[
+                        const SizedBox(width: 4),
+                        Text(
+                          '₺${featuredProduct.price?.toStringAsFixed(0) ?? '0'}',
+                          style: const TextStyle(
+                            decoration: TextDecoration.lineThrough,
+                            color: Colors.grey,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                // Category
+                if (featuredProduct.categoryName != null) ...[
+                  Text(
+                    featuredProduct.categoryName!,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                // Upcoming badge
+                if (featuredProduct.isUpcoming == true)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.orange[100],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Yakında',
+                      style: TextStyle(
+                        color: Colors.orange[800],
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FeaturedServiceCard extends StatelessWidget {
+  final FeaturedService featuredService;
+  final VoidCallback? onNavigateToServices;
+
+  const _FeaturedServiceCard({
+    required this.featuredService,
+    this.onNavigateToServices,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 160,
+      margin: const EdgeInsets.only(right: 16),
+      child: Card(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            // Navigate directly to services tab on tap
+            onNavigateToServices?.call();
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Service image
+                Container(
+                  width: double.infinity,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.grey[200],
+                  ),
+                  child: featuredService.image != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: CachedNetworkImage(
+                            imageUrl: featuredService.image!,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              color: Colors.grey[200],
+                              child: Icon(
+                                Icons.work,
+                                color: Theme.of(context).primaryColor,
+                                size: 32,
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: Colors.grey[200],
+                              child: Icon(
+                                Icons.work,
+                                color: Theme.of(context).primaryColor,
+                                size: 32,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Icon(
+                          Icons.work,
+                          size: 48,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                ),
+                const SizedBox(height: 16),
+                // Service title
+                Text(
+                  featuredService.title ?? 'Hizmet',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                // Service description
+                if (featuredService.description != null) ...[
+                  Text(
+                    featuredService.description!,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                // Upcoming badge
+                if (featuredService.isUpcoming == true)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.orange[100],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Yakında',
+                      style: TextStyle(
+                        color: Colors.orange[800],
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
