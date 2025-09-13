@@ -17,6 +17,11 @@ class ApiEndpoints {
   static String userAddress(String addressId) =>
       '/users/me/addresses/$addressId';
 
+  // Address endpoints
+  static const String addresses = '/users/me/addresses';
+  static String address(String addressId) => '/users/me/addresses/$addressId';
+  static const String currentAddress = '/users/me/current-address';
+
   // Categories endpoints
   static const String categories = '/categories';
   static String category(String categoryId) => '/categories/$categoryId';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../orders/presentation/pages/orders_list_page.dart';
+import '../../../addresses/presentation/pages/addresses_list_page.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -132,9 +133,9 @@ class ProfileTab extends ConsumerWidget {
                         title: 'Adreslerim',
                         subtitle: 'Teslimat adreslerini yönet',
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Adres yönetimi yakında eklenecek'),
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const AddressesListPage(),
                             ),
                           );
                         },
