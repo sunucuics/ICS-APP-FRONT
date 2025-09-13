@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../cart/providers/cart_provider.dart';
 import '../../../../core/models/cart_model.dart';
+import '../../../payment/presentation/pages/payment_method_page.dart';
 
 class CartTab extends ConsumerWidget {
   const CartTab({super.key});
@@ -424,50 +425,11 @@ class CartTab extends ConsumerWidget {
   }
 
   void _proceedToCheckout(BuildContext context, WidgetRef ref, Cart cart) {
-    // Şimdilik basit bir sipariş onay dialog'u gösterelim
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Sipariş Özeti'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Toplam ${cart.totalQuantity} ürün'),
-              const SizedBox(height: 8),
-              Text(
-                'Tutar: ₺${cart.totalBase.toStringAsFixed(2)}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Ödeme ve kargo entegrasyonu ileriki aşamada eklenecek.',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('İptal'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text('Sipariş oluşturma özelliği yakında eklenecek'),
-                    backgroundColor: Colors.orange,
-                  ),
-                );
-              },
-              child: const Text('Onayla'),
-            ),
-          ],
-        );
-      },
+    // Navigate to payment method selection
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const PaymentMethodPage(),
+      ),
     );
   }
 }
