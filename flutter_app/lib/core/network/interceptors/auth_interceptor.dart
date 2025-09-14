@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import '../api_client.dart';
-import '../../../features/auth/providers/anonymous_auth_provider.dart'
-    as anonymous;
+import '../../../features/auth/services/mock_anonymous_auth_service.dart';
 
 class AuthInterceptor extends Interceptor {
   @override
@@ -48,15 +47,14 @@ class AuthInterceptor extends Interceptor {
       return storedToken;
     }
 
-    // For anonymous users, get mock token
-    // In real implementation, this would be:
-    // final user = FirebaseAuth.instance.currentUser;
-    // if (user != null) {
-    //   return await user.getIdToken();
-    // }
+    // For anonymous users, get token from MockAnonymousAuthService
+    final anonymousService = MockAnonymousAuthService();
+    if (anonymousService.isAuthenticated) {
+      return await anonymousService.getIdToken();
+    }
 
-    // For now, return a mock token for anonymous users
-    return 'mock_anonymous_token';
+    // No authentication available
+    return null;
   }
 
   @override

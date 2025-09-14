@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/user_model.dart';
 import '../data/auth_repository.dart';
+import 'anonymous_auth_provider.dart' as anonymous;
 
 // Auth Repository Provider
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -41,8 +42,9 @@ class AuthState {
 // Auth State Notifier
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _authRepository;
+  final Ref _ref;
 
-  AuthNotifier(this._authRepository) : super(const AuthState()) {
+  AuthNotifier(this._authRepository, this._ref) : super(const AuthState()) {
     _checkAuthStatus();
   }
 
@@ -101,6 +103,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isAuthenticated: true,
         isLoading: false,
       );
+
+      // Clear anonymous authentication when user logs in
+      try {
+        await _ref.read(anonymous.anonymousAuthProvider.notifier).signOut();
+        print('🔐 AuthProvider - Anonymous auth cleared');
+      } catch (e) {
+        print('🔐 AuthProvider - Error clearing anonymous auth: $e');
+      }
+
       print(
           '🔐 AuthProvider - State updated, isAuthenticated: ${state.isAuthenticated}');
       print('🔐 AuthProvider - User in state: ${state.user?.email}');
@@ -200,7 +211,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 // Auth Provider
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final authRepository = ref.read(authRepositoryProvider);
-  return AuthNotifier(authRepository);
+  return AuthNotifier(authRepository, ref);
 });
 
 // Convenience providers

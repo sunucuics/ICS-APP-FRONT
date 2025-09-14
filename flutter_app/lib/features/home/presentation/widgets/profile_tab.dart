@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../auth/providers/anonymous_auth_provider.dart' as anonymous;
 import '../../../auth/presentation/pages/guest_upgrade_page.dart';
+import '../../../auth/presentation/pages/login_page.dart';
 import '../../../orders/presentation/pages/orders_list_page.dart';
 import '../../../addresses/presentation/pages/addresses_list_page.dart';
 import '../../../appointments/presentation/pages/my_appointments_page.dart';
@@ -15,6 +16,9 @@ class ProfileTab extends ConsumerWidget {
     final authState = ref.watch(authProvider);
     final currentUser = ref.watch(currentUserProvider);
     final isAnonymous = ref.watch(anonymous.isAnonymousProvider);
+
+    // If registered user is authenticated, ignore anonymous authentication
+    final isActuallyAnonymous = !authState.isAuthenticated && isAnonymous;
 
     return Scaffold(
       appBar: AppBar(
@@ -39,11 +43,11 @@ class ProfileTab extends ConsumerWidget {
                       children: [
                         CircleAvatar(
                           radius: 40,
-                          backgroundColor: isAnonymous
+                          backgroundColor: isActuallyAnonymous
                               ? Colors.orange
                               : Theme.of(context).primaryColor,
                           child: Text(
-                            isAnonymous
+                            isActuallyAnonymous
                                 ? 'M'
                                 : _getInitials(currentUser?.name ?? 'U'),
                             style: const TextStyle(
@@ -59,7 +63,7 @@ class ProfileTab extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                isAnonymous
+                                isActuallyAnonymous
                                     ? 'Misafir Kullanıcı'
                                     : (currentUser?.name ?? 'Kullanıcı'),
                                 style: Theme.of(context)
@@ -71,7 +75,7 @@ class ProfileTab extends ConsumerWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                isAnonymous
+                                isActuallyAnonymous
                                     ? 'Misafir olarak giriş yaptınız'
                                     : (currentUser?.email ??
                                         'email@example.com'),
@@ -82,7 +86,7 @@ class ProfileTab extends ConsumerWidget {
                                       color: Colors.grey[600],
                                     ),
                               ),
-                              if (isAnonymous) ...[
+                              if (isActuallyAnonymous) ...[
                                 const SizedBox(height: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
@@ -146,7 +150,7 @@ class ProfileTab extends ConsumerWidget {
                 const SizedBox(height: 24),
 
                 // Guest Upgrade Banner (only for anonymous users)
-                if (isAnonymous) ...[
+                if (isActuallyAnonymous) ...[
                   Card(
                     color: Colors.orange.withOpacity(0.05),
                     child: Padding(
@@ -191,31 +195,59 @@ class ProfileTab extends ConsumerWidget {
                             ],
                           ),
                           const SizedBox(height: 16),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const GuestUpgradePage(),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => const LoginPage(),
+                                      ),
+                                    );
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.orange,
+                                    side: BorderSide(color: Colors.orange),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
                                   ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                                  child: const Text(
+                                    'Giriş Yap',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                                 ),
                               ),
-                              child: const Text(
-                                'Hesap Oluştur',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const GuestUpgradePage(),
+                                      ),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.orange,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Hesap Oluştur',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
                         ],
                       ),
@@ -232,10 +264,10 @@ class ProfileTab extends ConsumerWidget {
                         context,
                         icon: Icons.shopping_bag,
                         title: 'Siparişlerim',
-                        subtitle: isAnonymous
+                        subtitle: isActuallyAnonymous
                             ? 'Hesap oluşturun'
                             : 'Geçmiş siparişleri görüntüle',
-                        onTap: isAnonymous
+                        onTap: isActuallyAnonymous
                             ? () => _showGuestUpgradeDialog(context)
                             : () {
                                 Navigator.of(context).push(
@@ -251,10 +283,10 @@ class ProfileTab extends ConsumerWidget {
                         context,
                         icon: Icons.location_on,
                         title: 'Adreslerim',
-                        subtitle: isAnonymous
+                        subtitle: isActuallyAnonymous
                             ? 'Hesap oluşturun'
                             : 'Teslimat adreslerini yönet',
-                        onTap: isAnonymous
+                        onTap: isActuallyAnonymous
                             ? () => _showGuestUpgradeDialog(context)
                             : () {
                                 Navigator.of(context).push(
@@ -270,10 +302,10 @@ class ProfileTab extends ConsumerWidget {
                         context,
                         icon: Icons.calendar_today,
                         title: 'Randevularım',
-                        subtitle: isAnonymous
+                        subtitle: isActuallyAnonymous
                             ? 'Hesap oluşturun'
                             : 'Aktif ve geçmiş randevular',
-                        onTap: isAnonymous
+                        onTap: isActuallyAnonymous
                             ? () => _showGuestUpgradeDialog(context)
                             : () {
                                 Navigator.of(context).push(
@@ -420,15 +452,36 @@ class ProfileTab extends ConsumerWidget {
 
                 // Check if user is anonymous
                 final isAnonymous = ref.read(anonymous.isAnonymousProvider);
+                final authState = ref.read(authProvider);
+                final isActuallyAnonymous =
+                    !authState.isAuthenticated && isAnonymous;
 
-                if (isAnonymous) {
+                if (isActuallyAnonymous) {
                   // For anonymous users, use anonymous auth provider
                   await ref
                       .read(anonymous.anonymousAuthProvider.notifier)
                       .signOut();
+
+                  // Navigate to login page after logout
+                  if (context.mounted) {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                    );
+                  }
                 } else {
                   // For registered users, use regular auth provider
                   await ref.read(authProvider.notifier).logout();
+
+                  // Navigate to login page after logout
+                  if (context.mounted) {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                    );
+                  }
                 }
               },
               style: ElevatedButton.styleFrom(

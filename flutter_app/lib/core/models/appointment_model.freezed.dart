@@ -1557,205 +1557,286 @@ abstract class _MonthlyAvailability implements MonthlyAvailability {
 }
 
 /// @nodoc
-mixin _$AppointmentBookingRequest {
-  String get serviceId => throw _privateConstructorUsedError;
-  DateTime get date => throw _privateConstructorUsedError;
-  String get startTime => throw _privateConstructorUsedError;
-  String? get notes => throw _privateConstructorUsedError;
+mixin _$AppointmentAdminOut {
+  String get id => throw _privateConstructorUsedError;
+  DateTime get start => throw _privateConstructorUsedError;
+  DateTime get end => throw _privateConstructorUsedError;
+  String get status => throw _privateConstructorUsedError;
+  UserBrief get user => throw _privateConstructorUsedError;
+  ServiceBrief get service => throw _privateConstructorUsedError;
 
-  /// Create a copy of AppointmentBookingRequest
+  /// Create a copy of AppointmentAdminOut
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $AppointmentBookingRequestCopyWith<AppointmentBookingRequest> get copyWith =>
+  $AppointmentAdminOutCopyWith<AppointmentAdminOut> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $AppointmentBookingRequestCopyWith<$Res> {
-  factory $AppointmentBookingRequestCopyWith(AppointmentBookingRequest value,
-          $Res Function(AppointmentBookingRequest) then) =
-      _$AppointmentBookingRequestCopyWithImpl<$Res, AppointmentBookingRequest>;
+abstract class $AppointmentAdminOutCopyWith<$Res> {
+  factory $AppointmentAdminOutCopyWith(
+          AppointmentAdminOut value, $Res Function(AppointmentAdminOut) then) =
+      _$AppointmentAdminOutCopyWithImpl<$Res, AppointmentAdminOut>;
   @useResult
-  $Res call({String serviceId, DateTime date, String startTime, String? notes});
+  $Res call(
+      {String id,
+      DateTime start,
+      DateTime end,
+      String status,
+      UserBrief user,
+      ServiceBrief service});
+
+  $UserBriefCopyWith<$Res> get user;
+  $ServiceBriefCopyWith<$Res> get service;
 }
 
 /// @nodoc
-class _$AppointmentBookingRequestCopyWithImpl<$Res,
-        $Val extends AppointmentBookingRequest>
-    implements $AppointmentBookingRequestCopyWith<$Res> {
-  _$AppointmentBookingRequestCopyWithImpl(this._value, this._then);
+class _$AppointmentAdminOutCopyWithImpl<$Res, $Val extends AppointmentAdminOut>
+    implements $AppointmentAdminOutCopyWith<$Res> {
+  _$AppointmentAdminOutCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of AppointmentBookingRequest
+  /// Create a copy of AppointmentAdminOut
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? serviceId = null,
-    Object? date = null,
-    Object? startTime = null,
-    Object? notes = freezed,
+    Object? id = null,
+    Object? start = null,
+    Object? end = null,
+    Object? status = null,
+    Object? user = null,
+    Object? service = null,
   }) {
     return _then(_value.copyWith(
-      serviceId: null == serviceId
-          ? _value.serviceId
-          : serviceId // ignore: cast_nullable_to_non_nullable
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
               as String,
-      date: null == date
-          ? _value.date
-          : date // ignore: cast_nullable_to_non_nullable
+      start: null == start
+          ? _value.start
+          : start // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      startTime: null == startTime
-          ? _value.startTime
-          : startTime // ignore: cast_nullable_to_non_nullable
+      end: null == end
+          ? _value.end
+          : end // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
               as String,
-      notes: freezed == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as String?,
+      user: null == user
+          ? _value.user
+          : user // ignore: cast_nullable_to_non_nullable
+              as UserBrief,
+      service: null == service
+          ? _value.service
+          : service // ignore: cast_nullable_to_non_nullable
+              as ServiceBrief,
     ) as $Val);
+  }
+
+  /// Create a copy of AppointmentAdminOut
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $UserBriefCopyWith<$Res> get user {
+    return $UserBriefCopyWith<$Res>(_value.user, (value) {
+      return _then(_value.copyWith(user: value) as $Val);
+    });
+  }
+
+  /// Create a copy of AppointmentAdminOut
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $ServiceBriefCopyWith<$Res> get service {
+    return $ServiceBriefCopyWith<$Res>(_value.service, (value) {
+      return _then(_value.copyWith(service: value) as $Val);
+    });
   }
 }
 
 /// @nodoc
-abstract class _$$AppointmentBookingRequestImplCopyWith<$Res>
-    implements $AppointmentBookingRequestCopyWith<$Res> {
-  factory _$$AppointmentBookingRequestImplCopyWith(
-          _$AppointmentBookingRequestImpl value,
-          $Res Function(_$AppointmentBookingRequestImpl) then) =
-      __$$AppointmentBookingRequestImplCopyWithImpl<$Res>;
+abstract class _$$AppointmentAdminOutImplCopyWith<$Res>
+    implements $AppointmentAdminOutCopyWith<$Res> {
+  factory _$$AppointmentAdminOutImplCopyWith(_$AppointmentAdminOutImpl value,
+          $Res Function(_$AppointmentAdminOutImpl) then) =
+      __$$AppointmentAdminOutImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String serviceId, DateTime date, String startTime, String? notes});
+  $Res call(
+      {String id,
+      DateTime start,
+      DateTime end,
+      String status,
+      UserBrief user,
+      ServiceBrief service});
+
+  @override
+  $UserBriefCopyWith<$Res> get user;
+  @override
+  $ServiceBriefCopyWith<$Res> get service;
 }
 
 /// @nodoc
-class __$$AppointmentBookingRequestImplCopyWithImpl<$Res>
-    extends _$AppointmentBookingRequestCopyWithImpl<$Res,
-        _$AppointmentBookingRequestImpl>
-    implements _$$AppointmentBookingRequestImplCopyWith<$Res> {
-  __$$AppointmentBookingRequestImplCopyWithImpl(
-      _$AppointmentBookingRequestImpl _value,
-      $Res Function(_$AppointmentBookingRequestImpl) _then)
+class __$$AppointmentAdminOutImplCopyWithImpl<$Res>
+    extends _$AppointmentAdminOutCopyWithImpl<$Res, _$AppointmentAdminOutImpl>
+    implements _$$AppointmentAdminOutImplCopyWith<$Res> {
+  __$$AppointmentAdminOutImplCopyWithImpl(_$AppointmentAdminOutImpl _value,
+      $Res Function(_$AppointmentAdminOutImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of AppointmentBookingRequest
+  /// Create a copy of AppointmentAdminOut
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? serviceId = null,
-    Object? date = null,
-    Object? startTime = null,
-    Object? notes = freezed,
+    Object? id = null,
+    Object? start = null,
+    Object? end = null,
+    Object? status = null,
+    Object? user = null,
+    Object? service = null,
   }) {
-    return _then(_$AppointmentBookingRequestImpl(
-      serviceId: null == serviceId
-          ? _value.serviceId
-          : serviceId // ignore: cast_nullable_to_non_nullable
+    return _then(_$AppointmentAdminOutImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
               as String,
-      date: null == date
-          ? _value.date
-          : date // ignore: cast_nullable_to_non_nullable
+      start: null == start
+          ? _value.start
+          : start // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      startTime: null == startTime
-          ? _value.startTime
-          : startTime // ignore: cast_nullable_to_non_nullable
+      end: null == end
+          ? _value.end
+          : end // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
               as String,
-      notes: freezed == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as String?,
+      user: null == user
+          ? _value.user
+          : user // ignore: cast_nullable_to_non_nullable
+              as UserBrief,
+      service: null == service
+          ? _value.service
+          : service // ignore: cast_nullable_to_non_nullable
+              as ServiceBrief,
     ));
   }
 }
 
 /// @nodoc
 
-class _$AppointmentBookingRequestImpl implements _AppointmentBookingRequest {
-  const _$AppointmentBookingRequestImpl(
-      {required this.serviceId,
-      required this.date,
-      required this.startTime,
-      this.notes});
+class _$AppointmentAdminOutImpl implements _AppointmentAdminOut {
+  const _$AppointmentAdminOutImpl(
+      {required this.id,
+      required this.start,
+      required this.end,
+      required this.status,
+      required this.user,
+      required this.service});
 
   @override
-  final String serviceId;
+  final String id;
   @override
-  final DateTime date;
+  final DateTime start;
   @override
-  final String startTime;
+  final DateTime end;
   @override
-  final String? notes;
+  final String status;
+  @override
+  final UserBrief user;
+  @override
+  final ServiceBrief service;
 
   @override
   String toString() {
-    return 'AppointmentBookingRequest(serviceId: $serviceId, date: $date, startTime: $startTime, notes: $notes)';
+    return 'AppointmentAdminOut(id: $id, start: $start, end: $end, status: $status, user: $user, service: $service)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$AppointmentBookingRequestImpl &&
-            (identical(other.serviceId, serviceId) ||
-                other.serviceId == serviceId) &&
-            (identical(other.date, date) || other.date == date) &&
-            (identical(other.startTime, startTime) ||
-                other.startTime == startTime) &&
-            (identical(other.notes, notes) || other.notes == notes));
+            other is _$AppointmentAdminOutImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.start, start) || other.start == start) &&
+            (identical(other.end, end) || other.end == end) &&
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.user, user) || other.user == user) &&
+            (identical(other.service, service) || other.service == service));
   }
 
   @override
   int get hashCode =>
-      Object.hash(runtimeType, serviceId, date, startTime, notes);
+      Object.hash(runtimeType, id, start, end, status, user, service);
 
-  /// Create a copy of AppointmentBookingRequest
+  /// Create a copy of AppointmentAdminOut
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$AppointmentBookingRequestImplCopyWith<_$AppointmentBookingRequestImpl>
-      get copyWith => __$$AppointmentBookingRequestImplCopyWithImpl<
-          _$AppointmentBookingRequestImpl>(this, _$identity);
+  _$$AppointmentAdminOutImplCopyWith<_$AppointmentAdminOutImpl> get copyWith =>
+      __$$AppointmentAdminOutImplCopyWithImpl<_$AppointmentAdminOutImpl>(
+          this, _$identity);
 }
 
-abstract class _AppointmentBookingRequest implements AppointmentBookingRequest {
-  const factory _AppointmentBookingRequest(
-      {required final String serviceId,
-      required final DateTime date,
-      required final String startTime,
-      final String? notes}) = _$AppointmentBookingRequestImpl;
+abstract class _AppointmentAdminOut implements AppointmentAdminOut {
+  const factory _AppointmentAdminOut(
+      {required final String id,
+      required final DateTime start,
+      required final DateTime end,
+      required final String status,
+      required final UserBrief user,
+      required final ServiceBrief service}) = _$AppointmentAdminOutImpl;
 
   @override
-  String get serviceId;
+  String get id;
   @override
-  DateTime get date;
+  DateTime get start;
   @override
-  String get startTime;
+  DateTime get end;
   @override
-  String? get notes;
+  String get status;
+  @override
+  UserBrief get user;
+  @override
+  ServiceBrief get service;
 
-  /// Create a copy of AppointmentBookingRequest
+  /// Create a copy of AppointmentAdminOut
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$AppointmentBookingRequestImplCopyWith<_$AppointmentBookingRequestImpl>
-      get copyWith => throw _privateConstructorUsedError;
+  _$$AppointmentAdminOutImplCopyWith<_$AppointmentAdminOutImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+ServiceAvailability _$ServiceAvailabilityFromJson(Map<String, dynamic> json) {
+  return _ServiceAvailability.fromJson(json);
 }
 
 /// @nodoc
 mixin _$ServiceAvailability {
+  @JsonKey(name: 'service_id')
   String get serviceId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'working_hours')
   Map<String, List<String>> get workingHours =>
       throw _privateConstructorUsedError;
+  @JsonKey(name: 'break_times')
   List<Map<String, String>> get breakTimes =>
       throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_available')
   bool get isAvailable => throw _privateConstructorUsedError;
+
+  /// Serializes this ServiceAvailability to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of ServiceAvailability
   /// with the given fields replaced by the non-null parameter values.
@@ -1771,10 +1852,10 @@ abstract class $ServiceAvailabilityCopyWith<$Res> {
       _$ServiceAvailabilityCopyWithImpl<$Res, ServiceAvailability>;
   @useResult
   $Res call(
-      {String serviceId,
-      Map<String, List<String>> workingHours,
-      List<Map<String, String>> breakTimes,
-      bool isAvailable});
+      {@JsonKey(name: 'service_id') String serviceId,
+      @JsonKey(name: 'working_hours') Map<String, List<String>> workingHours,
+      @JsonKey(name: 'break_times') List<Map<String, String>> breakTimes,
+      @JsonKey(name: 'is_available') bool isAvailable});
 }
 
 /// @nodoc
@@ -1827,10 +1908,10 @@ abstract class _$$ServiceAvailabilityImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String serviceId,
-      Map<String, List<String>> workingHours,
-      List<Map<String, String>> breakTimes,
-      bool isAvailable});
+      {@JsonKey(name: 'service_id') String serviceId,
+      @JsonKey(name: 'working_hours') Map<String, List<String>> workingHours,
+      @JsonKey(name: 'break_times') List<Map<String, String>> breakTimes,
+      @JsonKey(name: 'is_available') bool isAvailable});
 }
 
 /// @nodoc
@@ -1873,21 +1954,27 @@ class __$$ServiceAvailabilityImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
+@JsonSerializable()
 class _$ServiceAvailabilityImpl implements _ServiceAvailability {
   const _$ServiceAvailabilityImpl(
-      {required this.serviceId,
+      {@JsonKey(name: 'service_id') required this.serviceId,
+      @JsonKey(name: 'working_hours')
       final Map<String, List<String>> workingHours = const {},
+      @JsonKey(name: 'break_times')
       final List<Map<String, String>> breakTimes = const [],
-      this.isAvailable = true})
+      @JsonKey(name: 'is_available') this.isAvailable = true})
       : _workingHours = workingHours,
         _breakTimes = breakTimes;
 
+  factory _$ServiceAvailabilityImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ServiceAvailabilityImplFromJson(json);
+
   @override
+  @JsonKey(name: 'service_id')
   final String serviceId;
   final Map<String, List<String>> _workingHours;
   @override
-  @JsonKey()
+  @JsonKey(name: 'working_hours')
   Map<String, List<String>> get workingHours {
     if (_workingHours is EqualUnmodifiableMapView) return _workingHours;
     // ignore: implicit_dynamic_type
@@ -1896,7 +1983,7 @@ class _$ServiceAvailabilityImpl implements _ServiceAvailability {
 
   final List<Map<String, String>> _breakTimes;
   @override
-  @JsonKey()
+  @JsonKey(name: 'break_times')
   List<Map<String, String>> get breakTimes {
     if (_breakTimes is EqualUnmodifiableListView) return _breakTimes;
     // ignore: implicit_dynamic_type
@@ -1904,7 +1991,7 @@ class _$ServiceAvailabilityImpl implements _ServiceAvailability {
   }
 
   @override
-  @JsonKey()
+  @JsonKey(name: 'is_available')
   final bool isAvailable;
 
   @override
@@ -1927,6 +2014,7 @@ class _$ServiceAvailabilityImpl implements _ServiceAvailability {
                 other.isAvailable == isAvailable));
   }
 
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -1943,22 +2031,38 @@ class _$ServiceAvailabilityImpl implements _ServiceAvailability {
   _$$ServiceAvailabilityImplCopyWith<_$ServiceAvailabilityImpl> get copyWith =>
       __$$ServiceAvailabilityImplCopyWithImpl<_$ServiceAvailabilityImpl>(
           this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$ServiceAvailabilityImplToJson(
+      this,
+    );
+  }
 }
 
 abstract class _ServiceAvailability implements ServiceAvailability {
   const factory _ServiceAvailability(
-      {required final String serviceId,
+      {@JsonKey(name: 'service_id') required final String serviceId,
+      @JsonKey(name: 'working_hours')
       final Map<String, List<String>> workingHours,
-      final List<Map<String, String>> breakTimes,
+      @JsonKey(name: 'break_times') final List<Map<String, String>> breakTimes,
+      @JsonKey(name: 'is_available')
       final bool isAvailable}) = _$ServiceAvailabilityImpl;
 
+  factory _ServiceAvailability.fromJson(Map<String, dynamic> json) =
+      _$ServiceAvailabilityImpl.fromJson;
+
   @override
+  @JsonKey(name: 'service_id')
   String get serviceId;
   @override
+  @JsonKey(name: 'working_hours')
   Map<String, List<String>> get workingHours;
   @override
+  @JsonKey(name: 'break_times')
   List<Map<String, String>> get breakTimes;
   @override
+  @JsonKey(name: 'is_available')
   bool get isAvailable;
 
   /// Create a copy of ServiceAvailability

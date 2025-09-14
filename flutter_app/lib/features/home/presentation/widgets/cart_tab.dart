@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../cart/providers/cart_provider.dart';
 import '../../../auth/providers/anonymous_auth_provider.dart' as anonymous;
+import '../../../auth/providers/auth_provider.dart';
 import '../../../auth/presentation/pages/guest_upgrade_page.dart';
 import '../../../../core/models/cart_model.dart';
 import '../../../payment/presentation/pages/payment_method_page.dart';
@@ -427,10 +428,15 @@ class CartTab extends ConsumerWidget {
   }
 
   void _proceedToCheckout(BuildContext context, WidgetRef ref, Cart cart) {
-    // Check if user is anonymous
+    // Check if user is authenticated (either registered or anonymous)
+    final authState = ref.read(authProvider);
     final isAnonymous = ref.read(anonymous.isAnonymousProvider);
 
-    if (isAnonymous) {
+    // If registered user is authenticated, allow checkout
+    // If only anonymous user is authenticated, show upgrade dialog
+    final isActuallyAnonymous = !authState.isAuthenticated && isAnonymous;
+
+    if (isActuallyAnonymous) {
       _showGuestUpgradeDialog(context);
       return;
     }

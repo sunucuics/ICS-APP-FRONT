@@ -4,6 +4,7 @@ import '../../providers/anonymous_auth_provider.dart';
 import '../../../../core/widgets/auth_wrapper.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import 'register_page.dart';
+import 'login_page.dart';
 
 class GuestWelcomePage extends ConsumerWidget {
   const GuestWelcomePage({super.key});
@@ -304,7 +305,7 @@ class GuestWelcomePage extends ConsumerWidget {
   void _navigateToSignIn(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => const SignInPage(),
+        builder: (context) => const LoginPage(),
       ),
     );
   }

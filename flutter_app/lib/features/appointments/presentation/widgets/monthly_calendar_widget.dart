@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/models/appointment_model.dart';
 import '../../providers/appointments_provider.dart';
 
 class MonthlyCalendarWidget extends ConsumerStatefulWidget {
@@ -55,11 +54,10 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final monthlyAvailability = ref.watch(monthlyAvailabilityProvider(
-      MonthlyAvailabilityParams(
+    final busySlots = ref.watch(busySlotsProvider(
+      BusySlotsParams(
         serviceId: widget.serviceId,
-        year: _currentYear,
-        month: _currentMonth,
+        days: 90, // 3 ay
       ),
     ));
 
@@ -69,8 +67,8 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
         _buildMonthNavigation(),
         const SizedBox(height: 16),
         // Takvim
-        monthlyAvailability.when(
-          data: (availability) => _buildCalendar(availability),
+        busySlots.when(
+          data: (busyData) => _buildCalendarFromBusySlots(busyData),
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, stack) => _buildErrorWidget(error),
         ),
@@ -122,9 +120,31 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
     );
   }
 
-  Widget _buildCalendar(MonthlyAvailability availability) {
-    final days = availability.days;
+  Widget _buildCalendarFromBusySlots(Map<String, dynamic> busyData) {
+    final busySlots = busyData['busy'] as List<dynamic>? ?? [];
     final today = DateTime.now();
+
+    // Mevcut ayın günlerini oluştur
+    final daysInMonth = DateTime(_currentYear, _currentMonth + 1, 0).day;
+    final firstDayOfMonth = DateTime(_currentYear, _currentMonth, 1);
+    final firstWeekday = firstDayOfMonth.weekday; // 1 = Pazartesi
+
+    final days = <DateTime>[];
+
+    // Önceki ayın son günlerini ekle (haftanın başını doldur)
+    for (int i = firstWeekday - 1; i > 0; i--) {
+      days.add(firstDayOfMonth.subtract(Duration(days: i)));
+    }
+
+    // Bu ayın günlerini ekle
+    for (int i = 1; i <= daysInMonth; i++) {
+      days.add(DateTime(_currentYear, _currentMonth, i));
+    }
+
+    // Sonraki ayın ilk günlerini ekle (haftanın sonunu doldur)
+    while (days.length % 7 != 0) {
+      days.add(days.last.add(const Duration(days: 1)));
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -138,7 +158,8 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
           // Takvim günleri
           ...List.generate(
             (days.length / 7).ceil(),
-            (weekIndex) => _buildWeekRow(days, weekIndex, today),
+            (weekIndex) =>
+                _buildWeekRowFromBusySlots(days, weekIndex, today, busySlots),
           ),
         ],
       ),
@@ -175,8 +196,8 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
     );
   }
 
-  Widget _buildWeekRow(
-      List<DayAvailability> days, int weekIndex, DateTime today) {
+  Widget _buildWeekRowFromBusySlots(List<DateTime> days, int weekIndex,
+      DateTime today, List<dynamic> busySlots) {
     final startIndex = weekIndex * 7;
     final endIndex = (startIndex + 7).clamp(0, days.length);
     final weekDays = days.sublist(startIndex, endIndex);
@@ -184,7 +205,9 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
     return Row(
       children: List.generate(7, (dayIndex) {
         if (dayIndex < weekDays.length) {
-          return Expanded(child: _buildDayCell(weekDays[dayIndex], today));
+          return Expanded(
+              child: _buildDayCellFromBusySlots(
+                  weekDays[dayIndex], today, busySlots));
         } else {
           return const Expanded(child: SizedBox());
         }
@@ -192,14 +215,43 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
     );
   }
 
-  Widget _buildDayCell(DayAvailability day, DateTime today) {
-    final isToday = day.date.year == today.year &&
-        day.date.month == today.month &&
-        day.date.day == today.day;
+  Widget _buildDayCellFromBusySlots(
+      DateTime date, DateTime today, List<dynamic> busySlots) {
+    final isToday = date.year == today.year &&
+        date.month == today.month &&
+        date.day == today.day;
 
-    final isPast = day.date.isBefore(today) && !isToday;
-    final hasAvailableSlots =
-        day.isWorkingDay && day.timeSlots.any((slot) => slot.isAvailable);
+    final isPast = date.isBefore(today) && !isToday;
+    final isCurrentMonth =
+        date.month == _currentMonth && date.year == _currentYear;
+
+    // Bu tarih için dolu slotları bul
+    final dateString =
+        date.toIso8601String().split('T')[0]; // YYYY-MM-DD format
+    final dayBusySlots =
+        busySlots.where((slot) => slot['date'] == dateString).toList();
+
+    // Basit çalışma saatleri varsayımı (09:00-18:00, Pazartesi-Cumartesi)
+    final isWorkingDay = date.weekday <= 6; // 1-6: Pazartesi-Cumartesi
+    final workingHours = List.generate(
+        9,
+        (index) =>
+            '${(9 + index).toString().padLeft(2, '0')}:00'); // 09:00-17:00
+
+    // Müsait saatleri hesapla
+    final availableHours = <String>[];
+    if (isWorkingDay && !isPast) {
+      for (final hour in workingHours) {
+        final isBusy = dayBusySlots.any((slot) =>
+            slot['start'] == hour ||
+            (slot['start'] as String).split(':')[0] == hour.split(':')[0]);
+        if (!isBusy) {
+          availableHours.add(hour);
+        }
+      }
+    }
+
+    final hasAvailableSlots = availableHours.isNotEmpty;
 
     return Container(
       height: 80,
@@ -207,18 +259,22 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
         border: Border.all(color: Colors.grey[200]!),
         color: isToday
             ? Theme.of(context).primaryColor.withOpacity(0.1)
-            : Colors.white,
+            : isCurrentMonth
+                ? Colors.white
+                : Colors.grey[50],
       ),
       child: InkWell(
-        onTap: hasAvailableSlots && !isPast ? () => _showTimeSlots(day) : null,
+        onTap: hasAvailableSlots && isCurrentMonth
+            ? () => _showAvailableHours(date, availableHours)
+            : null,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              '${day.date.day}',
+              '${date.day}',
               style: TextStyle(
                 fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                color: isPast
+                color: isPast || !isCurrentMonth
                     ? Colors.grey[400]
                     : isToday
                         ? Theme.of(context).primaryColor
@@ -226,34 +282,36 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
               ),
             ),
             const SizedBox(height: 4),
-            if (day.isWorkingDay) ...[
-              if (hasAvailableSlots)
+            if (isCurrentMonth) ...[
+              if (isWorkingDay) ...[
+                if (hasAvailableSlots)
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: Colors.green,
+                      shape: BoxShape.circle,
+                    ),
+                  )
+                else
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+              ] else
                 Container(
                   width: 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: Colors.green,
-                    shape: BoxShape.circle,
-                  ),
-                )
-              else
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: Colors.grey[300],
                     shape: BoxShape.circle,
                   ),
                 ),
-            ] else
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  shape: BoxShape.circle,
-                ),
-              ),
+            ],
           ],
         ),
       ),
@@ -284,11 +342,10 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              ref.invalidate(monthlyAvailabilityProvider(
-                MonthlyAvailabilityParams(
+              ref.invalidate(busySlotsProvider(
+                BusySlotsParams(
                   serviceId: widget.serviceId,
-                  year: _currentYear,
-                  month: _currentMonth,
+                  days: 90,
                 ),
               ));
             },
@@ -299,7 +356,7 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
     );
   }
 
-  void _showTimeSlots(DayAvailability day) {
+  void _showAvailableHours(DateTime date, List<String> availableHours) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -330,7 +387,7 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
               const SizedBox(height: 24),
               // Başlık
               Text(
-                '${day.date.day} ${_getMonthName(day.date.month)} ${day.date.year}',
+                '${date.day} ${_getMonthName(date.month)} ${date.year}',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -338,7 +395,7 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
               const SizedBox(height: 16),
               // Müsait saatler
               Expanded(
-                child: day.timeSlots.isEmpty
+                child: availableHours.isEmpty
                     ? Center(
                         child: Text(
                           'Bu gün için müsait saat bulunmuyor',
@@ -354,10 +411,10 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
                           crossAxisSpacing: 8,
                           mainAxisSpacing: 8,
                         ),
-                        itemCount: day.timeSlots.length,
+                        itemCount: availableHours.length,
                         itemBuilder: (context, index) {
-                          final slot = day.timeSlots[index];
-                          return _buildTimeSlotButton(slot, day.date);
+                          final hour = availableHours[index];
+                          return _buildHourButton(hour, date);
                         },
                       ),
               ),
@@ -368,26 +425,21 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
     );
   }
 
-  Widget _buildTimeSlotButton(TimeSlot slot, DateTime date) {
-    final isAvailable = slot.isAvailable;
-
+  Widget _buildHourButton(String hour, DateTime date) {
     return ElevatedButton(
-      onPressed: isAvailable
-          ? () {
-              Navigator.pop(context);
-              widget.onTimeSlotSelected?.call(date, slot.startTime);
-            }
-          : null,
+      onPressed: () {
+        Navigator.pop(context);
+        widget.onTimeSlotSelected?.call(date, hour);
+      },
       style: ElevatedButton.styleFrom(
-        backgroundColor:
-            isAvailable ? Theme.of(context).primaryColor : Colors.grey[300],
-        foregroundColor: isAvailable ? Colors.white : Colors.grey[600],
+        backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
       ),
       child: Text(
-        slot.startTime,
+        hour,
         style: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,

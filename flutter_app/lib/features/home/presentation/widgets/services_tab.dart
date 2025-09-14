@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../services/providers/services_provider.dart';
 import '../../../auth/providers/anonymous_auth_provider.dart' as anonymous;
+import '../../../auth/providers/auth_provider.dart';
 import '../../../auth/presentation/pages/guest_upgrade_page.dart';
 import '../../../../core/models/service_model.dart';
 import '../../../appointments/presentation/pages/appointment_booking_page.dart';
@@ -388,10 +389,15 @@ class _ServiceCard extends ConsumerWidget {
   }
 
   void _bookAppointment(BuildContext context, WidgetRef ref, Service service) {
-    // Check if user is anonymous
+    // Check if user is authenticated (either registered or anonymous)
+    final authState = ref.read(authProvider);
     final isAnonymous = ref.read(anonymous.isAnonymousProvider);
 
-    if (isAnonymous) {
+    // If registered user is authenticated, allow booking
+    // If only anonymous user is authenticated, show upgrade dialog
+    final isActuallyAnonymous = !authState.isAuthenticated && isAnonymous;
+
+    if (isActuallyAnonymous) {
       _showGuestUpgradeDialog(context);
       return;
     }

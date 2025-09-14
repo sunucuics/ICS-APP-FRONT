@@ -14,40 +14,36 @@ final appointmentsRepositoryProvider = Provider<AppointmentsRepository>((ref) {
   return AppointmentsRepository(apiService: apiService);
 });
 
-// Monthly Availability Provider
-final monthlyAvailabilityProvider =
-    FutureProvider.family<MonthlyAvailability, MonthlyAvailabilityParams>(
+// Busy Slots Provider (Takvim için)
+final busySlotsProvider =
+    FutureProvider.family<Map<String, dynamic>, BusySlotsParams>(
         (ref, params) async {
   final repository = ref.watch(appointmentsRepositoryProvider);
-  return await repository.getMonthlyAvailability(
+  return await repository.getBusySlots(
     serviceId: params.serviceId,
-    year: params.year,
-    month: params.month,
+    days: params.days,
   );
 });
 
-class MonthlyAvailabilityParams {
-  final String serviceId;
-  final int year;
-  final int month;
+class BusySlotsParams {
+  final String? serviceId;
+  final int days;
 
-  MonthlyAvailabilityParams({
-    required this.serviceId,
-    required this.year,
-    required this.month,
+  BusySlotsParams({
+    this.serviceId,
+    this.days = 30,
   });
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MonthlyAvailabilityParams &&
+      other is BusySlotsParams &&
           runtimeType == other.runtimeType &&
           serviceId == other.serviceId &&
-          year == other.year &&
-          month == other.month;
+          days == other.days;
 
   @override
-  int get hashCode => serviceId.hashCode ^ year.hashCode ^ month.hashCode;
+  int get hashCode => serviceId.hashCode ^ days.hashCode;
 }
 
 // My Appointments Provider
@@ -72,10 +68,16 @@ class AppointmentBookingNotifier
   AppointmentBookingNotifier(this._repository)
       : super(const AsyncValue.data(null));
 
-  Future<void> bookAppointment(AppointmentBookingRequest request) async {
+  Future<void> bookAppointmentForm({
+    required String serviceId,
+    required DateTime start,
+  }) async {
     state = const AsyncValue.loading();
     try {
-      final appointment = await _repository.bookAppointment(request: request);
+      final appointment = await _repository.bookAppointmentForm(
+        serviceId: serviceId,
+        start: start,
+      );
       state = AsyncValue.data(appointment);
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
@@ -162,11 +164,62 @@ class AppointmentStatusUpdateNotifier extends StateNotifier<AsyncValue<void>> {
 
   Future<void> deleteAppointment({
     required String appointmentId,
+    required String status,
   }) async {
     state = const AsyncValue.loading();
     try {
-      await _repository.deleteAppointment(appointmentId: appointmentId);
+      await _repository.deleteAppointment(
+        appointmentId: appointmentId,
+        status: status,
+      );
       state = const AsyncValue.data(null);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
+
+  void reset() {
+    state = const AsyncValue.data(null);
+  }
+}
+
+// Admin - Tüm Randevuları Listele Provider
+final allAppointmentsProvider =
+    FutureProvider.family<List<AppointmentAdminOut>, String?>(
+        (ref, status) async {
+  final repository = ref.watch(appointmentsRepositoryProvider);
+  return await repository.getAllAppointments(status: status);
+});
+
+// Admin - Manuel Randevu Oluştur Provider
+final createAppointmentAdminProvider = StateNotifierProvider<
+    CreateAppointmentAdminNotifier, AsyncValue<Appointment?>>((ref) {
+  final repository = ref.watch(appointmentsRepositoryProvider);
+  return CreateAppointmentAdminNotifier(repository);
+});
+
+class CreateAppointmentAdminNotifier
+    extends StateNotifier<AsyncValue<Appointment?>> {
+  final AppointmentsRepository _repository;
+
+  CreateAppointmentAdminNotifier(this._repository)
+      : super(const AsyncValue.data(null));
+
+  Future<void> createAppointment({
+    required String serviceId,
+    String? userId,
+    required DateTime start,
+    DateTime? end,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      final appointment = await _repository.createAppointmentAdmin(
+        serviceId: serviceId,
+        userId: userId,
+        start: start,
+        end: end,
+      );
+      state = AsyncValue.data(appointment);
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }

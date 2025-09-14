@@ -305,16 +305,19 @@ class _AppointmentBookingPageState
   void _bookAppointment() {
     if (_selectedDate == null || _selectedTime == null) return;
 
-    final request = AppointmentBookingRequest(
-      serviceId: widget.service.id,
-      date: _selectedDate!,
-      startTime: _selectedTime!,
-      notes: _notesController.text.trim().isEmpty
-          ? null
-          : _notesController.text.trim(),
+    // Form-data ile randevu oluştur
+    final startDateTime = DateTime(
+      _selectedDate!.year,
+      _selectedDate!.month,
+      _selectedDate!.day,
+      int.parse(_selectedTime!.split(':')[0]),
+      int.parse(_selectedTime!.split(':')[1]),
     );
 
-    ref.read(appointmentBookingProvider.notifier).bookAppointment(request);
+    ref.read(appointmentBookingProvider.notifier).bookAppointmentForm(
+          serviceId: widget.service.id,
+          start: startDateTime,
+        );
 
     // Başarılı randevu oluşturma sonrası
     ref.listen(appointmentBookingProvider, (previous, next) {

@@ -8,24 +8,26 @@ class AppointmentsRepository {
     required AppointmentsApiService apiService,
   }) : _apiService = apiService;
 
-  /// Aylık müsaitlik bilgilerini getirir
-  Future<MonthlyAvailability> getMonthlyAvailability({
-    required String serviceId,
-    required int year,
-    required int month,
+  /// Dolu slotları getirir (takvim için)
+  Future<Map<String, dynamic>> getBusySlots({
+    String? serviceId,
+    int days = 30,
   }) async {
-    return await _apiService.getMonthlyAvailability(
+    return await _apiService.getBusySlots(
       serviceId: serviceId,
-      year: year,
-      month: month,
+      days: days,
     );
   }
 
-  /// Randevu talebi oluşturur
-  Future<Appointment> bookAppointment({
-    required AppointmentBookingRequest request,
+  /// Form-data ile randevu talebi oluşturur
+  Future<Appointment> bookAppointmentForm({
+    required String serviceId,
+    required DateTime start,
   }) async {
-    return await _apiService.bookAppointment(request: request);
+    return await _apiService.bookAppointmentForm(
+      serviceId: serviceId,
+      start: start,
+    );
   }
 
   /// Kullanıcının randevularını getirir
@@ -47,8 +49,12 @@ class AppointmentsRepository {
   /// Randevuyu siler (admin)
   Future<void> deleteAppointment({
     required String appointmentId,
+    required String status,
   }) async {
-    return await _apiService.deleteAppointment(appointmentId: appointmentId);
+    return await _apiService.deleteAppointment(
+      appointmentId: appointmentId,
+      status: status,
+    );
   }
 
   /// Servis müsaitlik ayarlarını getirir (admin)
@@ -66,6 +72,28 @@ class AppointmentsRepository {
     return await _apiService.updateServiceAvailability(
       serviceId: serviceId,
       availability: availability,
+    );
+  }
+
+  /// Admin - Tüm randevuları listeler
+  Future<List<AppointmentAdminOut>> getAllAppointments({
+    String? status,
+  }) async {
+    return await _apiService.getAllAppointments(status: status);
+  }
+
+  /// Admin - Manuel randevu oluşturur
+  Future<Appointment> createAppointmentAdmin({
+    required String serviceId,
+    String? userId,
+    required DateTime start,
+    DateTime? end,
+  }) async {
+    return await _apiService.createAppointmentAdmin(
+      serviceId: serviceId,
+      userId: userId,
+      start: start,
+      end: end,
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'appointment_model.freezed.dart';
+part 'appointment_model.g.dart';
 
 @freezed
 class Appointment with _$Appointment {
@@ -162,53 +163,41 @@ class MonthlyAvailability with _$MonthlyAvailability {
 }
 
 @freezed
-class AppointmentBookingRequest with _$AppointmentBookingRequest {
-  const factory AppointmentBookingRequest({
-    required String serviceId,
-    required DateTime date,
-    required String startTime,
-    String? notes,
-  }) = _AppointmentBookingRequest;
+class AppointmentAdminOut with _$AppointmentAdminOut {
+  const factory AppointmentAdminOut({
+    required String id,
+    required DateTime start,
+    required DateTime end,
+    required String status,
+    required UserBrief user,
+    required ServiceBrief service,
+  }) = _AppointmentAdminOut;
 
-  Map<String, dynamic> toJson() {
-    return {
-      'service_id': serviceId,
-      'date': date.toIso8601String().split('T')[0], // YYYY-MM-DD format
-      'start_time': startTime,
-      if (notes != null) 'notes': notes,
-    };
+  factory AppointmentAdminOut.fromJson(Map<String, dynamic> json) {
+    return AppointmentAdminOut(
+      id: json['id'] as String? ?? '',
+      start: DateTime.tryParse(json['start'].toString()) ?? DateTime.now(),
+      end: DateTime.tryParse(json['end'].toString()) ?? DateTime.now(),
+      status: json['status'] as String? ?? 'pending',
+      user: UserBrief.fromJson(json['user'] as Map<String, dynamic>),
+      service: ServiceBrief.fromJson(json['service'] as Map<String, dynamic>),
+    );
   }
 }
 
 @freezed
 class ServiceAvailability with _$ServiceAvailability {
   const factory ServiceAvailability({
-    required String serviceId,
-    @Default({}) Map<String, List<String>> workingHours,
-    @Default([]) List<Map<String, String>> breakTimes,
-    @Default(true) bool isAvailable,
+    @JsonKey(name: 'service_id') required String serviceId,
+    @JsonKey(name: 'working_hours')
+    @Default({})
+    Map<String, List<String>> workingHours,
+    @JsonKey(name: 'break_times')
+    @Default([])
+    List<Map<String, String>> breakTimes,
+    @JsonKey(name: 'is_available') @Default(true) bool isAvailable,
   }) = _ServiceAvailability;
 
-  factory ServiceAvailability.fromJson(Map<String, dynamic> json) {
-    return ServiceAvailability(
-      serviceId: json['service_id'] as String? ?? '',
-      workingHours: Map<String, List<String>>.from(
-        json['working_hours'] as Map<String, dynamic>? ?? {},
-      ),
-      breakTimes: (json['break_times'] as List<dynamic>?)
-              ?.map((e) => Map<String, String>.from(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      isAvailable: json['is_available'] as bool? ?? true,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'service_id': serviceId,
-      'working_hours': workingHours,
-      'break_times': breakTimes,
-      'is_available': isAvailable,
-    };
-  }
+  factory ServiceAvailability.fromJson(Map<String, dynamic> json) =>
+      _$ServiceAvailabilityFromJson(json);
 }

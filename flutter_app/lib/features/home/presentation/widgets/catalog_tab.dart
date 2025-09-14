@@ -6,6 +6,7 @@ import '../../../products/providers/products_provider.dart';
 import '../../../products/presentation/pages/product_detail_page.dart';
 import '../../../cart/providers/cart_provider.dart';
 import '../../../auth/providers/anonymous_auth_provider.dart' as anonymous;
+import '../../../auth/providers/auth_provider.dart';
 import '../../../auth/presentation/pages/guest_upgrade_page.dart';
 import '../../../../core/models/product_model.dart';
 
@@ -466,10 +467,15 @@ class _ProductCard extends ConsumerWidget {
   }
 
   void _addToCart(BuildContext context, WidgetRef ref, Product product) async {
-    // Check if user is anonymous
+    // Check if user is authenticated (either registered or anonymous)
+    final authState = ref.read(authProvider);
     final isAnonymous = ref.read(anonymous.isAnonymousProvider);
 
-    if (isAnonymous) {
+    // If registered user is authenticated, allow adding to cart
+    // If only anonymous user is authenticated, show upgrade dialog
+    final isActuallyAnonymous = !authState.isAuthenticated && isAnonymous;
+
+    if (isActuallyAnonymous) {
       _showGuestUpgradeDialog(context);
       return;
     }
