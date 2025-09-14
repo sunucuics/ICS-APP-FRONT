@@ -26,6 +26,7 @@ import {
   People,
   Settings,
   Logout,
+  CalendarToday,
 } from '@mui/icons-material';
 
 const drawerWidth = 240;
@@ -36,6 +37,7 @@ const menuItems = [
   { text: 'Ürünler', icon: <Inventory />, path: '/products' },
   { text: 'Hizmetler', icon: <Build />, path: '/services' },
   { text: 'Siparişler', icon: <ShoppingCart />, path: '/orders' },
+  { text: 'Randevular', icon: <CalendarToday />, path: '/appointments' },
   { text: 'Yorumlar', icon: <Comment />, path: '/comments' },
   { text: 'Kullanıcılar', icon: <People />, path: '/users' },
   { text: 'Ayarlar', icon: <Settings />, path: '/settings' },

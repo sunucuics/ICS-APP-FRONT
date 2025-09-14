@@ -5,6 +5,7 @@ import '../../../auth/providers/anonymous_auth_provider.dart' as anonymous;
 import '../../../auth/presentation/pages/guest_upgrade_page.dart';
 import '../../../orders/presentation/pages/orders_list_page.dart';
 import '../../../addresses/presentation/pages/addresses_list_page.dart';
+import '../../../appointments/presentation/pages/my_appointments_page.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -269,15 +270,19 @@ class ProfileTab extends ConsumerWidget {
                         context,
                         icon: Icons.calendar_today,
                         title: 'Randevularım',
-                        subtitle: 'Aktif ve geçmiş randevular',
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text('Randevular sayfası yakında eklenecek'),
-                            ),
-                          );
-                        },
+                        subtitle: isAnonymous
+                            ? 'Hesap oluşturun'
+                            : 'Aktif ve geçmiş randevular',
+                        onTap: isAnonymous
+                            ? () => _showGuestUpgradeDialog(context)
+                            : () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const MyAppointmentsPage(),
+                                  ),
+                                );
+                              },
                       ),
                       const Divider(height: 1),
                       _buildMenuItem(

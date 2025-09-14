@@ -5,6 +5,7 @@ import '../../../services/providers/services_provider.dart';
 import '../../../auth/providers/anonymous_auth_provider.dart' as anonymous;
 import '../../../auth/presentation/pages/guest_upgrade_page.dart';
 import '../../../../core/models/service_model.dart';
+import '../../../appointments/presentation/pages/appointment_booking_page.dart';
 
 class ServicesTab extends ConsumerWidget {
   const ServicesTab({super.key});
@@ -394,41 +395,12 @@ class _ServiceCard extends ConsumerWidget {
       _showGuestUpgradeDialog(context);
       return;
     }
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('${service.title} Randevu'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-                '${service.title} hizmeti için randevu almak istediğinizden emin misiniz?'),
-            const SizedBox(height: 16),
-            const Text(
-              'Randevu sistemi yakında aktif olacak. Şimdilik WhatsApp üzerinden iletişime geçebilirsiniz.',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('İptal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${service.title} için randevu talebi alındı'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
-            child: const Text('Onayla'),
-          ),
-        ],
+
+    // Navigate to appointment booking page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AppointmentBookingPage(service: service),
       ),
     );
   }

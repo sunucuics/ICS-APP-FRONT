@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import LoginPage from './pages/LoginPage';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
+import AppointmentsPage from './pages/AppointmentsPage';
 
 // Create theme
 const theme = createTheme({
@@ -48,6 +49,7 @@ function App() {
               <Route path="products" element={<div>Products Page - Coming Soon</div>} />
               <Route path="services" element={<div>Services Page - Coming Soon</div>} />
               <Route path="orders" element={<div>Orders Page - Coming Soon</div>} />
+              <Route path="appointments" element={<AppointmentsPage />} />
               <Route path="comments" element={<div>Comments Page - Coming Soon</div>} />
               <Route path="users" element={<div>Users Page - Coming Soon</div>} />
               <Route path="settings" element={<div>Settings Page - Coming Soon</div>} />

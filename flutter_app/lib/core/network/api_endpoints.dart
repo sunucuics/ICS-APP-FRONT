@@ -48,8 +48,14 @@ class ApiEndpoints {
   // Appointments endpoints
   static const String appointments = '/appointments';
   static const String appointmentsCalendar = '/appointments/calendar';
+  static const String appointmentsBook = '/appointments/book';
+  static const String myAppointments = '/appointments/my-appointments';
   static String appointment(String appointmentId) =>
       '/appointments/$appointmentId';
+  static String monthlyAvailability(String serviceId, int year, int month) =>
+      '/appointments/availability/$serviceId/$year/$month';
+  static String serviceAvailability(String serviceId) =>
+      '/appointments/service-availability/$serviceId';
 
   // Comments endpoints
   static const String comments = '/comments';
