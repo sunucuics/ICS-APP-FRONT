@@ -1,6 +1,6 @@
 class ApiEndpoints {
-  // Base URL - Backend 0.0.0.0 ile çalışıyor, gerçek IP kullanıyoruz
-  static const String baseUrl = 'http://192.168.1.146:8000';
+  // Base URL - Render deployed backend
+  static const String baseUrl = 'https://ics-app-back.onrender.com';
 
   // Debug mode flag
   static const bool isDebug = true;

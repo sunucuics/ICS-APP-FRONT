@@ -4,9 +4,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../featured/providers/featured_provider.dart';
+import '../../../cart/providers/cart_provider.dart';
 import '../../../../core/models/product_model.dart';
 import '../../../../core/models/service_model.dart';
 import '../../../../core/models/featured_model.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class HomeTab extends ConsumerWidget {
   final void Function(int tabIndex)? onNavigateToTab;
@@ -20,15 +22,40 @@ class HomeTab extends ConsumerWidget {
     final featuredProducts = ref.watch(featuredProductsListProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ICS App'),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryOrange,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.flash_on,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text('ICS App'),
+          ],
+        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Bildirimler yakında eklenecek')),
-              );
-            },
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: AppTheme.tertiaryBlack,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.notifications_outlined),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Bildirimler yakında eklenecek')),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -38,27 +65,52 @@ class HomeTab extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Welcome Message
-            Card(
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppTheme.primaryOrange,
+                    AppTheme.secondaryOrange,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryOrange.withOpacity(0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(24.0),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: Theme.of(context).primaryColor,
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
                       child: authState.user?.name.isNotEmpty == true
                           ? Text(
                               _getInitials(authState.user!.name),
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             )
                           : const Icon(Icons.person,
-                              color: Colors.white, size: 30),
+                              color: Colors.white, size: 32),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 20),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,17 +119,27 @@ class HomeTab extends ConsumerWidget {
                             authState.user?.name.isNotEmpty == true
                                 ? 'Hoş geldiniz, ${authState.user!.name.split(' ').first}!'
                                 : 'Hoş geldiniz!',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              shadows: [
+                                Shadow(
+                                  offset: Offset(0, 1),
+                                  blurRadius: 2,
+                                  color: Colors.black26,
                                 ),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 6),
                           Text(
                             'Bugün size nasıl yardımcı olabiliriz?',
-                            style: Theme.of(context).textTheme.bodyMedium,
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ],
                       ),
@@ -92,26 +154,39 @@ class HomeTab extends ConsumerWidget {
             Column(
               children: [
                 // Services Button
-                Card(
-                  elevation: 6,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Colors.blue.shade400,
-                          Colors.purple.shade500,
-                          Colors.indigo.shade600,
-                        ],
-                      ),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppTheme.cardBackground,
+                        AppTheme.tertiaryBlack,
+                        AppTheme.secondaryBlack,
+                      ],
                     ),
+                    border: Border.all(
+                      color: AppTheme.lightGray.withOpacity(0.4),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.5),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(20),
                       onTap: () {
                         // Navigate to services tab (index 1)
                         onNavigateToTab?.call(1);
@@ -124,17 +199,18 @@ class HomeTab extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(12),
+                                color: AppTheme.primaryOrange.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: Colors.white.withOpacity(0.3),
+                                  color:
+                                      AppTheme.primaryOrange.withOpacity(0.3),
                                   width: 1,
                                 ),
                               ),
                               child: const Icon(
                                 Icons.work,
                                 size: 32,
-                                color: Colors.white,
+                                color: AppTheme.primaryOrange,
                               ),
                             ),
                             const SizedBox(width: 20),
@@ -144,30 +220,19 @@ class HomeTab extends ConsumerWidget {
                                 children: [
                                   Text(
                                     'Hizmetler',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.copyWith(
+                                    style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
-                                      shadows: [
-                                        Shadow(
-                                          offset: const Offset(0, 1),
-                                          blurRadius: 2,
-                                          color: Colors.black.withOpacity(0.3),
-                                        ),
-                                      ],
+                                      fontSize: 20,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     'Profesyonel hizmetlerimizi keşfedin',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: Colors.white.withOpacity(0.9),
-                                        ),
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.7),
+                                      fontSize: 14,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -175,12 +240,12 @@ class HomeTab extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(8),
+                                color: AppTheme.primaryOrange.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
                                 Icons.arrow_forward_ios,
-                                color: Colors.white,
+                                color: AppTheme.primaryOrange,
                                 size: 20,
                               ),
                             ),
@@ -193,65 +258,94 @@ class HomeTab extends ConsumerWidget {
                 const SizedBox(height: 16),
 
                 // Store Button
-                Card(
-                  elevation: 4,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: () {
-                      // Navigate to catalog tab (index 2)
-                      onNavigateToTab?.call(2);
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(24.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(
-                              Icons.store,
-                              size: 32,
-                              color: Colors.orange,
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Mağaza',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.orange,
-                                      ),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppTheme.primaryBlack,
+                        AppTheme.secondaryBlack,
+                        AppTheme.tertiaryBlack,
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: () {
+                        // Navigate to catalog tab (index 2)
+                        onNavigateToTab?.call(2);
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24.0),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryOrange.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color:
+                                      AppTheme.primaryOrange.withOpacity(0.3),
+                                  width: 1,
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Kaliteli ürünlerimizi inceleyin',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: Colors.grey[600],
-                                      ),
-                                ),
-                              ],
+                              ),
+                              child: const Icon(
+                                Icons.store,
+                                size: 32,
+                                color: AppTheme.primaryOrange,
+                              ),
                             ),
-                          ),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            color: Colors.grey[400],
-                            size: 20,
-                          ),
-                        ],
+                            const SizedBox(width: 20),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Mağaza',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Kaliteli ürünlerimizi inceleyin',
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.7),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryOrange.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward_ios,
+                                color: AppTheme.primaryOrange,
+                                size: 20,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -259,64 +353,92 @@ class HomeTab extends ConsumerWidget {
                 const SizedBox(height: 16),
 
                 // WhatsApp Button
-                Card(
-                  elevation: 4,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: () {
-                      _launchWhatsApp(context);
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(24.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(
-                              Icons.chat,
-                              size: 32,
-                              color: Colors.green,
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'WhatsApp',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.green,
-                                      ),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppTheme.primaryBlack,
+                        AppTheme.secondaryBlack,
+                        AppTheme.tertiaryBlack,
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: () {
+                        _launchWhatsApp(context);
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24.0),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppTheme.successGreen.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: AppTheme.successGreen.withOpacity(0.3),
+                                  width: 1,
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Hemen iletişime geçin',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: Colors.grey[600],
-                                      ),
-                                ),
-                              ],
+                              ),
+                              child: const Icon(
+                                Icons.chat,
+                                size: 32,
+                                color: AppTheme.successGreen,
+                              ),
                             ),
-                          ),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            color: Colors.grey[400],
-                            size: 20,
-                          ),
-                        ],
+                            const SizedBox(width: 20),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'WhatsApp',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Hemen iletişime geçin',
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.7),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppTheme.successGreen.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward_ios,
+                                color: AppTheme.successGreen,
+                                size: 20,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -326,11 +448,26 @@ class HomeTab extends ConsumerWidget {
             const SizedBox(height: 24),
 
             // Featured Services
-            Text(
-              'Öne Çıkan Hizmetler',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryOrange,
+                    borderRadius: BorderRadius.circular(2),
                   ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Öne Çıkan Hizmetler',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -385,15 +522,30 @@ class HomeTab extends ConsumerWidget {
             const SizedBox(height: 24),
 
             // Featured Products
-            Text(
-              'Öne Çıkan Ürünler',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryOrange,
+                    borderRadius: BorderRadius.circular(2),
                   ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Öne Çıkan Ürünler',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             SizedBox(
-              height: 240,
+              height: 280,
               child: featuredProducts.isEmpty
                   ? Center(
                       child: Card(
@@ -704,7 +856,7 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-class _FeaturedProductCard extends StatelessWidget {
+class _FeaturedProductCard extends ConsumerWidget {
   final FeaturedProduct featuredProduct;
   final VoidCallback? onNavigateToCatalog;
 
@@ -714,136 +866,206 @@ class _FeaturedProductCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final displayPrice = featuredProduct.finalPrice ?? featuredProduct.price;
     final hasDiscount = featuredProduct.finalPrice != null &&
         featuredProduct.finalPrice! < featuredProduct.price!;
 
     return Container(
       width: 160,
-      height: 240, // Fixed height to prevent overflow
+      height: 320,
       margin: const EdgeInsets.only(right: 16),
       child: Card(
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            // Navigate directly to catalog tab on tap
-            onNavigateToCatalog?.call();
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(12), // Reduced padding
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Product image
-                Container(
-                  width: double.infinity,
-                  height: 80, // Reduced height
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey[200],
-                  ),
-                  child: featuredProduct.images.isNotEmpty
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: CachedNetworkImage(
-                            imageUrl: featuredProduct.images.first,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              color: Colors.grey[200],
-                              child: Icon(
-                                Icons.inventory,
-                                color: Theme.of(context).primaryColor,
-                                size: 28, // Reduced size
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              color: Colors.grey[200],
-                              child: Icon(
-                                Icons.inventory,
-                                color: Theme.of(context).primaryColor,
-                                size: 28, // Reduced size
-                              ),
-                            ),
-                          ),
-                        )
-                      : Icon(
-                          Icons.inventory,
-                          size: 40, // Reduced size
-                          color: Theme.of(context).primaryColor,
-                        ),
-                ),
-                const SizedBox(height: 12), // Reduced spacing
-                // Product title
-                Text(
-                  featuredProduct.title ?? 'Ürün',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        // Smaller text
-                        fontWeight: FontWeight.w600,
-                      ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6), // Reduced spacing
-                // Product price
-                if (featuredProduct.price != null) ...[
-                  Row(
-                    children: [
-                      Text(
-                        '₺${displayPrice?.toStringAsFixed(2) ?? '0.00'}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor,
-                          fontSize: 14, // Smaller text
-                        ),
-                      ),
-                      if (hasDiscount) ...[
-                        const SizedBox(width: 4),
-                        Text(
-                          '₺${featuredProduct.price?.toStringAsFixed(0) ?? '0'}',
-                          style: const TextStyle(
-                            decoration: TextDecoration.lineThrough,
-                            color: Colors.grey,
-                            fontSize: 9, // Smaller text
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 6), // Reduced spacing
-                ],
-                // Category
-                if (featuredProduct.categoryName != null) ...[
-                  Text(
-                    featuredProduct.categoryName!,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 11, // Smaller text
+        elevation: 8,
+        shadowColor: Colors.black.withOpacity(0.3),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: AppTheme.cardBackground,
+            border: Border.all(
+              color: AppTheme.primaryOrange.withOpacity(0.4),
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.4),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: AppTheme.primaryOrange.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () {
+              onNavigateToCatalog?.call();
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Product image
+                  Container(
+                    width: double.infinity,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: AppTheme.tertiaryBlack,
                     ),
-                    maxLines: 1,
+                    child: featuredProduct.images.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: CachedNetworkImage(
+                              imageUrl: featuredProduct.images.first,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                color: AppTheme.tertiaryBlack,
+                                child: const Icon(
+                                  Icons.inventory,
+                                  color: AppTheme.primaryOrange,
+                                  size: 32,
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                color: AppTheme.tertiaryBlack,
+                                child: const Icon(
+                                  Icons.inventory,
+                                  color: AppTheme.primaryOrange,
+                                  size: 32,
+                                ),
+                              ),
+                            ),
+                          )
+                        : const Icon(
+                            Icons.inventory,
+                            size: 40,
+                            color: AppTheme.primaryOrange,
+                          ),
+                  ),
+                  const SizedBox(height: 8),
+                  // Product title
+                  Text(
+                    featuredProduct.title ?? 'Ürün',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 13,
+                    ),
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6), // Reduced spacing
-                ],
-                // Upcoming badge
-                if (featuredProduct.isUpcoming == true)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 6, vertical: 3), // Reduced padding
-                    decoration: BoxDecoration(
-                      color: Colors.orange[100],
-                      borderRadius: BorderRadius.circular(10),
+                  const SizedBox(height: 6),
+                  // Product price
+                  if (featuredProduct.price != null) ...[
+                    Row(
+                      children: [
+                        Text(
+                          '₺${displayPrice?.toStringAsFixed(2) ?? '0.00'}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primaryOrange,
+                            fontSize: 14,
+                          ),
+                        ),
+                        if (hasDiscount) ...[
+                          const SizedBox(width: 4),
+                          Text(
+                            '₺${featuredProduct.price?.toStringAsFixed(0) ?? '0'}',
+                            style: const TextStyle(
+                              decoration: TextDecoration.lineThrough,
+                              color: Colors.white70,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                    child: Text(
-                      'Yakında',
-                      style: TextStyle(
-                        color: Colors.orange[800],
-                        fontSize: 9, // Smaller text
-                        fontWeight: FontWeight.w500,
+                    const SizedBox(height: 6),
+                  ],
+                  // Category
+                  if (featuredProduct.categoryName != null) ...[
+                    Text(
+                      featuredProduct.categoryName!,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  // Add to cart button or upcoming badge
+                  if (featuredProduct.isUpcoming == true)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryOrange.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppTheme.primaryOrange.withOpacity(0.5),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Text(
+                        'Yakında',
+                        style: TextStyle(
+                          color: AppTheme.primaryOrange,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+                  else
+                    Container(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Add to cart functionality
+                          final cartNotifier = ref.read(cartProvider.notifier);
+                          cartNotifier.addToCart(
+                            featuredProduct.id ?? '',
+                            quantity: 1,
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  '${featuredProduct.title} sepete eklendi'),
+                              backgroundColor: AppTheme.successGreen,
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryOrange,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Sepete Ekle',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

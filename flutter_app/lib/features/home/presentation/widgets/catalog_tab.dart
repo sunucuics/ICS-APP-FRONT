@@ -9,6 +9,7 @@ import '../../../auth/providers/anonymous_auth_provider.dart' as anonymous;
 import '../../../auth/providers/auth_provider.dart';
 import '../../../auth/presentation/pages/guest_upgrade_page.dart';
 import '../../../../core/models/product_model.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class CatalogTab extends ConsumerStatefulWidget {
   const CatalogTab({super.key});
@@ -84,30 +85,61 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                 style: const TextStyle(color: Colors.white),
                 onChanged: _onSearchChanged,
               )
-            : const Text('Mağaza'),
+            : Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryOrange,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.store,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text('Mağaza'),
+                ],
+              ),
         actions: [
-          IconButton(
-            icon: Icon(_isSearchVisible ? Icons.close : Icons.search),
-            onPressed: () {
-              setState(() {
-                if (_isSearchVisible) {
-                  _isSearchVisible = false;
-                  _searchController.clear();
-                  _searchQuery = '';
-                } else {
-                  _isSearchVisible = true;
-                }
-              });
-            },
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: AppTheme.tertiaryBlack,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: Icon(_isSearchVisible ? Icons.close : Icons.search),
+              onPressed: () {
+                setState(() {
+                  if (_isSearchVisible) {
+                    _isSearchVisible = false;
+                    _searchController.clear();
+                    _searchQuery = '';
+                  } else {
+                    _isSearchVisible = true;
+                  }
+                });
+              },
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Filtreleme özelliği yakında eklenecek')),
-              );
-            },
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: AppTheme.tertiaryBlack,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.filter_list),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Filtreleme özelliği yakında eklenecek')),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -146,25 +178,31 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                         margin: const EdgeInsets.only(right: 12),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? Theme.of(context).primaryColor
-                              : Colors.grey[100],
-                          borderRadius: BorderRadius.circular(12),
+                              ? AppTheme.primaryOrange
+                              : AppTheme.tertiaryBlack,
+                          borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: isSelected
-                                ? Theme.of(context).primaryColor
-                                : Colors.grey[300]!,
+                                ? AppTheme.primaryOrange
+                                : AppTheme.lightGray,
+                            width: 1,
                           ),
                           boxShadow: isSelected
                               ? [
                                   BoxShadow(
-                                    color: Theme.of(context)
-                                        .primaryColor
-                                        .withOpacity(0.3),
+                                    color:
+                                        AppTheme.primaryOrange.withOpacity(0.3),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ]
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
-                                ]
-                              : null,
+                                ],
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -173,8 +211,7 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                               index == 0
                                   ? Icons.apps
                                   : _getCategoryIcon(category.name),
-                              color:
-                                  isSelected ? Colors.white : Colors.grey[600],
+                              color: isSelected ? Colors.white : Colors.white70,
                               size: 20,
                             ),
                             const SizedBox(height: 4),
@@ -183,9 +220,8 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,
-                                color: isSelected
-                                    ? Colors.white
-                                    : Colors.grey[700],
+                                color:
+                                    isSelected ? Colors.white : Colors.white70,
                               ),
                               textAlign: TextAlign.center,
                               maxLines: 1,
@@ -328,138 +364,165 @@ class _ProductCard extends ConsumerWidget {
     final hasDiscount =
         product.finalPrice != null && product.finalPrice! < product.price;
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => ProductDetailPage(product: product),
-            ),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Product Image
-              Expanded(
-                flex: 3,
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey[100],
-                  ),
-                  child: product.images.isNotEmpty
-                      ? ClipRoundedRectangle(
-                          borderRadius: BorderRadius.circular(8),
-                          child: CachedNetworkImage(
-                            imageUrl: product.images.first,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              color: Colors.grey[200],
-                              child: const Center(
-                                child: CircularProgressIndicator(),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: AppTheme.secondaryBlack,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => ProductDetailPage(product: product),
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Product Image
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: AppTheme.tertiaryBlack,
+                    ),
+                    child: product.images.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: CachedNetworkImage(
+                              imageUrl: product.images.first,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                color: AppTheme.tertiaryBlack,
+                                child: const Center(
+                                  child: CircularProgressIndicator(
+                                    color: AppTheme.primaryOrange,
+                                  ),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                color: AppTheme.tertiaryBlack,
+                                child: const Icon(
+                                  Icons.image_not_supported,
+                                  color: AppTheme.primaryOrange,
+                                ),
                               ),
                             ),
-                            errorWidget: (context, url, error) => Container(
-                              color: Colors.grey[200],
-                              child: const Icon(Icons.image_not_supported),
+                          )
+                        : const Icon(
+                            Icons.image_not_supported,
+                            size: 48,
+                            color: AppTheme.primaryOrange,
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Product Title
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    product.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: Colors.white,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+
+                // Price and Stock
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      children: [
+                        Text(
+                          '₺${displayPrice.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: AppTheme.primaryOrange,
+                          ),
+                        ),
+                        if (hasDiscount) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            '₺${product.price.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              decoration: TextDecoration.lineThrough,
+                              color: Colors.white54,
+                              fontSize: 12,
                             ),
                           ),
-                        )
-                      : const Icon(Icons.image_not_supported, size: 48),
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Product Title
-              Expanded(
-                flex: 1,
-                child: Text(
-                  product.title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-
-              // Price and Stock
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Wrap(
-                    children: [
-                      Text(
-                        '₺${displayPrice.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Theme.of(context).primaryColor,
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      children: [
+                        Icon(
+                          product.stock > 0 ? Icons.check_circle : Icons.cancel,
+                          size: 12,
+                          color: product.stock > 0
+                              ? AppTheme.successGreen
+                              : AppTheme.errorRed,
                         ),
-                      ),
-                      if (hasDiscount) ...[
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 4),
                         Text(
-                          '₺${product.price.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            decoration: TextDecoration.lineThrough,
-                            color: Colors.grey,
-                            fontSize: 12,
+                          product.stock > 0 ? 'Stokta var' : 'Stokta yok',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: product.stock > 0
+                                ? AppTheme.successGreen
+                                : AppTheme.errorRed,
                           ),
                         ),
                       ],
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Wrap(
-                    children: [
-                      Icon(
-                        product.stock > 0 ? Icons.check_circle : Icons.cancel,
-                        size: 12,
-                        color: product.stock > 0 ? Colors.green : Colors.red,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        product.stock > 0 ? 'Stokta var' : 'Stokta yok',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: product.stock > 0 ? Colors.green : Colors.red,
+                    ),
+                    const SizedBox(height: 8),
+                    // Add to Cart Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: product.stock > 0
+                            ? () => _addToCart(context, ref, product)
+                            : null,
+                        icon:
+                            const Icon(Icons.shopping_cart_outlined, size: 16),
+                        label: Text(
+                          product.stock > 0 ? 'Sepete Ekle' : 'Stokta Yok',
+                          style: const TextStyle(fontSize: 12),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  // Add to Cart Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: product.stock > 0
-                          ? () => _addToCart(context, ref, product)
-                          : null,
-                      icon: const Icon(Icons.shopping_cart_outlined, size: 16),
-                      label: Text(
-                        product.stock > 0 ? 'Sepete Ekle' : 'Stokta Yok',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -545,26 +608,6 @@ class _ProductCard extends ConsumerWidget {
           ],
         );
       },
-    );
-  }
-}
-
-// Helper widget for rounded rectangle clipping
-class ClipRoundedRectangle extends StatelessWidget {
-  final Widget child;
-  final BorderRadius borderRadius;
-
-  const ClipRoundedRectangle({
-    super.key,
-    required this.child,
-    required this.borderRadius,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: borderRadius,
-      child: child,
     );
   }
 }

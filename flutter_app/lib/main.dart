@@ -32,7 +32,7 @@ class MyApp extends ConsumerWidget {
       title: 'ICS App',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.dark, // Force dark theme for modern black design
       home: const AuthWrapper(),
       debugShowCheckedModeBanner: false,
       navigatorKey: NavigationService.navigatorKey,

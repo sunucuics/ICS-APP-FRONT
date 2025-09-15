@@ -7,6 +7,7 @@ import '../../../auth/presentation/pages/login_page.dart';
 import '../../../orders/presentation/pages/orders_list_page.dart';
 import '../../../addresses/presentation/pages/addresses_list_page.dart';
 import '../../../appointments/presentation/pages/my_appointments_page.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -22,11 +23,35 @@ class ProfileTab extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profil'),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryOrange,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.person,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text('Profil'),
+          ],
+        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _showLogoutDialog(context, ref),
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: AppTheme.tertiaryBlack,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () => _showLogoutDialog(context, ref),
+            ),
           ),
         ],
       ),
@@ -36,16 +61,32 @@ class ProfileTab extends ConsumerWidget {
               padding: const EdgeInsets.all(16.0),
               children: [
                 // Profile Header
-                Card(
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppTheme.primaryOrange,
+                        AppTheme.secondaryOrange,
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.primaryOrange.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
                   child: Padding(
-                    padding: const EdgeInsets.all(20.0),
+                    padding: const EdgeInsets.all(24.0),
                     child: Row(
                       children: [
                         CircleAvatar(
                           radius: 40,
-                          backgroundColor: isActuallyAnonymous
-                              ? Colors.orange
-                              : Theme.of(context).primaryColor,
+                          backgroundColor: Colors.white.withOpacity(0.2),
                           child: Text(
                             isActuallyAnonymous
                                 ? 'M'
@@ -66,12 +107,18 @@ class ProfileTab extends ConsumerWidget {
                                 isActuallyAnonymous
                                     ? 'Misafir Kullanıcı'
                                     : (currentUser?.name ?? 'Kullanıcı'),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineSmall
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.bold,
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  shadows: [
+                                    Shadow(
+                                      offset: Offset(0, 1),
+                                      blurRadius: 2,
+                                      color: Colors.black26,
                                     ),
+                                  ],
+                                ),
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -79,12 +126,10 @@ class ProfileTab extends ConsumerWidget {
                                     ? 'Misafir olarak giriş yaptınız'
                                     : (currentUser?.email ??
                                         'email@example.com'),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      color: Colors.grey[600],
-                                    ),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white.withOpacity(0.9),
+                                ),
                               ),
                               if (isActuallyAnonymous) ...[
                                 const SizedBox(height: 8),
@@ -94,16 +139,16 @@ class ProfileTab extends ConsumerWidget {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.orange.withOpacity(0.1),
+                                    color: Colors.white.withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
-                                      color: Colors.orange.withOpacity(0.3),
+                                      color: Colors.white.withOpacity(0.3),
                                     ),
                                   ),
                                   child: const Text(
                                     'Misafir Modu',
-                                    style: TextStyle(
-                                      color: Colors.orange,
+                                    style: const TextStyle(
+                                      color: Colors.white,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -113,12 +158,10 @@ class ProfileTab extends ConsumerWidget {
                                 const SizedBox(height: 4),
                                 Text(
                                   currentUser!.phone,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        color: Colors.grey[500],
-                                      ),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white.withOpacity(0.7),
+                                  ),
                                 ),
                               ],
                               const SizedBox(height: 8),
@@ -126,7 +169,7 @@ class ProfileTab extends ConsumerWidget {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: Colors.green.withOpacity(0.1),
+                                  color: Colors.white.withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
@@ -134,7 +177,7 @@ class ProfileTab extends ConsumerWidget {
                                       ? 'Admin'
                                       : 'Aktif Üye',
                                   style: const TextStyle(
-                                    color: Colors.green,
+                                    color: Colors.white,
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -257,7 +300,18 @@ class ProfileTab extends ConsumerWidget {
                 ],
 
                 // Menu Items
-                Card(
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: AppTheme.secondaryBlack,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
                   child: Column(
                     children: [
                       _buildMenuItem(
@@ -278,7 +332,10 @@ class ProfileTab extends ConsumerWidget {
                                 );
                               },
                       ),
-                      const Divider(height: 1),
+                      Divider(
+                        height: 1,
+                        color: AppTheme.lightGray,
+                      ),
                       _buildMenuItem(
                         context,
                         icon: Icons.location_on,
@@ -297,7 +354,10 @@ class ProfileTab extends ConsumerWidget {
                                 );
                               },
                       ),
-                      const Divider(height: 1),
+                      Divider(
+                        height: 1,
+                        color: AppTheme.lightGray,
+                      ),
                       _buildMenuItem(
                         context,
                         icon: Icons.calendar_today,
@@ -315,20 +375,6 @@ class ProfileTab extends ConsumerWidget {
                                   ),
                                 );
                               },
-                      ),
-                      const Divider(height: 1),
-                      _buildMenuItem(
-                        context,
-                        icon: Icons.favorite,
-                        title: 'Favorilerim',
-                        subtitle: 'Beğendiğin ürünler',
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Favoriler yakında eklenecek'),
-                            ),
-                          );
-                        },
                       ),
                     ],
                   ),
@@ -353,7 +399,10 @@ class ProfileTab extends ConsumerWidget {
                           );
                         },
                       ),
-                      const Divider(height: 1),
+                      Divider(
+                        height: 1,
+                        color: AppTheme.lightGray,
+                      ),
                       _buildMenuItem(
                         context,
                         icon: Icons.help,
@@ -367,7 +416,10 @@ class ProfileTab extends ConsumerWidget {
                           );
                         },
                       ),
-                      const Divider(height: 1),
+                      Divider(
+                        height: 1,
+                        color: AppTheme.lightGray,
+                      ),
                       _buildMenuItem(
                         context,
                         icon: Icons.info,
@@ -407,21 +459,48 @@ class ProfileTab extends ConsumerWidget {
     required VoidCallback onTap,
     bool isDestructive = false,
   }) {
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: isDestructive ? Colors.red : Theme.of(context).primaryColor,
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: AppTheme.tertiaryBlack,
       ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontWeight: FontWeight.w500,
-          color: isDestructive ? Colors.red : null,
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: isDestructive
+                ? AppTheme.errorRed.withOpacity(0.2)
+                : AppTheme.primaryOrange.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            color: isDestructive ? AppTheme.errorRed : AppTheme.primaryOrange,
+            size: 20,
+          ),
         ),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: isDestructive ? AppTheme.errorRed : Colors.white,
+            fontSize: 16,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.7),
+            fontSize: 14,
+          ),
+        ),
+        trailing: Icon(
+          Icons.chevron_right,
+          color: Colors.white.withOpacity(0.5),
+        ),
+        onTap: onTap,
       ),
-      subtitle: Text(subtitle),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
     );
   }
 

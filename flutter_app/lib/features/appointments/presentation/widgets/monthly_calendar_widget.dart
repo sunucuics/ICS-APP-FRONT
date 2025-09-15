@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/appointments_provider.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class MonthlyCalendarWidget extends ConsumerStatefulWidget {
   final String serviceId;
@@ -93,27 +94,67 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
     ];
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.primaryOrange.withOpacity(0.1),
+            AppTheme.secondaryOrange.withOpacity(0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTheme.primaryOrange.withOpacity(0.3),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
-            onPressed: _previousMonth,
-            icon: const Icon(Icons.chevron_left),
+          Container(
+            decoration: BoxDecoration(
+              color: AppTheme.primaryOrange.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              onPressed: _previousMonth,
+              icon: const Icon(
+                Icons.chevron_left,
+                color: AppTheme.primaryOrange,
+                size: 24,
+              ),
+            ),
           ),
           Text(
             '${monthNames[_currentMonth - 1]} $_currentYear',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
-          IconButton(
-            onPressed: _nextMonth,
-            icon: const Icon(Icons.chevron_right),
+          Container(
+            decoration: BoxDecoration(
+              color: AppTheme.primaryOrange.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              onPressed: _nextMonth,
+              icon: const Icon(
+                Icons.chevron_right,
+                color: AppTheme.primaryOrange,
+                size: 24,
+              ),
+            ),
           ),
         ],
       ),
@@ -148,8 +189,19 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
 
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(12),
+        color: AppTheme.secondaryBlack,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTheme.primaryOrange.withOpacity(0.3),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -170,12 +222,19 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
     final weekdays = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.primaryOrange.withOpacity(0.1),
+            AppTheme.secondaryOrange.withOpacity(0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(12),
-          topRight: Radius.circular(12),
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
         ),
       ),
       child: Row(
@@ -185,8 +244,9 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
                     child: Text(
                       day,
                       style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: AppTheme.primaryOrange,
                       ),
                     ),
                   ),

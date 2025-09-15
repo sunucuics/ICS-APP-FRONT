@@ -8,6 +8,7 @@ import '../../../auth/providers/auth_provider.dart';
 import '../../../auth/presentation/pages/guest_upgrade_page.dart';
 import '../../../../core/models/service_model.dart';
 import '../../../appointments/presentation/pages/appointment_booking_page.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class ServicesTab extends ConsumerWidget {
   const ServicesTab({super.key});
@@ -17,16 +18,40 @@ class ServicesTab extends ConsumerWidget {
     final servicesAsync = ref.watch(servicesProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hizmetler'),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryOrange,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.work,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text('Hizmetler'),
+          ],
+        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Arama özelliği yakında eklenecek')),
-              );
-            },
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: AppTheme.tertiaryBlack,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Arama özelliği yakında eklenecek')),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -108,8 +133,18 @@ class _ServiceCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
+      elevation: 15,
+      shadowColor: Colors.black.withOpacity(0.6),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: AppTheme.lightGray.withOpacity(0.4),
+          width: 1,
+        ),
+      ),
+      color: AppTheme.cardBackground,
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
