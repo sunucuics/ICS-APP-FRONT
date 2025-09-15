@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import '../api_client.dart';
-import '../../../features/auth/services/mock_anonymous_auth_service.dart';
+import '../../services/firebase_auth_service.dart';
+import '../../services/navigation_service.dart';
 
 class AuthInterceptor extends Interceptor {
   @override
@@ -18,10 +18,10 @@ class AuthInterceptor extends Interceptor {
     final isPublicEndpoint =
         publicPaths.any((path) => options.path.startsWith(path));
 
-    // For public endpoints, add token if available (for anonymous users)
+    // For public endpoints, add token if available
     // For protected endpoints, require authentication
     if (isPublicEndpoint) {
-      // Public endpoint - add token if available (anonymous users can access)
+      // Public endpoint - add token if available
       final token = await _getAuthToken();
       if (token != null) {
         options.headers['Authorization'] = 'Bearer $token';
@@ -41,27 +41,19 @@ class AuthInterceptor extends Interceptor {
   }
 
   Future<String?> _getAuthToken() async {
-    // First try to get token from secure storage (for registered users)
-    final storedToken = await ApiClient.getToken();
-    if (storedToken != null) {
-      return storedToken;
+    try {
+      // Get fresh ID token from Firebase (auto-refreshes if needed)
+      return await FirebaseAuthService.getIdToken();
+    } catch (e) {
+      print('Error getting Firebase ID token: $e');
+      return null;
     }
-
-    // For anonymous users, get token from MockAnonymousAuthService
-    final anonymousService = MockAnonymousAuthService();
-    if (anonymousService.isAuthenticated) {
-      return await anonymousService.getIdToken();
-    }
-
-    // No authentication available
-    return null;
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    // Handle 401 Unauthorized - token expired
+    // Handle 401 Unauthorized
     if (err.response?.statusCode == 401) {
-      // Try to refresh token
       await _handleTokenRefresh(err, handler);
     } else {
       handler.next(err);
@@ -72,21 +64,45 @@ class AuthInterceptor extends Interceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    try {
-      final refreshToken = await ApiClient.getRefreshToken();
-
-      if (refreshToken != null) {
-        // TODO: Firebase token refresh implementasyonu
-        // Şimdilik sadece token'ları temizleyip hata döndürelim
-        await ApiClient.clearAllAuthData();
-      }
-
-      // Token refresh başarısız, user'ı login'e yönlendir
+    final originalRequest = err.requestOptions;
+    
+    // Check if this request has already been retried
+    if (originalRequest.extra['_retried'] == true) {
       handler.next(err);
-    } catch (e) {
-      // Refresh failed, clear tokens and redirect to login
-      await ApiClient.clearAllAuthData();
-      handler.next(err);
+      return;
     }
+
+    // Get error detail from response
+    final errorDetail = err.response?.data?['detail'] as String?;
+    
+    // If session is revoked, don't retry
+    if (errorDetail == 'Session revoked') {
+      print('Session revoked, redirecting to login');
+      NavigationService.navigateToLogin();
+      handler.next(err);
+      return;
+    }
+
+    try {
+      // Force refresh the token
+      final freshToken = await FirebaseAuthService.getIdToken(forceRefresh: true);
+      
+      if (freshToken != null) {
+        // Mark request as retried
+        originalRequest.extra['_retried'] = true;
+        originalRequest.headers['Authorization'] = 'Bearer $freshToken';
+        
+        // Retry the original request
+        final dio = Dio();
+        final response = await dio.fetch(originalRequest);
+        handler.resolve(response);
+        return;
+      }
+    } catch (e) {
+      print('Token refresh failed: $e');
+    }
+
+    // If we get here, token refresh failed
+    handler.next(err);
   }
 }

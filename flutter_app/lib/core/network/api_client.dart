@@ -1,7 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:firebase_auth/firebase_auth.dart'; // Geçici olarak kapalı
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'api_endpoints.dart';
 import 'interceptors/auth_interceptor.dart';
@@ -10,7 +8,6 @@ import 'exceptions/api_exception.dart';
 
 class ApiClient {
   late final Dio _dio;
-  static const _storage = FlutterSecureStorage();
 
   ApiClient() {
     _dio = Dio(BaseOptions(
@@ -47,53 +44,8 @@ class ApiClient {
 
   Dio get dio => _dio;
 
-  // Token management
-  static Future<void> saveToken(String token) async {
-    await _storage.write(key: 'auth_token', value: token);
-  }
-
-  static Future<String?> getToken() async {
-    return await _storage.read(key: 'auth_token');
-  }
-
-  static Future<void> clearToken() async {
-    await _storage.delete(key: 'auth_token');
-  }
-
-  // Refresh token management
-  static Future<void> saveRefreshToken(String refreshToken) async {
-    await _storage.write(key: 'refresh_token', value: refreshToken);
-  }
-
-  static Future<String?> getRefreshToken() async {
-    return await _storage.read(key: 'refresh_token');
-  }
-
-  static Future<void> clearRefreshToken() async {
-    await _storage.delete(key: 'refresh_token');
-  }
-
-  // User ID storage
-  static Future<void> saveUserId(String userId) async {
-    await _storage.write(key: 'user_id', value: userId);
-  }
-
-  static Future<String?> getUserId() async {
-    return await _storage.read(key: 'user_id');
-  }
-
-  static Future<void> clearUserId() async {
-    await _storage.delete(key: 'user_id');
-  }
-
-  // Clear all auth data
-  static Future<void> clearAllAuthData() async {
-    await Future.wait([
-      clearToken(),
-      clearRefreshToken(),
-      clearUserId(),
-    ]);
-  }
+  // Firebase handles token management automatically
+  // No need for manual token storage methods
 
   // GET request
   Future<Response> get(

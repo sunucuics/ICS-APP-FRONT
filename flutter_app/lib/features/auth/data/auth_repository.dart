@@ -1,5 +1,5 @@
 import '../../../core/models/user_model.dart';
-import '../../../core/network/api_client.dart';
+import '../../../core/services/firebase_auth_service.dart';
 import 'auth_api_service.dart';
 
 class AuthRepository {
@@ -10,10 +10,8 @@ class AuthRepository {
     final request = LoginRequest(email: email, password: password);
     final response = await _authApiService.login(request);
 
-    // Save tokens to secure storage
-    await ApiClient.saveToken(response.idToken);
-    await ApiClient.saveRefreshToken(response.refreshToken);
-    await ApiClient.saveUserId(response.userId);
+    // Firebase handles token management automatically
+    // No need to manually save tokens to secure storage
 
     return response;
   }
@@ -34,10 +32,8 @@ class AuthRepository {
 
     final response = await _authApiService.register(request);
 
-    // Save tokens to secure storage
-    await ApiClient.saveToken(response.idToken);
-    await ApiClient.saveRefreshToken(response.refreshToken);
-    await ApiClient.saveUserId(response.userId);
+    // Firebase handles token management automatically
+    // No need to manually save tokens to secure storage
 
     return response;
   }
@@ -49,27 +45,23 @@ class AuthRepository {
 
   // Logout
   Future<void> logout() async {
-    try {
-      // Call logout endpoint to invalidate token on server
-      await _authApiService.logout();
-    } catch (e) {
-      // Even if server call fails, we should clear local tokens
-      print('Logout API call failed: $e');
-    } finally {
-      // Clear all local auth data
-      await ApiClient.clearAllAuthData();
-    }
+    await _authApiService.logout();
+    // Firebase handles token cleanup automatically
   }
 
   // Check if user is logged in
   Future<bool> isLoggedIn() async {
-    final token = await ApiClient.getToken();
-    return token != null && token.isNotEmpty;
+    return FirebaseAuthService.isSignedIn;
   }
 
   // Get current user
   Future<UserProfile?> getCurrentUser() async {
     try {
+      // Check if Firebase user is signed in
+      if (!FirebaseAuthService.isSignedIn) {
+        return null;
+      }
+      
       return await _authApiService.getCurrentUser();
     } catch (e) {
       print('Failed to get current user: $e');
@@ -77,8 +69,8 @@ class AuthRepository {
     }
   }
 
-  // Get stored user ID
+  // Get current user ID from Firebase
   Future<String?> getCurrentUserId() async {
-    return await ApiClient.getUserId();
+    return FirebaseAuthService.userUid;
   }
 }

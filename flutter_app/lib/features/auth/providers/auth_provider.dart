@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/models/user_model.dart';
+import '../../../core/services/firebase_auth_service.dart';
 import '../data/auth_repository.dart';
 import 'anonymous_auth_provider.dart' as anonymous;
 
@@ -45,35 +47,40 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final Ref _ref;
 
   AuthNotifier(this._authRepository, this._ref) : super(const AuthState()) {
-    _checkAuthStatus();
+    _listenToAuthStateChanges();
   }
 
-  // Check if user is already logged in
-  Future<void> _checkAuthStatus() async {
-    state = state.copyWith(isLoading: true);
+  // Listen to Firebase auth state changes
+  void _listenToAuthStateChanges() {
+    FirebaseAuthService.authStateChanges.listen((User? firebaseUser) async {
+      if (firebaseUser != null) {
+        // User is signed in
+        await _loadUserProfile();
+      } else {
+        // User is signed out
+        state = const AuthState(isAuthenticated: false);
+      }
+    });
+  }
+
+  // Load user profile when Firebase user is authenticated
+  Future<void> _loadUserProfile() async {
+    state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final isLoggedIn = await _authRepository.isLoggedIn();
-      if (isLoggedIn) {
-        final user = await _authRepository.getCurrentUser();
-        if (user != null) {
-          state = state.copyWith(
-            user: user,
-            isAuthenticated: true,
-            isLoading: false,
-          );
-        } else {
-          // Token exists but user fetch failed, logout
-          await _authRepository.logout();
-          state = state.copyWith(
-            isAuthenticated: false,
-            isLoading: false,
-          );
-        }
+      final user = await _authRepository.getCurrentUser();
+      if (user != null) {
+        state = state.copyWith(
+          user: user,
+          isAuthenticated: true,
+          isLoading: false,
+        );
       } else {
+        // Firebase user exists but backend user fetch failed
         state = state.copyWith(
           isAuthenticated: false,
           isLoading: false,
+          error: 'Failed to load user profile',
         );
       }
     } catch (e) {
@@ -94,15 +101,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       print('🔐 AuthProvider - Calling auth repository login...');
       final response = await _authRepository.login(email, password);
       print(
-          '🔐 AuthProvider - Login successful, user: ${response.user?.email}');
+          '🔐 AuthProvider - Login successful, user: ${response.user?.email ?? 'Unknown'}');
       print('🔐 AuthProvider - User ID: ${response.userId}');
-      print('🔐 AuthProvider - Token exists: ${response.idToken != null}');
+      print('🔐 AuthProvider - Token exists: ${response.idToken.isNotEmpty}');
 
-      state = state.copyWith(
-        user: response.user,
-        isAuthenticated: true,
-        isLoading: false,
-      );
+      // Firebase auth state change will automatically update the state
+      // No need to manually update state here
 
       // Clear anonymous authentication when user logs in
       try {
@@ -112,9 +116,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         print('🔐 AuthProvider - Error clearing anonymous auth: $e');
       }
 
-      print(
-          '🔐 AuthProvider - State updated, isAuthenticated: ${state.isAuthenticated}');
-      print('🔐 AuthProvider - User in state: ${state.user?.email}');
+      print('🔐 AuthProvider - Login completed successfully');
       return true;
     } catch (e) {
       print('🔐 AuthProvider - Login failed: $e');
@@ -137,17 +139,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final response = await _authRepository.register(
+      await _authRepository.register(
         name: name,
         phone: phone,
         email: email,
         password: password,
       );
-      state = state.copyWith(
-        user: response.user,
-        isAuthenticated: true,
-        isLoading: false,
-      );
+      
+      // Firebase auth state change will automatically update the state
+      // No need to manually update state here
+      
       return true;
     } catch (e) {
       state = state.copyWith(
@@ -181,10 +182,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     try {
       await _authRepository.logout();
-      state = const AuthState(isAuthenticated: false);
+      // Firebase auth state change will automatically update the state
+      // No need to manually update state here
     } catch (e) {
-      // Even if logout fails, clear the state
-      state = const AuthState(isAuthenticated: false);
+      // Even if logout fails, Firebase auth state change will handle it
+      print('Logout error: $e');
     }
   }
 

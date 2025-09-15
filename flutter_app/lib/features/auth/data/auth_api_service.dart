@@ -2,70 +2,110 @@ import 'package:dio/dio.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/models/user_model.dart';
+import '../../../core/services/firebase_auth_service.dart';
 
 class AuthApiService {
   final ApiClient _apiClient = ApiClient.instance;
 
-  // Register
+  // Register - Firebase ile kullanıcı oluştur, sonra backend'e kaydet
   Future<AuthResponse> register(RegisterRequest request) async {
+    // Firebase'de kullanıcı oluştur
+    final userCredential = await FirebaseAuthService.createUserWithEmailAndPassword(
+      email: request.email,
+      password: request.password,
+    );
+
+    if (userCredential?.user == null) {
+      throw Exception('Failed to create Firebase user');
+    }
+
+    // Firebase ID token'ı al
+    final idToken = await userCredential!.user!.getIdToken();
+    
+    // Backend'e kullanıcı bilgilerini gönder
     final formData = FormData.fromMap({
       'name': request.name,
       'phone': request.phone,
       'email': request.email,
-      'password': request.password,
+      'firebase_uid': userCredential.user!.uid,
     });
 
-    final response = await _apiClient.postMultipart(
+    await _apiClient.postMultipart(
       ApiEndpoints.authRegister,
       formData,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $idToken',
+        },
+      ),
     );
-
-    // Register response'unda user bilgisi var, direkt parse edebiliriz
-    return AuthResponse.fromJson(response.data);
-  }
-
-  // Login
-  Future<AuthResponse> login(LoginRequest request) async {
-    final formData = FormData.fromMap({
-      'email': request.email,
-      'password': request.password,
-    });
-
-    final response = await _apiClient.postMultipart(
-      ApiEndpoints.authLogin,
-      formData,
-    );
-
-    // Backend sadece token bilgilerini döndürüyor, user profile'ını ayrıca çekmemiz gerekiyor
-    final loginData = response.data;
-
-    // Token'ı geçici olarak kaydet ki user profile çekebilelim
-    await ApiClient.saveToken(loginData['id_token']);
 
     // User profile'ını çek
     final userProfile = await getCurrentUser();
 
-    // AuthResponse oluştur
     return AuthResponse(
-      userId: loginData['user_id'],
+      userId: userCredential.user!.uid,
       user: userProfile,
-      idToken: loginData['id_token'],
-      refreshToken: loginData['refresh_token'],
-      expiresIn: loginData['expires_in'],
+      idToken: idToken ?? '',
+      refreshToken: '', // Firebase doesn't use refresh tokens in the same way
+      expiresIn: 3600, // Firebase tokens expire in 1 hour
     );
   }
 
-  // Reset Password
+  // Login - Firebase ile giriş yap
+  Future<AuthResponse> login(LoginRequest request) async {
+    // Firebase ile giriş yap
+    final userCredential = await FirebaseAuthService.signInWithEmailAndPassword(
+      email: request.email,
+      password: request.password,
+    );
+
+    if (userCredential?.user == null) {
+      throw Exception('Failed to sign in with Firebase');
+    }
+
+    // Firebase ID token'ı al
+    final idToken = await userCredential!.user!.getIdToken();
+    
+    // User profile'ını çek
+    final userProfile = await getCurrentUser();
+
+    return AuthResponse(
+      userId: userCredential.user!.uid,
+      user: userProfile,
+      idToken: idToken ?? '',
+      refreshToken: '', // Firebase doesn't use refresh tokens in the same way
+      expiresIn: 3600, // Firebase tokens expire in 1 hour
+    );
+  }
+
+  // Reset Password - Firebase ile şifre sıfırlama
   Future<void> resetPassword(String email) async {
-    await _apiClient.post(
-      ApiEndpoints.authResetPassword,
-      queryParameters: {'email': email},
-    );
+    await FirebaseAuthService.sendPasswordResetEmail(email);
   }
 
-  // Logout
+  // Logout - Backend logout endpoint'ini çağır, sonra Firebase'den çık
   Future<void> logout() async {
-    await _apiClient.post(ApiEndpoints.authLogout);
+    try {
+      // Backend logout endpoint'ini çağır
+      final idToken = await FirebaseAuthService.getIdToken();
+      if (idToken != null) {
+        await _apiClient.post(
+          ApiEndpoints.authLogout,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $idToken',
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      print('Backend logout failed: $e');
+      // Continue with Firebase logout even if backend call fails
+    } finally {
+      // Firebase'den çık
+      await FirebaseAuthService.signOut();
+    }
   }
 
   // Get current user profile
