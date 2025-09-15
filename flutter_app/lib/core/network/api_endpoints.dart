@@ -61,6 +61,24 @@ class ApiEndpoints {
   static const String comments = '/comments';
   static String comment(String commentId) => '/comments/$commentId';
 
+  // Product comments
+  static String productComments(String productId) =>
+      '/comments/products/$productId';
+
+  // Service comments
+  static String serviceComments(String serviceId) =>
+      '/comments/services/$serviceId';
+
+  // Admin comments endpoints
+  static const String adminCommentsProducts = '/admin/comments/products';
+  static const String adminCommentsServices = '/admin/comments/services';
+  static String adminComment(String commentId) => '/admin/comments/$commentId';
+
+  // Profanity filter endpoints
+  static const String adminProfanity = '/admin/comments/profanity';
+  static String adminProfanityWord(String wordId) =>
+      '/admin/comments/profanity/$wordId';
+
   // Featured endpoints
   static const String featured = '/featured';
   static const String featuredProducts = '/featured/products';

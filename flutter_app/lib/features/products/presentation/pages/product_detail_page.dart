@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../cart/providers/cart_provider.dart';
+import '../../../comments/presentation/widgets/rating_summary.dart';
+import '../../../comments/presentation/widgets/comments_list.dart';
+import '../../../comments/presentation/widgets/comment_form.dart';
+import '../../../comments/presentation/pages/comments_page.dart';
 import '../../../../core/models/product_model.dart';
 
 class ProductDetailPage extends ConsumerStatefulWidget {
@@ -16,6 +20,68 @@ class ProductDetailPage extends ConsumerStatefulWidget {
 class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
   int selectedImageIndex = 0;
   int quantity = 1;
+
+  void _showCommentForm() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            // Handle bar
+            Container(
+              margin: const EdgeInsets.only(top: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  const Text(
+                    'Yorum Ekle',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            // Comment form
+            Expanded(
+              child: CommentForm(
+                targetId: widget.product.id,
+                targetType: 'product',
+                onCommentAdded: () {
+                  Navigator.of(context).pop();
+                  // Refresh comments if needed
+                  setState(() {});
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -342,6 +408,75 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                           ),
                           const SizedBox(height: 24),
                         ],
+
+                        // Rating Summary
+                        RatingSummary(
+                          targetId: product.id,
+                          targetType: 'product',
+                        ),
+
+                        // Comments Section
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Yorumlar',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            Row(
+                              children: [
+                                // Add comment button
+                                ElevatedButton.icon(
+                                  onPressed: _showCommentForm,
+                                  icon: const Icon(Icons.add_comment, size: 16),
+                                  label: const Text('Yorum Ekle'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 8),
+                                    textStyle: const TextStyle(fontSize: 12),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                // View all comments button
+                                TextButton.icon(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => CommentsPage(
+                                          targetId: product.id,
+                                          targetType: 'product',
+                                          targetTitle: product.title,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.comment_outlined,
+                                      size: 16),
+                                  label: const Text('Tümünü Gör'),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Comments Preview (show first 3 comments)
+                        SizedBox(
+                          height: 300,
+                          child: CommentsList(
+                            targetId: product.id,
+                            targetType: 'product',
+                          ),
+                        ),
                       ],
                     ),
                   ),

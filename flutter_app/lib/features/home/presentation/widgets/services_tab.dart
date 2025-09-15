@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../services/providers/services_provider.dart';
+import '../../../services/presentation/pages/service_detail_page.dart';
 import '../../../auth/providers/anonymous_auth_provider.dart' as anonymous;
 import '../../../auth/providers/auth_provider.dart';
 import '../../../auth/presentation/pages/guest_upgrade_page.dart';
@@ -110,7 +111,11 @@ class _ServiceCard extends ConsumerWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          _showServiceDetail(context, ref, service);
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ServiceDetailPage(service: service),
+            ),
+          );
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -209,7 +214,12 @@ class _ServiceCard extends ConsumerWidget {
                         Expanded(
                           child: OutlinedButton(
                             onPressed: () {
-                              _showServiceDetail(context, ref, service);
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ServiceDetailPage(service: service),
+                                ),
+                              );
                             },
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 8),
