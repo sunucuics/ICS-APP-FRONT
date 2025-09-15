@@ -52,15 +52,36 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   // Listen to Firebase auth state changes
   void _listenToAuthStateChanges() {
-    FirebaseAuthService.authStateChanges.listen((User? firebaseUser) async {
-      if (firebaseUser != null) {
-        // User is signed in
+    try {
+      FirebaseAuthService.authStateChanges.listen((User? firebaseUser) async {
+        if (firebaseUser != null) {
+          // User is signed in
+          await _loadUserProfile();
+        } else {
+          // User is signed out
+          state = const AuthState(isAuthenticated: false);
+        }
+      });
+    } catch (e) {
+      print('❌ Firebase auth state listener setup failed: $e');
+      // Fallback to manual auth check
+      _checkAuthStatusManually();
+    }
+  }
+
+  // Fallback method for manual auth check
+  Future<void> _checkAuthStatusManually() async {
+    try {
+      final isLoggedIn = await _authRepository.isLoggedIn();
+      if (isLoggedIn) {
         await _loadUserProfile();
       } else {
-        // User is signed out
         state = const AuthState(isAuthenticated: false);
       }
-    });
+    } catch (e) {
+      print('❌ Manual auth check failed: $e');
+      state = const AuthState(isAuthenticated: false);
+    }
   }
 
   // Load user profile when Firebase user is authenticated
@@ -145,10 +166,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
         email: email,
         password: password,
       );
-      
+
       // Firebase auth state change will automatically update the state
       // No need to manually update state here
-      
+
       return true;
     } catch (e) {
       state = state.copyWith(

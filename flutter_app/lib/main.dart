@@ -9,10 +9,16 @@ import 'core/services/navigation_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase initialization
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // Firebase initialization - temporarily disabled for testing
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    print('✅ Firebase initialized successfully');
+  } catch (e) {
+    print('❌ Firebase initialization failed: $e');
+    print('⚠️ Continuing without Firebase...');
+  }
 
   runApp(const ProviderScope(child: MyApp()));
 }
