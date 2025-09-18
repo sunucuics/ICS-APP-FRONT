@@ -107,7 +107,7 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
-              color: AppTheme.tertiaryBlack,
+              color: Theme.of(context).colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
@@ -128,7 +128,7 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
-              color: AppTheme.tertiaryBlack,
+              color: Theme.of(context).colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
@@ -179,12 +179,12 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                         decoration: BoxDecoration(
                           color: isSelected
                               ? AppTheme.primaryOrange
-                              : AppTheme.tertiaryBlack,
+                              : Theme.of(context).colorScheme.surfaceVariant,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: isSelected
                                 ? AppTheme.primaryOrange
-                                : AppTheme.lightGray,
+                                : Theme.of(context).colorScheme.outline,
                             width: 1,
                           ),
                           boxShadow: isSelected
@@ -220,8 +220,9 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,
-                                color:
-                                    isSelected ? Colors.white : Colors.white70,
+                                color: isSelected
+                                    ? Colors.white
+                                    : Theme.of(context).colorScheme.onSurface,
                               ),
                               textAlign: TextAlign.center,
                               maxLines: 1,
@@ -367,7 +368,7 @@ class _ProductCard extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: AppTheme.secondaryBlack,
+        color: Theme.of(context).colorScheme.surfaceVariant,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.3),
@@ -399,7 +400,7 @@ class _ProductCard extends ConsumerWidget {
                     width: double.infinity,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      color: AppTheme.tertiaryBlack,
+                      color: Theme.of(context).colorScheme.surfaceVariant,
                     ),
                     child: product.images.isNotEmpty
                         ? ClipRRect(
@@ -408,7 +409,9 @@ class _ProductCard extends ConsumerWidget {
                               imageUrl: product.images.first,
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Container(
-                                color: AppTheme.tertiaryBlack,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceVariant,
                                 child: const Center(
                                   child: CircularProgressIndicator(
                                     color: AppTheme.primaryOrange,
@@ -416,7 +419,9 @@ class _ProductCard extends ConsumerWidget {
                                 ),
                               ),
                               errorWidget: (context, url, error) => Container(
-                                color: AppTheme.tertiaryBlack,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceVariant,
                                 child: const Icon(
                                   Icons.image_not_supported,
                                   color: AppTheme.primaryOrange,
@@ -438,10 +443,10 @@ class _ProductCard extends ConsumerWidget {
                   flex: 1,
                   child: Text(
                     product.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -509,7 +514,10 @@ class _ProductCard extends ConsumerWidget {
                             const Icon(Icons.shopping_cart_outlined, size: 16),
                         label: Text(
                           product.stock > 0 ? 'Sepete Ekle' : 'Stokta Yok',
-                          style: const TextStyle(fontSize: 12),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                         ),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 8),

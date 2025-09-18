@@ -6,6 +6,7 @@ import '../../../comments/presentation/widgets/comments_list.dart';
 import '../../../comments/presentation/widgets/comment_form.dart';
 import '../../../comments/presentation/pages/comments_page.dart';
 import '../../../../core/models/service_model.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class ServiceDetailPage extends ConsumerStatefulWidget {
   final Service service;
@@ -186,7 +187,7 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                                   ? Icons.access_time
                                   : Icons.check_circle,
                               color: service.isUpcoming
-                                  ? Colors.orange
+                                  ? AppTheme.primaryNavy
                                   : Colors.green,
                               size: 20,
                             ),
@@ -197,7 +198,7 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                                   : 'Aktif hizmet',
                               style: TextStyle(
                                 color: service.isUpcoming
-                                    ? Colors.orange
+                                    ? AppTheme.primaryNavy
                                     : Colors.green,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -211,19 +212,19 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: Colors.orange.withOpacity(0.1),
+                              color: AppTheme.primaryNavy.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(Icons.access_time,
-                                    color: Colors.orange, size: 16),
+                                    color: AppTheme.primaryNavy, size: 16),
                                 SizedBox(width: 4),
                                 Text(
                                   'Yakında gelecek',
                                   style: TextStyle(
-                                    color: Colors.orange,
+                                    color: AppTheme.primaryNavy,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -354,8 +355,9 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color:
-                            service.isUpcoming ? Colors.orange : Colors.green,
+                        color: service.isUpcoming
+                            ? AppTheme.primaryNavy
+                            : Colors.green,
                       ),
                     ),
                   ],
@@ -381,6 +383,8 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                       service.isUpcoming ? 'Yakında Başlayacak' : 'Randevu Al',
                     ),
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryNavy,
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),

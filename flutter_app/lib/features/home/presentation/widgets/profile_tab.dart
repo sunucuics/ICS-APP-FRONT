@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../auth/providers/anonymous_auth_provider.dart' as anonymous;
 import '../../../auth/presentation/pages/guest_upgrade_page.dart';
-import '../../../auth/presentation/pages/login_page.dart';
 import '../../../orders/presentation/pages/orders_list_page.dart';
 import '../../../addresses/presentation/pages/addresses_list_page.dart';
 import '../../../appointments/presentation/pages/my_appointments_page.dart';
+import '../../../settings/presentation/pages/settings_page.dart';
 import '../../../../core/theme/app_theme.dart';
 
 class ProfileTab extends ConsumerWidget {
@@ -22,436 +22,358 @@ class ProfileTab extends ConsumerWidget {
     final isActuallyAnonymous = !authState.isAuthenticated && isAnonymous;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryOrange,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.person,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text('Profil'),
-          ],
-        ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
-              color: AppTheme.tertiaryBlack,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () => _showLogoutDialog(context, ref),
-            ),
-          ),
-        ],
-      ),
       body: authState.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16.0),
-              children: [
-                // Profile Header
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppTheme.primaryOrange,
-                        AppTheme.secondaryOrange,
-                      ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.primaryOrange.withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundColor: Colors.white.withOpacity(0.2),
-                          child: Text(
-                            isActuallyAnonymous
-                                ? 'M'
-                                : _getInitials(currentUser?.name ?? 'U'),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+          : CustomScrollView(
+              slivers: [
+                // Modern App Bar
+                SliverAppBar(
+                  expandedHeight: 100,
+                  floating: false,
+                  pinned: true,
+                  elevation: 0,
+                  backgroundColor: Colors.transparent,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppTheme.primaryOrange,
+                            AppTheme.secondaryOrange,
+                          ],
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
+                      ),
+                      child: SafeArea(
+                        child: Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Text(
-                                isActuallyAnonymous
-                                    ? 'Misafir Kullanıcı'
-                                    : (currentUser?.name ?? 'Kullanıcı'),
-                                style: const TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  shadows: [
-                                    Shadow(
-                                      offset: Offset(0, 1),
-                                      blurRadius: 2,
-                                      color: Colors.black26,
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.2),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: const Icon(
+                                          Icons.person,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      const Text(
+                                        'Profil',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                  ],
-                                ),
+                                    child: IconButton(
+                                      icon: const Icon(
+                                        Icons.logout,
+                                        color: Colors.white,
+                                      ),
+                                      onPressed: () =>
+                                          _showLogoutDialog(context, ref),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                isActuallyAnonymous
-                                    ? 'Misafir olarak giriş yaptınız'
-                                    : (currentUser?.email ??
-                                        'email@example.com'),
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white.withOpacity(0.9),
-                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                // Modern Profile Content
+                SliverToBoxAdapter(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 0),
+                    child: Column(
+                      children: [
+                        // Profile Card
+                        Container(
+                          margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(24),
+                              topRight: Radius.circular(24),
+                              bottomLeft: Radius.circular(24),
+                              bottomRight: Radius.circular(24),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
                               ),
-                              if (isActuallyAnonymous) ...[
+                            ],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                                24.0, 20.0, 24.0, 24.0),
+                            child: Column(
+                              children: [
+                                // Profile Avatar
+                                CircleAvatar(
+                                  radius: 50,
+                                  backgroundColor:
+                                      AppTheme.primaryOrange.withOpacity(0.1),
+                                  child: Text(
+                                    isActuallyAnonymous
+                                        ? 'M'
+                                        : _getInitials(
+                                            currentUser?.name ?? 'U'),
+                                    style: TextStyle(
+                                      color: AppTheme.primaryOrange,
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                // User Info
+                                Text(
+                                  isActuallyAnonymous
+                                      ? 'Misafir Kullanıcı'
+                                      : currentUser?.name ?? 'Kullanıcı',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
+                                  ),
+                                ),
                                 const SizedBox(height: 8),
+                                if (!isActuallyAnonymous &&
+                                    currentUser?.email != null)
+                                  Text(
+                                    currentUser!.email!,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
+                                  ),
+                                const SizedBox(height: 16),
+                                // Status Badge
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
+                                      horizontal: 16, vertical: 8),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(12),
+                                    color:
+                                        AppTheme.primaryOrange.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
-                                      color: Colors.white.withOpacity(0.3),
+                                      color: AppTheme.primaryOrange
+                                          .withOpacity(0.3),
                                     ),
                                   ),
-                                  child: const Text(
-                                    'Misafir Modu',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ] else if (currentUser?.phone != null) ...[
-                                const SizedBox(height: 4),
-                                Text(
-                                  currentUser!.phone,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.white.withOpacity(0.7),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.verified,
+                                        color: AppTheme.primaryOrange,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        isActuallyAnonymous
+                                            ? 'Misafir'
+                                            : 'Aktif Üye',
+                                        style: TextStyle(
+                                          color: AppTheme.primaryOrange,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
-                              const SizedBox(height: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  currentUser?.role == 'admin'
-                                      ? 'Admin'
-                                      : 'Aktif Üye',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
+                        const SizedBox(height: 24),
+                        // Modern Menu Items
+                        _buildModernMenuSection(
+                          context,
+                          title: 'Hesabım',
+                          items: [
+                            _buildModernMenuItem(
+                              context,
+                              icon: Icons.shopping_bag_outlined,
+                              title: 'Siparişlerim',
+                              subtitle: isActuallyAnonymous
+                                  ? 'Hesap oluşturun'
+                                  : 'Geçmiş siparişleri görüntüle',
+                              onTap: isActuallyAnonymous
+                                  ? () => _showGuestUpgradeDialog(context)
+                                  : () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const OrdersListPage(),
+                                        ),
+                                      );
+                                    },
+                            ),
+                            _buildModernMenuItem(
+                              context,
+                              icon: Icons.location_on_outlined,
+                              title: 'Adreslerim',
+                              subtitle: isActuallyAnonymous
+                                  ? 'Hesap oluşturun'
+                                  : 'Teslimat adreslerini yönet',
+                              onTap: isActuallyAnonymous
+                                  ? () => _showGuestUpgradeDialog(context)
+                                  : () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const AddressesListPage(),
+                                        ),
+                                      );
+                                    },
+                            ),
+                            _buildModernMenuItem(
+                              context,
+                              icon: Icons.calendar_today_outlined,
+                              title: 'Randevularım',
+                              subtitle: isActuallyAnonymous
+                                  ? 'Hesap oluşturun'
+                                  : 'Aktif ve geçmiş randevular',
+                              onTap: isActuallyAnonymous
+                                  ? () => _showGuestUpgradeDialog(context)
+                                  : () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const MyAppointmentsPage(),
+                                        ),
+                                      );
+                                    },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        _buildModernMenuSection(
+                          context,
+                          title: 'Uygulama',
+                          items: [
+                            _buildModernMenuItem(
+                              context,
+                              icon: Icons.settings_outlined,
+                              title: 'Ayarlar',
+                              subtitle: 'Hesap ve uygulama ayarları',
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => const SettingsPage(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _buildModernMenuItem(
+                              context,
+                              icon: Icons.info_outline,
+                              title: 'Hakkında',
+                              subtitle: 'Uygulama bilgisi',
+                              onTap: () => _showAboutDialog(context),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        // Logout Button
+                        if (!isActuallyAnonymous)
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 20),
+                            child: _buildModernMenuItem(
+                              context,
+                              icon: Icons.logout,
+                              title: 'Çıkış Yap',
+                              subtitle: 'Hesabınızdan çıkış yapın',
+                              isDestructive: true,
+                              onTap: () => _showLogoutDialog(context, ref),
+                            ),
+                          ),
+                        const SizedBox(height: 32),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
-
-                // Guest Upgrade Banner (only for anonymous users)
-                if (isActuallyAnonymous) ...[
-                  Card(
-                    color: Colors.orange.withOpacity(0.05),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.star,
-                                color: Colors.orange,
-                                size: 24,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Hesap Oluşturun',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.orange[800],
-                                          ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Sipariş geçmişinizi, favorilerinizi ve daha fazlasını kaydedin',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(
-                                            color: Colors.orange[700],
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: OutlinedButton(
-                                  onPressed: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => const LoginPage(),
-                                      ),
-                                    );
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: Colors.orange,
-                                    side: BorderSide(color: Colors.orange),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Giriş Yap',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const GuestUpgradePage(),
-                                      ),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.orange,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Hesap Oluştur',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-
-                // Menu Items
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: AppTheme.secondaryBlack,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 15,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      _buildMenuItem(
-                        context,
-                        icon: Icons.shopping_bag,
-                        title: 'Siparişlerim',
-                        subtitle: isActuallyAnonymous
-                            ? 'Hesap oluşturun'
-                            : 'Geçmiş siparişleri görüntüle',
-                        onTap: isActuallyAnonymous
-                            ? () => _showGuestUpgradeDialog(context)
-                            : () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const OrdersListPage(),
-                                  ),
-                                );
-                              },
-                      ),
-                      Divider(
-                        height: 1,
-                        color: AppTheme.lightGray,
-                      ),
-                      _buildMenuItem(
-                        context,
-                        icon: Icons.location_on,
-                        title: 'Adreslerim',
-                        subtitle: isActuallyAnonymous
-                            ? 'Hesap oluşturun'
-                            : 'Teslimat adreslerini yönet',
-                        onTap: isActuallyAnonymous
-                            ? () => _showGuestUpgradeDialog(context)
-                            : () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const AddressesListPage(),
-                                  ),
-                                );
-                              },
-                      ),
-                      Divider(
-                        height: 1,
-                        color: AppTheme.lightGray,
-                      ),
-                      _buildMenuItem(
-                        context,
-                        icon: Icons.calendar_today,
-                        title: 'Randevularım',
-                        subtitle: isActuallyAnonymous
-                            ? 'Hesap oluşturun'
-                            : 'Aktif ve geçmiş randevular',
-                        onTap: isActuallyAnonymous
-                            ? () => _showGuestUpgradeDialog(context)
-                            : () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const MyAppointmentsPage(),
-                                  ),
-                                );
-                              },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Settings & Support
-                Card(
-                  child: Column(
-                    children: [
-                      _buildMenuItem(
-                        context,
-                        icon: Icons.settings,
-                        title: 'Ayarlar',
-                        subtitle: 'Hesap ve uygulama ayarları',
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text('Ayarlar sayfası yakında eklenecek'),
-                            ),
-                          );
-                        },
-                      ),
-                      Divider(
-                        height: 1,
-                        color: AppTheme.lightGray,
-                      ),
-                      _buildMenuItem(
-                        context,
-                        icon: Icons.help,
-                        title: 'Yardım & Destek',
-                        subtitle: 'SSS ve iletişim',
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Yardım sayfası yakında eklenecek'),
-                            ),
-                          );
-                        },
-                      ),
-                      Divider(
-                        height: 1,
-                        color: AppTheme.lightGray,
-                      ),
-                      _buildMenuItem(
-                        context,
-                        icon: Icons.info,
-                        title: 'Hakkında',
-                        subtitle: 'Uygulama bilgisi',
-                        onTap: () {
-                          _showAboutDialog(context);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Logout Button
-                Card(
-                  child: _buildMenuItem(
-                    context,
-                    icon: Icons.logout,
-                    title: 'Çıkış Yap',
-                    subtitle: 'Hesabından güvenli çıkış',
-                    onTap: () => _showLogoutDialog(context, ref),
-                    isDestructive: true,
-                  ),
-                ),
-                const SizedBox(height: 24),
               ],
             ),
     );
   }
 
-  Widget _buildMenuItem(
+  Widget _buildModernMenuSection(
+    BuildContext context, {
+    required String title,
+    required List<Widget> items,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 12),
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: items,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernMenuItem(
     BuildContext context, {
     required IconData icon,
     required String title,
@@ -460,46 +382,74 @@ class ProfileTab extends ConsumerWidget {
     bool isDestructive = false,
   }) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: AppTheme.tertiaryBlack,
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+            width: 1,
+          ),
+        ),
       ),
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: isDestructive
-                ? AppTheme.errorRed.withOpacity(0.2)
-                : AppTheme.primaryOrange.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            icon,
-            color: isDestructive ? AppTheme.errorRed : AppTheme.primaryOrange,
-            size: 20,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDestructive
+                        ? AppTheme.errorRed.withOpacity(0.1)
+                        : AppTheme.primaryOrange.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: isDestructive
+                        ? AppTheme.errorRed
+                        : AppTheme.primaryOrange,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: isDestructive
+                              ? AppTheme.errorRed
+                              : Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  size: 20,
+                ),
+              ],
+            ),
           ),
         ),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: isDestructive ? AppTheme.errorRed : Colors.white,
-            fontSize: 16,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
-            fontSize: 14,
-          ),
-        ),
-        trailing: Icon(
-          Icons.chevron_right,
-          color: Colors.white.withOpacity(0.5),
-        ),
-        onTap: onTap,
       ),
     );
   }
@@ -517,6 +467,9 @@ class ProfileTab extends ConsumerWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: const Text('Çıkış Yap'),
           content: const Text(
               'Hesabınızdan çıkış yapmak istediğinize emin misiniz?'),
@@ -526,45 +479,12 @@ class ProfileTab extends ConsumerWidget {
               child: const Text('İptal'),
             ),
             ElevatedButton(
-              onPressed: () async {
+              onPressed: () {
                 Navigator.of(context).pop();
-
-                // Check if user is anonymous
-                final isAnonymous = ref.read(anonymous.isAnonymousProvider);
-                final authState = ref.read(authProvider);
-                final isActuallyAnonymous =
-                    !authState.isAuthenticated && isAnonymous;
-
-                if (isActuallyAnonymous) {
-                  // For anonymous users, use anonymous auth provider
-                  await ref
-                      .read(anonymous.anonymousAuthProvider.notifier)
-                      .signOut();
-
-                  // Navigate to login page after logout
-                  if (context.mounted) {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => const LoginPage(),
-                      ),
-                    );
-                  }
-                } else {
-                  // For registered users, use regular auth provider
-                  await ref.read(authProvider.notifier).logout();
-
-                  // Navigate to login page after logout
-                  if (context.mounted) {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => const LoginPage(),
-                      ),
-                    );
-                  }
-                }
+                ref.read(authProvider.notifier).logout();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: AppTheme.errorRed,
                 foregroundColor: Colors.white,
               ),
               child: const Text('Çıkış Yap'),
@@ -580,11 +500,12 @@ class ProfileTab extends ConsumerWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Hesap Gerekli'),
-          content: const Text(
-            'Bu özelliği kullanmak için hesap oluşturmanız gerekiyor. '
-            'Hesap oluşturmak ister misiniz?',
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
+          title: const Text('Hesap Oluşturun'),
+          content: const Text(
+              'Bu özelliği kullanmak için bir hesap oluşturmanız gerekiyor.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -599,10 +520,6 @@ class ProfileTab extends ConsumerWidget {
                   ),
                 );
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-              ),
               child: const Text('Hesap Oluştur'),
             ),
           ],
@@ -616,15 +533,23 @@ class ProfileTab extends ConsumerWidget {
       context: context,
       applicationName: 'ICS App',
       applicationVersion: '1.0.0',
-      applicationLegalese: '© 2024 ICS App. Tüm hakları saklıdır.',
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(top: 16),
-          child: Text(
-            'E-ticaret ve hizmet rezervasyon uygulaması. '
-            'Ürün satın alma, hizmet randevusu alma ve daha fazlası için tasarlandı.',
-          ),
+      applicationIcon: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppTheme.primaryOrange,
+          borderRadius: BorderRadius.circular(12),
         ),
+        child: const Icon(
+          Icons.flash_on,
+          color: Colors.white,
+          size: 32,
+        ),
+      ),
+      children: const [
+        Text('ICS App - Akıllı Ev ve Hizmet Yönetimi'),
+        SizedBox(height: 16),
+        Text(
+            'Bu uygulama ile evinizi akıllı hale getirin ve profesyonel hizmetlerden yararlanın.'),
       ],
     );
   }

@@ -1,27 +1,73 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../../products/providers/products_provider.dart';
+import '../../../products/presentation/pages/category_products_page.dart';
 import '../../../../core/models/product_model.dart';
+import '../../../../core/widgets/theme_toggle_button.dart';
+import '../../../../core/theme/app_theme.dart';
 
-class CatalogTab extends ConsumerStatefulWidget {
-  const CatalogTab({super.key});
+class CatalogTabNew extends ConsumerStatefulWidget {
+  const CatalogTabNew({super.key});
 
   @override
-  ConsumerState<CatalogTab> createState() => _CatalogTabState();
+  ConsumerState<CatalogTabNew> createState() => _CatalogTabNewState();
 }
 
-class _CatalogTabState extends ConsumerState<CatalogTab> {
+class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
+    with TickerProviderStateMixin {
+  late AnimationController _fadeAnimationController;
+  late AnimationController _slideAnimationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
   // Category icons mapping
   final Map<String, IconData> categoryIcons = {
-    'elektronik': Icons.phone_android,
-    'giyim': Icons.checkroom,
-    'ev': Icons.home,
-    'spor': Icons.sports_soccer,
-    'kitap': Icons.book,
-    'oyuncak': Icons.toys,
+    'aydınlatma': Icons.lightbulb,
+    'led': Icons.light_mode,
+    'tabela': Icons.storefront,
+    'ikinci el': Icons.recycling,
+    'malzeme': Icons.build,
     'default': Icons.category,
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _slideAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeAnimationController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideAnimationController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _fadeAnimationController.forward();
+    _slideAnimationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeAnimationController.dispose();
+    _slideAnimationController.dispose();
+    super.dispose();
+  }
 
   IconData _getCategoryIcon(String categoryName) {
     final lowerName = categoryName.toLowerCase();
@@ -33,16 +79,132 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
     return categoryIcons['default']!;
   }
 
+  void _navigateToCategoryProducts(Category category) {
+    // Navigate to category products page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CategoryProductsPage(category: category),
+      ),
+    );
+  }
+
+  Widget _buildCategoryCardVertical(Category category, bool isSelected) {
+    return GestureDetector(
+      onTap: () {
+        // Navigate to category products page
+        _navigateToCategoryProducts(category);
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppTheme.primaryNavy
+              : Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected
+                ? AppTheme.primaryOrange
+                : Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isSelected
+                  ? AppTheme.primaryOrange.withOpacity(0.2)
+                  : Colors.black.withOpacity(0.05),
+              blurRadius: isSelected ? 12 : 8,
+              offset: const Offset(0, 4),
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppTheme.primaryOrange
+                    : AppTheme.primaryOrange.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                category.name == 'Tümü'
+                    ? Icons.grid_view_rounded
+                    : _getCategoryIcon(category.name),
+                color: isSelected ? Colors.white : AppTheme.primaryOrange,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                category.name,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: isSelected
+                  ? Colors.white.withOpacity(0.7)
+                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+              size: 16,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(categoriesProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
-    final productsAsync = ref.watch(productsProvider(selectedCategory));
 
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: const Text('Mağaza'),
+        backgroundColor: AppTheme.primaryOrange,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppTheme.primaryOrange,
+                AppTheme.primaryOrange.withOpacity(0.8),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(4),
+          child: Container(
+            height: 4,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.primaryNavy,
+                  AppTheme.primaryNavy.withOpacity(0.7),
+                ],
+              ),
+            ),
+          ),
+        ),
         actions: [
+          const ThemeToggleButton(),
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
@@ -52,321 +214,145 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
               );
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Filtreleme özelliği yakında eklenecek')),
-              );
-            },
-          ),
         ],
       ),
-      body: Column(
-        children: [
-          // Categories horizontal list
-          Container(
-            height: 80,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: categoriesAsync.when(
-              data: (categories) {
-                // Add "Tümü" category at the beginning
-                final allCategories = [
-                  const Category(id: '', name: 'Tümü'),
-                  ...categories,
-                ];
-
-                return ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: allCategories.length,
-                  itemBuilder: (context, index) {
-                    final category = allCategories[index];
-                    final isSelected =
-                        (selectedCategory == null && index == 0) ||
-                            (selectedCategory == category.name);
-
-                    return GestureDetector(
-                      onTap: () {
-                        final newCategory = index == 0 ? null : category.name;
-                        ref.read(selectedCategoryProvider.notifier).state =
-                            newCategory;
-                      },
-                      child: Container(
-                        width: 85,
-                        margin: const EdgeInsets.only(right: 12),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? Theme.of(context).primaryColor
-                              : Colors.grey[100],
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected
-                                ? Theme.of(context).primaryColor
-                                : Colors.grey[300]!,
-                          ),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: Theme.of(context)
-                                        .primaryColor
-                                        .withOpacity(0.3),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ]
-                              : null,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              index == 0
-                                  ? Icons.apps
-                                  : _getCategoryIcon(category.name),
-                              color:
-                                  isSelected ? Colors.white : Colors.grey[600],
-                              size: 20,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              category.name,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: isSelected
-                                    ? Colors.white
-                                    : Colors.grey[700],
-                              ),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Text('Kategoriler yüklenemedi: $error'),
+      body: AnimatedBuilder(
+        animation: _fadeAnimation,
+        builder: (context, child) {
+          return FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: Column(
+                children: [
+                  // Categories horizontal cards
+                  _buildCategoriesSection(categoriesAsync, selectedCategory),
+                ],
               ),
             ),
-          ),
-
-          // Products grid
-          Expanded(
-            child: productsAsync.when(
-              data: (products) {
-                if (products.isEmpty) {
-                  return const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.shopping_bag_outlined,
-                            size: 64, color: Colors.grey),
-                        SizedBox(height: 16),
-                        Text(
-                          'Bu kategoride henüz ürün bulunmuyor',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.7,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemCount: products.length,
-                  itemBuilder: (context, index) {
-                    final product = products[index];
-                    return _ProductCard(product: product);
-                  },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline,
-                        size: 64, color: Colors.red),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Ürünler yüklenemedi:\n$error',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () =>
-                          ref.refresh(productsProvider(selectedCategory)),
-                      child: const Text('Tekrar Dene'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
-}
 
-class _ProductCard extends StatelessWidget {
-  final Product product;
+  Widget _buildCategoriesSection(
+      AsyncValue<List<Category>> categoriesAsync, String? selectedCategory) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      child: categoriesAsync.when(
+        data: (categories) {
+          // Add "Tümü" category and other categories (excluding Innova Craft Studio from list)
+          final allCategories = [
+            const Category(id: '', name: 'Tümü'),
+            ...categories,
+          ];
 
-  const _ProductCard({required this.product});
-
-  @override
-  Widget build(BuildContext context) {
-    final displayPrice = product.finalPrice ?? product.price;
-    final hasDiscount =
-        product.finalPrice != null && product.finalPrice! < product.price;
-
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text('${product.title} detayı yakında eklenecek')),
+          return Column(
+            children: [
+              // Innova Craft Studio - Special Category with top margin
+              Container(
+                margin: const EdgeInsets.only(top: 20),
+                child: _buildSpecialCategoryCard(const Category(
+                    id: 'innova_craft_studio', name: 'Innova Craft Studio')),
+              ),
+              const SizedBox(height: 20),
+              // All Categories - Vertical Cards
+              ...allCategories.map((category) {
+                // No category should be selected by default
+                final isSelected = selectedCategory == category.name;
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: _buildCategoryCardVertical(category, isSelected),
+                );
+              }).toList(),
+            ],
           );
         },
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Product Image
-              Expanded(
-                flex: 3,
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey[100],
-                  ),
-                  child: product.images.isNotEmpty
-                      ? ClipRoundedRectangle(
-                          borderRadius: BorderRadius.circular(8),
-                          child: CachedNetworkImage(
-                            imageUrl: product.images.first,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              color: Colors.grey[200],
-                              child: const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              color: Colors.grey[200],
-                              child: const Icon(Icons.image_not_supported),
-                            ),
-                          ),
-                        )
-                      : const Icon(Icons.image_not_supported, size: 48),
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Product Title
-              Expanded(
-                flex: 1,
-                child: Text(
-                  product.title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-
-              // Price and Stock
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        '₺${displayPrice.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      ),
-                      if (hasDiscount) ...[
-                        const SizedBox(width: 8),
-                        Text(
-                          '₺${product.price.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            decoration: TextDecoration.lineThrough,
-                            color: Colors.grey,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(
-                        product.stock > 0 ? Icons.check_circle : Icons.cancel,
-                        size: 12,
-                        color: product.stock > 0 ? Colors.green : Colors.red,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        product.stock > 0 ? 'Stokta var' : 'Stokta yok',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: product.stock > 0 ? Colors.green : Colors.red,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Text('Kategoriler yüklenemedi: $error'),
         ),
       ),
     );
   }
-}
 
-// Helper widget for rounded rectangle clipping
-class ClipRoundedRectangle extends StatelessWidget {
-  final Widget child;
-  final BorderRadius borderRadius;
-
-  const ClipRoundedRectangle({
-    super.key,
-    required this.child,
-    required this.borderRadius,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: borderRadius,
-      child: child,
+  Widget _buildSpecialCategoryCard(Category category) {
+    return GestureDetector(
+      onTap: () {
+        // Navigate to Innova Craft Studio products page
+        _navigateToCategoryProducts(category);
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppTheme.primaryOrange,
+              AppTheme.primaryOrange.withOpacity(0.8),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primaryOrange.withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.storefront_rounded,
+                color: Colors.white,
+                size: 32,
+              ),
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Innova Craft Studio',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Özel tasarım ürünler',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white.withOpacity(0.9),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: Colors.white.withOpacity(0.8),
+              size: 20,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

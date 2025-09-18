@@ -8,6 +8,7 @@ import '../../../cart/providers/cart_provider.dart';
 import '../../../../core/models/product_model.dart';
 import '../../../../core/models/service_model.dart';
 import '../../../../core/models/featured_model.dart';
+import '../../../../core/widgets/theme_toggle_button.dart';
 import '../../../../core/theme/app_theme.dart';
 
 class HomeTab extends ConsumerWidget {
@@ -22,33 +23,80 @@ class HomeTab extends ConsumerWidget {
     final featuredProducts = ref.watch(featuredProductsListProvider);
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryOrange,
-                borderRadius: BorderRadius.circular(12),
+        title: RichText(
+          text: TextSpan(
+            children: [
+              const TextSpan(
+                text: 'Innova Craft ',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              child: const Icon(
-                Icons.flash_on,
-                color: Colors.white,
-                size: 20,
+              TextSpan(
+                text: 'S',
+                style: TextStyle(
+                  color: Colors.blue[600],
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            const Text('ICS App'),
-          ],
+              TextSpan(
+                text: 't',
+                style: TextStyle(
+                  color: Colors.orange[600],
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              TextSpan(
+                text: 'u',
+                style: TextStyle(
+                  color: Colors.yellow[700],
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              TextSpan(
+                text: 'd',
+                style: TextStyle(
+                  color: Colors.red[600],
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              TextSpan(
+                text: 'i',
+                style: TextStyle(
+                  color: Colors.blue[600],
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              TextSpan(
+                text: 'o',
+                style: TextStyle(
+                  color: Colors.orange[600],
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
-              color: AppTheme.tertiaryBlack,
+              color: Theme.of(context).colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
-              icon: const Icon(Icons.notifications_outlined),
+              icon: Icon(
+                Icons.notifications_outlined,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -78,7 +126,7 @@ class HomeTab extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.primaryNavy.withOpacity(0.3),
+                    color: AppTheme.primaryNavy.withValues(alpha: 0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -91,10 +139,10 @@ class HomeTab extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),
@@ -161,23 +209,26 @@ class HomeTab extends ConsumerWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        AppTheme.cardBackground,
-                        AppTheme.tertiaryBlack,
-                        AppTheme.secondaryBlack,
+                        Theme.of(context).colorScheme.surface,
+                        Theme.of(context).colorScheme.surfaceVariant,
+                        Theme.of(context).colorScheme.surfaceVariant,
                       ],
                     ),
                     border: Border.all(
-                      color: AppTheme.lightGray.withOpacity(0.4),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.4),
                       width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withValues(alpha: 0.08),
                         blurRadius: 20,
-                        offset: const Offset(0, 10),
+                        offset: const Offset(0, 8),
                       ),
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: AppTheme.primaryNavy.withValues(alpha: 0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -186,7 +237,7 @@ class HomeTab extends ConsumerWidget {
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(24),
                       onTap: () {
                         // Navigate to services tab (index 1)
                         onNavigateToTab?.call(1);
@@ -219,9 +270,11 @@ class HomeTab extends ConsumerWidget {
                                 children: [
                                   Text(
                                     'Hizmetler',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
                                       fontSize: 20,
                                     ),
                                   ),
@@ -229,7 +282,9 @@ class HomeTab extends ConsumerWidget {
                                   Text(
                                     'Profesyonel hizmetlerimizi keşfedin',
                                     style: TextStyle(
-                                      color: Colors.white.withOpacity(0.7),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -242,7 +297,7 @@ class HomeTab extends ConsumerWidget {
                                 color: AppTheme.primaryNavy.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.arrow_forward_ios,
                                 color: AppTheme.primaryNavy,
                                 size: 20,
@@ -259,28 +314,32 @@ class HomeTab extends ConsumerWidget {
                 // Store Button
                 Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppTheme.primaryBlack,
-                        AppTheme.secondaryBlack,
-                        AppTheme.tertiaryBlack,
-                      ],
+                    borderRadius: BorderRadius.circular(24),
+                    color: Theme.of(context).colorScheme.surface,
+                    border: Border.all(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.2),
+                      width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 15,
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 20,
                         offset: const Offset(0, 8),
+                      ),
+                      BoxShadow(
+                        color: AppTheme.primaryOrange.withValues(alpha: 0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(24),
                       onTap: () {
                         // Navigate to catalog tab (index 2)
                         onNavigateToTab?.call(2);
@@ -312,11 +371,13 @@ class HomeTab extends ConsumerWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Mağaza',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
                                       fontSize: 20,
                                     ),
                                   ),
@@ -324,7 +385,9 @@ class HomeTab extends ConsumerWidget {
                                   Text(
                                     'Kaliteli ürünlerimizi inceleyin',
                                     style: TextStyle(
-                                      color: Colors.white.withOpacity(0.7),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -337,7 +400,7 @@ class HomeTab extends ConsumerWidget {
                                 color: AppTheme.primaryOrange.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.arrow_forward_ios,
                                 color: AppTheme.primaryOrange,
                                 size: 20,
@@ -354,28 +417,32 @@ class HomeTab extends ConsumerWidget {
                 // WhatsApp Button
                 Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppTheme.primaryBlack,
-                        AppTheme.secondaryBlack,
-                        AppTheme.tertiaryBlack,
-                      ],
+                    borderRadius: BorderRadius.circular(24),
+                    color: Theme.of(context).colorScheme.surface,
+                    border: Border.all(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.2),
+                      width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 15,
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 20,
                         offset: const Offset(0, 8),
+                      ),
+                      BoxShadow(
+                        color: AppTheme.whatsappGreen.withValues(alpha: 0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(24),
                       onTap: () {
                         _launchWhatsApp(context);
                       },
@@ -406,11 +473,13 @@ class HomeTab extends ConsumerWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'WhatsApp',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
                                       fontSize: 20,
                                     ),
                                   ),
@@ -418,7 +487,9 @@ class HomeTab extends ConsumerWidget {
                                   Text(
                                     'Hemen iletişime geçin',
                                     style: TextStyle(
-                                      color: Colors.white.withOpacity(0.7),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -431,7 +502,7 @@ class HomeTab extends ConsumerWidget {
                                 color: AppTheme.whatsappGreen.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.arrow_forward_ios,
                                 color: AppTheme.whatsappGreen,
                                 size: 20,
@@ -461,17 +532,17 @@ class HomeTab extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Text(
                   'Öne Çıkan Hizmetler',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onBackground,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             SizedBox(
-              height: 200,
+              height: 210,
               child: featuredServices.isEmpty
                   ? Center(
                       child: Card(
@@ -490,7 +561,8 @@ class HomeTab extends ConsumerWidget {
                               Text(
                                 'Henüz hizmet yok',
                                 style: TextStyle(
-                                  color: Colors.grey[600],
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -498,7 +570,9 @@ class HomeTab extends ConsumerWidget {
                               Text(
                                 'Yakında eklenecek',
                                 style: TextStyle(
-                                  color: Colors.grey[500],
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                   fontSize: 12,
                                 ),
                               ),
@@ -535,17 +609,17 @@ class HomeTab extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Text(
                   'Öne Çıkan Ürünler',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onBackground,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             SizedBox(
-              height: 280,
+              height: 230,
               child: featuredProducts.isEmpty
                   ? Center(
                       child: Card(
@@ -564,7 +638,8 @@ class HomeTab extends ConsumerWidget {
                               Text(
                                 'Henüz öne çıkan ürün yok',
                                 style: TextStyle(
-                                  color: Colors.grey[600],
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -572,7 +647,9 @@ class HomeTab extends ConsumerWidget {
                               Text(
                                 'Yakında eklenecek',
                                 style: TextStyle(
-                                  color: Colors.grey[500],
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                   fontSize: 12,
                                 ),
                               ),
@@ -634,228 +711,6 @@ class HomeTab extends ConsumerWidget {
   }
 }
 
-class _ServiceCard extends StatelessWidget {
-  final Service service;
-  final VoidCallback? onNavigateToServices;
-
-  const _ServiceCard({
-    required this.service,
-    this.onNavigateToServices,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 160,
-      height: 200, // Fixed height to prevent overflow
-      margin: const EdgeInsets.only(right: 16),
-      child: Card(
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            // Navigate directly to services tab on tap
-            onNavigateToServices?.call();
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(12), // Reduced padding
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Service image or icon
-                Container(
-                  width: double.infinity,
-                  height: 70, // Reduced height
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey[200],
-                  ),
-                  child: service.image != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: CachedNetworkImage(
-                            imageUrl: service.image!,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              color: Colors.grey[200],
-                              child: Icon(
-                                Icons.work,
-                                color: Theme.of(context).primaryColor,
-                                size: 28, // Reduced size
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              color: Colors.grey[200],
-                              child: Icon(
-                                Icons.work,
-                                color: Theme.of(context).primaryColor,
-                                size: 28, // Reduced size
-                              ),
-                            ),
-                          ),
-                        )
-                      : Icon(
-                          Icons.work,
-                          size: 40, // Reduced size
-                          color: Theme.of(context).primaryColor,
-                        ),
-                ),
-                const SizedBox(height: 12), // Reduced spacing
-                // Service title
-                Text(
-                  service.title,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        // Smaller text
-                        fontWeight: FontWeight.w600,
-                      ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6), // Reduced spacing
-                // Service description
-                Expanded(
-                  child: Text(
-                    service.description,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          // Smaller text
-                          fontSize: 11,
-                        ),
-                    maxLines: 2, // Reduced lines
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ProductCard extends StatelessWidget {
-  final Product product;
-  final VoidCallback? onNavigateToCatalog;
-
-  const _ProductCard({
-    required this.product,
-    this.onNavigateToCatalog,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final displayPrice = product.finalPrice ?? product.price;
-    final hasDiscount =
-        product.finalPrice != null && product.finalPrice! < product.price;
-
-    return Container(
-      width: 160,
-      height: 240, // Fixed height to prevent overflow
-      margin: const EdgeInsets.only(right: 16),
-      child: Card(
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            // Navigate directly to catalog tab on tap
-            onNavigateToCatalog?.call();
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(12), // Reduced padding
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Product image
-                Container(
-                  width: double.infinity,
-                  height: 80, // Reduced height
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey[200],
-                  ),
-                  child: product.images.isNotEmpty
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: CachedNetworkImage(
-                            imageUrl: product.images.first,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              color: Colors.grey[200],
-                              child: Icon(
-                                Icons.inventory,
-                                color: Theme.of(context).primaryColor,
-                                size: 28, // Reduced size
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              color: Colors.grey[200],
-                              child: Icon(
-                                Icons.inventory,
-                                color: Theme.of(context).primaryColor,
-                                size: 28, // Reduced size
-                              ),
-                            ),
-                          ),
-                        )
-                      : Icon(
-                          Icons.inventory,
-                          size: 40, // Reduced size
-                          color: Theme.of(context).primaryColor,
-                        ),
-                ),
-                const SizedBox(height: 12), // Reduced spacing
-                // Product title
-                Text(
-                  product.title,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        // Smaller text
-                        fontWeight: FontWeight.w600,
-                      ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6), // Reduced spacing
-                // Product price
-                Row(
-                  children: [
-                    Text(
-                      '₺${displayPrice.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
-                        fontSize: 14, // Smaller text
-                      ),
-                    ),
-                    if (hasDiscount) ...[
-                      const SizedBox(width: 4),
-                      Text(
-                        '₺${product.price.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                          decoration: TextDecoration.lineThrough,
-                          color: Colors.grey,
-                          fontSize: 9, // Smaller text
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 6), // Reduced spacing
-                // Stock status
-                Text(
-                  product.stock > 0 ? 'Stokta' : 'Tükendi',
-                  style: TextStyle(
-                    color: product.stock > 0 ? Colors.green : Colors.red,
-                    fontSize: 11, // Smaller text
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _FeaturedProductCard extends ConsumerWidget {
   final FeaturedProduct featuredProduct;
   final VoidCallback? onNavigateToCatalog;
@@ -873,8 +728,8 @@ class _FeaturedProductCard extends ConsumerWidget {
 
     return Container(
       width: 160,
-      height: 320,
-      margin: const EdgeInsets.only(right: 16),
+      height: 210, // Even larger cards to prevent overflow
+      margin: const EdgeInsets.only(right: 12),
       child: Card(
         elevation: 8,
         shadowColor: Colors.black.withOpacity(0.3),
@@ -884,7 +739,7 @@ class _FeaturedProductCard extends ConsumerWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            color: AppTheme.cardBackground,
+            color: Theme.of(context).colorScheme.surface,
             border: Border.all(
               color: AppTheme.primaryOrange.withOpacity(0.4),
               width: 2,
@@ -915,10 +770,10 @@ class _FeaturedProductCard extends ConsumerWidget {
                   // Product image
                   Container(
                     width: double.infinity,
-                    height: 80,
+                    height: 70, // Larger image height for better visibility
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      color: AppTheme.tertiaryBlack,
+                      color: Theme.of(context).colorScheme.surfaceVariant,
                     ),
                     child: featuredProduct.images.isNotEmpty
                         ? ClipRRect(
@@ -927,7 +782,9 @@ class _FeaturedProductCard extends ConsumerWidget {
                               imageUrl: featuredProduct.images.first,
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Container(
-                                color: AppTheme.tertiaryBlack,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceVariant,
                                 child: const Icon(
                                   Icons.inventory,
                                   color: AppTheme.primaryOrange,
@@ -935,7 +792,9 @@ class _FeaturedProductCard extends ConsumerWidget {
                                 ),
                               ),
                               errorWidget: (context, url, error) => Container(
-                                color: AppTheme.tertiaryBlack,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceVariant,
                                 child: const Icon(
                                   Icons.inventory,
                                   color: AppTheme.primaryOrange,
@@ -950,19 +809,19 @@ class _FeaturedProductCard extends ConsumerWidget {
                             color: AppTheme.primaryOrange,
                           ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   // Product title
                   Text(
                     featuredProduct.title ?? 'Ürün',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontSize: 13,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 13, // Larger font size for better readability
                     ),
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   // Product price
                   if (featuredProduct.price != null) ...[
                     Row(
@@ -972,36 +831,40 @@ class _FeaturedProductCard extends ConsumerWidget {
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: AppTheme.primaryOrange,
-                            fontSize: 14,
+                            fontSize:
+                                14, // Larger font size for better readability
                           ),
                         ),
                         if (hasDiscount) ...[
                           const SizedBox(width: 4),
                           Text(
                             '₺${featuredProduct.price?.toStringAsFixed(0) ?? '0'}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               decoration: TextDecoration.lineThrough,
-                              color: Colors.white70,
-                              fontSize: 11,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                              fontSize:
+                                  11, // Larger font size for better readability
                             ),
                           ),
                         ],
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                   ],
                   // Category
                   if (featuredProduct.categoryName != null) ...[
                     Text(
                       featuredProduct.categoryName!,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 11,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontSize: 11, // Larger font size for better readability
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                   ],
                   // Add to cart button or upcoming badge
                   if (featuredProduct.isUpcoming == true)
@@ -1087,8 +950,8 @@ class _FeaturedServiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 160,
-      height: 200, // Fixed height to prevent overflow
-      margin: const EdgeInsets.only(right: 16),
+      height: 190, // Even larger cards to prevent overflow
+      margin: const EdgeInsets.only(right: 12),
       child: Card(
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
@@ -1097,14 +960,14 @@ class _FeaturedServiceCard extends StatelessWidget {
             onNavigateToServices?.call();
           },
           child: Padding(
-            padding: const EdgeInsets.all(12), // Reduced padding
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Service image
                 Container(
                   width: double.infinity,
-                  height: 70, // Reduced height
+                  height: 70, // Larger image height for better visibility
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     color: Colors.grey[200],
@@ -1120,7 +983,7 @@ class _FeaturedServiceCard extends StatelessWidget {
                               child: Icon(
                                 Icons.work,
                                 color: Theme.of(context).primaryColor,
-                                size: 28, // Reduced size
+                                size: 32,
                               ),
                             ),
                             errorWidget: (context, url, error) => Container(
@@ -1128,29 +991,29 @@ class _FeaturedServiceCard extends StatelessWidget {
                               child: Icon(
                                 Icons.work,
                                 color: Theme.of(context).primaryColor,
-                                size: 28, // Reduced size
+                                size: 32,
                               ),
                             ),
                           ),
                         )
                       : Icon(
                           Icons.work,
-                          size: 40, // Reduced size
+                          size: 40,
                           color: Theme.of(context).primaryColor,
                         ),
                 ),
-                const SizedBox(height: 12), // Reduced spacing
+                const SizedBox(height: 8),
                 // Service title
                 Text(
                   featuredService.title ?? 'Hizmet',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        // Smaller text
                         fontWeight: FontWeight.w600,
+                        fontSize: 13, // Larger font size for better readability
                       ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 6), // Reduced spacing
+                const SizedBox(height: 4),
                 // Service description
                 if (featuredService.description != null) ...[
                   Expanded(
@@ -1158,29 +1021,63 @@ class _FeaturedServiceCard extends StatelessWidget {
                       featuredService.description!,
                       style: TextStyle(
                         color: Colors.grey[600],
-                        fontSize: 11, // Smaller text
+                        fontSize: 11, // Larger font size for better readability
                       ),
-                      maxLines: 2,
+                      maxLines: 2, // More lines for better readability
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(height: 6), // Reduced spacing
+                  const SizedBox(height: 8),
                 ],
-                // Upcoming badge
+                // Appointment button or upcoming badge
                 if (featuredService.isUpcoming == true)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 6, vertical: 3), // Reduced padding
+                    width: double.infinity,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppTheme.primaryNavy.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Text(
+                    child: const Text(
                       'Yakında',
                       style: TextStyle(
                         color: AppTheme.primaryNavy,
-                        fontSize: 9, // Smaller text
-                        fontWeight: FontWeight.w500,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                else
+                  Container(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Show appointment booking dialog or navigate to appointment page
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                '${featuredService.title} için randevu alınıyor...'),
+                            backgroundColor: AppTheme.primaryNavy,
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryNavy,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        'Randevu Al',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),

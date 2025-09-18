@@ -188,12 +188,12 @@ class AppointmentAdminOut with _$AppointmentAdminOut {
 @freezed
 class BusySlot with _$BusySlot {
   const factory BusySlot({
-    String? serviceId,
+    @JsonKey(name: 'service_id') String? serviceId,
     required String date,
     required String start,
     required String end,
     required String status,
-    required String appointmentId,
+    @JsonKey(name: 'appointment_id') required String appointmentId,
   }) = _BusySlot;
 
   factory BusySlot.fromJson(Map<String, dynamic> json) =>

@@ -5,6 +5,8 @@ import 'firebase_options.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/auth_wrapper.dart';
 import 'core/services/navigation_service.dart';
+import 'core/providers/theme_provider.dart';
+import 'core/services/theme_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +22,10 @@ void main() async {
     print('⚠️ Continuing without Firebase...');
   }
 
+  // Initialize theme service
+  final themeService = ThemeService();
+  await themeService.initialize();
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -28,11 +34,13 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+
     return MaterialApp(
       title: 'ICS App',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.dark, // Force dark theme for modern black design
+      themeMode: themeMode, // Dynamic theme mode based on user preference
       home: const AuthWrapper(),
       debugShowCheckedModeBanner: false,
       navigatorKey: NavigationService.navigatorKey,

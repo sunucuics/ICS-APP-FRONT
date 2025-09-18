@@ -1824,11 +1824,13 @@ BusySlot _$BusySlotFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$BusySlot {
+  @JsonKey(name: 'service_id')
   String? get serviceId => throw _privateConstructorUsedError;
   String get date => throw _privateConstructorUsedError;
   String get start => throw _privateConstructorUsedError;
   String get end => throw _privateConstructorUsedError;
   String get status => throw _privateConstructorUsedError;
+  @JsonKey(name: 'appointment_id')
   String get appointmentId => throw _privateConstructorUsedError;
 
   /// Serializes this BusySlot to a JSON map.
@@ -1847,12 +1849,12 @@ abstract class $BusySlotCopyWith<$Res> {
       _$BusySlotCopyWithImpl<$Res, BusySlot>;
   @useResult
   $Res call(
-      {String? serviceId,
+      {@JsonKey(name: 'service_id') String? serviceId,
       String date,
       String start,
       String end,
       String status,
-      String appointmentId});
+      @JsonKey(name: 'appointment_id') String appointmentId});
 }
 
 /// @nodoc
@@ -1915,12 +1917,12 @@ abstract class _$$BusySlotImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String? serviceId,
+      {@JsonKey(name: 'service_id') String? serviceId,
       String date,
       String start,
       String end,
       String status,
-      String appointmentId});
+      @JsonKey(name: 'appointment_id') String appointmentId});
 }
 
 /// @nodoc
@@ -1976,17 +1978,18 @@ class __$$BusySlotImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$BusySlotImpl implements _BusySlot {
   const _$BusySlotImpl(
-      {this.serviceId,
+      {@JsonKey(name: 'service_id') this.serviceId,
       required this.date,
       required this.start,
       required this.end,
       required this.status,
-      required this.appointmentId});
+      @JsonKey(name: 'appointment_id') required this.appointmentId});
 
   factory _$BusySlotImpl.fromJson(Map<String, dynamic> json) =>
       _$$BusySlotImplFromJson(json);
 
   @override
+  @JsonKey(name: 'service_id')
   final String? serviceId;
   @override
   final String date;
@@ -1997,6 +2000,7 @@ class _$BusySlotImpl implements _BusySlot {
   @override
   final String status;
   @override
+  @JsonKey(name: 'appointment_id')
   final String appointmentId;
 
   @override
@@ -2042,17 +2046,19 @@ class _$BusySlotImpl implements _BusySlot {
 
 abstract class _BusySlot implements BusySlot {
   const factory _BusySlot(
-      {final String? serviceId,
+      {@JsonKey(name: 'service_id') final String? serviceId,
       required final String date,
       required final String start,
       required final String end,
       required final String status,
+      @JsonKey(name: 'appointment_id')
       required final String appointmentId}) = _$BusySlotImpl;
 
   factory _BusySlot.fromJson(Map<String, dynamic> json) =
       _$BusySlotImpl.fromJson;
 
   @override
+  @JsonKey(name: 'service_id')
   String? get serviceId;
   @override
   String get date;
@@ -2063,6 +2069,7 @@ abstract class _BusySlot implements BusySlot {
   @override
   String get status;
   @override
+  @JsonKey(name: 'appointment_id')
   String get appointmentId;
 
   /// Create a copy of BusySlot

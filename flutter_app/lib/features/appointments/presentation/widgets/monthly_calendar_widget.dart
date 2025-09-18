@@ -19,10 +19,15 @@ class MonthlyCalendarWidget extends ConsumerStatefulWidget {
       _MonthlyCalendarWidgetState();
 }
 
-class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
+class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget>
+    with TickerProviderStateMixin {
   late DateTime _currentDate;
   late int _currentYear;
   late int _currentMonth;
+  late AnimationController _monthAnimationController;
+  late AnimationController _dayAnimationController;
+  late Animation<double> _monthAnimation;
+  late Animation<double> _dayAnimation;
 
   @override
   void initState() {
@@ -30,27 +35,68 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
     _currentDate = DateTime.now();
     _currentYear = _currentDate.year;
     _currentMonth = _currentDate.month;
+
+    _monthAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _dayAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+
+    _monthAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _monthAnimationController,
+      curve: Curves.easeInOut,
+    ));
+
+    _dayAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _dayAnimationController,
+      curve: Curves.elasticOut,
+    ));
+
+    _monthAnimationController.forward();
+    _dayAnimationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _monthAnimationController.dispose();
+    _dayAnimationController.dispose();
+    super.dispose();
   }
 
   void _previousMonth() {
-    setState(() {
-      if (_currentMonth == 1) {
-        _currentMonth = 12;
-        _currentYear--;
-      } else {
-        _currentMonth--;
-      }
+    _monthAnimationController.reverse().then((_) {
+      setState(() {
+        if (_currentMonth == 1) {
+          _currentMonth = 12;
+          _currentYear--;
+        } else {
+          _currentMonth--;
+        }
+      });
+      _monthAnimationController.forward();
     });
   }
 
   void _nextMonth() {
-    setState(() {
-      if (_currentMonth == 12) {
-        _currentMonth = 1;
-        _currentYear++;
-      } else {
-        _currentMonth++;
-      }
+    _monthAnimationController.reverse().then((_) {
+      setState(() {
+        if (_currentMonth == 12) {
+          _currentMonth = 1;
+          _currentYear++;
+        } else {
+          _currentMonth++;
+        }
+      });
+      _monthAnimationController.forward();
     });
   }
 
@@ -65,20 +111,20 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
 
     return Column(
       children: [
-        // Ay navigasyonu
-        _buildMonthNavigation(),
-        const SizedBox(height: 16),
-        // Takvim
+        // Modern month navigation
+        _buildModernMonthNavigation(),
+        const SizedBox(height: 20),
+        // Modern calendar
         busySlots.when(
-          data: (busySlotsList) => _buildCalendarFromBusySlots(busySlotsList),
-          loading: () => const Center(child: CircularProgressIndicator()),
+          data: (busySlotsList) => _buildModernCalendar(busySlotsList),
+          loading: () => _buildLoadingState(),
           error: (error, stack) => _buildErrorWidget(error),
         ),
       ],
     );
   }
 
-  Widget _buildMonthNavigation() {
+  Widget _buildModernMonthNavigation() {
     final monthNames = [
       'Ocak',
       'Şubat',
@@ -95,84 +141,109 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
     ];
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppTheme.primaryOrange.withOpacity(0.1),
-            AppTheme.secondaryOrange.withOpacity(0.05),
+            AppTheme.primaryNavy,
+            AppTheme.primaryNavy.withOpacity(0.8),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppTheme.primaryOrange.withOpacity(0.3),
-          width: 1,
-        ),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: AppTheme.primaryNavy.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+            spreadRadius: 0,
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: AppTheme.primaryOrange.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildNavigationButton(
+              icon: Icons.chevron_left_rounded,
               onPressed: _previousMonth,
-              icon: const Icon(
-                Icons.chevron_left,
-                color: AppTheme.primaryOrange,
-                size: 24,
-              ),
             ),
-          ),
-          Text(
-            '${monthNames[_currentMonth - 1]} $_currentYear',
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+            AnimatedBuilder(
+              animation: _monthAnimation,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: 0.8 + (0.2 * _monthAnimation.value),
+                  child: Opacity(
+                    opacity: _monthAnimation.value,
+                    child: Text(
+                      '${monthNames[_currentMonth - 1]} $_currentYear',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: AppTheme.primaryOrange.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
+            _buildNavigationButton(
+              icon: Icons.chevron_right_rounded,
               onPressed: _nextMonth,
-              icon: const Icon(
-                Icons.chevron_right,
-                color: AppTheme.primaryOrange,
-                size: 24,
-              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildCalendarFromBusySlots(List<BusySlot> busySlotsList) {
-    final today = DateTime.now();
+  Widget _buildNavigationButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-    // Mevcut ayın günlerini oluştur
+  Widget _buildModernCalendar(List<BusySlot> busySlotsList) {
+    final today = DateTime.now();
     final daysInMonth = DateTime(_currentYear, _currentMonth + 1, 0).day;
     final firstDayOfMonth = DateTime(_currentYear, _currentMonth, 1);
-    final firstWeekday = firstDayOfMonth.weekday; // 1 = Pazartesi
+    final firstWeekday = firstDayOfMonth.weekday;
 
     final days = <DateTime>[];
 
-    // Önceki ayın son günlerini ekle (haftanın başını doldur)
+    // Önceki ayın son günlerini ekle
     for (int i = firstWeekday - 1; i > 0; i--) {
       days.add(firstDayOfMonth.subtract(Duration(days: i)));
     }
@@ -182,59 +253,69 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
       days.add(DateTime(_currentYear, _currentMonth, i));
     }
 
-    // Sonraki ayın ilk günlerini ekle (haftanın sonunu doldur)
+    // Sonraki ayın ilk günlerini ekle
     while (days.length % 7 != 0) {
       days.add(days.last.add(const Duration(days: 1)));
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.secondaryBlack,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppTheme.primaryOrange.withOpacity(0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+    return AnimatedBuilder(
+      animation: _monthAnimation,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: 0.95 + (0.05 * _monthAnimation.value),
+          child: Opacity(
+            opacity: _monthAnimation.value,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 30,
+                    offset: const Offset(0, 10),
+                    spreadRadius: 0,
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  _buildModernWeekdayHeaders(),
+                  ...List.generate(
+                    (days.length / 7).ceil(),
+                    (weekIndex) => _buildModernWeekRow(
+                        days, weekIndex, today, busySlotsList),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Hafta günleri başlığı
-          _buildWeekdayHeaders(),
-          // Takvim günleri
-          ...List.generate(
-            (days.length / 7).ceil(),
-            (weekIndex) => _buildWeekRowFromBusySlots(
-                days, weekIndex, today, busySlotsList),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildWeekdayHeaders() {
+  Widget _buildModernWeekdayHeaders() {
     final weekdays = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppTheme.primaryOrange.withOpacity(0.1),
-            AppTheme.secondaryOrange.withOpacity(0.05),
+            AppTheme.primaryNavy.withOpacity(0.05),
+            AppTheme.primaryNavy.withOpacity(0.02),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
         ),
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
         ),
       ),
       child: Row(
@@ -243,10 +324,11 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
                   child: Center(
                     child: Text(
                       day,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
                         fontSize: 14,
-                        color: AppTheme.primaryOrange,
+                        color: AppTheme.primaryNavy.withOpacity(0.8),
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
@@ -256,8 +338,8 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
     );
   }
 
-  Widget _buildWeekRowFromBusySlots(List<DateTime> days, int weekIndex,
-      DateTime today, List<BusySlot> busySlots) {
+  Widget _buildModernWeekRow(List<DateTime> days, int weekIndex, DateTime today,
+      List<BusySlot> busySlots) {
     final startIndex = weekIndex * 7;
     final endIndex = (startIndex + 7).clamp(0, days.length);
     final weekDays = days.sublist(startIndex, endIndex);
@@ -266,8 +348,8 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
       children: List.generate(7, (dayIndex) {
         if (dayIndex < weekDays.length) {
           return Expanded(
-              child: _buildDayCellFromBusySlots(
-                  weekDays[dayIndex], today, busySlots));
+            child: _buildModernDayCell(weekDays[dayIndex], today, busySlots),
+          );
         } else {
           return const Expanded(child: SizedBox());
         }
@@ -275,7 +357,7 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
     );
   }
 
-  Widget _buildDayCellFromBusySlots(
+  Widget _buildModernDayCell(
       DateTime date, DateTime today, List<BusySlot> busySlots) {
     final isToday = date.year == today.year &&
         date.month == today.month &&
@@ -286,17 +368,14 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
         date.month == _currentMonth && date.year == _currentYear;
 
     // Bu tarih için dolu slotları bul
-    final dateString =
-        date.toIso8601String().split('T')[0]; // YYYY-MM-DD format
+    final dateString = date.toIso8601String().split('T')[0];
     final dayBusySlots =
         busySlots.where((slot) => slot.date == dateString).toList();
 
     // Basit çalışma saatleri varsayımı (09:00-18:00, Pazartesi-Cumartesi)
-    final isWorkingDay = date.weekday <= 6; // 1-6: Pazartesi-Cumartesi
+    final isWorkingDay = date.weekday <= 6;
     final workingHours = List.generate(
-        9,
-        (index) =>
-            '${(9 + index).toString().padLeft(2, '0')}:00'); // 09:00-17:00
+        9, (index) => '${(9 + index).toString().padLeft(2, '0')}:00');
 
     // Müsait saatleri hesapla
     final availableHours = <String>[];
@@ -312,66 +391,158 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
     }
 
     final hasAvailableSlots = availableHours.isNotEmpty;
+    final isWeekend = date.weekday == 7; // Pazar
 
+    return AnimatedBuilder(
+      animation: _dayAnimation,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: 0.8 + (0.2 * _dayAnimation.value),
+          child: Container(
+            height: 90,
+            margin: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              color:
+                  _getDayCellColor(isToday, isPast, isCurrentMonth, isWeekend),
+              border: isToday
+                  ? Border.all(
+                      color: AppTheme.primaryOrange,
+                      width: 2,
+                    )
+                  : null,
+              boxShadow: isToday
+                  ? [
+                      BoxShadow(
+                        color: AppTheme.primaryOrange.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: hasAvailableSlots && isCurrentMonth
+                    ? () => _showModernAvailableHours(date, availableHours)
+                    : null,
+                borderRadius: BorderRadius.circular(16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '${date.day}',
+                      style: TextStyle(
+                        fontWeight: isToday ? FontWeight.bold : FontWeight.w600,
+                        fontSize: 16,
+                        color: _getDayTextColor(
+                            isToday, isPast, isCurrentMonth, isWeekend),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    if (isCurrentMonth) ...[
+                      if (isWorkingDay) ...[
+                        _buildAvailabilityIndicator(hasAvailableSlots),
+                      ] else
+                        _buildWeekendIndicator(),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Color _getDayCellColor(
+      bool isToday, bool isPast, bool isCurrentMonth, bool isWeekend) {
+    if (isToday) {
+      return AppTheme.primaryOrange.withOpacity(0.1);
+    } else if (isPast) {
+      return Colors.grey.withOpacity(0.1);
+    } else if (!isCurrentMonth) {
+      return Colors.grey.withOpacity(0.05);
+    } else if (isWeekend) {
+      return Colors.blue.withOpacity(0.05);
+    } else {
+      return Colors.transparent;
+    }
+  }
+
+  Color _getDayTextColor(
+      bool isToday, bool isPast, bool isCurrentMonth, bool isWeekend) {
+    if (isToday) {
+      return AppTheme.primaryOrange;
+    } else if (isPast || !isCurrentMonth) {
+      return Colors.grey.withOpacity(0.5);
+    } else if (isWeekend) {
+      return Colors.blue.withOpacity(0.7);
+    } else {
+      return Theme.of(context).colorScheme.onSurface;
+    }
+  }
+
+  Widget _buildAvailabilityIndicator(bool hasAvailableSlots) {
     return Container(
-      height: 80,
+      width: 12,
+      height: 12,
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[200]!),
-        color: isToday
-            ? Theme.of(context).primaryColor.withOpacity(0.1)
-            : isCurrentMonth
-                ? Colors.white
-                : Colors.grey[50],
+        color: hasAvailableSlots ? AppTheme.successGreen : AppTheme.errorRed,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color:
+                (hasAvailableSlots ? AppTheme.successGreen : AppTheme.errorRed)
+                    .withOpacity(0.4),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: InkWell(
-        onTap: hasAvailableSlots && isCurrentMonth
-            ? () => _showAvailableHours(date, availableHours)
-            : null,
+    );
+  }
+
+  Widget _buildWeekendIndicator() {
+    return Container(
+      width: 12,
+      height: 12,
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.6),
+        shape: BoxShape.circle,
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Container(
+      height: 400,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryOrange),
+            ),
+            SizedBox(height: 16),
             Text(
-              '${date.day}',
+              'Takvim yükleniyor...',
               style: TextStyle(
-                fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                color: isPast || !isCurrentMonth
-                    ? Colors.grey[400]
-                    : isToday
-                        ? Theme.of(context).primaryColor
-                        : Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: AppTheme.primaryNavy,
               ),
             ),
-            const SizedBox(height: 4),
-            if (isCurrentMonth) ...[
-              if (isWorkingDay) ...[
-                if (hasAvailableSlots)
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                    ),
-                  )
-                else
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-              ] else
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    shape: BoxShape.circle,
-                  ),
-                ),
-            ],
           ],
         ),
       ),
@@ -380,27 +551,46 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
 
   Widget _buildErrorWidget(Object error) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 48,
-            color: Colors.red[400],
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.errorRed.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.error_outline_rounded,
+              size: 48,
+              color: AppTheme.errorRed,
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Text(
-            'Takvim yüklenemedi',
-            style: Theme.of(context).textTheme.titleMedium,
+            'Takvim Yüklenemedi',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.errorRed,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
             error.toString(),
-            style: Theme.of(context).textTheme.bodySmall,
+            style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
-          ElevatedButton(
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
             onPressed: () {
               ref.invalidate(busySlotsProvider(
                 BusySlotsParams(
@@ -409,74 +599,153 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
                 ),
               ));
             },
-            child: const Text('Tekrar Dene'),
+            icon: const Icon(Icons.refresh_rounded),
+            label: const Text('Tekrar Dene'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryOrange,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _showAvailableHours(DateTime date, List<String> availableHours) {
+  void _showModernAvailableHours(DateTime date, List<String> availableHours) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
+        initialChildSize: 0.7,
         maxChildSize: 0.9,
-        minChildSize: 0.3,
+        minChildSize: 0.4,
         expand: false,
         builder: (context, scrollController) => Container(
-          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 20,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Handle bar
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+              // Modern handle bar
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 50,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(3),
                 ),
               ),
-              const SizedBox(height: 24),
-              // Başlık
-              Text(
-                '${date.day} ${_getMonthName(date.month)} ${date.year}',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Modern header
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryOrange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Icon(
+                            Icons.access_time_rounded,
+                            color: AppTheme.primaryOrange,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Müsait Saatler',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              Text(
+                                '${date.day} ${_getMonthName(date.month)} ${date.year}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.copyWith(
+                                      color:
+                                          AppTheme.primaryNavy.withOpacity(0.7),
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-              ),
-              const SizedBox(height: 16),
-              // Müsait saatler
-              Expanded(
-                child: availableHours.isEmpty
-                    ? Center(
-                        child: Text(
-                          'Bu gün için müsait saat bulunmuyor',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      )
-                    : GridView.builder(
-                        controller: scrollController,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          childAspectRatio: 2.5,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
-                        ),
-                        itemCount: availableHours.length,
-                        itemBuilder: (context, index) {
-                          final hour = availableHours[index];
-                          return _buildHourButton(hour, date);
-                        },
-                      ),
+                    const SizedBox(height: 24),
+                    // Modern time slots
+                    Flexible(
+                      child: availableHours.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.schedule_rounded,
+                                    size: 64,
+                                    color: Colors.grey.withOpacity(0.5),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Bu gün için müsait saat bulunmuyor',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          color: Colors.grey.withOpacity(0.7),
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : SizedBox(
+                              height: 200, // Sabit yükseklik ver
+                              child: GridView.builder(
+                                controller: scrollController,
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3,
+                                  childAspectRatio: 2.2,
+                                  crossAxisSpacing: 12,
+                                  mainAxisSpacing: 12,
+                                ),
+                                itemCount: availableHours.length,
+                                itemBuilder: (context, index) {
+                                  final hour = availableHours[index];
+                                  return _buildModernHourButton(hour, date);
+                                },
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -485,24 +754,49 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
     );
   }
 
-  Widget _buildHourButton(String hour, DateTime date) {
-    return ElevatedButton(
-      onPressed: () {
-        Navigator.pop(context);
-        widget.onTimeSlotSelected?.call(date, hour);
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+  Widget _buildModernHourButton(String hour, DateTime date) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.primaryOrange,
+            AppTheme.primaryOrange.withOpacity(0.8),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryOrange.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Text(
-        hour,
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.pop(context);
+            widget.onTimeSlotSelected?.call(date, hour);
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Center(
+              child: Text(
+                hour,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );

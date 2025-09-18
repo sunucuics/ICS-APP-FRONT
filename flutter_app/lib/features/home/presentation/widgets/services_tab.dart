@@ -40,7 +40,7 @@ class ServicesTab extends ConsumerWidget {
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
-              color: AppTheme.tertiaryBlack,
+              color: Theme.of(context).colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
@@ -138,11 +138,11 @@ class _ServiceCard extends ConsumerWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: AppTheme.lightGray.withOpacity(0.4),
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
           width: 1,
         ),
       ),
-      color: AppTheme.cardBackground,
+      color: Theme.of(context).colorScheme.surface,
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () {
@@ -257,6 +257,9 @@ class _ServiceCard extends ConsumerWidget {
                               );
                             },
                             style: OutlinedButton.styleFrom(
+                              foregroundColor: AppTheme.primaryNavy,
+                              side: const BorderSide(
+                                  color: AppTheme.primaryNavy, width: 2),
                               padding: const EdgeInsets.symmetric(vertical: 8),
                             ),
                             child: const Text(
@@ -274,6 +277,8 @@ class _ServiceCard extends ConsumerWidget {
                                     _bookAppointment(context, ref, service);
                                   },
                             style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryNavy,
+                              foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 8),
                             ),
                             child: Text(
@@ -413,6 +418,8 @@ class _ServiceCard extends ConsumerWidget {
                           _bookAppointment(context, ref, service);
                         },
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryNavy,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: Text(
@@ -481,7 +488,7 @@ class _ServiceCard extends ConsumerWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: AppTheme.primaryNavy,
                 foregroundColor: Colors.white,
               ),
               child: const Text('Hesap Oluştur'),

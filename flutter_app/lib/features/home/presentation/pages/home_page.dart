@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/home_tab.dart';
 import '../widgets/services_tab.dart';
-import '../widgets/catalog_tab.dart';
 import '../widgets/cart_tab.dart';
+import '../widgets/catalog_tab_new.dart';
 import '../widgets/profile_tab.dart';
 import '../../../../core/theme/app_theme.dart';
 
@@ -30,8 +30,8 @@ class _HomePageState extends State<HomePage> {
     _tabs = [
       HomeTab(onNavigateToTab: _switchToTab),
       const ServicesTab(),
-      const CatalogTab(),
       const CartTab(),
+      const CatalogTabNew(),
       const ProfileTab(),
     ];
   }
@@ -44,127 +44,150 @@ class _HomePageState extends State<HomePage> {
         children: _tabs,
       ),
       bottomNavigationBar: Container(
-        margin: const EdgeInsets.all(16),
+        margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         decoration: BoxDecoration(
-          color: AppTheme.surfaceElevated,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(25),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.black.withValues(alpha: 0.1),
               blurRadius: 15,
-              offset: const Offset(0, 5),
+              offset: const Offset(0, 6),
             ),
           ],
         ),
-        child: NavigationBar(
-          selectedIndex: _currentIndex,
-          onDestinationSelected: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-          backgroundColor: Colors.transparent,
-          surfaceTintColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          destinations: [
-            NavigationDestination(
-              icon: Icon(
-                Icons.home_outlined,
-                color: Colors.white,
-                size: 24,
-              ),
-              selectedIcon: Icon(
-                Icons.home,
-                color: Colors.white,
-                size: 24,
-              ),
-              label: 'Ana Sayfa',
-            ),
-            NavigationDestination(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: _currentIndex == 1
-                      ? AppTheme.primaryNavy.withOpacity(0.2)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.work_outline,
-                  color: Colors.white,
-                  size: 24,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              // Anasayfa (Home)
+              GestureDetector(
+                onTap: () => setState(() => _currentIndex = 0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.home,
+                      color: _currentIndex == 0
+                          ? Colors.grey[700]
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                      size: 24,
+                    ),
+                    if (_currentIndex == 0)
+                      Container(
+                        margin: const EdgeInsets.only(top: 4),
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[700],
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              selectedIcon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryNavy.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.work,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              label: 'Hizmetler',
-            ),
-            NavigationDestination(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: _currentIndex == 2
-                      ? AppTheme.primaryOrange.withOpacity(0.2)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.store_outlined,
-                  color: Colors.white,
-                  size: 24,
+              // Hizmetler (Services)
+              GestureDetector(
+                onTap: () => setState(() => _currentIndex = 1),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.work,
+                      color: _currentIndex == 1
+                          ? AppTheme.primaryNavy
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                      size: 24,
+                    ),
+                    if (_currentIndex == 1)
+                      Container(
+                        margin: const EdgeInsets.only(top: 4),
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.primaryNavy,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              selectedIcon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryOrange.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
+              // Sepet (Cart) - Central Button
+              GestureDetector(
+                onTap: () => setState(() => _currentIndex = 2),
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: _currentIndex == 2
+                        ? AppTheme.primaryOrange
+                        : AppTheme.primaryOrange,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.shopping_cart,
+                    color: Colors.white,
+                    size: 24,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.store,
-                  color: Colors.white,
-                  size: 24,
+              ),
+              // Mağaza (Store)
+              GestureDetector(
+                onTap: () => setState(() => _currentIndex = 3),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.store,
+                      color: _currentIndex == 3
+                          ? AppTheme.primaryOrange
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                      size: 24,
+                    ),
+                    if (_currentIndex == 3)
+                      Container(
+                        margin: const EdgeInsets.only(top: 4),
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.primaryOrange,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              label: 'Mağaza',
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.shopping_cart_outlined,
-                color: Colors.white,
-                size: 24,
+              // Profil (Profile)
+              GestureDetector(
+                onTap: () => setState(() => _currentIndex = 4),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.person,
+                      color: _currentIndex == 4
+                          ? Colors.grey[700]
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                      size: 24,
+                    ),
+                    if (_currentIndex == 4)
+                      Container(
+                        margin: const EdgeInsets.only(top: 4),
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[700],
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                  ],
+                ),
               ),
-              selectedIcon: Icon(
-                Icons.shopping_cart,
-                color: Colors.white,
-                size: 24,
-              ),
-              label: 'Sepet',
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.person_outline,
-                color: Colors.white,
-                size: 24,
-              ),
-              selectedIcon: Icon(
-                Icons.person,
-                color: Colors.white,
-                size: 24,
-              ),
-              label: 'Profil',
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

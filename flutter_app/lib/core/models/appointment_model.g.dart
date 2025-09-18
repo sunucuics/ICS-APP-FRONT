@@ -8,22 +8,22 @@ part of 'appointment_model.dart';
 
 _$BusySlotImpl _$$BusySlotImplFromJson(Map<String, dynamic> json) =>
     _$BusySlotImpl(
-      serviceId: json['serviceId'] as String?,
+      serviceId: json['service_id'] as String?,
       date: json['date'] as String,
       start: json['start'] as String,
       end: json['end'] as String,
       status: json['status'] as String,
-      appointmentId: json['appointmentId'] as String,
+      appointmentId: json['appointment_id'] as String,
     );
 
 Map<String, dynamic> _$$BusySlotImplToJson(_$BusySlotImpl instance) =>
     <String, dynamic>{
-      'serviceId': instance.serviceId,
+      'service_id': instance.serviceId,
       'date': instance.date,
       'start': instance.start,
       'end': instance.end,
       'status': instance.status,
-      'appointmentId': instance.appointmentId,
+      'appointment_id': instance.appointmentId,
     };
 
 _$ServiceAvailabilityImpl _$$ServiceAvailabilityImplFromJson(

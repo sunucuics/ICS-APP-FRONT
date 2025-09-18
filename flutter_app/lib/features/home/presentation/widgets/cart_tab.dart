@@ -114,10 +114,10 @@ class CartTab extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             'Sepetiniz boş',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onBackground,
             ),
           ),
           const SizedBox(height: 8),
@@ -125,7 +125,7 @@ class CartTab extends ConsumerWidget {
             'Mağazadan ürün ekleyerek başlayabilirsiniz',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.white.withOpacity(0.7),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),
@@ -176,7 +176,7 @@ class CartTab extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: AppTheme.secondaryBlack,
+        color: Theme.of(context).colorScheme.surfaceVariant,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.3),
@@ -195,7 +195,7 @@ class CartTab extends ConsumerWidget {
               height: 80,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color: AppTheme.tertiaryBlack,
+                color: Theme.of(context).colorScheme.surfaceVariant,
               ),
               child: item.image != null
                   ? ClipRRect(
@@ -204,7 +204,7 @@ class CartTab extends ConsumerWidget {
                         imageUrl: item.image!,
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(
-                          color: AppTheme.tertiaryBlack,
+                          color: Theme.of(context).colorScheme.surfaceVariant,
                           child: const Center(
                             child: CircularProgressIndicator(
                               color: AppTheme.primaryOrange,
@@ -212,7 +212,7 @@ class CartTab extends ConsumerWidget {
                           ),
                         ),
                         errorWidget: (context, url, error) => Container(
-                          color: AppTheme.tertiaryBlack,
+                          color: Theme.of(context).colorScheme.surfaceVariant,
                           child: const Icon(
                             Icons.image_not_supported,
                             color: AppTheme.primaryOrange,
@@ -234,10 +234,10 @@ class CartTab extends ConsumerWidget {
                 children: [
                   Text(
                     item.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -247,7 +247,7 @@ class CartTab extends ConsumerWidget {
                     Text(
                       item.categoryName!,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 12,
                       ),
                     ),
@@ -268,9 +268,10 @@ class CartTab extends ConsumerWidget {
                         const SizedBox(width: 8),
                         Text(
                           '₺${item.price.toStringAsFixed(2)}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             decoration: TextDecoration.lineThrough,
-                            color: Colors.white54,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                             fontSize: 12,
                           ),
                         ),
@@ -289,7 +290,8 @@ class CartTab extends ConsumerWidget {
                             : null,
                         icon: const Icon(Icons.remove),
                         style: IconButton.styleFrom(
-                          backgroundColor: AppTheme.tertiaryBlack,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.surfaceVariant,
                           padding: const EdgeInsets.all(8),
                           minimumSize: const Size(32, 32),
                         ),
@@ -297,10 +299,10 @@ class CartTab extends ConsumerWidget {
                       const SizedBox(width: 12),
                       Text(
                         '${item.qty}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -340,7 +342,7 @@ class CartTab extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.secondaryBlack,
+        color: Theme.of(context).colorScheme.surfaceVariant,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
@@ -360,10 +362,10 @@ class CartTab extends ConsumerWidget {
             children: [
               Text(
                 'Toplam (${cart.totalQuantity} ürün)',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               Text(
@@ -386,9 +388,13 @@ class CartTab extends ConsumerWidget {
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              child: const Text(
+              child: Text(
                 'Siparişi Tamamla',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
               ),
             ),
           ),
