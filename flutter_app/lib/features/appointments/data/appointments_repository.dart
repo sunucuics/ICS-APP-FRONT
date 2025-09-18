@@ -9,7 +9,7 @@ class AppointmentsRepository {
   }) : _apiService = apiService;
 
   /// Dolu slotları getirir (takvim için)
-  Future<Map<String, dynamic>> getBusySlots({
+  Future<List<BusySlot>> getBusySlots({
     String? serviceId,
     int days = 30,
   }) async {

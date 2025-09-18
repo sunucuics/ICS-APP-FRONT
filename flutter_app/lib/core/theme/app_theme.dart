@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Modern Orange Color Palette
-  static const Color primaryOrange = Color(0xFFFF6B35);
-  static const Color secondaryOrange = Color(0xFFFF8C42);
-  static const Color lightOrange = Color(0xFFFFB366);
-  static const Color darkOrange = Color(0xFFE55A2B);
-
   // Modern Black/Dark Color Palette
   static const Color primaryBlack = Color(0xFF0A0A0A);
   static const Color secondaryBlack = Color(0xFF1C1C1E);
@@ -16,6 +10,23 @@ class AppTheme {
   static const Color darkGray = Color(0xFF6A6A6C);
   static const Color cardBackground = Color(0xFF1A1A1C);
   static const Color surfaceElevated = Color(0xFF242426);
+
+  // Navy Blue Color Palette (Services)
+  static const Color primaryNavy = Color(0xFF1A237E);
+  static const Color secondaryNavy = Color(0xFF283593);
+  static const Color lightNavy = Color(0xFF3949AB);
+  static const Color darkNavy = Color(0xFF0D1B69);
+
+  // Orange Color Palette (Store)
+  static const Color primaryOrange = Color(0xFFFF6B35);
+  static const Color secondaryOrange = Color(0xFFFF8C42);
+  static const Color lightOrange = Color(0xFFFFB366);
+  static const Color darkOrange = Color(0xFFE55A2B);
+
+  // WhatsApp Green Color Palette
+  static const Color whatsappGreen = Color(0xFF25D366);
+  static const Color whatsappGreenLight = Color(0xFF4AE54A);
+  static const Color whatsappGreenDark = Color(0xFF128C7E);
 
   // Accent Colors
   static const Color successGreen = Color(0xFF4CAF50);
@@ -110,14 +121,14 @@ class AppTheme {
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: primaryBlack,
-      indicatorColor: primaryOrange,
+      indicatorColor: primaryNavy,
       indicatorShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
       labelTextStyle: MaterialStateProperty.resolveWith((states) {
         if (states.contains(MaterialState.selected)) {
           return const TextStyle(
-            color: primaryOrange,
+            color: primaryNavy,
             fontSize: 13,
             fontWeight: FontWeight.bold,
             shadows: [
@@ -145,7 +156,7 @@ class AppTheme {
       iconTheme: MaterialStateProperty.resolveWith((states) {
         if (states.contains(MaterialState.selected)) {
           return const IconThemeData(
-            color: primaryOrange,
+            color: primaryNavy,
             size: 26,
             shadows: [
               Shadow(
@@ -306,14 +317,14 @@ class AppTheme {
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: primaryBlack,
-      indicatorColor: primaryOrange,
+      indicatorColor: primaryNavy,
       indicatorShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
       labelTextStyle: MaterialStateProperty.resolveWith((states) {
         if (states.contains(MaterialState.selected)) {
           return const TextStyle(
-            color: primaryOrange,
+            color: primaryNavy,
             fontSize: 13,
             fontWeight: FontWeight.bold,
             shadows: [
@@ -341,7 +352,7 @@ class AppTheme {
       iconTheme: MaterialStateProperty.resolveWith((states) {
         if (states.contains(MaterialState.selected)) {
           return const IconThemeData(
-            color: primaryOrange,
+            color: primaryNavy,
             size: 26,
             shadows: [
               Shadow(

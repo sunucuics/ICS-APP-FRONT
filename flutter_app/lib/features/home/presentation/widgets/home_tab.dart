@@ -71,14 +71,14 @@ class HomeTab extends ConsumerWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    AppTheme.primaryOrange,
-                    AppTheme.secondaryOrange,
+                    AppTheme.primaryNavy,
+                    AppTheme.secondaryNavy,
                   ],
                 ),
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.primaryOrange.withOpacity(0.3),
+                    color: AppTheme.primaryNavy.withOpacity(0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -199,18 +199,17 @@ class HomeTab extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: AppTheme.primaryOrange.withOpacity(0.2),
+                                color: AppTheme.primaryNavy.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color:
-                                      AppTheme.primaryOrange.withOpacity(0.3),
+                                  color: AppTheme.primaryNavy.withOpacity(0.3),
                                   width: 1,
                                 ),
                               ),
                               child: const Icon(
                                 Icons.work,
                                 size: 32,
-                                color: AppTheme.primaryOrange,
+                                color: AppTheme.primaryNavy,
                               ),
                             ),
                             const SizedBox(width: 20),
@@ -240,12 +239,12 @@ class HomeTab extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: AppTheme.primaryOrange.withOpacity(0.2),
+                                color: AppTheme.primaryNavy.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
                                 Icons.arrow_forward_ios,
-                                color: AppTheme.primaryOrange,
+                                color: AppTheme.primaryNavy,
                                 size: 20,
                               ),
                             ),
@@ -388,17 +387,18 @@ class HomeTab extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: AppTheme.successGreen.withOpacity(0.2),
+                                color: AppTheme.whatsappGreen.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: AppTheme.successGreen.withOpacity(0.3),
+                                  color:
+                                      AppTheme.whatsappGreen.withOpacity(0.3),
                                   width: 1,
                                 ),
                               ),
                               child: const Icon(
                                 Icons.chat,
                                 size: 32,
-                                color: AppTheme.successGreen,
+                                color: AppTheme.whatsappGreen,
                               ),
                             ),
                             const SizedBox(width: 20),
@@ -428,12 +428,12 @@ class HomeTab extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: AppTheme.successGreen.withOpacity(0.2),
+                                color: AppTheme.whatsappGreen.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
                                 Icons.arrow_forward_ios,
-                                color: AppTheme.successGreen,
+                                color: AppTheme.whatsappGreen,
                                 size: 20,
                               ),
                             ),
@@ -1172,13 +1172,13 @@ class _FeaturedServiceCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 6, vertical: 3), // Reduced padding
                     decoration: BoxDecoration(
-                      color: Colors.orange[100],
+                      color: AppTheme.primaryNavy.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       'Yakında',
                       style: TextStyle(
-                        color: Colors.orange[800],
+                        color: AppTheme.primaryNavy,
                         fontSize: 9, // Smaller text
                         fontWeight: FontWeight.w500,
                       ),

@@ -46,14 +46,11 @@ class ApiEndpoints {
   static String orderTracking(String orderId) => '/orders/$orderId/tracking';
 
   // Appointments endpoints
-  static const String appointments = '/appointments';
+  static const String appointments = '/appointments/';
   static const String appointmentsCalendar = '/appointments/calendar';
-  static const String appointmentsBook = '/appointments/book';
   static const String myAppointments = '/appointments/my-appointments';
   static String appointment(String appointmentId) =>
       '/appointments/$appointmentId';
-  static String monthlyAvailability(String serviceId, int year, int month) =>
-      '/appointments/availability/$serviceId/$year/$month';
   static String serviceAvailability(String serviceId) =>
       '/appointments/service-availability/$serviceId';
 
@@ -89,7 +86,11 @@ class ApiEndpoints {
   static const String adminProducts = '/admin/products';
   static const String adminServices = '/admin/services';
   static const String adminOrders = '/admin/orders';
-  static const String adminAppointments = '/admin/appointments';
+  static const String adminAppointments = '/admin/appointments/';
+  static String adminAppointment(String appointmentId) =>
+      '/admin/appointments/$appointmentId';
+  static String adminServiceAvailability(String serviceId) =>
+      '/admin/appointments/service-availability/$serviceId';
   static const String adminDiscounts = '/admin/discounts';
   static const String adminComments = '/admin/comments';
   static const String adminFeatured = '/admin/featured';

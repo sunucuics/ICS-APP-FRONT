@@ -34,6 +34,20 @@ class _AppointmentBookingPageState
   Widget build(BuildContext context) {
     final bookingState = ref.watch(appointmentBookingProvider);
 
+    // Listen to booking state changes
+    ref.listen(appointmentBookingProvider, (previous, next) {
+      next.whenOrNull(
+        data: (appointment) {
+          if (appointment != null) {
+            _showSuccessDialog();
+          }
+        },
+        error: (error, stack) {
+          _showErrorDialog(error.toString());
+        },
+      );
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text('${widget.service.title} - Randevu Al'),
@@ -305,7 +319,7 @@ class _AppointmentBookingPageState
   void _bookAppointment() {
     if (_selectedDate == null || _selectedTime == null) return;
 
-    // Form-data ile randevu oluştur
+    // Create DateTime in local timezone, then convert to UTC for backend
     final startDateTime = DateTime(
       _selectedDate!.year,
       _selectedDate!.month,
@@ -318,20 +332,6 @@ class _AppointmentBookingPageState
           serviceId: widget.service.id,
           start: startDateTime,
         );
-
-    // Başarılı randevu oluşturma sonrası
-    ref.listen(appointmentBookingProvider, (previous, next) {
-      next.whenOrNull(
-        data: (appointment) {
-          if (appointment != null) {
-            _showSuccessDialog();
-          }
-        },
-        error: (error, stack) {
-          _showErrorDialog(error.toString());
-        },
-      );
-    });
   }
 
   void _showSuccessDialog() {
@@ -339,25 +339,50 @@ class _AppointmentBookingPageState
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
         title: const Row(
           children: [
-            Icon(Icons.check_circle, color: Colors.green),
-            SizedBox(width: 8),
-            Text('Randevu Talebi Oluşturuldu'),
+            Icon(Icons.check_circle, color: Colors.green, size: 28),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Randevu Talebi Oluşturuldu!',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ],
         ),
         content: const Text(
-          'Randevu talebiniz başarıyla oluşturuldu. '
+          '🎉 Randevu talebiniz başarıyla oluşturuldu!\n\n'
           'Admin onayından sonra randevunuz aktif olacaktır. '
           'Randevularım sayfasından durumunuzu takip edebilirsiniz.',
+          style: TextStyle(fontSize: 16),
         ),
         actions: [
-          TextButton(
+          ElevatedButton(
             onPressed: () {
+              // Reset provider state
+              ref.read(appointmentBookingProvider.notifier).reset();
               Navigator.pop(context);
               Navigator.pop(context);
             },
-            child: const Text('Tamam'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+            child: const Text(
+              'Harika!',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -368,18 +393,47 @@ class _AppointmentBookingPageState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
         title: const Row(
           children: [
-            Icon(Icons.error, color: Colors.red),
-            SizedBox(width: 8),
-            Text('Hata'),
+            Icon(Icons.error_outline, color: Colors.red, size: 28),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Randevu Alınamadı',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ],
         ),
-        content: Text(error),
+        content: Text(
+          '❌ Randevu talebi oluşturulurken bir hata oluştu:\n\n$error\n\nLütfen tekrar deneyin.',
+          style: const TextStyle(fontSize: 16),
+        ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Tamam'),
+          ElevatedButton(
+            onPressed: () {
+              // Reset provider state
+              ref.read(appointmentBookingProvider.notifier).reset();
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+            child: const Text(
+              'Tamam',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),

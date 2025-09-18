@@ -16,8 +16,7 @@ final appointmentsRepositoryProvider = Provider<AppointmentsRepository>((ref) {
 
 // Busy Slots Provider (Takvim için)
 final busySlotsProvider =
-    FutureProvider.family<Map<String, dynamic>, BusySlotsParams>(
-        (ref, params) async {
+    FutureProvider.family<List<BusySlot>, BusySlotsParams>((ref, params) async {
   final repository = ref.watch(appointmentsRepositoryProvider);
   return await repository.getBusySlots(
     serviceId: params.serviceId,

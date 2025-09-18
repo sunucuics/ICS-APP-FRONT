@@ -47,26 +47,12 @@ class _HomePageState extends State<HomePage> {
         margin: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppTheme.surfaceElevated,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: AppTheme.primaryOrange.withOpacity(0.5),
-            width: 2,
-          ),
+          borderRadius: BorderRadius.circular(25),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.8),
-              blurRadius: 30,
-              offset: const Offset(0, 10),
-            ),
-            BoxShadow(
-              color: AppTheme.primaryOrange.withOpacity(0.2),
-              blurRadius: 20,
-              offset: const Offset(0, 5),
-            ),
-            BoxShadow(
               color: Colors.black.withOpacity(0.3),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
             ),
           ],
         ),
@@ -82,33 +68,15 @@ class _HomePageState extends State<HomePage> {
           shadowColor: Colors.transparent,
           destinations: [
             NavigationDestination(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: _currentIndex == 0
-                      ? AppTheme.primaryOrange.withOpacity(0.2)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.home_outlined,
-                  color: _currentIndex == 0
-                      ? AppTheme.primaryOrange
-                      : Colors.white,
-                  size: 26,
-                ),
+              icon: Icon(
+                Icons.home_outlined,
+                color: Colors.white,
+                size: 24,
               ),
-              selectedIcon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryOrange.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.home,
-                  color: AppTheme.primaryOrange,
-                  size: 26,
-                ),
+              selectedIcon: Icon(
+                Icons.home,
+                color: Colors.white,
+                size: 24,
               ),
               label: 'Ana Sayfa',
             ),
@@ -117,28 +85,26 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: _currentIndex == 1
-                      ? AppTheme.primaryOrange.withOpacity(0.2)
+                      ? AppTheme.primaryNavy.withOpacity(0.2)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   Icons.work_outline,
-                  color: _currentIndex == 1
-                      ? AppTheme.primaryOrange
-                      : Colors.white,
-                  size: 26,
+                  color: Colors.white,
+                  size: 24,
                 ),
               ),
               selectedIcon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryOrange.withOpacity(0.2),
+                  color: AppTheme.primaryNavy.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.work,
-                  color: AppTheme.primaryOrange,
-                  size: 26,
+                  color: Colors.white,
+                  size: 24,
                 ),
               ),
               label: 'Hizmetler',
@@ -154,10 +120,8 @@ class _HomePageState extends State<HomePage> {
                 ),
                 child: Icon(
                   Icons.store_outlined,
-                  color: _currentIndex == 2
-                      ? AppTheme.primaryOrange
-                      : Colors.white,
-                  size: 26,
+                  color: Colors.white,
+                  size: 24,
                 ),
               ),
               selectedIcon: Container(
@@ -168,71 +132,35 @@ class _HomePageState extends State<HomePage> {
                 ),
                 child: const Icon(
                   Icons.store,
-                  color: AppTheme.primaryOrange,
-                  size: 26,
+                  color: Colors.white,
+                  size: 24,
                 ),
               ),
               label: 'Mağaza',
             ),
             NavigationDestination(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: _currentIndex == 3
-                      ? AppTheme.primaryOrange.withOpacity(0.2)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.shopping_cart_outlined,
-                  color: _currentIndex == 3
-                      ? AppTheme.primaryOrange
-                      : Colors.white,
-                  size: 26,
-                ),
+              icon: Icon(
+                Icons.shopping_cart_outlined,
+                color: Colors.white,
+                size: 24,
               ),
-              selectedIcon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryOrange.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.shopping_cart,
-                  color: AppTheme.primaryOrange,
-                  size: 26,
-                ),
+              selectedIcon: Icon(
+                Icons.shopping_cart,
+                color: Colors.white,
+                size: 24,
               ),
               label: 'Sepet',
             ),
             NavigationDestination(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: _currentIndex == 4
-                      ? AppTheme.primaryOrange.withOpacity(0.2)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.person_outline,
-                  color: _currentIndex == 4
-                      ? AppTheme.primaryOrange
-                      : Colors.white,
-                  size: 26,
-                ),
+              icon: Icon(
+                Icons.person_outline,
+                color: Colors.white,
+                size: 24,
               ),
-              selectedIcon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryOrange.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.person,
-                  color: AppTheme.primaryOrange,
-                  size: 26,
-                ),
+              selectedIcon: Icon(
+                Icons.person,
+                color: Colors.white,
+                size: 24,
               ),
               label: 'Profil',
             ),

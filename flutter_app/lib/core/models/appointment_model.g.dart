@@ -6,6 +6,26 @@ part of 'appointment_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+_$BusySlotImpl _$$BusySlotImplFromJson(Map<String, dynamic> json) =>
+    _$BusySlotImpl(
+      serviceId: json['serviceId'] as String?,
+      date: json['date'] as String,
+      start: json['start'] as String,
+      end: json['end'] as String,
+      status: json['status'] as String,
+      appointmentId: json['appointmentId'] as String,
+    );
+
+Map<String, dynamic> _$$BusySlotImplToJson(_$BusySlotImpl instance) =>
+    <String, dynamic>{
+      'serviceId': instance.serviceId,
+      'date': instance.date,
+      'start': instance.start,
+      'end': instance.end,
+      'status': instance.status,
+      'appointmentId': instance.appointmentId,
+    };
+
 _$ServiceAvailabilityImpl _$$ServiceAvailabilityImplFromJson(
         Map<String, dynamic> json) =>
     _$ServiceAvailabilityImpl(

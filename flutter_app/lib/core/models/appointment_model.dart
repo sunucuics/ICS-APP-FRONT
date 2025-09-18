@@ -186,6 +186,21 @@ class AppointmentAdminOut with _$AppointmentAdminOut {
 }
 
 @freezed
+class BusySlot with _$BusySlot {
+  const factory BusySlot({
+    String? serviceId,
+    required String date,
+    required String start,
+    required String end,
+    required String status,
+    required String appointmentId,
+  }) = _BusySlot;
+
+  factory BusySlot.fromJson(Map<String, dynamic> json) =>
+      _$BusySlotFromJson(json);
+}
+
+@freezed
 class ServiceAvailability with _$ServiceAvailability {
   const factory ServiceAvailability({
     @JsonKey(name: 'service_id') required String serviceId,

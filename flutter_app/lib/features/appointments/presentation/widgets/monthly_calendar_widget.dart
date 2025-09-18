@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/appointments_provider.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/models/appointment_model.dart';
 
 class MonthlyCalendarWidget extends ConsumerStatefulWidget {
   final String serviceId;
@@ -69,7 +70,7 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
         const SizedBox(height: 16),
         // Takvim
         busySlots.when(
-          data: (busyData) => _buildCalendarFromBusySlots(busyData),
+          data: (busySlotsList) => _buildCalendarFromBusySlots(busySlotsList),
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, stack) => _buildErrorWidget(error),
         ),
@@ -161,8 +162,7 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
     );
   }
 
-  Widget _buildCalendarFromBusySlots(Map<String, dynamic> busyData) {
-    final busySlots = busyData['busy'] as List<dynamic>? ?? [];
+  Widget _buildCalendarFromBusySlots(List<BusySlot> busySlotsList) {
     final today = DateTime.now();
 
     // Mevcut ayın günlerini oluştur
@@ -210,8 +210,8 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
           // Takvim günleri
           ...List.generate(
             (days.length / 7).ceil(),
-            (weekIndex) =>
-                _buildWeekRowFromBusySlots(days, weekIndex, today, busySlots),
+            (weekIndex) => _buildWeekRowFromBusySlots(
+                days, weekIndex, today, busySlotsList),
           ),
         ],
       ),
@@ -257,7 +257,7 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
   }
 
   Widget _buildWeekRowFromBusySlots(List<DateTime> days, int weekIndex,
-      DateTime today, List<dynamic> busySlots) {
+      DateTime today, List<BusySlot> busySlots) {
     final startIndex = weekIndex * 7;
     final endIndex = (startIndex + 7).clamp(0, days.length);
     final weekDays = days.sublist(startIndex, endIndex);
@@ -276,7 +276,7 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
   }
 
   Widget _buildDayCellFromBusySlots(
-      DateTime date, DateTime today, List<dynamic> busySlots) {
+      DateTime date, DateTime today, List<BusySlot> busySlots) {
     final isToday = date.year == today.year &&
         date.month == today.month &&
         date.day == today.day;
@@ -289,7 +289,7 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
     final dateString =
         date.toIso8601String().split('T')[0]; // YYYY-MM-DD format
     final dayBusySlots =
-        busySlots.where((slot) => slot['date'] == dateString).toList();
+        busySlots.where((slot) => slot.date == dateString).toList();
 
     // Basit çalışma saatleri varsayımı (09:00-18:00, Pazartesi-Cumartesi)
     final isWorkingDay = date.weekday <= 6; // 1-6: Pazartesi-Cumartesi
@@ -303,8 +303,8 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget> {
     if (isWorkingDay && !isPast) {
       for (final hour in workingHours) {
         final isBusy = dayBusySlots.any((slot) =>
-            slot['start'] == hour ||
-            (slot['start'] as String).split(':')[0] == hour.split(':')[0]);
+            slot.start == hour ||
+            slot.start.split(':')[0] == hour.split(':')[0]);
         if (!isBusy) {
           availableHours.add(hour);
         }

@@ -7,7 +7,7 @@ class AppointmentsApiService {
   final ApiClient _apiClient = ApiClient.instance;
 
   /// Dolu slotları getirir (takvim için)
-  Future<Map<String, dynamic>> getBusySlots({
+  Future<List<BusySlot>> getBusySlots({
     String? serviceId,
     int days = 30,
   }) async {
@@ -22,7 +22,13 @@ class AppointmentsApiService {
       ApiEndpoints.appointmentsCalendar,
       queryParameters: queryParams,
     );
-    return response.data as Map<String, dynamic>;
+
+    final data = response.data as Map<String, dynamic>;
+    final busyList = data['busy'] as List<dynamic>? ?? [];
+
+    return busyList
+        .map((item) => BusySlot.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 
   /// Form-data ile randevu talebi oluşturur
@@ -30,9 +36,13 @@ class AppointmentsApiService {
     required String serviceId,
     required DateTime start,
   }) async {
+    // Convert to UTC and ensure Z suffix for backend compatibility
+    final utcStart = start.toUtc();
+    final isoString = utcStart.toIso8601String();
+
     final formData = FormData.fromMap({
       'service_id': serviceId,
-      'start': start.toIso8601String(),
+      'start': isoString,
     });
 
     final response = await _apiClient.post(
@@ -62,7 +72,7 @@ class AppointmentsApiService {
     });
 
     await _apiClient.put(
-      ApiEndpoints.appointment(appointmentId),
+      ApiEndpoints.adminAppointment(appointmentId),
       data: formData,
     );
   }
@@ -77,7 +87,7 @@ class AppointmentsApiService {
     });
 
     await _apiClient.delete(
-      ApiEndpoints.appointment(appointmentId),
+      ApiEndpoints.adminAppointment(appointmentId),
       data: formData,
     );
   }
@@ -86,7 +96,7 @@ class AppointmentsApiService {
   Future<ServiceAvailability> getServiceAvailability({
     required String serviceId,
   }) async {
-    final url = ApiEndpoints.serviceAvailability(serviceId);
+    final url = ApiEndpoints.adminServiceAvailability(serviceId);
     final response = await _apiClient.get(url);
     return ServiceAvailability.fromJson(response.data as Map<String, dynamic>);
   }
@@ -96,7 +106,7 @@ class AppointmentsApiService {
     required String serviceId,
     required ServiceAvailability availability,
   }) async {
-    final url = ApiEndpoints.serviceAvailability(serviceId);
+    final url = ApiEndpoints.adminServiceAvailability(serviceId);
     await _apiClient.put(url, data: availability.toJson());
   }
 
@@ -110,7 +120,7 @@ class AppointmentsApiService {
     }
 
     final response = await _apiClient.get(
-      ApiEndpoints.appointments, // GET /appointments/ (admin)
+      ApiEndpoints.adminAppointments, // GET /admin/appointments/
       queryParameters: queryParams,
     );
     final jsonData = response.data as List<dynamic>;
@@ -127,15 +137,19 @@ class AppointmentsApiService {
     required DateTime start,
     DateTime? end,
   }) async {
+    // Convert to UTC and ensure Z suffix for backend compatibility
+    final utcStart = start.toUtc();
+    final utcEnd = end?.toUtc();
+
     final formData = FormData.fromMap({
       'service_id': serviceId,
-      'start': start.toIso8601String(),
+      'start': utcStart.toIso8601String(),
       if (userId != null) 'user_id': userId,
-      if (end != null) 'end': end.toIso8601String(),
+      if (utcEnd != null) 'end': utcEnd.toIso8601String(),
     });
 
     final response = await _apiClient.post(
-      ApiEndpoints.appointments, // POST /appointments/ (admin)
+      ApiEndpoints.adminAppointments, // POST /admin/appointments/
       data: formData,
     );
     return Appointment.fromJson(response.data as Map<String, dynamic>);

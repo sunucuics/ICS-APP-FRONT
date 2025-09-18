@@ -23,7 +23,7 @@ class ServicesTab extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppTheme.primaryOrange,
+                color: AppTheme.primaryNavy,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
@@ -218,13 +218,13 @@ class _ServiceCard extends ConsumerWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.orange.withOpacity(0.1),
+                              color: AppTheme.primaryNavy.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Text(
                               'Yakında',
                               style: TextStyle(
-                                color: Colors.orange,
+                                color: AppTheme.primaryNavy,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -374,13 +374,13 @@ class _ServiceCard extends ConsumerWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.orange.withOpacity(0.1),
+                        color: AppTheme.primaryNavy.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: const Text(
                         'Yakında',
                         style: TextStyle(
-                          color: Colors.orange,
+                          color: AppTheme.primaryNavy,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),

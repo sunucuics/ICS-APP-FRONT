@@ -1818,6 +1818,261 @@ abstract class _AppointmentAdminOut implements AppointmentAdminOut {
       throw _privateConstructorUsedError;
 }
 
+BusySlot _$BusySlotFromJson(Map<String, dynamic> json) {
+  return _BusySlot.fromJson(json);
+}
+
+/// @nodoc
+mixin _$BusySlot {
+  String? get serviceId => throw _privateConstructorUsedError;
+  String get date => throw _privateConstructorUsedError;
+  String get start => throw _privateConstructorUsedError;
+  String get end => throw _privateConstructorUsedError;
+  String get status => throw _privateConstructorUsedError;
+  String get appointmentId => throw _privateConstructorUsedError;
+
+  /// Serializes this BusySlot to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of BusySlot
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $BusySlotCopyWith<BusySlot> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $BusySlotCopyWith<$Res> {
+  factory $BusySlotCopyWith(BusySlot value, $Res Function(BusySlot) then) =
+      _$BusySlotCopyWithImpl<$Res, BusySlot>;
+  @useResult
+  $Res call(
+      {String? serviceId,
+      String date,
+      String start,
+      String end,
+      String status,
+      String appointmentId});
+}
+
+/// @nodoc
+class _$BusySlotCopyWithImpl<$Res, $Val extends BusySlot>
+    implements $BusySlotCopyWith<$Res> {
+  _$BusySlotCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of BusySlot
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? serviceId = freezed,
+    Object? date = null,
+    Object? start = null,
+    Object? end = null,
+    Object? status = null,
+    Object? appointmentId = null,
+  }) {
+    return _then(_value.copyWith(
+      serviceId: freezed == serviceId
+          ? _value.serviceId
+          : serviceId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      date: null == date
+          ? _value.date
+          : date // ignore: cast_nullable_to_non_nullable
+              as String,
+      start: null == start
+          ? _value.start
+          : start // ignore: cast_nullable_to_non_nullable
+              as String,
+      end: null == end
+          ? _value.end
+          : end // ignore: cast_nullable_to_non_nullable
+              as String,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      appointmentId: null == appointmentId
+          ? _value.appointmentId
+          : appointmentId // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$BusySlotImplCopyWith<$Res>
+    implements $BusySlotCopyWith<$Res> {
+  factory _$$BusySlotImplCopyWith(
+          _$BusySlotImpl value, $Res Function(_$BusySlotImpl) then) =
+      __$$BusySlotImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String? serviceId,
+      String date,
+      String start,
+      String end,
+      String status,
+      String appointmentId});
+}
+
+/// @nodoc
+class __$$BusySlotImplCopyWithImpl<$Res>
+    extends _$BusySlotCopyWithImpl<$Res, _$BusySlotImpl>
+    implements _$$BusySlotImplCopyWith<$Res> {
+  __$$BusySlotImplCopyWithImpl(
+      _$BusySlotImpl _value, $Res Function(_$BusySlotImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of BusySlot
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? serviceId = freezed,
+    Object? date = null,
+    Object? start = null,
+    Object? end = null,
+    Object? status = null,
+    Object? appointmentId = null,
+  }) {
+    return _then(_$BusySlotImpl(
+      serviceId: freezed == serviceId
+          ? _value.serviceId
+          : serviceId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      date: null == date
+          ? _value.date
+          : date // ignore: cast_nullable_to_non_nullable
+              as String,
+      start: null == start
+          ? _value.start
+          : start // ignore: cast_nullable_to_non_nullable
+              as String,
+      end: null == end
+          ? _value.end
+          : end // ignore: cast_nullable_to_non_nullable
+              as String,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      appointmentId: null == appointmentId
+          ? _value.appointmentId
+          : appointmentId // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$BusySlotImpl implements _BusySlot {
+  const _$BusySlotImpl(
+      {this.serviceId,
+      required this.date,
+      required this.start,
+      required this.end,
+      required this.status,
+      required this.appointmentId});
+
+  factory _$BusySlotImpl.fromJson(Map<String, dynamic> json) =>
+      _$$BusySlotImplFromJson(json);
+
+  @override
+  final String? serviceId;
+  @override
+  final String date;
+  @override
+  final String start;
+  @override
+  final String end;
+  @override
+  final String status;
+  @override
+  final String appointmentId;
+
+  @override
+  String toString() {
+    return 'BusySlot(serviceId: $serviceId, date: $date, start: $start, end: $end, status: $status, appointmentId: $appointmentId)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$BusySlotImpl &&
+            (identical(other.serviceId, serviceId) ||
+                other.serviceId == serviceId) &&
+            (identical(other.date, date) || other.date == date) &&
+            (identical(other.start, start) || other.start == start) &&
+            (identical(other.end, end) || other.end == end) &&
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.appointmentId, appointmentId) ||
+                other.appointmentId == appointmentId));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, serviceId, date, start, end, status, appointmentId);
+
+  /// Create a copy of BusySlot
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$BusySlotImplCopyWith<_$BusySlotImpl> get copyWith =>
+      __$$BusySlotImplCopyWithImpl<_$BusySlotImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$BusySlotImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _BusySlot implements BusySlot {
+  const factory _BusySlot(
+      {final String? serviceId,
+      required final String date,
+      required final String start,
+      required final String end,
+      required final String status,
+      required final String appointmentId}) = _$BusySlotImpl;
+
+  factory _BusySlot.fromJson(Map<String, dynamic> json) =
+      _$BusySlotImpl.fromJson;
+
+  @override
+  String? get serviceId;
+  @override
+  String get date;
+  @override
+  String get start;
+  @override
+  String get end;
+  @override
+  String get status;
+  @override
+  String get appointmentId;
+
+  /// Create a copy of BusySlot
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$BusySlotImplCopyWith<_$BusySlotImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 ServiceAvailability _$ServiceAvailabilityFromJson(Map<String, dynamic> json) {
   return _ServiceAvailability.fromJson(json);
 }
