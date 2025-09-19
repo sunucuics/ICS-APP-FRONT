@@ -1,4 +1,5 @@
 import '../../../core/models/service_model.dart';
+import '../../../core/network/api_endpoints.dart';
 import 'services_api_service.dart';
 
 class ServicesRepository {
@@ -9,7 +10,10 @@ class ServicesRepository {
     try {
       return await _apiService.getServices();
     } catch (e) {
-      print('Error fetching services: $e');
+      // Only print in debug mode
+      if (ApiEndpoints.isDebug) {
+        print('Error fetching services: $e');
+      }
       rethrow;
     }
   }
@@ -19,7 +23,10 @@ class ServicesRepository {
     try {
       return await _apiService.getService(serviceId);
     } catch (e) {
-      print('Error fetching service: $e');
+      // Only print in debug mode
+      if (ApiEndpoints.isDebug) {
+        print('Error fetching service: $e');
+      }
       rethrow;
     }
   }

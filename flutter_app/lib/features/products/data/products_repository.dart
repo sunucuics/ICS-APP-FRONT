@@ -1,4 +1,5 @@
 import '../../../core/models/product_model.dart';
+import '../../../core/network/api_endpoints.dart';
 import 'products_api_service.dart';
 
 class ProductsRepository {
@@ -9,7 +10,10 @@ class ProductsRepository {
     try {
       return await _apiService.getProducts(categoryName: categoryName);
     } catch (e) {
-      print('Error fetching products: $e');
+      // Only print in debug mode
+      if (ApiEndpoints.isDebug) {
+        print('Error fetching products: $e');
+      }
       rethrow;
     }
   }
@@ -19,7 +23,10 @@ class ProductsRepository {
     try {
       return await _apiService.getProduct(productId);
     } catch (e) {
-      print('Error fetching product $productId: $e');
+      // Only print in debug mode
+      if (ApiEndpoints.isDebug) {
+        print('Error fetching product $productId: $e');
+      }
       rethrow;
     }
   }
@@ -29,7 +36,10 @@ class ProductsRepository {
     try {
       return await _apiService.getCategories();
     } catch (e) {
-      print('Error fetching categories: $e');
+      // Only print in debug mode
+      if (ApiEndpoints.isDebug) {
+        print('Error fetching categories: $e');
+      }
       rethrow;
     }
   }
@@ -39,7 +49,10 @@ class ProductsRepository {
     try {
       return await _apiService.getCategory(categoryId);
     } catch (e) {
-      print('Error fetching category $categoryId: $e');
+      // Only print in debug mode
+      if (ApiEndpoints.isDebug) {
+        print('Error fetching category $categoryId: $e');
+      }
       rethrow;
     }
   }

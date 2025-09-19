@@ -7,6 +7,7 @@ import '../../../auth/providers/anonymous_auth_provider.dart';
 import '../../../../core/models/product_model.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../home/presentation/pages/home_page.dart';
+import 'product_detail_page.dart';
 
 class CategoryProductsPage extends ConsumerStatefulWidget {
   final Category category;
@@ -195,18 +196,56 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
                     homePageState.switchToTab(2);
                   }
                 },
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: const BoxDecoration(
-                    color: AppTheme.primaryOrange,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.shopping_cart,
-                    color: Colors.white,
-                    size: 24,
-                  ),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: const BoxDecoration(
+                        color: AppTheme.primaryOrange,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.shopping_cart,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    // Cart badge
+                    Consumer(
+                      builder: (context, ref, child) {
+                        final cartItemCount = ref.watch(cartItemCountProvider);
+                        if (cartItemCount > 0) {
+                          return Positioned(
+                            right: -2,
+                            top: -2,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 20,
+                                minHeight: 20,
+                              ),
+                              child: Text(
+                                '$cartItemCount',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ],
                 ),
               ),
               // Mağaza (Store) - Current tab
@@ -430,10 +469,10 @@ class _ProductCard extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.grey.withOpacity(0.2),
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
           width: 1,
         ),
         boxShadow: [
@@ -450,14 +489,10 @@ class _ProductCard extends ConsumerWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('${product.title} detayı yakında eklenecek'),
-                backgroundColor: AppTheme.primaryOrange,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProductDetailPage(product: product),
               ),
             );
           },
@@ -473,7 +508,7 @@ class _ProductCard extends ConsumerWidget {
                     width: double.infinity,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      color: Colors.grey[100],
+                      color: Theme.of(context).colorScheme.surfaceVariant,
                     ),
                     child: product.images.isNotEmpty
                         ? ClipRRect(
@@ -482,7 +517,9 @@ class _ProductCard extends ConsumerWidget {
                               imageUrl: product.images.first,
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Container(
-                                color: Colors.grey[200],
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceVariant,
                                 child: const Center(
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
@@ -492,10 +529,14 @@ class _ProductCard extends ConsumerWidget {
                                 ),
                               ),
                               errorWidget: (context, url, error) => Container(
-                                color: Colors.grey[200],
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceVariant,
                                 child: Icon(
                                   Icons.image_not_supported_rounded,
-                                  color: Colors.grey[400],
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                   size: 32,
                                 ),
                               ),
@@ -504,7 +545,8 @@ class _ProductCard extends ConsumerWidget {
                         : Icon(
                             Icons.image_not_supported_rounded,
                             size: 48,
-                            color: Colors.grey[400],
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                   ),
                 ),
@@ -549,9 +591,11 @@ class _ProductCard extends ConsumerWidget {
                         if (hasDiscount)
                           Text(
                             '₺${product.price.toStringAsFixed(2)}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               decoration: TextDecoration.lineThrough,
-                              color: Colors.grey,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                               fontSize: 12,
                             ),
                           ),
@@ -602,7 +646,7 @@ class _ProductCard extends ConsumerWidget {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        onPressed: product.stock > 0
+                        onPressed: (product.stock > 0 && !product.isUpcoming)
                             ? () async {
                                 // Check if user is anonymous (guest)
                                 final isAnonymous =
@@ -644,32 +688,7 @@ class _ProductCard extends ConsumerWidget {
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(12),
                                       ),
-                                      action: SnackBarAction(
-                                        label: 'Sepete Git',
-                                        textColor: Colors.white,
-                                        onPressed: () {
-                                          // Close SnackBar first
-                                          ScaffoldMessenger.of(context)
-                                              .hideCurrentSnackBar();
-
-                                          // Get HomePage state before navigation
-                                          final homePageState =
-                                              context.findAncestorStateOfType<
-                                                  HomePageState>();
-
-                                          // Navigate back to home page
-                                          Navigator.of(context).popUntil(
-                                              (route) => route.isFirst);
-
-                                          // Switch to cart tab immediately after navigation
-                                          if (homePageState != null) {
-                                            WidgetsBinding.instance
-                                                .addPostFrameCallback((_) {
-                                              homePageState.switchToTab(2);
-                                            });
-                                          }
-                                        },
-                                      ),
+                                      // Remove action button, just show notification
                                     ),
                                   );
                                 } catch (e) {
@@ -689,13 +708,18 @@ class _ProductCard extends ConsumerWidget {
                             : null,
                         icon: const Icon(Icons.shopping_cart, size: 16),
                         label: Text(
-                          product.stock > 0 ? 'Sepete Ekle' : 'Stokta Yok',
+                          product.isUpcoming
+                              ? 'Yakında Satışta'
+                              : product.stock > 0
+                                  ? 'Sepete Ekle'
+                                  : 'Stokta Yok',
                           style: const TextStyle(fontSize: 12),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: product.stock > 0
-                              ? AppTheme.primaryOrange
-                              : Colors.grey,
+                          backgroundColor:
+                              (product.stock > 0 && !product.isUpcoming)
+                                  ? AppTheme.primaryOrange
+                                  : Colors.grey,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           shape: RoundedRectangleBorder(

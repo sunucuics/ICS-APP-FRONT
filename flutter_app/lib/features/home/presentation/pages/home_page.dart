@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/home_tab.dart';
 import '../widgets/services_tab.dart';
 import '../widgets/cart_tab.dart';
 import '../widgets/catalog_tab_new.dart';
 import '../widgets/profile_tab.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../cart/providers/cart_provider.dart';
+import '../../../admin/providers/admin_provider.dart';
+import '../../../admin/presentation/pages/admin_dashboard_page.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => HomePageState();
+  ConsumerState<HomePage> createState() => HomePageState();
 }
 
-class HomePageState extends State<HomePage> {
+class HomePageState extends ConsumerState<HomePage> {
   int _currentIndex = 0;
 
   void switchToTab(int tabIndex) {
@@ -38,6 +42,13 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isAdmin = ref.watch(isAdminProvider);
+
+    // If user is admin, show admin dashboard
+    if (isAdmin) {
+      return const AdminDashboardPage();
+    }
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
@@ -118,20 +129,58 @@ class HomePageState extends State<HomePage> {
               // Sepet (Cart) - Central Button
               GestureDetector(
                 onTap: () => switchToTab(2),
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: _currentIndex == 2
-                        ? AppTheme.primaryOrange
-                        : AppTheme.primaryOrange,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.shopping_cart,
-                    color: Colors.white,
-                    size: 24,
-                  ),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: _currentIndex == 2
+                            ? AppTheme.primaryOrange
+                            : AppTheme.primaryOrange,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.shopping_cart,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    // Cart badge
+                    Consumer(
+                      builder: (context, ref, child) {
+                        final cartItemCount = ref.watch(cartItemCountProvider);
+                        if (cartItemCount > 0) {
+                          return Positioned(
+                            right: -2,
+                            top: -2,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 20,
+                                minHeight: 20,
+                              ),
+                              child: Text(
+                                '$cartItemCount',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ],
                 ),
               ),
               // Mağaza (Store)

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/product_model.dart';
+import '../../../core/network/api_endpoints.dart';
 import '../data/products_repository.dart';
 
 // Products Repository Provider
@@ -41,18 +42,26 @@ final selectedCategoryProvider = StateProvider<String?>((ref) => null);
 final filteredProductsProvider =
     FutureProvider.autoDispose<List<Product>>((ref) {
   final selectedCategory = ref.watch(selectedCategoryProvider);
-  print('🛍️ Fetching products for category: ${selectedCategory ?? "All"}');
+  if (ApiEndpoints.isDebug) {
+    print('🛍️ Fetching products for category: ${selectedCategory ?? "All"}');
+  }
   return ref.watch(productsProvider(selectedCategory)).when(
     data: (products) {
-      print('✅ Successfully loaded ${products.length} products');
+      if (ApiEndpoints.isDebug) {
+        print('✅ Successfully loaded ${products.length} products');
+      }
       return products;
     },
     loading: () {
-      print('⏳ Loading products...');
+      if (ApiEndpoints.isDebug) {
+        print('⏳ Loading products...');
+      }
       return <Product>[];
     },
     error: (error, stack) {
-      print('❌ Error loading products: $error');
+      if (ApiEndpoints.isDebug) {
+        print('❌ Error loading products: $error');
+      }
       // Return empty list instead of throwing to prevent app crash
       return <Product>[];
     },

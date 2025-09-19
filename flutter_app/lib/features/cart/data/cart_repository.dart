@@ -1,4 +1,5 @@
 import '../../../core/models/cart_model.dart';
+import '../../../core/network/api_endpoints.dart';
 import 'cart_api_service.dart';
 
 class CartRepository {
@@ -9,7 +10,10 @@ class CartRepository {
     try {
       return await _apiService.getCart();
     } catch (e) {
-      print('Error fetching cart: $e');
+      // Only print in debug mode
+      if (ApiEndpoints.isDebug) {
+        print('Error fetching cart: $e');
+      }
       // Return empty cart as fallback
       return const Cart(
         userId: '',
@@ -25,7 +29,10 @@ class CartRepository {
     try {
       return await _apiService.getCartTotal();
     } catch (e) {
-      print('Error fetching cart total: $e');
+      // Only print in debug mode
+      if (ApiEndpoints.isDebug) {
+        print('Error fetching cart total: $e');
+      }
       rethrow;
     }
   }
@@ -37,7 +44,10 @@ class CartRepository {
           AddToCartRequest(productId: productId, quantity: quantity);
       await _apiService.addToCart(request);
     } catch (e) {
-      print('Error adding to cart: $e');
+      // Only print in debug mode
+      if (ApiEndpoints.isDebug) {
+        print('Error adding to cart: $e');
+      }
       rethrow;
     }
   }
@@ -47,7 +57,10 @@ class CartRepository {
     try {
       await _apiService.removeFromCart(productId);
     } catch (e) {
-      print('Error removing from cart: $e');
+      // Only print in debug mode
+      if (ApiEndpoints.isDebug) {
+        print('Error removing from cart: $e');
+      }
       rethrow;
     }
   }
@@ -57,7 +70,10 @@ class CartRepository {
     try {
       await _apiService.clearCart();
     } catch (e) {
-      print('Error clearing cart: $e');
+      // Only print in debug mode
+      if (ApiEndpoints.isDebug) {
+        print('Error clearing cart: $e');
+      }
       rethrow;
     }
   }

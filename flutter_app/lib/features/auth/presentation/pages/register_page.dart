@@ -1,8 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
 import 'guest_upgrade_page.dart';
 import '../../../home/presentation/pages/home_page.dart';
+
+// Custom phone number formatter
+class _PhoneNumberFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Remove all non-digit characters
+    final digitsOnly = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+
+    // Limit to 10 digits - if more than 10, don't allow the input
+    if (digitsOnly.length > 10) {
+      return oldValue; // Reject the input
+    }
+
+    // Format as 555 123 4567
+    String formatted = '';
+    if (digitsOnly.length >= 1) {
+      formatted = digitsOnly.substring(
+          0, digitsOnly.length > 3 ? 3 : digitsOnly.length);
+    }
+    if (digitsOnly.length >= 4) {
+      formatted +=
+          ' ${digitsOnly.substring(3, digitsOnly.length > 6 ? 6 : digitsOnly.length)}';
+    }
+    if (digitsOnly.length >= 7) {
+      formatted += ' ${digitsOnly.substring(6, digitsOnly.length)}';
+    }
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -17,9 +54,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  String? _phoneError;
 
   @override
   void dispose() {
@@ -27,6 +66,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _nameController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -82,6 +122,55 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     }
                     if (value.trim().length < 2) {
                       return 'Ad soyad en az 2 karakter olmalı';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                // Phone Field
+                TextFormField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(
+                        13), // 10 digits + 3 spaces max
+                    _PhoneNumberFormatter(),
+                  ],
+                  onChanged: (value) {
+                    final digitsOnly = value.replaceAll(RegExp(r'[^\d]'), '');
+                    if (digitsOnly.length > 10) {
+                      setState(() {
+                        _phoneError =
+                            'Telefon numarası en fazla 10 haneli olabilir';
+                      });
+                    } else {
+                      setState(() {
+                        _phoneError = null;
+                      });
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Telefon',
+                    hintText: '555 123 4567',
+                    prefixIcon: const Icon(Icons.phone_outlined),
+                    border: const OutlineInputBorder(),
+                    errorText: _phoneError,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Telefon numarası gerekli';
+                    }
+                    // Backend expects format like '555 123 4567'
+                    if (!RegExp(r'^[0-9\s]+$').hasMatch(value)) {
+                      return 'Telefon numarası sadece rakam ve boşluk içermelidir';
+                    }
+                    // Check if it has the expected format (numbers with spaces)
+                    final cleanNumber = value.replaceAll(' ', '');
+                    if (cleanNumber.length < 10 || cleanNumber.length > 11) {
+                      return 'Telefon numarası 10-11 haneli olmalıdır';
                     }
                     return null;
                   },
@@ -277,6 +366,26 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     );
   }
 
+  // Format phone number to backend expected format (555 123 4567)
+  String _formatPhoneNumber(String phone) {
+    // Remove all non-digit characters
+    final cleanPhone = phone.replaceAll(RegExp(r'[^\d]'), '');
+
+    // If it starts with 0, remove it
+    final phoneWithoutZero =
+        cleanPhone.startsWith('0') ? cleanPhone.substring(1) : cleanPhone;
+
+    // Format as 555 123 4567 (3-3-4 digits)
+    if (phoneWithoutZero.length == 10) {
+      return '${phoneWithoutZero.substring(0, 3)} ${phoneWithoutZero.substring(3, 6)} ${phoneWithoutZero.substring(6)}';
+    } else if (phoneWithoutZero.length == 11) {
+      return '${phoneWithoutZero.substring(0, 3)} ${phoneWithoutZero.substring(3, 6)} ${phoneWithoutZero.substring(6)}';
+    }
+
+    // If format doesn't match expected, return as is
+    return phone;
+  }
+
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -285,28 +394,54 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     });
 
     try {
-      // Simulate registration process
-      await Future.delayed(const Duration(seconds: 2));
+      // Use real auth provider for registration
+      final success = await ref.read(authProvider.notifier).register(
+            name: _nameController.text.trim(),
+            phone: _formatPhoneNumber(_phoneController.text.trim()),
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          );
 
       if (mounted) {
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Hesabınız başarıyla oluşturuldu!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-        // Navigate to guest upgrade page to link account
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => GuestUpgradePage(
-              email: _emailController.text.trim(),
-              password: _passwordController.text,
-              name: _nameController.text.trim(),
+        if (success) {
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Hesabınız başarıyla oluşturuldu!'),
+              backgroundColor: Colors.green,
             ),
-          ),
-        );
+          );
+
+          // Navigate to home page after successful registration
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        } else {
+          // Show error message
+          final error = ref.read(authErrorProvider);
+          String userFriendlyError = 'Hesap oluşturulurken bir hata oluştu';
+
+          if (error != null) {
+            if (error.contains('email-already-in-use') ||
+                error.contains('EMAIL_EXISTS') ||
+                error.contains('Bu e-posta zaten kayıtlı')) {
+              userFriendlyError = 'Bu e-posta adresi zaten kullanılıyor';
+            } else if (error.contains('weak-password')) {
+              userFriendlyError = 'Şifre çok zayıf, daha güçlü bir şifre seçin';
+            } else if (error.contains('invalid-email')) {
+              userFriendlyError = 'Geçersiz e-posta adresi';
+            } else if (error.contains('NO_INTERNET')) {
+              userFriendlyError = 'İnternet bağlantısı bulunamadı';
+            }
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(userFriendlyError),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

@@ -10,10 +10,13 @@ final cartRepositoryProvider = Provider<CartRepository>((ref) {
 // Cart Provider - State Notifier for better cart management
 class CartNotifier extends StateNotifier<AsyncValue<Cart>> {
   final CartRepository _repository;
+  bool _isAddingToCart = false;
 
   CartNotifier(this._repository) : super(const AsyncValue.loading()) {
     loadCart();
   }
+
+  bool get isAddingToCart => _isAddingToCart;
 
   // Load cart from backend
   Future<void> loadCart() async {
@@ -26,35 +29,130 @@ class CartNotifier extends StateNotifier<AsyncValue<Cart>> {
     }
   }
 
-  // Add item to cart
-  Future<void> addToCart(String productId, {int quantity = 1}) async {
+  // Add item to cart with optimistic UI
+  Future<void> addToCart(String productId,
+      {int quantity = 1, String? productTitle, double? productPrice}) async {
+    if (_isAddingToCart) return; // Prevent multiple simultaneous requests
+
+    _isAddingToCart = true;
     try {
+      // Optimistic update - immediately update UI
+      final currentCart = state.valueOrNull;
+      if (currentCart != null) {
+        // Check if item already exists in cart
+        final existingItemIndex = currentCart.items.indexWhere(
+          (item) => item.productId == productId,
+        );
+
+        List<CartItem> updatedItems;
+        if (existingItemIndex != -1) {
+          // Update existing item quantity
+          final existingItem = currentCart.items[existingItemIndex];
+          updatedItems = List.from(currentCart.items);
+          updatedItems[existingItemIndex] = existingItem.copyWith(
+            qty: existingItem.qty + quantity,
+            baseSubtotal: (existingItem.qty + quantity) * existingItem.price,
+            totalBase: (existingItem.qty + quantity) * existingItem.price,
+          );
+        } else {
+          // Add new item with product details if available
+          final newItem = CartItem(
+            productId: productId,
+            title: productTitle ?? 'Loading...',
+            price: productPrice ?? 0.0,
+            stock: 0,
+            qty: quantity,
+            baseSubtotal: (productPrice ?? 0.0) * quantity,
+            totalBase: (productPrice ?? 0.0) * quantity,
+          );
+          updatedItems = [...currentCart.items, newItem];
+        }
+
+        // Calculate new totals
+        final newTotalQuantity =
+            updatedItems.fold(0, (sum, item) => sum + item.qty);
+        final newTotalBase =
+            updatedItems.fold(0.0, (sum, item) => sum + item.totalBase);
+
+        // Update state optimistically
+        state = AsyncValue.data(currentCart.copyWith(
+          items: updatedItems,
+          totalQuantity: newTotalQuantity,
+          totalBase: newTotalBase,
+        ));
+      }
+
+      // Make API call
       await _repository.addToCart(productId, quantity: quantity);
-      // Reload cart to get updated data
+
+      // Reload cart to get accurate data from server
       await loadCart();
     } catch (error, stackTrace) {
+      // Revert optimistic update on error
+      await loadCart();
       state = AsyncValue.error(error, stackTrace);
+    } finally {
+      _isAddingToCart = false;
     }
   }
 
-  // Remove item from cart
+  // Remove item from cart with optimistic UI
   Future<void> removeFromCart(String productId) async {
     try {
+      // Optimistic update - immediately update UI
+      final currentCart = state.valueOrNull;
+      if (currentCart != null) {
+        final updatedItems = currentCart.items
+            .where((item) => item.productId != productId)
+            .toList();
+
+        // Calculate new totals
+        final newTotalQuantity =
+            updatedItems.fold(0, (sum, item) => sum + item.qty);
+        final newTotalBase =
+            updatedItems.fold(0.0, (sum, item) => sum + item.totalBase);
+
+        // Update state optimistically
+        state = AsyncValue.data(currentCart.copyWith(
+          items: updatedItems,
+          totalQuantity: newTotalQuantity,
+          totalBase: newTotalBase,
+        ));
+      }
+
+      // Make API call
       await _repository.removeFromCart(productId);
-      // Reload cart to get updated data
+
+      // Reload cart to get accurate data from server
       await loadCart();
     } catch (error, stackTrace) {
+      // Revert optimistic update on error
+      await loadCart();
       state = AsyncValue.error(error, stackTrace);
     }
   }
 
-  // Clear entire cart
+  // Clear entire cart with optimistic UI
   Future<void> clearCart() async {
     try {
+      // Optimistic update - immediately clear UI
+      final currentCart = state.valueOrNull;
+      if (currentCart != null) {
+        state = AsyncValue.data(currentCart.copyWith(
+          items: [],
+          totalQuantity: 0,
+          totalBase: 0.0,
+        ));
+      }
+
+      // Make API call
       await _repository.clearCart();
-      // Reload cart to get updated data
+
+      // Reload cart to confirm
       await loadCart();
     } catch (error, stackTrace) {
+      // Revert optimistic update on error
+      await loadCart();
       state = AsyncValue.error(error, stackTrace);
     }
   }
@@ -103,12 +201,20 @@ final cartTotalAmountProvider = Provider<double>((ref) {
       );
 });
 
+// Loading state provider for cart operations
+final cartLoadingProvider = Provider<bool>((ref) {
+  return ref.watch(cartProvider.notifier).isAddingToCart;
+});
+
 // Helper to add item to cart from anywhere in the app
-final addToCartProvider =
-    Provider<Future<void> Function(String, {int quantity})>((ref) {
-  return (String productId, {int quantity = 1}) async {
-    await ref
-        .read(cartProvider.notifier)
-        .addToCart(productId, quantity: quantity);
+final addToCartProvider = Provider<
+    Future<void> Function(String,
+        {int quantity, String? productTitle, double? productPrice})>((ref) {
+  return (String productId,
+      {int quantity = 1, String? productTitle, double? productPrice}) async {
+    await ref.read(cartProvider.notifier).addToCart(productId,
+        quantity: quantity,
+        productTitle: productTitle,
+        productPrice: productPrice);
   };
 });

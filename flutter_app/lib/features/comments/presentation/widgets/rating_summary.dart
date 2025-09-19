@@ -62,16 +62,19 @@ class RatingSummary extends ConsumerWidget {
                         color: Theme.of(context).primaryColor,
                       ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 4),
                 // Stars
                 _buildStars(averageRating),
-                const SizedBox(width: 8),
+                const SizedBox(width: 4),
                 // Total count
-                Text(
-                  '(${comments.length} değerlendirme)',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 14,
+                Expanded(
+                  child: Text(
+                    '(${comments.length} değerlendirme)',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -120,16 +123,16 @@ class RatingSummary extends ConsumerWidget {
                 color: Colors.amber,
                 size: 16,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
               // Rating number
               SizedBox(
-                width: 20,
+                width: 16,
                 child: Text(
                   '$rating',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
               // Progress bar
               Expanded(
                 child: LinearProgressIndicator(
@@ -141,10 +144,10 @@ class RatingSummary extends ConsumerWidget {
                   minHeight: 8,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
               // Count
               SizedBox(
-                width: 30,
+                width: 24,
                 child: Text(
                   '$count',
                   style: TextStyle(

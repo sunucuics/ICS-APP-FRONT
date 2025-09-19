@@ -36,6 +36,7 @@ class _CommentFormState extends ConsumerState<CommentForm> {
     return Card(
       margin: const EdgeInsets.all(16),
       elevation: 2,
+      color: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -51,6 +52,7 @@ class _CommentFormState extends ConsumerState<CommentForm> {
                 'Yorum Ekle',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
               ),
               const SizedBox(height: 16),
@@ -58,7 +60,9 @@ class _CommentFormState extends ConsumerState<CommentForm> {
               // Rating section
               Text(
                 'Puanınız:',
-                style: Theme.of(context).textTheme.titleMedium,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
               ),
               const SizedBox(height: 8),
               _buildRatingSelector(),
@@ -67,7 +71,9 @@ class _CommentFormState extends ConsumerState<CommentForm> {
               // Comment content
               Text(
                 'Yorumunuz:',
-                style: Theme.of(context).textTheme.titleMedium,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
               ),
               const SizedBox(height: 8),
               TextFormField(
@@ -108,6 +114,11 @@ class _CommentFormState extends ConsumerState<CommentForm> {
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _submitComment,
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                    elevation: 3,
+                    shadowColor:
+                        Theme.of(context).primaryColor.withOpacity(0.3),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),

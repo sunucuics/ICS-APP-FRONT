@@ -542,25 +542,48 @@ class _ProductCard extends ConsumerWidget {
                     // Add to Cart Button
                     SizedBox(
                       width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: product.stock > 0
-                            ? () => _addToCart(context, ref, product)
-                            : null,
-                        icon:
-                            const Icon(Icons.shopping_cart_outlined, size: 16),
-                        label: Text(
-                          product.stock > 0 ? 'Sepete Ekle' : 'Stokta Yok',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
+                      child: Consumer(
+                        builder: (context, ref, child) {
+                          final isLoading = ref.watch(cartLoadingProvider);
+                          return ElevatedButton.icon(
+                            onPressed: (product.stock > 0 &&
+                                    !product.isUpcoming &&
+                                    !isLoading)
+                                ? () => _addToCart(context, ref, product)
+                                : null,
+                            icon: isLoading
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
+                                    ),
+                                  )
+                                : const Icon(Icons.shopping_cart_outlined,
+                                    size: 16),
+                            label: Text(
+                              isLoading
+                                  ? 'Ekleniyor...'
+                                  : product.isUpcoming
+                                      ? 'Yakında Satışta'
+                                      : product.stock > 0
+                                          ? 'Sepete Ekle'
+                                          : 'Stokta Yok',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -588,22 +611,19 @@ class _ProductCard extends ConsumerWidget {
     }
 
     try {
-      await ref.read(cartProvider.notifier).addToCart(product.id, quantity: 1);
+      await ref.read(cartProvider.notifier).addToCart(
+            product.id,
+            quantity: 1,
+            productTitle: product.title,
+            productPrice: product.price,
+          );
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${product.title} sepete eklendi'),
             duration: const Duration(seconds: 2),
-            action: SnackBarAction(
-              label: 'Sepeti Gör',
-              onPressed: () {
-                // Navigate to cart tab - bu parent widget'ta handle edilmeli
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Sepet sekmesine geçin')),
-                );
-              },
-            ),
+            // Remove action button, just show notification
           ),
         );
       }

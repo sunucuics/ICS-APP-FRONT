@@ -51,7 +51,7 @@ class ServicesTab extends ConsumerWidget {
                     'Henüz hizmet yok',
                     style: TextStyle(
                       fontSize: 18,
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -60,7 +60,7 @@ class ServicesTab extends ConsumerWidget {
                     'Yakında hizmetler eklenecek',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[500],
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -145,7 +145,7 @@ class _ServiceCard extends ConsumerWidget {
                 height: 60,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: Colors.grey[200],
+                  color: Theme.of(context).colorScheme.surfaceVariant,
                 ),
                 child: service.image != null
                     ? ClipRRect(
@@ -154,16 +154,16 @@ class _ServiceCard extends ConsumerWidget {
                           imageUrl: service.image!,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
-                            color: Colors.grey[200],
+                            color: Theme.of(context).colorScheme.surfaceVariant,
                             child: const Center(
                               child: CircularProgressIndicator(),
                             ),
                           ),
                           errorWidget: (context, url, error) => Container(
-                            color: Colors.grey[200],
+                            color: Theme.of(context).colorScheme.surfaceVariant,
                             child: Icon(
                               Icons.work,
-                              color: Theme.of(context).primaryColor,
+                              color: AppTheme.primaryNavy,
                               size: 32,
                             ),
                           ),
@@ -171,7 +171,7 @@ class _ServiceCard extends ConsumerWidget {
                       )
                     : Icon(
                         Icons.work,
-                        color: Theme.of(context).primaryColor,
+                        color: AppTheme.primaryNavy,
                         size: 32,
                       ),
               ),
@@ -186,9 +186,10 @@ class _ServiceCard extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             service.title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -221,7 +222,7 @@ class _ServiceCard extends ConsumerWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 13,
                       ),
                     ),
@@ -230,7 +231,7 @@ class _ServiceCard extends ConsumerWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: OutlinedButton(
+                          child: ElevatedButton(
                             onPressed: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
@@ -239,10 +240,12 @@ class _ServiceCard extends ConsumerWidget {
                                 ),
                               );
                             },
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppTheme.primaryNavy,
-                              side: const BorderSide(
-                                  color: AppTheme.primaryNavy, width: 2),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryNavy,
+                              foregroundColor: Colors.white,
+                              elevation: 3,
+                              shadowColor:
+                                  AppTheme.primaryNavy.withOpacity(0.3),
                               padding: const EdgeInsets.symmetric(vertical: 8),
                             ),
                             child: const Text(
@@ -262,6 +265,9 @@ class _ServiceCard extends ConsumerWidget {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppTheme.primaryNavy,
                               foregroundColor: Colors.white,
+                              elevation: 3,
+                              shadowColor:
+                                  AppTheme.primaryNavy.withOpacity(0.3),
                               padding: const EdgeInsets.symmetric(vertical: 8),
                             ),
                             child: Text(
@@ -306,7 +312,7 @@ class _ServiceCard extends ConsumerWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: Theme.of(context).colorScheme.outline,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -319,7 +325,7 @@ class _ServiceCard extends ConsumerWidget {
                   height: 200,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    color: Colors.grey[200],
+                    color: Theme.of(context).colorScheme.surfaceVariant,
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
@@ -327,14 +333,14 @@ class _ServiceCard extends ConsumerWidget {
                       imageUrl: service.image!,
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
-                        color: Colors.grey[200],
+                        color: Theme.of(context).colorScheme.surfaceVariant,
                         child: const Center(child: CircularProgressIndicator()),
                       ),
                       errorWidget: (context, url, error) => Container(
-                        color: Colors.grey[200],
+                        color: Theme.of(context).colorScheme.surfaceVariant,
                         child: Icon(
                           Icons.work,
-                          color: Theme.of(context).primaryColor,
+                          color: AppTheme.primaryNavy,
                           size: 64,
                         ),
                       ),
@@ -403,6 +409,8 @@ class _ServiceCard extends ConsumerWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryNavy,
                     foregroundColor: Colors.white,
+                    elevation: 3,
+                    shadowColor: AppTheme.primaryNavy.withOpacity(0.3),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: Text(
@@ -473,6 +481,8 @@ class _ServiceCard extends ConsumerWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryNavy,
                 foregroundColor: Colors.white,
+                elevation: 3,
+                shadowColor: AppTheme.primaryNavy.withOpacity(0.3),
               ),
               child: const Text('Hesap Oluştur'),
             ),

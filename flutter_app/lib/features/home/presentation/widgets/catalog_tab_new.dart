@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../products/providers/products_provider.dart';
 import '../../../products/presentation/pages/category_products_page.dart';
 import '../../../../core/models/product_model.dart';
-import '../../../../core/widgets/theme_toggle_button.dart';
 import '../../../../core/theme/app_theme.dart';
 
 class CatalogTabNew extends ConsumerStatefulWidget {

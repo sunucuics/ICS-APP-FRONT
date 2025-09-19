@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/models/user_model.dart';
@@ -9,47 +10,65 @@ class AuthApiService {
 
   // Register - Firebase ile kullanıcı oluştur, sonra backend'e kaydet
   Future<AuthResponse> register(RegisterRequest request) async {
-    // Firebase'de kullanıcı oluştur
-    final userCredential = await FirebaseAuthService.createUserWithEmailAndPassword(
-      email: request.email,
-      password: request.password,
-    );
+    UserCredential? userCredential;
 
-    if (userCredential?.user == null) {
-      throw Exception('Failed to create Firebase user');
+    try {
+      // Firebase'de kullanıcı oluştur
+      userCredential = await FirebaseAuthService.createUserWithEmailAndPassword(
+        email: request.email,
+        password: request.password,
+      );
+
+      if (userCredential?.user == null) {
+        throw Exception('Failed to create Firebase user');
+      }
+
+      // Firebase ID token'ı al
+      final idToken = await userCredential!.user!.getIdToken();
+
+      // Backend'e kullanıcı bilgilerini gönder
+      final formData = FormData.fromMap({
+        'name': request.name,
+        'phone': request.phone,
+        'email': request.email,
+        'password': request.password,
+        'firebase_uid': userCredential.user!.uid,
+      });
+
+      await _apiClient.postMultipart(
+        ApiEndpoints.authRegister,
+        formData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $idToken',
+          },
+        ),
+      );
+
+      // User profile'ını çek
+      final userProfile = await getCurrentUser();
+
+      return AuthResponse(
+        userId: userCredential.user!.uid,
+        user: userProfile,
+        idToken: idToken ?? '',
+        refreshToken: '', // Firebase doesn't use refresh tokens in the same way
+        expiresIn: 3600, // Firebase tokens expire in 1 hour
+      );
+    } catch (e) {
+      // Backend'e kayıt başarısız olursa Firebase'deki hesabı da sil
+      if (userCredential?.user != null) {
+        try {
+          await userCredential!.user!.delete();
+          print('Firebase user deleted due to backend registration failure');
+        } catch (deleteError) {
+          print('Failed to delete Firebase user: $deleteError');
+        }
+      }
+
+      // Hata mesajını yeniden fırlat
+      rethrow;
     }
-
-    // Firebase ID token'ı al
-    final idToken = await userCredential!.user!.getIdToken();
-    
-    // Backend'e kullanıcı bilgilerini gönder
-    final formData = FormData.fromMap({
-      'name': request.name,
-      'phone': request.phone,
-      'email': request.email,
-      'firebase_uid': userCredential.user!.uid,
-    });
-
-    await _apiClient.postMultipart(
-      ApiEndpoints.authRegister,
-      formData,
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $idToken',
-        },
-      ),
-    );
-
-    // User profile'ını çek
-    final userProfile = await getCurrentUser();
-
-    return AuthResponse(
-      userId: userCredential.user!.uid,
-      user: userProfile,
-      idToken: idToken ?? '',
-      refreshToken: '', // Firebase doesn't use refresh tokens in the same way
-      expiresIn: 3600, // Firebase tokens expire in 1 hour
-    );
   }
 
   // Login - Firebase ile giriş yap
@@ -66,7 +85,7 @@ class AuthApiService {
 
     // Firebase ID token'ı al
     final idToken = await userCredential!.user!.getIdToken();
-    
+
     // User profile'ını çek
     final userProfile = await getCurrentUser();
 

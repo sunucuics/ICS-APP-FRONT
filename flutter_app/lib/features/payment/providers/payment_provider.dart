@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/payment_model.dart';
 import '../../../core/models/order_model.dart';
-import '../../../core/models/address_model.dart';
 import '../../../features/orders/providers/orders_provider.dart';
 import '../../../features/addresses/providers/addresses_provider.dart';
 import '../../../features/cart/providers/cart_provider.dart';
@@ -26,9 +25,8 @@ final paymentStatusProvider = StateProvider<PaymentStatus>((ref) {
 class PaymentProcessingNotifier
     extends StateNotifier<AsyncValue<PaymentResponse?>> {
   final MockPaymentService _mockPaymentService;
-  final Ref _ref;
 
-  PaymentProcessingNotifier(this._mockPaymentService, this._ref)
+  PaymentProcessingNotifier(this._mockPaymentService)
       : super(const AsyncValue.data(null));
 
   Future<PaymentResponse?> processPayment({
@@ -100,7 +98,7 @@ class PaymentProcessingNotifier
 final paymentProcessingProvider = StateNotifierProvider<
     PaymentProcessingNotifier, AsyncValue<PaymentResponse?>>((ref) {
   final mockPaymentService = ref.read(mockPaymentServiceProvider);
-  return PaymentProcessingNotifier(mockPaymentService, ref);
+  return PaymentProcessingNotifier(mockPaymentService);
 });
 
 // Payment Summary Provider

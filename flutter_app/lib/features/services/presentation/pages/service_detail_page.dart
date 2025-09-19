@@ -5,6 +5,10 @@ import '../../../comments/presentation/widgets/rating_summary.dart';
 import '../../../comments/presentation/widgets/comments_list.dart';
 import '../../../comments/presentation/widgets/comment_form.dart';
 import '../../../comments/presentation/pages/comments_page.dart';
+import '../../../auth/providers/anonymous_auth_provider.dart' as anonymous;
+import '../../../auth/providers/auth_provider.dart';
+import '../../../auth/presentation/pages/guest_upgrade_page.dart';
+import '../../../appointments/presentation/pages/appointment_booking_page.dart';
 import '../../../../core/models/service_model.dart';
 import '../../../../core/theme/app_theme.dart';
 
@@ -25,9 +29,9 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.7,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
           children: [
@@ -37,7 +41,7 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: Theme.of(context).colorScheme.outline,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -46,17 +50,21 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  const Text(
+                  Text(
                     'Yorum Ekle',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const Spacer(),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close),
+                    icon: Icon(
+                      Icons.close,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 ],
               ),
@@ -80,6 +88,67 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
     );
   }
 
+  void _bookAppointment(BuildContext context, WidgetRef ref, Service service) {
+    // Check if user is authenticated (either registered or anonymous)
+    final authState = ref.read(authProvider);
+    final isAnonymous = ref.read(anonymous.isAnonymousProvider);
+
+    // If registered user is authenticated, allow booking
+    // If only anonymous user is authenticated, show upgrade dialog
+    final isActuallyAnonymous = !authState.isAuthenticated && isAnonymous;
+
+    if (isActuallyAnonymous) {
+      _showGuestUpgradeDialog(context);
+      return;
+    }
+
+    // Navigate to appointment booking page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AppointmentBookingPage(service: service),
+      ),
+    );
+  }
+
+  void _showGuestUpgradeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Hesap Gerekli'),
+          content: const Text(
+            'Randevu almak için hesap oluşturmanız gerekiyor. '
+            'Hesap oluşturmak ister misiniz?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('İptal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const GuestUpgradePage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryNavy,
+                foregroundColor: Colors.white,
+                elevation: 3,
+                shadowColor: AppTheme.primaryNavy.withOpacity(0.3),
+              ),
+              child: const Text('Hesap Oluştur'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final service = widget.service;
@@ -87,26 +156,7 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(service.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.favorite_border),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Favoriler özelliği yakında eklenecek')),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Paylaşım özelliği yakında eklenecek')),
-              );
-            },
-          ),
-        ],
+        actions: [],
       ),
       body: Column(
         children: [
@@ -120,25 +170,27 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                   Container(
                     height: 300,
                     width: double.infinity,
-                    color: Colors.grey[100],
+                    color: Theme.of(context).colorScheme.surfaceVariant,
                     child: service.image != null && service.image!.isNotEmpty
                         ? CachedNetworkImage(
                             imageUrl: service.image!,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
-                              color: Colors.grey[200],
+                              color:
+                                  Theme.of(context).colorScheme.surfaceVariant,
                               child: const Center(
                                 child: CircularProgressIndicator(),
                               ),
                             ),
                             errorWidget: (context, url, error) => Container(
-                              color: Colors.grey[200],
+                              color:
+                                  Theme.of(context).colorScheme.surfaceVariant,
                               child: const Icon(Icons.image_not_supported,
                                   size: 64),
                             ),
                           )
                         : Container(
-                            color: Colors.grey[200],
+                            color: Theme.of(context).colorScheme.surfaceVariant,
                             child: const Icon(Icons.business_center, size: 64),
                           ),
                   ),
@@ -164,14 +216,13 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 4),
                           decoration: BoxDecoration(
-                            color:
-                                Theme.of(context).primaryColor.withOpacity(0.1),
+                            color: AppTheme.primaryNavy.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             'Hizmet',
                             style: TextStyle(
-                              color: Theme.of(context).primaryColor,
+                              color: AppTheme.primaryNavy,
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
@@ -329,8 +380,10 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(top: BorderSide(color: Colors.grey[300]!)),
+              color: Theme.of(context).colorScheme.surface,
+              border: Border(
+                  top:
+                      BorderSide(color: Theme.of(context).colorScheme.outline)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),
@@ -346,9 +399,12 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Durum',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     Text(
                       service.isUpcoming ? 'Yakında' : 'Aktif',
@@ -370,13 +426,7 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                     onPressed: service.isUpcoming
                         ? null
                         : () {
-                            // Navigate to appointment booking or contact
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content:
-                                    Text('Randevu sistemi yakında eklenecek'),
-                              ),
-                            );
+                            _bookAppointment(context, ref, service);
                           },
                     icon: const Icon(Icons.calendar_today),
                     label: Text(
@@ -385,6 +435,8 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primaryNavy,
                       foregroundColor: Colors.white,
+                      elevation: 3,
+                      shadowColor: AppTheme.primaryNavy.withOpacity(0.3),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),

@@ -183,14 +183,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
   Widget _buildModernServiceInfo() {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.white,
-            Colors.grey.withOpacity(0.02),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
@@ -269,7 +262,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
                   Text(
                     widget.service.description,
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 15,
                       height: 1.4,
                     ),
@@ -449,7 +442,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
         const SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
@@ -476,9 +469,10 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
               border: InputBorder.none,
               contentPadding: const EdgeInsets.all(20),
             ),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               height: 1.4,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),

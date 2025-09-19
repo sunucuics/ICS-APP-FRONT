@@ -615,6 +615,15 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget>
   }
 
   void _showModernAvailableHours(DateTime date, List<String> availableHours) {
+    // Get busy slots for this date
+    final dateString = date.toIso8601String().split('T')[0];
+    final busySlotsAsync = ref.watch(busySlotsProvider(
+      BusySlotsParams(
+        serviceId: widget.serviceId,
+        days: 30,
+      ),
+    ));
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -676,7 +685,7 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Müsait Saatler',
+                                'Saatler',
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge
@@ -702,47 +711,73 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget>
                     const SizedBox(height: 24),
                     // Modern time slots
                     Flexible(
-                      child: availableHours.isEmpty
-                          ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.schedule_rounded,
-                                    size: 64,
-                                    color: Colors.grey.withOpacity(0.5),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'Bu gün için müsait saat bulunmuyor',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                          color: Colors.grey.withOpacity(0.7),
-                                        ),
-                                  ),
-                                ],
+                      child: busySlotsAsync.when(
+                        data: (busySlots) {
+                          final dayBusySlots = busySlots
+                              .where((slot) => slot.date == dateString)
+                              .toList();
+                          final allWorkingHours = List.generate(
+                              9,
+                              (index) =>
+                                  '${(9 + index).toString().padLeft(2, '0')}:00');
+
+                          return SizedBox(
+                            height: 200,
+                            child: GridView.builder(
+                              controller: scrollController,
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                childAspectRatio: 2.2,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
                               ),
-                            )
-                          : SizedBox(
-                              height: 200, // Sabit yükseklik ver
-                              child: GridView.builder(
-                                controller: scrollController,
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 3,
-                                  childAspectRatio: 2.2,
-                                  crossAxisSpacing: 12,
-                                  mainAxisSpacing: 12,
-                                ),
-                                itemCount: availableHours.length,
-                                itemBuilder: (context, index) {
-                                  final hour = availableHours[index];
+                              itemCount: allWorkingHours.length,
+                              itemBuilder: (context, index) {
+                                final hour = allWorkingHours[index];
+                                final isBusy = dayBusySlots.any((slot) =>
+                                    slot.start == hour ||
+                                    slot.start.split(':')[0] ==
+                                        hour.split(':')[0]);
+
+                                if (isBusy) {
+                                  return _buildBusyHourButton(hour);
+                                } else {
                                   return _buildModernHourButton(hour, date);
-                                },
-                              ),
+                                }
+                              },
                             ),
+                          );
+                        },
+                        loading: () => const Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                AppTheme.primaryOrange),
+                          ),
+                        ),
+                        error: (error, stack) => Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.error_outline_rounded,
+                                size: 64,
+                                color: Colors.grey.withOpacity(0.5),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Saatler yüklenirken hata oluştu',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      color: Colors.grey.withOpacity(0.7),
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -798,6 +833,50 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget>
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildBusyHourButton(String hour) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.grey.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Hour text
+          Center(
+            child: Text(
+              hour,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey.withOpacity(0.6),
+              ),
+            ),
+          ),
+          // Red cross overlay
+          Center(
+            child: Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: AppTheme.errorRed.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.close_rounded,
+                color: AppTheme.errorRed,
+                size: 16,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

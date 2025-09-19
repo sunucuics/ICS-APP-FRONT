@@ -7,6 +7,7 @@ import '../../../comments/presentation/widgets/comments_list.dart';
 import '../../../comments/presentation/widgets/comment_form.dart';
 import '../../../comments/presentation/pages/comments_page.dart';
 import '../../../../core/models/product_model.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class ProductDetailPage extends ConsumerStatefulWidget {
   final Product product;
@@ -28,9 +29,9 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.7,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
           children: [
@@ -40,7 +41,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: Theme.of(context).colorScheme.outline,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -49,17 +50,21 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  const Text(
+                  Text(
                     'Yorum Ekle',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const Spacer(),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close),
+                    icon: Icon(
+                      Icons.close,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 ],
               ),
@@ -93,27 +98,38 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(product.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.favorite_border),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Favoriler özelliği yakında eklenecek')),
-              );
-            },
+        backgroundColor: AppTheme.primaryOrange,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppTheme.primaryOrange,
+                AppTheme.primaryOrange.withOpacity(0.8),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Paylaşım özelliği yakında eklenecek')),
-              );
-            },
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(4),
+          child: Container(
+            height: 4,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.primaryOrange,
+                  AppTheme.primaryOrange.withOpacity(0.7),
+                ],
+              ),
+            ),
           ),
-        ],
+        ),
       ),
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: Column(
         children: [
           // Product Images
@@ -122,35 +138,66 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Main Image
+                  // Main Image with enhanced design
                   Container(
-                    height: 300,
+                    height: 350,
                     width: double.infinity,
-                    color: Colors.grey[100],
-                    child: product.images.isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: product.images[selectedImageIndex],
-                            fit: BoxFit.contain,
-                            placeholder: (context, url) => Container(
-                              color: Colors.grey[200],
-                              child: const Center(
-                                child: CircularProgressIndicator(),
+                    margin: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: product.images.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: product.images[selectedImageIndex],
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceVariant,
+                                child: const Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        AppTheme.primaryOrange),
+                                  ),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceVariant,
+                                child: const Icon(
+                                  Icons.image_not_supported,
+                                  size: 64,
+                                  color: AppTheme.primaryOrange,
+                                ),
+                              ),
+                            )
+                          : Container(
+                              color:
+                                  Theme.of(context).colorScheme.surfaceVariant,
+                              child: const Icon(
+                                Icons.image_not_supported,
+                                size: 64,
+                                color: AppTheme.primaryOrange,
                               ),
                             ),
-                            errorWidget: (context, url, error) => Container(
-                              color: Colors.grey[200],
-                              child: const Icon(Icons.image_not_supported,
-                                  size: 64),
-                            ),
-                          )
-                        : const Icon(Icons.image_not_supported, size: 64),
+                    ),
                   ),
 
-                  // Image thumbnails
+                  // Image thumbnails with enhanced design
                   if (product.images.length > 1) ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     Container(
-                      height: 80,
+                      height: 90,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
@@ -164,32 +211,51 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                               });
                             },
                             child: Container(
-                              width: 80,
-                              height: 80,
-                              margin: const EdgeInsets.only(right: 12),
+                              width: 90,
+                              height: 90,
+                              margin: const EdgeInsets.only(right: 16),
                               decoration: BoxDecoration(
                                 border: Border.all(
                                   color: isSelected
-                                      ? Theme.of(context).primaryColor
+                                      ? AppTheme.primaryOrange
                                       : Colors.grey[300]!,
-                                  width: isSelected ? 2 : 1,
+                                  width: isSelected ? 3 : 1,
                                 ),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: AppTheme.primaryOrange
+                                              .withOpacity(0.3),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ]
+                                    : null,
                               ),
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(6),
+                                borderRadius: BorderRadius.circular(10),
                                 child: CachedNetworkImage(
                                   imageUrl: product.images[index],
                                   fit: BoxFit.cover,
                                   placeholder: (context, url) => Container(
-                                    color: Colors.grey[200],
-                                    child: const Icon(Icons.image),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .surfaceVariant,
+                                    child: const Icon(
+                                      Icons.image,
+                                      color: AppTheme.primaryOrange,
+                                    ),
                                   ),
                                   errorWidget: (context, url, error) =>
                                       Container(
-                                    color: Colors.grey[200],
-                                    child:
-                                        const Icon(Icons.image_not_supported),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .surfaceVariant,
+                                    child: const Icon(
+                                      Icons.image_not_supported,
+                                      color: AppTheme.primaryOrange,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -200,134 +266,256 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                     ),
                   ],
 
-                  // Product Info
-                  Padding(
-                    padding: const EdgeInsets.all(16),
+                  // Product Info with enhanced design
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Title and Category
                         Text(
                           product.title,
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                         ),
                         if (product.categoryName != null) ...[
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 4),
+                                horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .primaryColor
-                                  .withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
+                              color: AppTheme.primaryOrange.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: AppTheme.primaryOrange.withOpacity(0.3),
+                                width: 1,
+                              ),
                             ),
                             child: Text(
                               product.categoryName!,
-                              style: TextStyle(
-                                color: Theme.of(context).primaryColor,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
+                              style: const TextStyle(
+                                color: AppTheme.primaryOrange,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
                         ],
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 20),
 
-                        // Price
-                        Row(
-                          children: [
-                            Text(
-                              '₺${displayPrice.toStringAsFixed(2)}',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).primaryColor,
-                              ),
+                        // Price with enhanced design
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppTheme.primaryOrange.withOpacity(0.1),
+                                AppTheme.primaryOrange.withOpacity(0.05),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                            if (hasDiscount) ...[
-                              const SizedBox(width: 12),
-                              Text(
-                                '₺${product.price.toStringAsFixed(2)}',
-                                style: const TextStyle(
-                                  decoration: TextDecoration.lineThrough,
-                                  color: Colors.grey,
-                                  fontSize: 16,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Fiyat',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '₺${displayPrice.toStringAsFixed(2)}',
+                                      style: const TextStyle(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.primaryOrange,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  borderRadius: BorderRadius.circular(12),
+                              if (hasDiscount) ...[
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      '₺${product.price.toStringAsFixed(2)}',
+                                      style: TextStyle(
+                                        decoration: TextDecoration.lineThrough,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: Text(
+                                        '${(((product.price - displayPrice) / product.price) * 100).round()}% İndirim',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                child: Text(
-                                  '${(((product.price - displayPrice) / product.price) * 100).round()}% İndirim',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Stock Status with enhanced design
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: product.stock > 0
+                                ? AppTheme.successGreen.withOpacity(0.1)
+                                : Colors.red.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: product.stock > 0
+                                  ? AppTheme.successGreen.withOpacity(0.3)
+                                  : Colors.red.withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: product.stock > 0
+                                      ? AppTheme.successGreen
+                                      : Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  product.stock > 0
+                                      ? Icons.check_circle
+                                      : Icons.cancel,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Stok Durumu',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      product.stock > 0
+                                          ? 'Stokta var'
+                                          : 'Stokta yok',
+                                      style: TextStyle(
+                                        color: product.stock > 0
+                                            ? AppTheme.successGreen
+                                            : Colors.red,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Stock Status
-                        Row(
-                          children: [
-                            Icon(
-                              product.stock > 0
-                                  ? Icons.check_circle
-                                  : Icons.cancel,
-                              color:
-                                  product.stock > 0 ? Colors.green : Colors.red,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              product.stock > 0
-                                  ? 'Stokta var (${product.stock} adet)'
-                                  : 'Stokta yok',
-                              style: TextStyle(
-                                color: product.stock > 0
-                                    ? Colors.green
-                                    : Colors.red,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
 
                         if (product.isUpcoming) ...[
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 20),
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: Colors.orange.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.orange.withOpacity(0.3),
+                                width: 1,
+                              ),
                             ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
+                            child: Row(
                               children: [
-                                Icon(Icons.access_time,
-                                    color: Colors.orange, size: 16),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Yakında gelecek',
-                                  style: TextStyle(
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: const BoxDecoration(
                                     color: Colors.orange,
-                                    fontWeight: FontWeight.w500,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.access_time,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Yakında Satışta',
+                                        style: TextStyle(
+                                          color: Colors.orange,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Bu ürün yakında satışa sunulacak',
+                                        style: TextStyle(
+                                          color: Colors.orange,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
@@ -336,77 +524,153 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                         ],
                         const SizedBox(height: 24),
 
-                        // Quantity Selector
+                        // Quantity Selector with enhanced design
                         if (product.stock > 0 && !product.isUpcoming) ...[
-                          Row(
-                            children: [
-                              const Text(
-                                'Adet:',
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.w500),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color:
+                                  Theme.of(context).colorScheme.surfaceVariant,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .outline
+                                    .withOpacity(0.2),
+                                width: 1,
                               ),
-                              const SizedBox(width: 16),
-                              Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey[300]!),
-                                  borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Text(
+                                  'Adet:',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
+                                  ),
                                 ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      onPressed: quantity > 1
-                                          ? () {
-                                              setState(() {
-                                                quantity--;
-                                              });
-                                            }
-                                          : null,
-                                      icon: const Icon(Icons.remove),
-                                    ),
-                                    Text(
-                                      '$quantity',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
+                                const SizedBox(width: 20),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color:
+                                        Theme.of(context).colorScheme.surface,
+                                    border: Border.all(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline
+                                            .withOpacity(0.3)),
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.05),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
                                       ),
-                                    ),
-                                    IconButton(
-                                      onPressed: quantity < product.stock
-                                          ? () {
-                                              setState(() {
-                                                quantity++;
-                                              });
-                                            }
-                                          : null,
-                                      icon: const Icon(Icons.add),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        onPressed: quantity > 1
+                                            ? () {
+                                                setState(() {
+                                                  quantity--;
+                                                });
+                                              }
+                                            : null,
+                                        icon: const Icon(Icons.remove),
+                                        style: IconButton.styleFrom(
+                                          foregroundColor: quantity > 1
+                                              ? AppTheme.primaryOrange
+                                              : Colors.grey,
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 12),
+                                        child: Text(
+                                          quantity.toString(),
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: quantity < product.stock
+                                            ? () {
+                                                setState(() {
+                                                  quantity++;
+                                                });
+                                              }
+                                            : null,
+                                        icon: const Icon(Icons.add),
+                                        style: IconButton.styleFrom(
+                                          foregroundColor:
+                                              quantity < product.stock
+                                                  ? AppTheme.primaryOrange
+                                                  : Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 20),
                         ],
 
-                        // Description
+                        // Description with enhanced design
                         if (product.description != null &&
                             product.description!.isNotEmpty) ...[
-                          Text(
-                            'Ürün Açıklaması',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color:
+                                  Theme.of(context).colorScheme.surfaceVariant,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .outline
+                                    .withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Ürün Açıklaması',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
+                                  ),
                                 ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  product.description!,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            product.description!,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 20),
                         ],
 
                         // Rating Summary
@@ -415,57 +679,95 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                           targetType: 'product',
                         ),
 
-                        // Comments Section
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Yorumlar',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                        // Comments Section with enhanced design
+                        const SizedBox(height: 20),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .outline
+                                  .withOpacity(0.2),
+                              width: 1,
                             ),
-                            Row(
-                              children: [
-                                // Add comment button
-                                ElevatedButton.icon(
-                                  onPressed: _showCommentForm,
-                                  icon: const Icon(Icons.add_comment, size: 16),
-                                  label: const Text('Yorum Ekle'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        Theme.of(context).primaryColor,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 8),
-                                    textStyle: const TextStyle(fontSize: 12),
+                          ),
+                          child: Column(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Yorumlar',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                // View all comments button
-                                TextButton.icon(
-                                  onPressed: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => CommentsPage(
-                                          targetId: product.id,
-                                          targetType: 'product',
-                                          targetTitle: product.title,
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    children: [
+                                      // Add comment button
+                                      Expanded(
+                                        child: ElevatedButton.icon(
+                                          onPressed: _showCommentForm,
+                                          icon: const Icon(Icons.add_comment,
+                                              size: 16),
+                                          label: const Text('Yorum Ekle'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor:
+                                                AppTheme.primaryOrange,
+                                            foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 12, vertical: 10),
+                                            textStyle:
+                                                const TextStyle(fontSize: 12),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    );
-                                  },
-                                  icon: const Icon(Icons.comment_outlined,
-                                      size: 16),
-                                  label: const Text('Tümünü Gör'),
-                                ),
-                              ],
-                            ),
-                          ],
+                                      const SizedBox(width: 8),
+                                      // View all comments button
+                                      Expanded(
+                                        child: TextButton.icon(
+                                          onPressed: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    CommentsPage(
+                                                  targetId: product.id,
+                                                  targetType: 'product',
+                                                  targetTitle: product.title,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          icon: const Icon(
+                                              Icons.comment_outlined,
+                                              size: 16),
+                                          label: const Text('Tümünü Gör'),
+                                          style: TextButton.styleFrom(
+                                            foregroundColor:
+                                                AppTheme.primaryOrange,
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 12, vertical: 8),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 8),
 
@@ -485,17 +787,18 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
             ),
           ),
 
-          // Bottom Action Bar
+          // Bottom Action Bar with enhanced design
           Container(
-            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(top: BorderSide(color: Colors.grey[300]!)),
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, -2),
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, -5),
                 ),
               ],
             ),
@@ -503,44 +806,86 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
               children: [
                 // Total price
                 if (product.stock > 0 && !product.isUpcoming) ...[
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Toplam',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                      Text(
-                        '₺${(displayPrice * quantity).toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor,
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Toplam',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(
+                          '₺${(displayPrice * quantity).toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primaryOrange,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(width: 16),
                 ],
 
                 // Add to Cart Button
                 Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: (product.stock > 0 && !product.isUpcoming)
-                        ? () => _addToCart(context, ref)
-                        : null,
-                    icon: const Icon(Icons.shopping_cart),
-                    label: Text(
-                      product.isUpcoming
-                          ? 'Yakında Satışta'
-                          : product.stock > 0
-                              ? 'Sepete Ekle'
-                              : 'Stokta Yok',
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
+                  flex: product.stock > 0 && !product.isUpcoming ? 2 : 1,
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final isLoading = ref.watch(cartLoadingProvider);
+                      return ElevatedButton.icon(
+                        onPressed: (product.stock > 0 &&
+                                !product.isUpcoming &&
+                                !isLoading)
+                            ? () => _addToCart(context, ref)
+                            : null,
+                        icon: isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                ),
+                              )
+                            : const Icon(Icons.shopping_cart, size: 20),
+                        label: Text(
+                          isLoading
+                              ? 'Ekleniyor...'
+                              : product.isUpcoming
+                                  ? 'Yakında Satışta'
+                                  : product.stock > 0
+                                      ? 'Sepete Ekle'
+                                      : 'Stokta Yok',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: (product.stock > 0 &&
+                                  !product.isUpcoming &&
+                                  !isLoading)
+                              ? AppTheme.primaryOrange
+                              : Colors.grey,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 0,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -553,9 +898,12 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
 
   void _addToCart(BuildContext context, WidgetRef ref) async {
     try {
-      await ref
-          .read(cartProvider.notifier)
-          .addToCart(widget.product.id, quantity: quantity);
+      await ref.read(cartProvider.notifier).addToCart(
+            widget.product.id,
+            quantity: quantity,
+            productTitle: widget.product.title,
+            productPrice: widget.product.price,
+          );
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -563,13 +911,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
             content:
                 Text('${widget.product.title} sepete eklendi ($quantity adet)'),
             duration: const Duration(seconds: 2),
-            action: SnackBarAction(
-              label: 'Sepeti Gör',
-              onPressed: () {
-                Navigator.of(context).pop(); // Detail page'i kapat
-                // Parent'ta cart tab'a geçiş yapılacak
-              },
-            ),
+            // Remove action button, just show notification
           ),
         );
       }

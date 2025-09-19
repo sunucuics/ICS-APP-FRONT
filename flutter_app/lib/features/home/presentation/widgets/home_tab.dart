@@ -5,10 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../featured/providers/featured_provider.dart';
 import '../../../cart/providers/cart_provider.dart';
-import '../../../../core/models/product_model.dart';
-import '../../../../core/models/service_model.dart';
 import '../../../../core/models/featured_model.dart';
-import '../../../../core/widgets/theme_toggle_button.dart';
 import '../../../../core/theme/app_theme.dart';
 
 class HomeTab extends ConsumerWidget {
@@ -26,10 +23,10 @@ class HomeTab extends ConsumerWidget {
         title: RichText(
           text: TextSpan(
             children: [
-              const TextSpan(
+              TextSpan(
                 text: 'Innova Craft ',
                 style: TextStyle(
-                  color: Colors.black,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -137,7 +134,7 @@ class HomeTab extends ConsumerWidget {
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(24),
@@ -146,17 +143,28 @@ class HomeTab extends ConsumerWidget {
                           width: 1,
                         ),
                       ),
-                      child: authState.user?.name.isNotEmpty == true
-                          ? Text(
-                              _getInitials(authState.user!.name),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )
-                          : const Icon(Icons.person,
-                              color: Colors.white, size: 32),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          'assets/images/ics_logo.jpg',
+                          width: 64,
+                          height: 64,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return authState.user?.name.isNotEmpty == true
+                                ? Text(
+                                    _getInitials(authState.user!.name),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )
+                                : const Icon(Icons.person,
+                                    color: Colors.white, size: 40);
+                          },
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 20),
                     Expanded(
@@ -165,11 +173,11 @@ class HomeTab extends ConsumerWidget {
                         children: [
                           Text(
                             authState.user?.name.isNotEmpty == true
-                                ? 'Hoş geldiniz, ${authState.user!.name.split(' ').first}!'
+                                ? 'Hoş geldiniz, ${authState.user!.name}!'
                                 : 'Hoş geldiniz!',
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 22,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               shadows: [
                                 Shadow(
@@ -180,12 +188,12 @@ class HomeTab extends ConsumerWidget {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 4),
                           Text(
-                            'Bugün size nasıl yardımcı olabiliriz?',
+                            'Size nasıl yardımcı olabiliriz?',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.9),
-                              fontSize: 16,
+                              fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -205,15 +213,7 @@ class HomeTab extends ConsumerWidget {
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Theme.of(context).colorScheme.surface,
-                        Theme.of(context).colorScheme.surfaceVariant,
-                        Theme.of(context).colorScheme.surfaceVariant,
-                      ],
-                    ),
+                    color: Colors.white,
                     border: Border.all(
                       color: Theme.of(context)
                           .colorScheme
@@ -280,7 +280,7 @@ class HomeTab extends ConsumerWidget {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Profesyonel hizmetlerimizi keşfedin',
+                                    'Hizmetlerimizi Keşfedin',
                                     style: TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme
@@ -341,8 +341,8 @@ class HomeTab extends ConsumerWidget {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(24),
                       onTap: () {
-                        // Navigate to catalog tab (index 2)
-                        onNavigateToTab?.call(2);
+                        // Navigate to catalog tab (index 3)
+                        onNavigateToTab?.call(3);
                       },
                       child: Container(
                         width: double.infinity,
@@ -383,7 +383,7 @@ class HomeTab extends ConsumerWidget {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Kaliteli ürünlerimizi inceleyin',
+                                    'Ürünlerimizi inceleyin',
                                     style: TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme
@@ -665,7 +665,7 @@ class HomeTab extends ConsumerWidget {
                         final featuredProduct = featuredProducts[index];
                         return _FeaturedProductCard(
                           featuredProduct: featuredProduct,
-                          onNavigateToCatalog: () => onNavigateToTab?.call(2),
+                          onNavigateToCatalog: () => onNavigateToTab?.call(3),
                         );
                       },
                     ),
@@ -891,40 +891,67 @@ class _FeaturedProductCard extends ConsumerWidget {
                       ),
                     )
                   else
-                    Container(
+                    SizedBox(
                       width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Add to cart functionality
-                          final cartNotifier = ref.read(cartProvider.notifier);
-                          cartNotifier.addToCart(
-                            featuredProduct.id ?? '',
-                            quantity: 1,
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                  '${featuredProduct.title} sepete eklendi'),
-                              backgroundColor: AppTheme.successGreen,
+                      child: Consumer(
+                        builder: (context, ref, child) {
+                          final isLoading = ref.watch(cartLoadingProvider);
+                          return ElevatedButton(
+                            onPressed: isLoading
+                                ? null
+                                : () async {
+                                    // Add to cart functionality
+                                    final cartNotifier =
+                                        ref.read(cartProvider.notifier);
+                                    try {
+                                      await cartNotifier.addToCart(
+                                        featuredProduct.id,
+                                        quantity: 1,
+                                        productTitle: featuredProduct.title,
+                                        productPrice: featuredProduct.price,
+                                      );
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                                '${featuredProduct.title} sepete eklendi'),
+                                            backgroundColor:
+                                                AppTheme.successGreen,
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content:
+                                                Text('Hata: ${e.toString()}'),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryOrange,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              isLoading ? 'Ekleniyor...' : 'Sepete Ekle',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           );
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryOrange,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 6),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text(
-                          'Sepete Ekle',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
                       ),
                     ),
                 ],

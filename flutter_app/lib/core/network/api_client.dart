@@ -12,9 +12,9 @@ class ApiClient {
   ApiClient() {
     _dio = Dio(BaseOptions(
       baseUrl: ApiEndpoints.baseUrl,
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-      sendTimeout: const Duration(seconds: 30),
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+      sendTimeout: const Duration(seconds: 10),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -72,9 +72,11 @@ class ApiClient {
     Options? options,
   }) async {
     try {
-      // Debug: POST data'yı yazdır
-      print('🌐 POST $path');
-      print('📦 POST Data: $data');
+      // Debug: POST data'yı yazdır (sadece debug modda)
+      if (ApiEndpoints.isDebug) {
+        print('🌐 POST $path');
+        print('📦 POST Data: $data');
+      }
 
       return await _dio.post(
         path,

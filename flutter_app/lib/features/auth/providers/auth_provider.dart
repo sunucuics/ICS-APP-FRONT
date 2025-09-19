@@ -98,13 +98,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
         );
       } else {
         // Firebase user exists but backend user fetch failed
+        // This means the user was created in Firebase but not in backend
+        // Sign out from Firebase to clean up the state
+        print(
+            '⚠️ Firebase user exists but backend user not found. Signing out...');
+        await FirebaseAuthService.signOut();
         state = state.copyWith(
           isAuthenticated: false,
           isLoading: false,
-          error: 'Failed to load user profile',
+          error: 'User profile not found. Please try again.',
         );
       }
     } catch (e) {
+      // If there's an error, also sign out to clean up the state
+      print('⚠️ Error loading user profile: $e. Signing out...');
+      await FirebaseAuthService.signOut();
       state = state.copyWith(
         error: e.toString(),
         isAuthenticated: false,
@@ -121,8 +129,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       print('🔐 AuthProvider - Calling auth repository login...');
       final response = await _authRepository.login(email, password);
-      print(
-          '🔐 AuthProvider - Login successful, user: ${response.user?.email ?? 'Unknown'}');
+      print('🔐 AuthProvider - Login successful, user: ${response.user.email}');
       print('🔐 AuthProvider - User ID: ${response.userId}');
       print('🔐 AuthProvider - Token exists: ${response.idToken.isNotEmpty}');
 
