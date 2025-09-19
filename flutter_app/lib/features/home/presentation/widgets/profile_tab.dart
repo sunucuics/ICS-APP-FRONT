@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../auth/providers/anonymous_auth_provider.dart' as anonymous;
 import '../../../auth/presentation/pages/guest_upgrade_page.dart';
+import '../../../auth/presentation/pages/login_page.dart';
+import '../../../auth/presentation/pages/register_page.dart';
 import '../../../orders/presentation/pages/orders_list_page.dart';
 import '../../../addresses/presentation/pages/addresses_list_page.dart';
 import '../../../appointments/presentation/pages/my_appointments_page.dart';
@@ -170,7 +172,7 @@ class ProfileTab extends ConsumerWidget {
                                 if (!isActuallyAnonymous &&
                                     currentUser?.email != null)
                                   Text(
-                                    currentUser!.email!,
+                                    currentUser?.email ?? '',
                                     style: TextStyle(
                                       fontSize: 16,
                                       color: Theme.of(context)
@@ -308,7 +310,29 @@ class ProfileTab extends ConsumerWidget {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        // Logout Button
+                        // Authentication Buttons for Guest Users
+                        if (isActuallyAnonymous)
+                          _buildModernMenuSection(
+                            context,
+                            title: 'Hesap',
+                            items: [
+                              _buildModernMenuItem(
+                                context,
+                                icon: Icons.login,
+                                title: 'Giriş Yap',
+                                subtitle: 'Mevcut hesabınızla giriş yapın',
+                                onTap: () => _navigateToLogin(context),
+                              ),
+                              _buildModernMenuItem(
+                                context,
+                                icon: Icons.person_add,
+                                title: 'Kayıt Ol',
+                                subtitle: 'Yeni hesap oluşturun',
+                                onTap: () => _navigateToRegister(context),
+                              ),
+                            ],
+                          ),
+                        // Logout Button for Registered Users
                         if (!isActuallyAnonymous)
                           Container(
                             margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -463,6 +487,9 @@ class ProfileTab extends ConsumerWidget {
   }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    final isActuallyAnonymous = !ref.read(authProvider).isAuthenticated &&
+        ref.read(anonymous.isAnonymousProvider);
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -471,17 +498,27 @@ class ProfileTab extends ConsumerWidget {
             borderRadius: BorderRadius.circular(16),
           ),
           title: const Text('Çıkış Yap'),
-          content: const Text(
-              'Hesabınızdan çıkış yapmak istediğinize emin misiniz?'),
+          content: Text(isActuallyAnonymous
+              ? 'Misafir oturumundan çıkış yapmak istediğinize emin misiniz?'
+              : 'Hesabınızdan çıkış yapmak istediğinize emin misiniz?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('İptal'),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                ref.read(authProvider.notifier).logout();
+
+                if (isActuallyAnonymous) {
+                  // Sign out from anonymous auth
+                  await ref
+                      .read(anonymous.anonymousAuthProvider.notifier)
+                      .signOut();
+                } else {
+                  // Sign out from registered auth
+                  await ref.read(authProvider.notifier).logout();
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.errorRed,
@@ -525,6 +562,22 @@ class ProfileTab extends ConsumerWidget {
           ],
         );
       },
+    );
+  }
+
+  void _navigateToLogin(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const LoginPage(),
+      ),
+    );
+  }
+
+  void _navigateToRegister(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const RegisterPage(),
+      ),
     );
   }
 

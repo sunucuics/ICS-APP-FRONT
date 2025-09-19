@@ -43,6 +43,20 @@ class ProductsApiService {
         .map((item) => Category.fromJson(item as Map<String, dynamic>))
         .toList();
 
+    // Sort categories: fixed categories first, then by creation date (newest first)
+    categoryList.sort((a, b) {
+      // Fixed categories always come first
+      if (a.isFixed && !b.isFixed) return -1;
+      if (!a.isFixed && b.isFixed) return 1;
+
+      // If both have same fixed status, sort by creation date (newest first)
+      if (a.createdAt != null && b.createdAt != null) {
+        return b.createdAt!.compareTo(a.createdAt!);
+      }
+
+      return 0;
+    });
+
     return categoryList;
   }
 

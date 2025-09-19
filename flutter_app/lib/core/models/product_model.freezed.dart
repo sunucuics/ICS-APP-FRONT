@@ -540,6 +540,7 @@ mixin _$Category {
   String? get coverImage => throw _privateConstructorUsedError;
   String get kind => throw _privateConstructorUsedError;
   bool get isDeleted => throw _privateConstructorUsedError;
+  bool get isFixed => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
 
   /// Serializes this Category to a JSON map.
@@ -565,6 +566,7 @@ abstract class $CategoryCopyWith<$Res> {
       String? coverImage,
       String kind,
       bool isDeleted,
+      bool isFixed,
       DateTime? createdAt});
 }
 
@@ -590,6 +592,7 @@ class _$CategoryCopyWithImpl<$Res, $Val extends Category>
     Object? coverImage = freezed,
     Object? kind = null,
     Object? isDeleted = null,
+    Object? isFixed = null,
     Object? createdAt = freezed,
   }) {
     return _then(_value.copyWith(
@@ -621,6 +624,10 @@ class _$CategoryCopyWithImpl<$Res, $Val extends Category>
           ? _value.isDeleted
           : isDeleted // ignore: cast_nullable_to_non_nullable
               as bool,
+      isFixed: null == isFixed
+          ? _value.isFixed
+          : isFixed // ignore: cast_nullable_to_non_nullable
+              as bool,
       createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -645,6 +652,7 @@ abstract class _$$CategoryImplCopyWith<$Res>
       String? coverImage,
       String kind,
       bool isDeleted,
+      bool isFixed,
       DateTime? createdAt});
 }
 
@@ -668,6 +676,7 @@ class __$$CategoryImplCopyWithImpl<$Res>
     Object? coverImage = freezed,
     Object? kind = null,
     Object? isDeleted = null,
+    Object? isFixed = null,
     Object? createdAt = freezed,
   }) {
     return _then(_$CategoryImpl(
@@ -699,6 +708,10 @@ class __$$CategoryImplCopyWithImpl<$Res>
           ? _value.isDeleted
           : isDeleted // ignore: cast_nullable_to_non_nullable
               as bool,
+      isFixed: null == isFixed
+          ? _value.isFixed
+          : isFixed // ignore: cast_nullable_to_non_nullable
+              as bool,
       createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -718,6 +731,7 @@ class _$CategoryImpl implements _Category {
       this.coverImage,
       this.kind = 'category',
       this.isDeleted = false,
+      this.isFixed = false,
       this.createdAt});
 
   factory _$CategoryImpl.fromJson(Map<String, dynamic> json) =>
@@ -740,11 +754,14 @@ class _$CategoryImpl implements _Category {
   @JsonKey()
   final bool isDeleted;
   @override
+  @JsonKey()
+  final bool isFixed;
+  @override
   final DateTime? createdAt;
 
   @override
   String toString() {
-    return 'Category(id: $id, name: $name, description: $description, image: $image, coverImage: $coverImage, kind: $kind, isDeleted: $isDeleted, createdAt: $createdAt)';
+    return 'Category(id: $id, name: $name, description: $description, image: $image, coverImage: $coverImage, kind: $kind, isDeleted: $isDeleted, isFixed: $isFixed, createdAt: $createdAt)';
   }
 
   @override
@@ -762,6 +779,7 @@ class _$CategoryImpl implements _Category {
             (identical(other.kind, kind) || other.kind == kind) &&
             (identical(other.isDeleted, isDeleted) ||
                 other.isDeleted == isDeleted) &&
+            (identical(other.isFixed, isFixed) || other.isFixed == isFixed) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
   }
@@ -769,7 +787,7 @@ class _$CategoryImpl implements _Category {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, id, name, description, image,
-      coverImage, kind, isDeleted, createdAt);
+      coverImage, kind, isDeleted, isFixed, createdAt);
 
   /// Create a copy of Category
   /// with the given fields replaced by the non-null parameter values.
@@ -796,6 +814,7 @@ abstract class _Category implements Category {
       final String? coverImage,
       final String kind,
       final bool isDeleted,
+      final bool isFixed,
       final DateTime? createdAt}) = _$CategoryImpl;
 
   factory _Category.fromJson(Map<String, dynamic> json) =
@@ -815,6 +834,8 @@ abstract class _Category implements Category {
   String get kind;
   @override
   bool get isDeleted;
+  @override
+  bool get isFixed;
   @override
   DateTime? get createdAt;
 

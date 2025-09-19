@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/anonymous_auth_provider.dart';
-import '../../../../core/widgets/auth_wrapper.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import 'register_page.dart';
 import 'login_page.dart';
@@ -15,11 +14,11 @@ class GuestWelcomePage extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             children: [
-              const Spacer(),
+              const SizedBox(height: 40),
 
               // App Logo/Icon
               Container(
@@ -63,7 +62,7 @@ class GuestWelcomePage extends ConsumerWidget {
               // Guest Mode Benefits
               _buildBenefitsList(context),
 
-              const Spacer(),
+              const SizedBox(height: 48),
 
               // Action Buttons
               _buildActionButtons(context, ref, authNotifier),
@@ -72,6 +71,8 @@ class GuestWelcomePage extends ConsumerWidget {
 
               // Terms and Privacy
               _buildTermsAndPrivacy(context),
+
+              const SizedBox(height: 40),
             ],
           ),
         ),

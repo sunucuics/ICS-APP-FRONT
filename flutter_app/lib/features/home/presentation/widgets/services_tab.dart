@@ -36,24 +36,7 @@ class ServicesTab extends ConsumerWidget {
             const Text('Hizmetler'),
           ],
         ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Arama özelliği yakında eklenecek')),
-                );
-              },
-            ),
-          ),
-        ],
+        actions: [],
       ),
       body: servicesAsync.when(
         data: (services) {

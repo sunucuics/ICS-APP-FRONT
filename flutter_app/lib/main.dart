@@ -7,6 +7,9 @@ import 'core/widgets/auth_wrapper.dart';
 import 'core/services/navigation_service.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/services/theme_service.dart';
+import 'features/auth/presentation/pages/login_page.dart';
+import 'features/auth/presentation/pages/register_page.dart';
+import 'features/home/presentation/pages/home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,6 +47,11 @@ class MyApp extends ConsumerWidget {
       home: const AuthWrapper(),
       debugShowCheckedModeBanner: false,
       navigatorKey: NavigationService.navigatorKey,
+      routes: {
+        '/login': (context) => const LoginPage(),
+        '/register': (context) => const RegisterPage(),
+        '/home': (context) => const HomePage(),
+      },
     );
   }
 }

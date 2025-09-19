@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../products/providers/products_provider.dart';
+import '../../../cart/providers/cart_provider.dart';
+import '../../../auth/providers/anonymous_auth_provider.dart';
 import '../../../../core/models/product_model.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../home/presentation/pages/home_page.dart';
 
 class CategoryProductsPage extends ConsumerStatefulWidget {
   final Category category;
@@ -66,13 +69,18 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
 
   @override
   Widget build(BuildContext context) {
-    final productsAsync = ref.watch(productsProvider(widget.category.name));
+    // For "Tümü" category (empty name), pass null to get all products
+    final categoryName =
+        widget.category.name.isEmpty ? null : widget.category.name;
+    final productsAsync = ref.watch(productsProvider(categoryName));
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        title: Text(widget.category.name),
-        backgroundColor: AppTheme.primaryNavy,
+        title: Text(widget.category.name.isEmpty
+            ? 'Tüm Ürünler'
+            : widget.category.name),
+        backgroundColor: AppTheme.primaryOrange,
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
@@ -80,8 +88,8 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                AppTheme.primaryNavy,
-                AppTheme.primaryNavy.withOpacity(0.8),
+                AppTheme.primaryOrange,
+                AppTheme.primaryOrange.withOpacity(0.8),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -114,6 +122,147 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
             ),
           );
         },
+      ),
+      bottomNavigationBar: Container(
+        margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.black.withValues(alpha: 0.1),
+              blurRadius: 15,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              // Anasayfa (Home)
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  final homePageState =
+                      context.findAncestorStateOfType<HomePageState>();
+                  if (homePageState != null) {
+                    homePageState.switchToTab(0);
+                  }
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.home,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      size: 24,
+                    ),
+                  ],
+                ),
+              ),
+              // Hizmetler (Services)
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  final homePageState =
+                      context.findAncestorStateOfType<HomePageState>();
+                  if (homePageState != null) {
+                    homePageState.switchToTab(1);
+                  }
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.work,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      size: 24,
+                    ),
+                  ],
+                ),
+              ),
+              // Sepet (Cart) - Central Button
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  final homePageState =
+                      context.findAncestorStateOfType<HomePageState>();
+                  if (homePageState != null) {
+                    homePageState.switchToTab(2);
+                  }
+                },
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: const BoxDecoration(
+                    color: AppTheme.primaryOrange,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.shopping_cart,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
+              // Mağaza (Store) - Current tab
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  final homePageState =
+                      context.findAncestorStateOfType<HomePageState>();
+                  if (homePageState != null) {
+                    homePageState.switchToTab(3);
+                  }
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.store,
+                      color: AppTheme.primaryOrange,
+                      size: 24,
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(top: 4),
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: AppTheme.primaryOrange,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Profil (Profile)
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  final homePageState =
+                      context.findAncestorStateOfType<HomePageState>();
+                  if (homePageState != null) {
+                    homePageState.switchToTab(4);
+                  }
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.person,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      size: 24,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -230,8 +379,11 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
           ),
           const SizedBox(height: 20),
           ElevatedButton.icon(
-            onPressed: () =>
-                ref.refresh(productsProvider(widget.category.name)),
+            onPressed: () {
+              final categoryName =
+                  widget.category.name.isEmpty ? null : widget.category.name;
+              ref.refresh(productsProvider(categoryName));
+            },
             icon: const Icon(Icons.refresh_rounded),
             label: const Text('Tekrar Dene'),
             style: ElevatedButton.styleFrom(
@@ -252,7 +404,7 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
       padding: const EdgeInsets.all(20),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.75,
+        childAspectRatio: 0.65, // Reduced to accommodate the button
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),
@@ -265,13 +417,13 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
   }
 }
 
-class _ProductCard extends StatelessWidget {
+class _ProductCard extends ConsumerWidget {
   final Product product;
 
   const _ProductCard({required this.product});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final displayPrice = product.finalPrice ?? product.price;
     final hasDiscount =
         product.finalPrice != null && product.finalPrice! < product.price;
@@ -380,18 +532,21 @@ class _ProductCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Price Row
                     Row(
                       children: [
-                        Text(
-                          '₺${displayPrice.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: AppTheme.primaryOrange,
+                        Expanded(
+                          child: Text(
+                            '₺${displayPrice.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: AppTheme.primaryOrange,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (hasDiscount) ...[
-                          const SizedBox(width: 8),
+                        if (hasDiscount)
                           Text(
                             '₺${product.price.toStringAsFixed(2)}',
                             style: const TextStyle(
@@ -400,10 +555,11 @@ class _ProductCard extends StatelessWidget {
                               fontSize: 12,
                             ),
                           ),
-                        ],
                       ],
                     ),
                     const SizedBox(height: 6),
+
+                    // Stock Row
                     Row(
                       children: [
                         Container(
@@ -425,17 +581,129 @@ class _ProductCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 6),
-                        Text(
-                          product.stock > 0 ? 'Stokta var' : 'Stokta yok',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: product.stock > 0
-                                ? AppTheme.successGreen
-                                : Colors.red,
+                        Expanded(
+                          child: Text(
+                            product.stock > 0 ? 'Stokta var' : 'Stokta yok',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: product.stock > 0
+                                  ? AppTheme.successGreen
+                                  : Colors.red,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Add to Cart Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: product.stock > 0
+                            ? () async {
+                                // Check if user is anonymous (guest)
+                                final isAnonymous =
+                                    ref.read(isAnonymousProvider);
+
+                                if (isAnonymous) {
+                                  // User is anonymous (guest), show login prompt
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: const Text(
+                                          'Sepete eklemek için lütfen giriş yapın'),
+                                      backgroundColor: Colors.orange,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      action: SnackBarAction(
+                                        label: 'Giriş Yap',
+                                        textColor: Colors.white,
+                                        onPressed: () {
+                                          // Navigate to login page
+                                          Navigator.pushNamed(
+                                              context, '/login');
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                try {
+                                  await ref.read(addToCartProvider)(product.id);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          '${product.title} sepete eklendi'),
+                                      backgroundColor: AppTheme.primaryOrange,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      action: SnackBarAction(
+                                        label: 'Sepete Git',
+                                        textColor: Colors.white,
+                                        onPressed: () {
+                                          // Close SnackBar first
+                                          ScaffoldMessenger.of(context)
+                                              .hideCurrentSnackBar();
+
+                                          // Get HomePage state before navigation
+                                          final homePageState =
+                                              context.findAncestorStateOfType<
+                                                  HomePageState>();
+
+                                          // Navigate back to home page
+                                          Navigator.of(context).popUntil(
+                                              (route) => route.isFirst);
+
+                                          // Switch to cart tab immediately after navigation
+                                          if (homePageState != null) {
+                                            WidgetsBinding.instance
+                                                .addPostFrameCallback((_) {
+                                              homePageState.switchToTab(2);
+                                            });
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'Ürün sepete eklenirken hata oluştu: $e'),
+                                      backgroundColor: Colors.red,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                            : null,
+                        icon: const Icon(Icons.shopping_cart, size: 16),
+                        label: Text(
+                          product.stock > 0 ? 'Sepete Ekle' : 'Stokta Yok',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: product.stock > 0
+                              ? AppTheme.primaryOrange
+                              : Colors.grey,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                      ),
                     ),
                   ],
                 ),

@@ -63,6 +63,7 @@ _$CategoryImpl _$$CategoryImplFromJson(Map<String, dynamic> json) =>
       coverImage: json['coverImage'] as String?,
       kind: json['kind'] as String? ?? 'category',
       isDeleted: json['isDeleted'] as bool? ?? false,
+      isFixed: json['isFixed'] as bool? ?? false,
       createdAt: json['createdAt'] == null
           ? null
           : DateTime.parse(json['createdAt'] as String),
@@ -77,6 +78,7 @@ Map<String, dynamic> _$$CategoryImplToJson(_$CategoryImpl instance) =>
       'coverImage': instance.coverImage,
       'kind': instance.kind,
       'isDeleted': instance.isDeleted,
+      'isFixed': instance.isFixed,
       'createdAt': instance.createdAt?.toIso8601String(),
     };
 

@@ -10,13 +10,13 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomePage> createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  void _switchToTab(int tabIndex) {
+  void switchToTab(int tabIndex) {
     setState(() {
       _currentIndex = tabIndex;
     });
@@ -28,7 +28,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _tabs = [
-      HomeTab(onNavigateToTab: _switchToTab),
+      HomeTab(onNavigateToTab: switchToTab),
       const ServicesTab(),
       const CartTab(),
       const CatalogTabNew(),
@@ -65,7 +65,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               // Anasayfa (Home)
               GestureDetector(
-                onTap: () => setState(() => _currentIndex = 0),
+                onTap: () => switchToTab(0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -91,7 +91,7 @@ class _HomePageState extends State<HomePage> {
               ),
               // Hizmetler (Services)
               GestureDetector(
-                onTap: () => setState(() => _currentIndex = 1),
+                onTap: () => switchToTab(1),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -117,7 +117,7 @@ class _HomePageState extends State<HomePage> {
               ),
               // Sepet (Cart) - Central Button
               GestureDetector(
-                onTap: () => setState(() => _currentIndex = 2),
+                onTap: () => switchToTab(2),
                 child: Container(
                   width: 48,
                   height: 48,
@@ -136,7 +136,7 @@ class _HomePageState extends State<HomePage> {
               ),
               // Mağaza (Store)
               GestureDetector(
-                onTap: () => setState(() => _currentIndex = 3),
+                onTap: () => switchToTab(3),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -162,7 +162,7 @@ class _HomePageState extends State<HomePage> {
               ),
               // Profil (Profile)
               GestureDetector(
-                onTap: () => setState(() => _currentIndex = 4),
+                onTap: () => switchToTab(4),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [

@@ -90,6 +90,9 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
   }
 
   Widget _buildCategoryCardVertical(Category category, bool isSelected) {
+    // Check if this is a fixed category
+    final isFixed = category.isFixed;
+
     return GestureDetector(
       onTap: () {
         // Navigate to category products page
@@ -99,22 +102,36 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppTheme.primaryNavy
-              : Theme.of(context).colorScheme.surface,
+          color: isFixed
+              ? AppTheme.primaryOrange.withOpacity(0.1)
+              : isSelected
+                  ? AppTheme.primaryNavy
+                  : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected
+            color: isFixed
                 ? AppTheme.primaryOrange
-                : Theme.of(context).colorScheme.outline.withOpacity(0.2),
-            width: isSelected ? 2 : 1,
+                : isSelected
+                    ? AppTheme.primaryOrange
+                    : Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            width: isFixed
+                ? 2
+                : isSelected
+                    ? 2
+                    : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: isSelected
-                  ? AppTheme.primaryOrange.withOpacity(0.2)
-                  : Colors.black.withOpacity(0.05),
-              blurRadius: isSelected ? 12 : 8,
+              color: isFixed
+                  ? AppTheme.primaryOrange.withOpacity(0.3)
+                  : isSelected
+                      ? AppTheme.primaryOrange.withOpacity(0.2)
+                      : Colors.black.withOpacity(0.05),
+              blurRadius: isFixed
+                  ? 16
+                  : isSelected
+                      ? 12
+                      : 8,
               offset: const Offset(0, 4),
               spreadRadius: 0,
             ),
@@ -125,37 +142,118 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isSelected
+                color: isFixed
                     ? AppTheme.primaryOrange
-                    : AppTheme.primaryOrange.withOpacity(0.1),
+                    : isSelected
+                        ? AppTheme.primaryOrange
+                        : AppTheme.primaryOrange.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                category.name == 'Tümü'
-                    ? Icons.grid_view_rounded
-                    : _getCategoryIcon(category.name),
-                color: isSelected ? Colors.white : AppTheme.primaryOrange,
-                size: 24,
+              child: Stack(
+                children: [
+                  Icon(
+                    category.name == 'Tümü'
+                        ? Icons.grid_view_rounded
+                        : _getCategoryIcon(category.name),
+                    color: isFixed || isSelected
+                        ? Colors.white
+                        : AppTheme.primaryOrange,
+                    size: 24,
+                  ),
+                  if (isFixed)
+                    Positioned(
+                      right: -2,
+                      top: -2,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.push_pin,
+                          color: Colors.white,
+                          size: 12,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: Text(
-                category.name,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: isSelected
-                      ? Colors.white
-                      : Theme.of(context).colorScheme.onSurface,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          category.name,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: isFixed
+                                ? AppTheme.primaryOrange
+                                : isSelected
+                                    ? Colors.white
+                                    : Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      if (isFixed)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryOrange,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text(
+                            'ÖNE ÇIKAN',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  if (category.description != null &&
+                      category.description!.isNotEmpty)
+                    const SizedBox(height: 4),
+                  if (category.description != null &&
+                      category.description!.isNotEmpty)
+                    Text(
+                      category.description!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isFixed
+                            ? AppTheme.primaryOrange.withOpacity(0.8)
+                            : isSelected
+                                ? Colors.white.withOpacity(0.8)
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withOpacity(0.6),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
               ),
             ),
             Icon(
               Icons.arrow_forward_ios_rounded,
-              color: isSelected
-                  ? Colors.white.withOpacity(0.7)
-                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+              color: isFixed
+                  ? AppTheme.primaryOrange.withOpacity(0.7)
+                  : isSelected
+                      ? Colors.white.withOpacity(0.7)
+                      : Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.5),
               size: 16,
             ),
           ],
@@ -203,18 +301,7 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
             ),
           ),
         ),
-        actions: [
-          const ThemeToggleButton(),
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Arama özelliği yakında eklenecek')),
-              );
-            },
-          ),
-        ],
+        actions: [],
       ),
       body: AnimatedBuilder(
         animation: _fadeAnimation,
@@ -223,11 +310,13 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
             opacity: _fadeAnimation,
             child: SlideTransition(
               position: _slideAnimation,
-              child: Column(
-                children: [
-                  // Categories horizontal cards
-                  _buildCategoriesSection(categoriesAsync, selectedCategory),
-                ],
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // Categories horizontal cards
+                    _buildCategoriesSection(categoriesAsync, selectedCategory),
+                  ],
+                ),
               ),
             ),
           );
@@ -242,27 +331,40 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: categoriesAsync.when(
         data: (categories) {
-          // Add "Tümü" category and other categories (excluding Innova Craft Studio from list)
+          // Add "Tümü" category and other categories from backend
+          // Filter out test categories
+          final filteredCategories = categories
+              .where((cat) =>
+                  !cat.name.toLowerCase().contains('deneme') &&
+                  !cat.name.toLowerCase().contains('test'))
+              .toList();
+
+          // Fixed categories should appear first
+          final fixedCategories =
+              filteredCategories.where((cat) => cat.isFixed).toList();
+          final regularCategories =
+              filteredCategories.where((cat) => !cat.isFixed).toList();
+
           final allCategories = [
+            ...fixedCategories,
             const Category(id: '', name: 'Tümü'),
-            ...categories,
+            ...regularCategories,
           ];
 
           return Column(
             children: [
-              // Innova Craft Studio - Special Category with top margin
-              Container(
-                margin: const EdgeInsets.only(top: 20),
-                child: _buildSpecialCategoryCard(const Category(
-                    id: 'innova_craft_studio', name: 'Innova Craft Studio')),
-              ),
-              const SizedBox(height: 20),
               // All Categories - Vertical Cards
-              ...allCategories.map((category) {
+              ...allCategories.asMap().entries.map((entry) {
+                final index = entry.key;
+                final category = entry.value;
                 // No category should be selected by default
                 final isSelected = selectedCategory == category.name;
                 return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
+                  margin: EdgeInsets.only(
+                    top:
+                        index == 0 ? 20 : 0, // Add top margin to first category
+                    bottom: 12,
+                  ),
                   child: _buildCategoryCardVertical(category, isSelected),
                 );
               }).toList(),
@@ -272,85 +374,6 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Text('Kategoriler yüklenemedi: $error'),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSpecialCategoryCard(Category category) {
-    return GestureDetector(
-      onTap: () {
-        // Navigate to Innova Craft Studio products page
-        _navigateToCategoryProducts(category);
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppTheme.primaryOrange,
-              AppTheme.primaryOrange.withOpacity(0.8),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.primaryOrange.withOpacity(0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-              spreadRadius: 0,
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.storefront_rounded,
-                color: Colors.white,
-                size: 32,
-              ),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Innova Craft Studio',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Özel tasarım ürünler',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white.withOpacity(0.9),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              color: Colors.white.withOpacity(0.8),
-              size: 20,
-            ),
-          ],
         ),
       ),
     );

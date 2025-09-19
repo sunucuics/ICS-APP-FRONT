@@ -4,7 +4,6 @@ import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/providers/anonymous_auth_provider.dart'
     as anonymous;
 import '../../features/auth/presentation/pages/guest_welcome_page.dart';
-import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 
 class AuthWrapper extends ConsumerWidget {
@@ -13,56 +12,42 @@ class AuthWrapper extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
-    final anonymousAuthState = ref.watch(anonymous.authStateProvider);
-    final anonymousUserAsync = ref.watch(anonymous.anonymousAuthProvider);
 
-    // Auto sign-in anonymously if not authenticated
+    // Handle user sign out - navigate to welcome page
     ref.listen(anonymous.anonymousAuthProvider, (previous, next) {
       next.when(
         data: (user) {
           if (user == null && previous?.value != null) {
-            // User signed out, navigate to login page
+            // User signed out, navigate to welcome page
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (context.mounted) {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
-                    builder: (context) => const LoginPage(),
+                    builder: (context) => const GuestWelcomePage(),
                   ),
                 );
               }
             });
-          } else if (user == null) {
-            // No user initially, try to sign in anonymously
-            ref
-                .read(anonymous.anonymousAuthProvider.notifier)
-                .signInAnonymously();
           }
         },
         loading: () {},
         error: (error, stack) {
-          // On error, try to sign in anonymously
-          ref
-              .read(anonymous.anonymousAuthProvider.notifier)
-              .signInAnonymously();
+          // On error, show welcome page
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => const GuestWelcomePage(),
+                ),
+              );
+            }
+          });
         },
       );
     });
 
-    // Check anonymous user directly
-    final isAnonymousAuthenticated = anonymousUserAsync.when(
-      data: (user) => user != null,
-      loading: () => false,
-      error: (error, stack) => false,
-    );
-
-    // Check if user is authenticated (either registered or anonymous)
-    // If registered user is authenticated, ignore anonymous authentication
-    final isAnyAuthenticated = authState.isAuthenticated ||
-        (!authState.isAuthenticated && isAnonymousAuthenticated);
-    final isLoading = authState.isLoading ||
-        (!authState.isAuthenticated && anonymousAuthState.isLoading);
-
-    // AuthWrapper only handles widget rendering, navigation is handled by individual pages
+    // Only check registered user authentication
+    final isLoading = authState.isLoading;
 
     if (isLoading) {
       return const Scaffold(
@@ -79,9 +64,11 @@ class AuthWrapper extends ConsumerWidget {
       );
     }
 
-    if (isAnyAuthenticated) {
+    // If registered user is authenticated, show HomePage
+    if (authState.isAuthenticated) {
       return const HomePage();
     } else {
+      // Show welcome page for unauthenticated users
       return const GuestWelcomePage();
     }
   }

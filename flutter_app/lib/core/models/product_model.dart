@@ -58,6 +58,7 @@ class Category with _$Category {
     String? coverImage,
     @Default('category') String kind,
     @Default(false) bool isDeleted,
+    @Default(false) bool isFixed,
     DateTime? createdAt,
   }) = _Category;
 
@@ -69,6 +70,7 @@ class Category with _$Category {
         'coverImage': json['cover_image'],
         'kind': json['kind'] ?? 'category',
         'isDeleted': json['is_deleted'] ?? false,
+        'isFixed': json['is_fixed'] ?? false,
         'createdAt': json['created_at'] != null
             ? DateTime.parse(json['created_at'])
             : null,

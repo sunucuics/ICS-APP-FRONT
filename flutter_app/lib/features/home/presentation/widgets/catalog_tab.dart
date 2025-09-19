@@ -111,27 +111,6 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
-              icon: Icon(_isSearchVisible ? Icons.close : Icons.search),
-              onPressed: () {
-                setState(() {
-                  if (_isSearchVisible) {
-                    _isSearchVisible = false;
-                    _searchController.clear();
-                    _searchQuery = '';
-                  } else {
-                    _isSearchVisible = true;
-                  }
-                });
-              },
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
               icon: const Icon(Icons.filter_list),
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -152,9 +131,23 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
             child: categoriesAsync.when(
               data: (categories) {
                 // Add "Tümü" category at the beginning
+                // Filter out test categories
+                final filteredCategories = categories
+                    .where((cat) =>
+                        !cat.name.toLowerCase().contains('deneme') &&
+                        !cat.name.toLowerCase().contains('test'))
+                    .toList();
+
+                // Fixed categories should appear first
+                final fixedCategories =
+                    filteredCategories.where((cat) => cat.isFixed).toList();
+                final regularCategories =
+                    filteredCategories.where((cat) => !cat.isFixed).toList();
+
                 final allCategories = [
+                  ...fixedCategories,
                   const Category(id: '', name: 'Tümü'),
-                  ...categories,
+                  ...regularCategories,
                 ];
 
                 return ListView.builder(
@@ -166,6 +159,7 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                     final isSelected =
                         (selectedCategory == null && index == 0) ||
                             (selectedCategory == category.name);
+                    final isFixed = category.isFixed;
 
                     return GestureDetector(
                       onTap: () {
@@ -177,57 +171,99 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                         width: 85,
                         margin: const EdgeInsets.only(right: 12),
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppTheme.primaryOrange
-                              : Theme.of(context).colorScheme.surfaceVariant,
+                          color: isFixed
+                              ? AppTheme.primaryOrange.withOpacity(0.2)
+                              : isSelected
+                                  ? AppTheme.primaryOrange
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .surfaceVariant,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: isSelected
+                            color: isFixed
                                 ? AppTheme.primaryOrange
-                                : Theme.of(context).colorScheme.outline,
-                            width: 1,
+                                : isSelected
+                                    ? AppTheme.primaryOrange
+                                    : Theme.of(context).colorScheme.outline,
+                            width: isFixed ? 2 : 1,
                           ),
-                          boxShadow: isSelected
+                          boxShadow: isFixed
                               ? [
                                   BoxShadow(
                                     color:
-                                        AppTheme.primaryOrange.withOpacity(0.3),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
+                                        AppTheme.primaryOrange.withOpacity(0.4),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 6),
                                   ),
                                 ]
-                              : [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.2),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
+                              : isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: AppTheme.primaryOrange
+                                            .withOpacity(0.3),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ]
+                                  : [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.2),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        child: Stack(
                           children: [
-                            Icon(
-                              index == 0
-                                  ? Icons.apps
-                                  : _getCategoryIcon(category.name),
-                              color: isSelected ? Colors.white : Colors.white70,
-                              size: 20,
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  index == 0
+                                      ? Icons.apps
+                                      : _getCategoryIcon(category.name),
+                                  color: isFixed || isSelected
+                                      ? Colors.white
+                                      : Colors.white70,
+                                  size: 20,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  category.name,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: isFixed
+                                        ? AppTheme.primaryOrange
+                                        : isSelected
+                                            ? Colors.white
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              category.name,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: isSelected
-                                    ? Colors.white
-                                    : Theme.of(context).colorScheme.onSurface,
+                            if (isFixed)
+                              Positioned(
+                                right: 4,
+                                top: 4,
+                                child: Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.push_pin,
+                                    color: Colors.white,
+                                    size: 8,
+                                  ),
+                                ),
                               ),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
                           ],
                         ),
                       ),
