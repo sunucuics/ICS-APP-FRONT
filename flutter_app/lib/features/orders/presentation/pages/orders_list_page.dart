@@ -150,11 +150,12 @@ class OrdersListPage extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(8),
                         color: Colors.grey[200],
                       ),
-                      child: order.items.first.imageUrl != null
+                      child: _getFirstItemImage(order.items.first) != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: CachedNetworkImage(
-                                imageUrl: order.items.first.imageUrl!,
+                                imageUrl:
+                                    _getFirstItemImage(order.items.first)!,
                                 fit: BoxFit.cover,
                                 placeholder: (context, url) => Container(
                                   color: Colors.grey[200],
@@ -375,6 +376,23 @@ class OrdersListPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String? _getFirstItemImage(OrderItem item) {
+    // First try to get image from imageUrl field
+    if (item.imageUrl != null && item.imageUrl!.isNotEmpty) {
+      return item.imageUrl;
+    }
+
+    // Then try to get first image from product.images array
+    if (item.product != null && item.product!['images'] != null) {
+      final images = item.product!['images'] as List<dynamic>?;
+      if (images != null && images.isNotEmpty) {
+        return images.first as String;
+      }
+    }
+
+    return null;
   }
 
   String _formatDate(DateTime? date) {

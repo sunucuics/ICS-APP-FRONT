@@ -11,6 +11,7 @@ class ApiEndpoints {
   static const String authLogin = '/auth/login';
   static const String authLogout = '/auth/logout';
   static const String authResetPassword = '/auth/reset-password';
+  static const String authCheckEmail = '/auth/check-email';
 
   // User endpoints
   static const String userProfile = '/users/me';

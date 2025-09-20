@@ -92,6 +92,10 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
     // Check if this is a fixed category
     final isFixed = category.isFixed;
 
+    // Special handling for Innova Craft Studio card
+    final isInnovaCard =
+        isFixed && category.name.toLowerCase().contains('innova');
+
     return GestureDetector(
       onTap: () {
         // Navigate to category products page
@@ -99,165 +103,221 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
       },
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(isInnovaCard ? 20 : 16),
         decoration: BoxDecoration(
-          color: isFixed
-              ? AppTheme.primaryOrange.withOpacity(0.1)
-              : isSelected
-                  ? AppTheme.primaryNavy
-                  : Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
+          color:
+              isInnovaCard ? const Color(0xFF0c0ff3) : AppTheme.primaryOrange,
+          borderRadius: BorderRadius.circular(isInnovaCard ? 20 : 16),
           border: Border.all(
-            color: isFixed
-                ? AppTheme.primaryOrange
-                : isSelected
-                    ? AppTheme.primaryOrange
-                    : Theme.of(context).colorScheme.outline.withOpacity(0.2),
-            width: isFixed
-                ? 2
-                : isSelected
-                    ? 2
-                    : 1,
+            color: isInnovaCard
+                ? const Color(0xFF0c0ff3).withOpacity(0.3)
+                : AppTheme.primaryOrange.withOpacity(0.3),
+            width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: isFixed
-                  ? AppTheme.primaryOrange.withOpacity(0.3)
-                  : isSelected
-                      ? AppTheme.primaryOrange.withOpacity(0.2)
-                      : Colors.black.withOpacity(0.05),
-              blurRadius: isFixed
-                  ? 16
-                  : isSelected
-                      ? 12
-                      : 8,
-              offset: const Offset(0, 4),
+              color: isInnovaCard
+                  ? const Color(0xFF0c0ff3).withOpacity(0.3)
+                  : AppTheme.primaryOrange.withOpacity(0.3),
+              blurRadius: isInnovaCard ? 20 : 12,
+              offset: const Offset(0, 8),
               spreadRadius: 0,
             ),
           ],
         ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isFixed
-                    ? AppTheme.primaryOrange
-                    : isSelected
-                        ? AppTheme.primaryOrange
-                        : AppTheme.primaryOrange.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Stack(
+        child: isInnovaCard
+            ? _buildInnovaCard(category)
+            : Row(
                 children: [
-                  Icon(
-                    category.name == 'Tümü'
-                        ? Icons.grid_view_rounded
-                        : _getCategoryIcon(category.name),
-                    color: isFixed || isSelected
-                        ? Colors.white
-                        : AppTheme.primaryOrange,
-                    size: 24,
-                  ),
-                  if (isFixed)
-                    Positioned(
-                      right: -2,
-                      top: -2,
-                      child: Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.push_pin,
-                          color: Colors.white,
-                          size: 12,
-                        ),
-                      ),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
                     ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          category.name,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: isFixed
-                                ? AppTheme.primaryOrange
-                                : isSelected
-                                    ? Colors.white
-                                    : Theme.of(context).colorScheme.onSurface,
-                          ),
+                    child: Stack(
+                      children: [
+                        Icon(
+                          category.name == 'Tümü'
+                              ? Icons.grid_view_rounded
+                              : _getCategoryIcon(category.name),
+                          color: Colors.white,
+                          size: 24,
                         ),
-                      ),
-                      if (isFixed)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primaryOrange,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            'ÖNE ÇIKAN',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                        if (isFixed)
+                          Positioned(
+                            right: -2,
+                            top: -2,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.push_pin,
+                                color: Colors.white,
+                                size: 12,
+                              ),
                             ),
                           ),
-                        ),
-                    ],
-                  ),
-                  if (category.description != null &&
-                      category.description!.isNotEmpty)
-                    const SizedBox(height: 4),
-                  if (category.description != null &&
-                      category.description!.isNotEmpty)
-                    Text(
-                      category.description!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isFixed
-                            ? AppTheme.primaryOrange.withOpacity(0.8)
-                            : isSelected
-                                ? Colors.white.withOpacity(0.8)
-                                : Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withOpacity(0.6),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      ],
                     ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                category.name,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            if (isFixed)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Text(
+                                  'ÖNE ÇIKAN',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        if (category.description != null &&
+                            category.description!.isNotEmpty)
+                          const SizedBox(height: 4),
+                        if (category.description != null &&
+                            category.description!.isNotEmpty)
+                          Text(
+                            category.description!,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.white70,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
                 ],
               ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              color: isFixed
-                  ? AppTheme.primaryOrange.withOpacity(0.7)
-                  : isSelected
-                      ? Colors.white.withOpacity(0.7)
-                      : Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withOpacity(0.5),
-              size: 16,
-            ),
-          ],
-        ),
       ),
+    );
+  }
+
+  Widget _buildInnovaCard(Category category) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: const Icon(
+            Icons.business,
+            color: Colors.white,
+            size: 32,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              children: [
+                const TextSpan(
+                  text: 'Innova Craft ',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextSpan(
+                  text: 'S',
+                  style: TextStyle(
+                    color: Colors.blue[600],
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextSpan(
+                  text: 't',
+                  style: TextStyle(
+                    color: Colors.orange[600],
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextSpan(
+                  text: 'u',
+                  style: TextStyle(
+                    color: Colors.yellow[700],
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextSpan(
+                  text: 'd',
+                  style: TextStyle(
+                    color: Colors.red[600],
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextSpan(
+                  text: 'i',
+                  style: TextStyle(
+                    color: Colors.blue[600],
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextSpan(
+                  text: 'o',
+                  style: TextStyle(
+                    color: Colors.orange[600],
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const Icon(
+          Icons.arrow_forward_ios_rounded,
+          color: Colors.white,
+          size: 20,
+        ),
+      ],
     );
   }
 

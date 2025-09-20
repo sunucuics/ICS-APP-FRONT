@@ -60,6 +60,16 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
 
     _fadeAnimationController.forward();
     _slideAnimationController.forward();
+
+    // Preload calendar data
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(busySlotsProvider(
+        BusySlotsParams(
+          serviceId: widget.service.id,
+          days: 90,
+        ),
+      ).future);
+    });
   }
 
   @override
@@ -253,7 +263,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
-                      color: AppTheme.primaryNavy,
+                      color: Colors.white,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -261,8 +271,8 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
                   const SizedBox(height: 8),
                   Text(
                     widget.service.description,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    style: const TextStyle(
+                      color: Colors.white,
                       fontSize: 15,
                       height: 1.4,
                     ),
@@ -287,12 +297,12 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppTheme.primaryOrange.withOpacity(0.1),
+                color: AppTheme.primaryNavy.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
                 Icons.calendar_month_rounded,
-                color: AppTheme.primaryOrange,
+                color: AppTheme.primaryNavy,
                 size: 24,
               ),
             ),
@@ -301,7 +311,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
               'Tarih ve Saat Seçin',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.primaryNavy,
+                    color: Colors.white,
                   ),
             ),
           ],
@@ -369,9 +379,9 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
                 children: [
                   Text(
                     'Seçilen Randevu',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.successGreen,
+                      color: Colors.white,
                       fontSize: 16,
                     ),
                   ),
@@ -381,7 +391,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: AppTheme.primaryNavy,
+                      color: Colors.white,
                     ),
                   ),
                 ],
@@ -434,7 +444,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
               'Ek Notlar (İsteğe Bağlı)',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.primaryNavy,
+                    color: Colors.white,
                   ),
             ),
           ],
@@ -469,10 +479,10 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
               border: InputBorder.none,
               contentPadding: const EdgeInsets.all(20),
             ),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 15,
               height: 1.4,
-              color: Theme.of(context).colorScheme.onSurface,
+              color: Colors.white,
             ),
           ),
         ),
@@ -654,7 +664,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
                 'Randevu Talebi Oluşturuldu!',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryNavy,
+                      color: Colors.white,
                     ),
                 textAlign: TextAlign.center,
               ),
@@ -664,10 +674,11 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
                 '🎉 Randevu talebiniz başarıyla oluşturuldu!\n\n'
                 'Admin onayından sonra randevunuz aktif olacaktır. '
                 'Randevularım sayfasından durumunuzu takip edebilirsiniz.',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
-                      height: 1.5,
-                    ),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  height: 1.5,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -748,7 +759,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
                 'Randevu Alınamadı',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryNavy,
+                      color: Colors.white,
                     ),
                 textAlign: TextAlign.center,
               ),
@@ -756,10 +767,11 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
               // Message
               Text(
                 '❌ Randevu talebi oluşturulurken bir hata oluştu:\n\n$error\n\nLütfen tekrar deneyin.',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
-                      height: 1.5,
-                    ),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  height: 1.5,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),

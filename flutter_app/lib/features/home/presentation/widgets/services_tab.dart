@@ -117,15 +117,15 @@ class _ServiceCard extends ConsumerWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 15,
-      shadowColor: Colors.black.withOpacity(0.6),
+      shadowColor: AppTheme.serviceCardBlue.withOpacity(0.3),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
+          color: AppTheme.serviceCardBlue.withOpacity(0.3),
           width: 1,
         ),
       ),
-      color: Theme.of(context).colorScheme.surface,
+      color: AppTheme.serviceCardBlue,
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () {
@@ -145,7 +145,7 @@ class _ServiceCard extends ConsumerWidget {
                 height: 60,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  color: Colors.white.withOpacity(0.1),
                 ),
                 child: service.image != null
                     ? ClipRRect(
@@ -154,24 +154,26 @@ class _ServiceCard extends ConsumerWidget {
                           imageUrl: service.image!,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
-                            color: Theme.of(context).colorScheme.surfaceVariant,
+                            color: Colors.white.withOpacity(0.1),
                             child: const Center(
-                              child: CircularProgressIndicator(),
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                           errorWidget: (context, url, error) => Container(
-                            color: Theme.of(context).colorScheme.surfaceVariant,
-                            child: Icon(
+                            color: Colors.white.withOpacity(0.1),
+                            child: const Icon(
                               Icons.work,
-                              color: AppTheme.primaryNavy,
+                              color: Colors.white,
                               size: 32,
                             ),
                           ),
                         ),
                       )
-                    : Icon(
+                    : const Icon(
                         Icons.work,
-                        color: AppTheme.primaryNavy,
+                        color: Colors.white,
                         size: 32,
                       ),
               ),
@@ -186,10 +188,10 @@ class _ServiceCard extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             service.title,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
-                              color: Theme.of(context).colorScheme.onSurface,
+                              color: Colors.white,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -202,13 +204,13 @@ class _ServiceCard extends ConsumerWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: AppTheme.primaryNavy.withOpacity(0.1),
+                              color: Colors.white.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Text(
                               'Yakında',
                               style: TextStyle(
-                                color: AppTheme.primaryNavy,
+                                color: Colors.white,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -221,8 +223,8 @@ class _ServiceCard extends ConsumerWidget {
                       service.description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      style: const TextStyle(
+                        color: Colors.white70,
                         fontSize: 13,
                       ),
                     ),
@@ -241,11 +243,10 @@ class _ServiceCard extends ConsumerWidget {
                               );
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primaryNavy,
-                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.white,
+                              foregroundColor: AppTheme.serviceCardBlue,
                               elevation: 3,
-                              shadowColor:
-                                  AppTheme.primaryNavy.withOpacity(0.3),
+                              shadowColor: Colors.white.withOpacity(0.3),
                               padding: const EdgeInsets.symmetric(vertical: 8),
                             ),
                             child: const Text(
@@ -263,11 +264,16 @@ class _ServiceCard extends ConsumerWidget {
                                     _bookAppointment(context, ref, service);
                                   },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primaryNavy,
-                              foregroundColor: Colors.white,
+                              backgroundColor: service.isUpcoming
+                                  ? Colors.grey[300]
+                                  : Colors.white,
+                              foregroundColor: service.isUpcoming
+                                  ? Colors.grey[600]
+                                  : AppTheme.serviceCardBlue,
                               elevation: 3,
-                              shadowColor:
-                                  AppTheme.primaryNavy.withOpacity(0.3),
+                              shadowColor: service.isUpcoming
+                                  ? Colors.grey.withOpacity(0.3)
+                                  : Colors.white.withOpacity(0.3),
                               padding: const EdgeInsets.symmetric(vertical: 8),
                             ),
                             child: Text(

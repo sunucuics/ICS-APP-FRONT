@@ -5,7 +5,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../featured/providers/featured_provider.dart';
 import '../../../cart/providers/cart_provider.dart';
+import '../../../services/providers/services_provider.dart';
+import '../../../appointments/presentation/pages/appointment_booking_page.dart';
 import '../../../../core/models/featured_model.dart';
+import '../../../../core/models/service_model.dart';
 import '../../../../core/theme/app_theme.dart';
 
 class HomeTab extends ConsumerWidget {
@@ -20,6 +23,9 @@ class HomeTab extends ConsumerWidget {
     final featuredProducts = ref.watch(featuredProductsListProvider);
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        toolbarHeight: 60,
         title: RichText(
           text: TextSpan(
             children: [
@@ -27,7 +33,7 @@ class HomeTab extends ConsumerWidget {
                 text: 'Innova Craft ',
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 18,
+                  fontSize: 22,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -35,7 +41,7 @@ class HomeTab extends ConsumerWidget {
                 text: 'S',
                 style: TextStyle(
                   color: Colors.blue[600],
-                  fontSize: 18,
+                  fontSize: 22,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -43,7 +49,7 @@ class HomeTab extends ConsumerWidget {
                 text: 't',
                 style: TextStyle(
                   color: Colors.orange[600],
-                  fontSize: 18,
+                  fontSize: 22,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -51,7 +57,7 @@ class HomeTab extends ConsumerWidget {
                 text: 'u',
                 style: TextStyle(
                   color: Colors.yellow[700],
-                  fontSize: 18,
+                  fontSize: 22,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -59,7 +65,7 @@ class HomeTab extends ConsumerWidget {
                 text: 'd',
                 style: TextStyle(
                   color: Colors.red[600],
-                  fontSize: 18,
+                  fontSize: 22,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -67,7 +73,7 @@ class HomeTab extends ConsumerWidget {
                 text: 'i',
                 style: TextStyle(
                   color: Colors.blue[600],
-                  fontSize: 18,
+                  fontSize: 22,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -75,7 +81,7 @@ class HomeTab extends ConsumerWidget {
                 text: 'o',
                 style: TextStyle(
                   color: Colors.orange[600],
-                  fontSize: 18,
+                  fontSize: 22,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -95,10 +101,8 @@ class HomeTab extends ConsumerWidget {
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Bildirimler yakında eklenecek')),
-                );
+                // Navigate to appointments tab to show user's appointments
+                onNavigateToTab?.call(4); // Appointments tab is index 4
               },
             ),
           ),
@@ -112,18 +116,11 @@ class HomeTab extends ConsumerWidget {
             // Welcome Message
             Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppTheme.primaryNavy,
-                    AppTheme.secondaryNavy,
-                  ],
-                ),
+                color: AppTheme.darkSurface,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.primaryNavy.withValues(alpha: 0.3),
+                    color: AppTheme.darkSurface.withOpacity(0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -213,22 +210,19 @@ class HomeTab extends ConsumerWidget {
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    color: Colors.white,
+                    color: AppTheme.serviceCardBlue,
                     border: Border.all(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .outline
-                          .withValues(alpha: 0.4),
+                      color: AppTheme.serviceCardBlue.withOpacity(0.3),
                       width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
+                        color: AppTheme.serviceCardBlue.withOpacity(0.3),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
                       BoxShadow(
-                        color: AppTheme.primaryNavy.withValues(alpha: 0.1),
+                        color: AppTheme.serviceCardBlue.withOpacity(0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -250,17 +244,17 @@ class HomeTab extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: AppTheme.primaryNavy.withOpacity(0.2),
+                                color: Colors.white.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: AppTheme.primaryNavy.withOpacity(0.3),
+                                  color: Colors.white.withOpacity(0.3),
                                   width: 1,
                                 ),
                               ),
                               child: const Icon(
                                 Icons.work,
                                 size: 32,
-                                color: AppTheme.primaryNavy,
+                                color: Colors.white,
                               ),
                             ),
                             const SizedBox(width: 20),
@@ -268,23 +262,19 @@ class HomeTab extends ConsumerWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  const Text(
                                     'Hizmetler',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface,
+                                      color: Colors.white,
                                       fontSize: 20,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
-                                  Text(
+                                  const Text(
                                     'Hizmetlerimizi Keşfedin',
                                     style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
+                                      color: Colors.white70,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -294,12 +284,12 @@ class HomeTab extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: AppTheme.primaryNavy.withOpacity(0.2),
+                                color: Colors.white.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.arrow_forward_ios,
-                                color: AppTheme.primaryNavy,
+                                color: Colors.white,
                                 size: 20,
                               ),
                             ),
@@ -315,22 +305,19 @@ class HomeTab extends ConsumerWidget {
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(24),
-                    color: Theme.of(context).colorScheme.surface,
+                    color: AppTheme.primaryOrange,
                     border: Border.all(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .outline
-                          .withValues(alpha: 0.2),
+                      color: AppTheme.primaryOrange.withOpacity(0.3),
                       width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
+                        color: AppTheme.primaryOrange.withOpacity(0.3),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
                       BoxShadow(
-                        color: AppTheme.primaryOrange.withValues(alpha: 0.1),
+                        color: AppTheme.primaryOrange.withOpacity(0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -352,18 +339,17 @@ class HomeTab extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: AppTheme.primaryOrange.withOpacity(0.2),
+                                color: Colors.white.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color:
-                                      AppTheme.primaryOrange.withOpacity(0.3),
+                                  color: Colors.white.withOpacity(0.3),
                                   width: 1,
                                 ),
                               ),
                               child: const Icon(
                                 Icons.store,
                                 size: 32,
-                                color: AppTheme.primaryOrange,
+                                color: Colors.white,
                               ),
                             ),
                             const SizedBox(width: 20),
@@ -371,23 +357,19 @@ class HomeTab extends ConsumerWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  const Text(
                                     'Mağaza',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface,
+                                      color: Colors.white,
                                       fontSize: 20,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
-                                  Text(
+                                  const Text(
                                     'Ürünlerimizi inceleyin',
                                     style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
+                                      color: Colors.white70,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -397,12 +379,12 @@ class HomeTab extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: AppTheme.primaryOrange.withOpacity(0.2),
+                                color: Colors.white.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.arrow_forward_ios,
-                                color: AppTheme.primaryOrange,
+                                color: Colors.white,
                                 size: 20,
                               ),
                             ),
@@ -418,22 +400,19 @@ class HomeTab extends ConsumerWidget {
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(24),
-                    color: Theme.of(context).colorScheme.surface,
+                    color: AppTheme.whatsappGreen,
                     border: Border.all(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .outline
-                          .withValues(alpha: 0.2),
+                      color: AppTheme.whatsappGreen.withOpacity(0.3),
                       width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
+                        color: AppTheme.whatsappGreen.withOpacity(0.3),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
                       BoxShadow(
-                        color: AppTheme.whatsappGreen.withValues(alpha: 0.1),
+                        color: AppTheme.whatsappGreen.withOpacity(0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -454,18 +433,17 @@ class HomeTab extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: AppTheme.whatsappGreen.withOpacity(0.2),
+                                color: Colors.white.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color:
-                                      AppTheme.whatsappGreen.withOpacity(0.3),
+                                  color: Colors.white.withOpacity(0.3),
                                   width: 1,
                                 ),
                               ),
                               child: const Icon(
                                 Icons.chat,
                                 size: 32,
-                                color: AppTheme.whatsappGreen,
+                                color: Colors.white,
                               ),
                             ),
                             const SizedBox(width: 20),
@@ -473,23 +451,19 @@ class HomeTab extends ConsumerWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  const Text(
                                     'WhatsApp',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface,
+                                      color: Colors.white,
                                       fontSize: 20,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
-                                  Text(
-                                    'Hemen iletişime geçin',
+                                  const Text(
+                                    'İletişime Geçin',
                                     style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
+                                      color: Colors.white70,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -499,12 +473,12 @@ class HomeTab extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: AppTheme.whatsappGreen.withOpacity(0.2),
+                                color: Colors.white.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.arrow_forward_ios,
-                                color: AppTheme.whatsappGreen,
+                                color: Colors.white,
                                 size: 20,
                               ),
                             ),
@@ -589,6 +563,9 @@ class HomeTab extends ConsumerWidget {
                         return _FeaturedServiceCard(
                           featuredService: service,
                           onNavigateToServices: () => onNavigateToTab?.call(1),
+                          onBookAppointment: () =>
+                              _bookAppointmentFromFeaturedService(
+                                  context, ref, service),
                         );
                       },
                     ),
@@ -707,6 +684,65 @@ class HomeTab extends ConsumerWidget {
           backgroundColor: Colors.red,
         ),
       );
+    }
+  }
+
+  Future<void> _bookAppointmentFromFeaturedService(BuildContext context,
+      WidgetRef ref, FeaturedService featuredService) async {
+    // Check if user is authenticated
+    final authState = ref.read(authProvider);
+
+    if (!authState.isAuthenticated) {
+      // Show login prompt
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Randevu almak için giriş yapmalısınız'),
+          backgroundColor: Colors.orange,
+          action: SnackBarAction(
+            label: 'Giriş Yap',
+            textColor: Colors.white,
+            onPressed: () {
+              // Navigate to login page
+              Navigator.of(context).pushNamed('/login');
+            },
+          ),
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Get the full service details
+      final servicesAsync = await ref.read(servicesProvider.future);
+      final service = servicesAsync.firstWhere(
+        (s) => s.id == featuredService.id,
+        orElse: () => Service(
+          id: featuredService.id,
+          title: featuredService.title ?? 'Hizmet',
+          description: featuredService.description ?? '',
+          image: featuredService.image,
+          isUpcoming: featuredService.isUpcoming ?? false,
+        ),
+      );
+
+      // Navigate to appointment booking page
+      if (context.mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AppointmentBookingPage(service: service),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Hizmet bilgileri alınamadı: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 }
@@ -967,10 +1003,12 @@ class _FeaturedProductCard extends ConsumerWidget {
 class _FeaturedServiceCard extends StatelessWidget {
   final FeaturedService featuredService;
   final VoidCallback? onNavigateToServices;
+  final VoidCallback? onBookAppointment;
 
   const _FeaturedServiceCard({
     required this.featuredService,
     this.onNavigateToServices,
+    this.onBookAppointment,
   });
 
   @override
@@ -980,6 +1018,16 @@ class _FeaturedServiceCard extends StatelessWidget {
       height: 190, // Even larger cards to prevent overflow
       margin: const EdgeInsets.only(right: 12),
       child: Card(
+        color: AppTheme.serviceCardBlue,
+        elevation: 8,
+        shadowColor: AppTheme.serviceCardBlue.withOpacity(0.3),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: AppTheme.serviceCardBlue.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {
@@ -997,7 +1045,7 @@ class _FeaturedServiceCard extends StatelessWidget {
                   height: 70, // Larger image height for better visibility
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey[200],
+                    color: Colors.white.withOpacity(0.1),
                   ),
                   child: featuredService.image != null
                       ? ClipRRect(
@@ -1006,37 +1054,38 @@ class _FeaturedServiceCard extends StatelessWidget {
                             imageUrl: featuredService.image!,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
-                              color: Colors.grey[200],
-                              child: Icon(
+                              color: Colors.white.withOpacity(0.1),
+                              child: const Icon(
                                 Icons.work,
-                                color: Theme.of(context).primaryColor,
+                                color: Colors.white,
                                 size: 32,
                               ),
                             ),
                             errorWidget: (context, url, error) => Container(
-                              color: Colors.grey[200],
-                              child: Icon(
+                              color: Colors.white.withOpacity(0.1),
+                              child: const Icon(
                                 Icons.work,
-                                color: Theme.of(context).primaryColor,
+                                color: Colors.white,
                                 size: 32,
                               ),
                             ),
                           ),
                         )
-                      : Icon(
+                      : const Icon(
                           Icons.work,
                           size: 40,
-                          color: Theme.of(context).primaryColor,
+                          color: Colors.white,
                         ),
                 ),
                 const SizedBox(height: 8),
                 // Service title
                 Text(
                   featuredService.title ?? 'Hizmet',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13, // Larger font size for better readability
-                      ),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13, // Larger font size for better readability
+                    color: Colors.white,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1046,8 +1095,8 @@ class _FeaturedServiceCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       featuredService.description!,
-                      style: TextStyle(
-                        color: Colors.grey[600],
+                      style: const TextStyle(
+                        color: Colors.white70,
                         fontSize: 11, // Larger font size for better readability
                       ),
                       maxLines: 2, // More lines for better readability
@@ -1063,13 +1112,13 @@ class _FeaturedServiceCard extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryNavy.withOpacity(0.1),
+                      color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(
                       'Yakında',
                       style: TextStyle(
-                        color: AppTheme.primaryNavy,
+                        color: Colors.white,
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1081,18 +1130,12 @@ class _FeaturedServiceCard extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Show appointment booking dialog or navigate to appointment page
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                '${featuredService.title} için randevu alınıyor...'),
-                            backgroundColor: AppTheme.primaryNavy,
-                          ),
-                        );
+                        // Call the appointment booking callback
+                        onBookAppointment?.call();
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryNavy,
-                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.white,
+                        foregroundColor: AppTheme.serviceCardBlue,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 6),
                         shape: RoundedRectangleBorder(

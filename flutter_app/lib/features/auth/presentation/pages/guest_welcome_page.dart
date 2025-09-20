@@ -20,18 +20,21 @@ class GuestWelcomePage extends ConsumerWidget {
             children: [
               const SizedBox(height: 40),
 
-              // App Logo/Icon
+              // App Logo
               Container(
-                width: 120,
-                height: 120,
+                width: 160,
+                height: 160,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(60),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: Icon(
-                  Icons.shopping_bag_outlined,
-                  size: 60,
-                  color: Theme.of(context).primaryColor,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(
+                    'assets/images/ics_logo.jpg',
+                    width: 160,
+                    height: 160,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
 
@@ -167,12 +170,35 @@ class GuestWelcomePage extends ConsumerWidget {
   ) {
     return Column(
       children: [
-        // Continue as Guest Button
+        // Login Button
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: () => _continueAsGuest(context, authNotifier),
+            onPressed: () => _navigateToSignIn(context),
             style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text(
+              'Giriş Yap',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        // Continue as Guest Button
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: () => _continueAsGuest(context, authNotifier),
+            style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -206,23 +232,6 @@ class GuestWelcomePage extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // Sign In Button
-        SizedBox(
-          width: double.infinity,
-          child: TextButton(
-            onPressed: () => _navigateToSignIn(context),
-            child: const Text(
-              'Zaten hesabınız var mı? Giriş yapın',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
               ),
             ),
           ),

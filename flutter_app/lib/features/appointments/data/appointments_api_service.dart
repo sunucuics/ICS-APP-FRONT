@@ -36,9 +36,8 @@ class AppointmentsApiService {
     required String serviceId,
     required DateTime start,
   }) async {
-    // Convert to UTC and ensure Z suffix for backend compatibility
-    final utcStart = start.toUtc();
-    final isoString = utcStart.toIso8601String();
+    // Send the DateTime as-is, backend will handle timezone conversion
+    final isoString = start.toIso8601String();
 
     final formData = FormData.fromMap({
       'service_id': serviceId,
@@ -137,15 +136,12 @@ class AppointmentsApiService {
     required DateTime start,
     DateTime? end,
   }) async {
-    // Convert to UTC and ensure Z suffix for backend compatibility
-    final utcStart = start.toUtc();
-    final utcEnd = end?.toUtc();
-
+    // Send the DateTime as-is, backend will handle timezone conversion
     final formData = FormData.fromMap({
       'service_id': serviceId,
-      'start': utcStart.toIso8601String(),
+      'start': start.toIso8601String(),
       if (userId != null) 'user_id': userId,
-      if (utcEnd != null) 'end': utcEnd.toIso8601String(),
+      if (end != null) 'end': end.toIso8601String(),
     });
 
     final response = await _apiClient.post(

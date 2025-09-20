@@ -271,11 +271,15 @@ class AdminAppointmentsPage extends ConsumerWidget {
   }
 
   String _formatDate(DateTime dateTime) {
-    return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    // Convert to local time if the date is in UTC
+    final localDate = dateTime.isUtc ? dateTime.toLocal() : dateTime;
+    return '${localDate.day}/${localDate.month}/${localDate.year}';
   }
 
   String _formatTime(DateTime dateTime) {
-    return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+    // Convert to local time if the date is in UTC
+    final localDate = dateTime.isUtc ? dateTime.toLocal() : dateTime;
+    return '${localDate.hour.toString().padLeft(2, '0')}:${localDate.minute.toString().padLeft(2, '0')}';
   }
 
   Widget _buildEmptyState(BuildContext context, WidgetRef ref) {

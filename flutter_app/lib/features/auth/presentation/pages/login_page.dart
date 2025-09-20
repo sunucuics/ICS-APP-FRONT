@@ -115,10 +115,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       padding: const EdgeInsets.all(24.0),
                       child: Column(
                         children: [
-                          Icon(
-                            Icons.store,
-                            size: 48,
-                            color: Theme.of(context).primaryColor,
+                          Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.asset(
+                                'assets/images/ics_logo.jpg',
+                                width: 120,
+                                height: 120,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
                           const SizedBox(height: 12),
                           Text(

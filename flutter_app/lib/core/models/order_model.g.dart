@@ -40,7 +40,7 @@ Map<String, dynamic> _$$AddressImplToJson(_$AddressImpl instance) =>
 
 _$OrderItemImpl _$$OrderItemImplFromJson(Map<String, dynamic> json) =>
     _$OrderItemImpl(
-      productId: json['productId'] as String,
+      productId: json['product_id'] as String?,
       name: json['name'] as String,
       title: json['title'] as String?,
       quantity: (json['quantity'] as num).toInt(),
@@ -58,7 +58,7 @@ _$OrderItemImpl _$$OrderItemImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$OrderItemImplToJson(_$OrderItemImpl instance) =>
     <String, dynamic>{
-      'productId': instance.productId,
+      'product_id': instance.productId,
       'name': instance.name,
       'title': instance.title,
       'quantity': instance.quantity,

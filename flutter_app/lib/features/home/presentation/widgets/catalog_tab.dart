@@ -161,6 +161,144 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                             (selectedCategory == category.name);
                     final isFixed = category.isFixed;
 
+                    // Special handling for Innova Craft Studio card
+                    if (isFixed &&
+                        category.name.toLowerCase().contains('innova')) {
+                      return GestureDetector(
+                        onTap: () {
+                          final newCategory = index == 0 ? null : category.name;
+                          ref.read(selectedCategoryProvider.notifier).state =
+                              newCategory;
+                        },
+                        child: Container(
+                          width: 200, // Larger width for featured card
+                          height: 80,
+                          margin: const EdgeInsets.only(right: 12),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryOrange,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: AppTheme.primaryOrange.withOpacity(0.3),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.primaryOrange.withOpacity(0.3),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.business,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        const TextSpan(
+                                          text: 'Innova Craft ',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: 'S',
+                                          style: TextStyle(
+                                            color: Colors.blue[600],
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: 't',
+                                          style: TextStyle(
+                                            color: Colors.orange[600],
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: 'u',
+                                          style: TextStyle(
+                                            color: Colors.yellow[700],
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: 'd',
+                                          style: TextStyle(
+                                            color: Colors.red[600],
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: 'i',
+                                          style: TextStyle(
+                                            color: Colors.blue[600],
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: 'o',
+                                          style: TextStyle(
+                                            color: Colors.orange[600],
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Text(
+                                    'ÖNE ÇIKAN',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
                     return GestureDetector(
                       onTap: () {
                         final newCategory = index == 0 ? null : category.name;
@@ -171,47 +309,19 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                         width: 85,
                         margin: const EdgeInsets.only(right: 12),
                         decoration: BoxDecoration(
-                          color: isFixed
-                              ? AppTheme.primaryOrange.withOpacity(0.2)
-                              : isSelected
-                                  ? AppTheme.primaryOrange
-                                  : Theme.of(context)
-                                      .colorScheme
-                                      .surfaceVariant,
+                          color: AppTheme.primaryOrange,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: isFixed
-                                ? AppTheme.primaryOrange
-                                : isSelected
-                                    ? AppTheme.primaryOrange
-                                    : Theme.of(context).colorScheme.outline,
-                            width: isFixed ? 2 : 1,
+                            color: AppTheme.primaryOrange.withOpacity(0.3),
+                            width: 1,
                           ),
-                          boxShadow: isFixed
-                              ? [
-                                  BoxShadow(
-                                    color:
-                                        AppTheme.primaryOrange.withOpacity(0.4),
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 6),
-                                  ),
-                                ]
-                              : isSelected
-                                  ? [
-                                      BoxShadow(
-                                        color: AppTheme.primaryOrange
-                                            .withOpacity(0.3),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ]
-                                  : [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.2),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppTheme.primaryOrange.withOpacity(0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
                         child: Stack(
                           children: [
@@ -222,24 +332,16 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                                   index == 0
                                       ? Icons.apps
                                       : _getCategoryIcon(category.name),
-                                  color: isFixed || isSelected
-                                      ? Colors.white
-                                      : Colors.white70,
+                                  color: Colors.white,
                                   size: 20,
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   category.name,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w500,
-                                    color: isFixed
-                                        ? AppTheme.primaryOrange
-                                        : isSelected
-                                            ? Colors.white
-                                            : Theme.of(context)
-                                                .colorScheme
-                                                .onSurface,
+                                    color: Colors.white,
                                   ),
                                   textAlign: TextAlign.center,
                                   maxLines: 1,
@@ -404,10 +506,10 @@ class _ProductCard extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: AppTheme.primaryOrange,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: AppTheme.primaryOrange.withOpacity(0.3),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -436,7 +538,7 @@ class _ProductCard extends ConsumerWidget {
                     width: double.infinity,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      color: Colors.white.withOpacity(0.1),
                     ),
                     child: product.images.isNotEmpty
                         ? ClipRRect(
@@ -445,22 +547,18 @@ class _ProductCard extends ConsumerWidget {
                               imageUrl: product.images.first,
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Container(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceVariant,
+                                color: Colors.white.withOpacity(0.1),
                                 child: const Center(
                                   child: CircularProgressIndicator(
-                                    color: AppTheme.primaryOrange,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
                               errorWidget: (context, url, error) => Container(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceVariant,
+                                color: Colors.white.withOpacity(0.1),
                                 child: const Icon(
                                   Icons.image_not_supported,
-                                  color: AppTheme.primaryOrange,
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
@@ -468,7 +566,7 @@ class _ProductCard extends ConsumerWidget {
                         : const Icon(
                             Icons.image_not_supported,
                             size: 48,
-                            color: AppTheme.primaryOrange,
+                            color: Colors.white,
                           ),
                   ),
                 ),
@@ -479,10 +577,10 @@ class _ProductCard extends ConsumerWidget {
                   flex: 1,
                   child: Text(
                     product.title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: Colors.white,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -500,7 +598,7 @@ class _ProductCard extends ConsumerWidget {
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
-                            color: AppTheme.primaryOrange,
+                            color: Colors.white,
                           ),
                         ),
                         if (hasDiscount) ...[
@@ -532,8 +630,8 @@ class _ProductCard extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 11,
                             color: product.stock > 0
-                                ? AppTheme.successGreen
-                                : AppTheme.errorRed,
+                                ? Colors.white70
+                                : Colors.white70,
                           ),
                         ),
                       ],
@@ -571,12 +669,14 @@ class _ProductCard extends ConsumerWidget {
                                       : product.stock > 0
                                           ? 'Sepete Ekle'
                                           : 'Stokta Yok',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 12,
-                                color: Theme.of(context).colorScheme.onPrimary,
+                                color: AppTheme.primaryOrange,
                               ),
                             ),
                             style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: AppTheme.primaryOrange,
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),

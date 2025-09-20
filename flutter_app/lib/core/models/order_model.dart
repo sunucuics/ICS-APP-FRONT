@@ -80,7 +80,7 @@ class Address with _$Address {
 @freezed
 class OrderItem with _$OrderItem {
   const factory OrderItem({
-    required String productId,
+    @JsonKey(name: 'product_id') String? productId,
     required String name,
     @JsonKey(name: 'title') String? title,
     required int quantity,

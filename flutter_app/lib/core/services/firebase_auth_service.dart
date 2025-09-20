@@ -52,13 +52,39 @@ class FirebaseAuthService {
     required String email,
     required String password,
   }) async {
+    print('🔥 Firebase: Attempting to create user with email: $email');
     try {
-      return await _firebaseAuth.createUserWithEmailAndPassword(
+      final result = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+      print('🔥 Firebase: User created successfully for email: $email');
+      return result;
+    } on FirebaseAuthException catch (e) {
+      print('🔥 Firebase Auth Error: ${e.code} - ${e.message}');
+      print('🔥 Firebase Auth Error Details: email=$email, code=${e.code}');
+
+      // Convert Firebase errors to user-friendly messages
+      switch (e.code) {
+        case 'email-already-in-use':
+          print('🔥 Firebase: Email already in use: $email');
+          throw Exception('Bu e-posta zaten kayıtlı');
+        case 'weak-password':
+          print('🔥 Firebase: Weak password for email: $email');
+          throw Exception('Şifre çok zayıf');
+        case 'invalid-email':
+          print('🔥 Firebase: Invalid email: $email');
+          throw Exception('Geçersiz e-posta adresi');
+        case 'operation-not-allowed':
+          print('🔥 Firebase: Operation not allowed for email: $email');
+          throw Exception('E-posta/şifre girişi devre dışı');
+        default:
+          print(
+              '🔥 Firebase: Unknown error for email: $email, error: ${e.message}');
+          throw Exception('Hesap oluşturulurken bir hata oluştu: ${e.message}');
+      }
     } catch (e) {
-      print('Error creating user: $e');
+      print('🔥 Firebase: General error creating user: $e');
       rethrow;
     }
   }

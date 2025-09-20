@@ -10,23 +10,29 @@ class AuthApiService {
 
   // Register - Firebase ile kullanıcı oluştur, sonra backend'e kaydet
   Future<AuthResponse> register(RegisterRequest request) async {
+    print(
+        '🚀 AuthApiService: Starting registration for email: ${request.email}');
     UserCredential? userCredential;
 
     try {
       // Firebase'de kullanıcı oluştur
+      print('🚀 AuthApiService: Creating Firebase user...');
       userCredential = await FirebaseAuthService.createUserWithEmailAndPassword(
         email: request.email,
         password: request.password,
       );
+      print('🚀 AuthApiService: Firebase user created successfully');
 
       if (userCredential?.user == null) {
         throw Exception('Failed to create Firebase user');
       }
 
-      // Firebase ID token'ı al
-      final idToken = await userCredential!.user!.getIdToken();
+      // Firebase kullanıcısı başarıyla oluşturuldu
+      print('🚀 AuthApiService: Firebase user created successfully');
 
       // Backend'e kullanıcı bilgilerini gönder
+      print('🚀 AuthApiService: Sending registration request to backend...');
+      print('🚀 AuthApiService: Firebase UID: ${userCredential!.user!.uid}');
       final formData = FormData.fromMap({
         'name': request.name,
         'phone': request.phone,
@@ -35,37 +41,46 @@ class AuthApiService {
         'firebase_uid': userCredential.user!.uid,
       });
 
-      await _apiClient.postMultipart(
+      final response = await _apiClient.postMultipart(
         ApiEndpoints.authRegister,
         formData,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $idToken',
-          },
-        ),
       );
+      print('🚀 AuthApiService: Backend registration successful');
 
-      // User profile'ını çek
-      final userProfile = await getCurrentUser();
+      // Backend'den dönen user profile'ını kullan
+      final userProfile = UserProfile.fromJson(response.data['user']);
 
       return AuthResponse(
-        userId: userCredential.user!.uid,
+        userId: response.data['user_id'],
         user: userProfile,
-        idToken: idToken ?? '',
-        refreshToken: '', // Firebase doesn't use refresh tokens in the same way
-        expiresIn: 3600, // Firebase tokens expire in 1 hour
+        idToken: response.data['id_token'],
+        refreshToken: response.data['refresh_token'],
+        expiresIn: response.data['expires_in'],
       );
     } catch (e) {
-      // Backend'e kayıt başarısız olursa Firebase'deki hesabı da sil
+      print('🚀 AuthApiService: Registration failed with error: $e');
+      print('🚀 AuthApiService: Error type: ${e.runtimeType}');
+
+      // Firebase kullanıcısını temizle (sadece Firebase hatası durumunda)
       if (userCredential?.user != null) {
-        try {
-          await userCredential!.user!.delete();
-          print('Firebase user deleted due to backend registration failure');
-        } catch (deleteError) {
-          print('Failed to delete Firebase user: $deleteError');
+        // Sadece Firebase'de kullanıcı oluşturma hatası durumunda temizle
+        if (e.toString().contains('email-already-in-use') ||
+            e.toString().contains('Bu e-posta zaten kayıtlı')) {
+          print(
+              '🚀 AuthApiService: Firebase user creation failed, cleaning up...');
+          try {
+            await userCredential!.user!.delete();
+            await FirebaseAuthService.signOut();
+            print('🚀 AuthApiService: Firebase user cleaned up');
+          } catch (cleanupError) {
+            print(
+                '🚀 AuthApiService: Failed to cleanup Firebase user: $cleanupError');
+            await FirebaseAuthService.signOut(); // En azından sign out yap
+          }
         }
       }
 
+      print('🚀 AuthApiService: Rethrowing error');
       // Hata mesajını yeniden fırlat
       rethrow;
     }

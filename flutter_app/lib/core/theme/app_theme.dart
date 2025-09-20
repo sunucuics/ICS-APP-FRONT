@@ -13,6 +13,9 @@ class AppTheme {
   static const Color lightNavy = Color(0xFF3949AB);
   static const Color darkNavy = Color(0xFF0D1B69);
 
+  // Service Card Blue
+  static const Color serviceCardBlue = Color(0xFF0505B5);
+
   // WhatsApp Green Color Palette
   static const Color whatsappGreen = Color(0xFF25D366);
   static const Color whatsappGreenLight = Color(0xFF4AE54A);

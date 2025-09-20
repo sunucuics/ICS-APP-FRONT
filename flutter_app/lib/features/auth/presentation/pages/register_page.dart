@@ -389,18 +389,24 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
 
+    print('📱 RegisterPage: Starting registration process');
+    print('📱 RegisterPage: Email: ${_emailController.text.trim()}');
+    print('📱 RegisterPage: Name: ${_nameController.text.trim()}');
+
     setState(() {
       _isLoading = true;
     });
 
     try {
       // Use real auth provider for registration
+      print('📱 RegisterPage: Calling auth provider register...');
       final success = await ref.read(authProvider.notifier).register(
             name: _nameController.text.trim(),
             phone: _formatPhoneNumber(_phoneController.text.trim()),
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
+      print('📱 RegisterPage: Registration result: $success');
 
       if (mounted) {
         if (success) {
@@ -419,17 +425,74 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         } else {
           // Show error message
           final error = ref.read(authErrorProvider);
+          print('📱 RegisterPage: Registration failed, error: $error');
           String userFriendlyError = 'Hesap oluşturulurken bir hata oluştu';
 
           if (error != null) {
-            if (error.contains('email-already-in-use') ||
-                error.contains('EMAIL_EXISTS') ||
-                error.contains('Bu e-posta zaten kayıtlı')) {
-              userFriendlyError = 'Bu e-posta adresi zaten kullanılıyor';
-            } else if (error.contains('weak-password')) {
+            // Backend hatalarını kullanıcı dostu mesajlara çevir
+            if (error.contains('Bu e-posta zaten kayıtlı') ||
+                error.contains('Bu kullanıcı zaten kayıtlı')) {
+              userFriendlyError =
+                  'Bu e-posta adresi zaten kullanılıyor. Giriş yapmak için tıklayın.';
+
+              // Kullanıcıyı login sayfasına yönlendir
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('E-posta Zaten Kayıtlı'),
+                  content: const Text(
+                      'Bu e-posta adresi ile zaten bir hesap bulunmaktadır. Giriş yapmak ister misiniz?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('İptal'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _navigateToSignIn();
+                      },
+                      child: const Text('Giriş Yap'),
+                    ),
+                  ],
+                ),
+              );
+              return; // SnackBar gösterme
+            } else if (error.contains('email-already-in-use')) {
+              // Firebase'den gelen hata (nadir durum)
+              userFriendlyError =
+                  'Bu e-posta adresi zaten kullanılıyor. Giriş yapmak için tıklayın.';
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('E-posta Zaten Kayıtlı'),
+                  content: const Text(
+                      'Bu e-posta adresi ile zaten bir hesap bulunmaktadır. Giriş yapmak ister misiniz?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('İptal'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _navigateToSignIn();
+                      },
+                      child: const Text('Giriş Yap'),
+                    ),
+                  ],
+                ),
+              );
+              return; // SnackBar gösterme
+            } else if (error.contains('weak-password') ||
+                error.contains('Şifre çok zayıf')) {
               userFriendlyError = 'Şifre çok zayıf, daha güçlü bir şifre seçin';
-            } else if (error.contains('invalid-email')) {
+            } else if (error.contains('invalid-email') ||
+                error.contains('Geçersiz e-posta')) {
               userFriendlyError = 'Geçersiz e-posta adresi';
+            } else if (error.contains('Firebase kullanıcısı bulunamadı')) {
+              userFriendlyError =
+                  'Kayıt işlemi başarısız. Lütfen tekrar deneyin.';
             } else if (error.contains('NO_INTERNET')) {
               userFriendlyError = 'İnternet bağlantısı bulunamadı';
             }

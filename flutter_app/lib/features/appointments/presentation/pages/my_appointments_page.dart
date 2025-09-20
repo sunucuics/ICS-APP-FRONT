@@ -406,6 +406,8 @@ class MyAppointmentsPage extends ConsumerWidget {
   }
 
   String _formatDate(DateTime date) {
+    // Convert to local time if the date is in UTC
+    final localDate = date.isUtc ? date.toLocal() : date;
     final monthNames = [
       'Ocak',
       'Şubat',
@@ -420,10 +422,12 @@ class MyAppointmentsPage extends ConsumerWidget {
       'Kasım',
       'Aralık'
     ];
-    return '${date.day} ${monthNames[date.month - 1]} ${date.year}';
+    return '${localDate.day} ${monthNames[localDate.month - 1]} ${localDate.year}';
   }
 
   String _formatTime(DateTime date) {
-    return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    // Convert to local time if the date is in UTC
+    final localDate = date.isUtc ? date.toLocal() : date;
+    return '${localDate.hour.toString().padLeft(2, '0')}:${localDate.minute.toString().padLeft(2, '0')}';
   }
 }

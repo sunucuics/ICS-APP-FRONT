@@ -1628,7 +1628,8 @@ OrderItem _$OrderItemFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$OrderItem {
-  String get productId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'product_id')
+  String? get productId => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   @JsonKey(name: 'title')
   String? get title => throw _privateConstructorUsedError;
@@ -1664,7 +1665,7 @@ abstract class $OrderItemCopyWith<$Res> {
       _$OrderItemCopyWithImpl<$Res, OrderItem>;
   @useResult
   $Res call(
-      {String productId,
+      {@JsonKey(name: 'product_id') String? productId,
       String name,
       @JsonKey(name: 'title') String? title,
       int quantity,
@@ -1695,7 +1696,7 @@ class _$OrderItemCopyWithImpl<$Res, $Val extends OrderItem>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? productId = null,
+    Object? productId = freezed,
     Object? name = null,
     Object? title = freezed,
     Object? quantity = null,
@@ -1711,10 +1712,10 @@ class _$OrderItemCopyWithImpl<$Res, $Val extends OrderItem>
     Object? product = freezed,
   }) {
     return _then(_value.copyWith(
-      productId: null == productId
+      productId: freezed == productId
           ? _value.productId
           : productId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -1780,7 +1781,7 @@ abstract class _$$OrderItemImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String productId,
+      {@JsonKey(name: 'product_id') String? productId,
       String name,
       @JsonKey(name: 'title') String? title,
       int quantity,
@@ -1809,7 +1810,7 @@ class __$$OrderItemImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? productId = null,
+    Object? productId = freezed,
     Object? name = null,
     Object? title = freezed,
     Object? quantity = null,
@@ -1825,10 +1826,10 @@ class __$$OrderItemImplCopyWithImpl<$Res>
     Object? product = freezed,
   }) {
     return _then(_$OrderItemImpl(
-      productId: null == productId
+      productId: freezed == productId
           ? _value.productId
           : productId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -1889,7 +1890,7 @@ class __$$OrderItemImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$OrderItemImpl implements _OrderItem {
   const _$OrderItemImpl(
-      {required this.productId,
+      {@JsonKey(name: 'product_id') this.productId,
       required this.name,
       @JsonKey(name: 'title') this.title,
       required this.quantity,
@@ -1910,7 +1911,8 @@ class _$OrderItemImpl implements _OrderItem {
       _$$OrderItemImplFromJson(json);
 
   @override
-  final String productId;
+  @JsonKey(name: 'product_id')
+  final String? productId;
   @override
   final String name;
   @override
@@ -2027,7 +2029,7 @@ class _$OrderItemImpl implements _OrderItem {
 
 abstract class _OrderItem implements OrderItem {
   const factory _OrderItem(
-      {required final String productId,
+      {@JsonKey(name: 'product_id') final String? productId,
       required final String name,
       @JsonKey(name: 'title') final String? title,
       required final int quantity,
@@ -2046,7 +2048,8 @@ abstract class _OrderItem implements OrderItem {
       _$OrderItemImpl.fromJson;
 
   @override
-  String get productId;
+  @JsonKey(name: 'product_id')
+  String? get productId;
   @override
   String get name;
   @override
