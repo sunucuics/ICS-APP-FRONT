@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class NavigationService {
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
 
   // Navigate to login screen
   static void navigateToLogin() {
     final context = navigatorKey.currentContext;
     if (context != null) {
-      context.go('/login');
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
     }
   }
 
@@ -16,7 +16,7 @@ class NavigationService {
   static void navigateToHome() {
     final context = navigatorKey.currentContext;
     if (context != null) {
-      context.go('/home');
+      Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
     }
   }
 

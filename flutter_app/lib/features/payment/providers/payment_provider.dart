@@ -187,7 +187,7 @@ class CheckoutNotifier extends StateNotifier<AsyncValue<Order?>> {
             await _ref.read(paymentProcessingProvider.notifier).processPayment(
                   amount: order.totals?.grandTotal ?? 0.0,
                   method: paymentMethod,
-                  description: 'Sipariş #${order.id}',
+                  description: 'Sipariş #${order.id ?? 'Bilinmeyen'}',
                   simulateSuccess: simulatePaymentSuccess,
                 );
 

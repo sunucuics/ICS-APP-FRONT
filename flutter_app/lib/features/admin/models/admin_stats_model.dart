@@ -31,6 +31,28 @@ class AdminDashboardData with _$AdminDashboardData {
     @Default([]) List<Map<String, dynamic>> recentUsers,
   }) = _AdminDashboardData;
 
-  factory AdminDashboardData.fromJson(Map<String, dynamic> json) =>
-      _$AdminDashboardDataFromJson(json);
+  factory AdminDashboardData.fromJson(Map<String, dynamic> json) {
+    // Backend'den gelen veri yapısını Flutter model'ine uygun hale getir
+    final stats = AdminStats(
+      totalUsers: json['total_users'] ?? 0,
+      totalOrders: json['total_orders'] ?? 0,
+      totalRevenue: (json['revenue_this_month'] ?? 0.0).toDouble(),
+      activeDiscounts: json['active_discounts'] ?? 0,
+      pendingComments: json['pending_comments'] ?? 0,
+      upcomingAppointments: json['pending_appointments'] ?? 0,
+      lowStockProducts: 0, // Backend'de bu alan yok, default 0
+      totalProducts: json['total_products'] ?? 0,
+      totalServices: json['total_services'] ?? 0,
+    );
+
+    return AdminDashboardData(
+      stats: stats,
+      recentOrders:
+          List<Map<String, dynamic>>.from(json['recent_orders'] ?? []),
+      upcomingAppointments:
+          List<Map<String, dynamic>>.from(json['recent_appointments'] ?? []),
+      lowStockProducts: [], // Backend'de bu alan yok, boş liste
+      recentUsers: [], // Backend'de bu alan yok, boş liste
+    );
+  }
 }

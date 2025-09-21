@@ -81,10 +81,10 @@ class Address with _$Address {
 class OrderItem with _$OrderItem {
   const factory OrderItem({
     @JsonKey(name: 'product_id') String? productId,
-    required String name,
+    String? name,
     @JsonKey(name: 'title') String? title,
-    required int quantity,
-    required double price,
+    int? quantity,
+    double? price,
     @JsonKey(name: 'unit_price') double? unitPrice,
     double? total,
     @JsonKey(name: 'line_total') double? lineTotal,
@@ -104,13 +104,13 @@ class OrderItem with _$OrderItem {
 @freezed
 class OrderTotals with _$OrderTotals {
   const factory OrderTotals({
-    @JsonKey(name: 'item_count') required int itemCount,
-    required double subtotal,
-    required double discount,
-    required double shipping,
-    required double tax,
-    @JsonKey(name: 'grand_total') required double grandTotal,
-    required String currency,
+    @JsonKey(name: 'item_count') int? itemCount,
+    double? subtotal,
+    double? discount,
+    double? shipping,
+    double? tax,
+    @JsonKey(name: 'grand_total') double? grandTotal,
+    String? currency,
   }) = _OrderTotals;
 
   factory OrderTotals.fromJson(Map<String, dynamic> json) =>
@@ -136,27 +136,31 @@ class OrderShipment with _$OrderShipment {
 @freezed
 class Order with _$Order {
   const factory Order({
-    required String id,
-    @JsonKey(name: 'user_id') required String userId,
+    String? id,
+    @JsonKey(name: 'user_id') String? userId,
     @JsonKey(fromJson: _statusFromJson, toJson: _statusToJson)
     required OrderStatus status,
     @JsonKey(name: 'tracking_number') String? trackingNumber,
     @JsonKey(name: 'shipping_provider') String? shippingProvider,
     @JsonKey(name: 'integration_code') String? integrationCode,
-    required Address address,
-    required List<OrderItem> items,
+    Address? address,
+    List<OrderItem>? items,
     OrderTotals? totals,
     OrderShipment? shipment,
     String? note,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
+    @JsonKey(name: 'customer_name') String? customerName,
+    @JsonKey(name: 'customer_phone') String? customerPhone,
+    @JsonKey(name: 'customer_email') String? customerEmail,
   }) = _Order;
 
   factory Order.fromJson(Map<String, dynamic> json) => _$OrderFromJson(json);
 }
 
 // JSON conversion helpers for OrderStatus
-OrderStatus _statusFromJson(String status) => OrderStatus.fromString(status);
+OrderStatus _statusFromJson(String? status) =>
+    OrderStatus.fromString(status ?? 'Hazırlanıyor');
 String _statusToJson(OrderStatus status) => status.displayName;
 
 // Order Create Request Model

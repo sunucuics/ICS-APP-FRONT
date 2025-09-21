@@ -21,15 +21,19 @@ AdminDiscount _$AdminDiscountFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$AdminDiscount {
   String get id => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
-  double get percentage => throw _privateConstructorUsedError;
+  @JsonKey(name: 'target_type')
   String get targetType =>
       throw _privateConstructorUsedError; // 'product' or 'category'
+  @JsonKey(name: 'target_id')
   String? get targetId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'percent')
+  double get percentage => throw _privateConstructorUsedError;
+  bool get active => throw _privateConstructorUsedError;
+  @JsonKey(name: 'start_at')
+  DateTime? get startAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'end_at')
+  DateTime? get endAt => throw _privateConstructorUsedError;
   String? get targetName => throw _privateConstructorUsedError;
-  DateTime get startDate => throw _privateConstructorUsedError;
-  DateTime get endDate => throw _privateConstructorUsedError;
-  bool get isActive => throw _privateConstructorUsedError;
   String? get description => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
@@ -52,14 +56,13 @@ abstract class $AdminDiscountCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
-      String name,
-      double percentage,
-      String targetType,
-      String? targetId,
+      @JsonKey(name: 'target_type') String targetType,
+      @JsonKey(name: 'target_id') String? targetId,
+      @JsonKey(name: 'percent') double percentage,
+      bool active,
+      @JsonKey(name: 'start_at') DateTime? startAt,
+      @JsonKey(name: 'end_at') DateTime? endAt,
       String? targetName,
-      DateTime startDate,
-      DateTime endDate,
-      bool isActive,
       String? description,
       DateTime? createdAt,
       DateTime? updatedAt});
@@ -81,14 +84,13 @@ class _$AdminDiscountCopyWithImpl<$Res, $Val extends AdminDiscount>
   @override
   $Res call({
     Object? id = null,
-    Object? name = null,
-    Object? percentage = null,
     Object? targetType = null,
     Object? targetId = freezed,
+    Object? percentage = null,
+    Object? active = null,
+    Object? startAt = freezed,
+    Object? endAt = freezed,
     Object? targetName = freezed,
-    Object? startDate = null,
-    Object? endDate = null,
-    Object? isActive = null,
     Object? description = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
@@ -98,14 +100,6 @@ class _$AdminDiscountCopyWithImpl<$Res, $Val extends AdminDiscount>
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      percentage: null == percentage
-          ? _value.percentage
-          : percentage // ignore: cast_nullable_to_non_nullable
-              as double,
       targetType: null == targetType
           ? _value.targetType
           : targetType // ignore: cast_nullable_to_non_nullable
@@ -114,22 +108,26 @@ class _$AdminDiscountCopyWithImpl<$Res, $Val extends AdminDiscount>
           ? _value.targetId
           : targetId // ignore: cast_nullable_to_non_nullable
               as String?,
+      percentage: null == percentage
+          ? _value.percentage
+          : percentage // ignore: cast_nullable_to_non_nullable
+              as double,
+      active: null == active
+          ? _value.active
+          : active // ignore: cast_nullable_to_non_nullable
+              as bool,
+      startAt: freezed == startAt
+          ? _value.startAt
+          : startAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      endAt: freezed == endAt
+          ? _value.endAt
+          : endAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       targetName: freezed == targetName
           ? _value.targetName
           : targetName // ignore: cast_nullable_to_non_nullable
               as String?,
-      startDate: null == startDate
-          ? _value.startDate
-          : startDate // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      endDate: null == endDate
-          ? _value.endDate
-          : endDate // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      isActive: null == isActive
-          ? _value.isActive
-          : isActive // ignore: cast_nullable_to_non_nullable
-              as bool,
       description: freezed == description
           ? _value.description
           : description // ignore: cast_nullable_to_non_nullable
@@ -156,14 +154,13 @@ abstract class _$$AdminDiscountImplCopyWith<$Res>
   @useResult
   $Res call(
       {String id,
-      String name,
-      double percentage,
-      String targetType,
-      String? targetId,
+      @JsonKey(name: 'target_type') String targetType,
+      @JsonKey(name: 'target_id') String? targetId,
+      @JsonKey(name: 'percent') double percentage,
+      bool active,
+      @JsonKey(name: 'start_at') DateTime? startAt,
+      @JsonKey(name: 'end_at') DateTime? endAt,
       String? targetName,
-      DateTime startDate,
-      DateTime endDate,
-      bool isActive,
       String? description,
       DateTime? createdAt,
       DateTime? updatedAt});
@@ -183,14 +180,13 @@ class __$$AdminDiscountImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? name = null,
-    Object? percentage = null,
     Object? targetType = null,
     Object? targetId = freezed,
+    Object? percentage = null,
+    Object? active = null,
+    Object? startAt = freezed,
+    Object? endAt = freezed,
     Object? targetName = freezed,
-    Object? startDate = null,
-    Object? endDate = null,
-    Object? isActive = null,
     Object? description = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
@@ -200,14 +196,6 @@ class __$$AdminDiscountImplCopyWithImpl<$Res>
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      percentage: null == percentage
-          ? _value.percentage
-          : percentage // ignore: cast_nullable_to_non_nullable
-              as double,
       targetType: null == targetType
           ? _value.targetType
           : targetType // ignore: cast_nullable_to_non_nullable
@@ -216,22 +204,26 @@ class __$$AdminDiscountImplCopyWithImpl<$Res>
           ? _value.targetId
           : targetId // ignore: cast_nullable_to_non_nullable
               as String?,
+      percentage: null == percentage
+          ? _value.percentage
+          : percentage // ignore: cast_nullable_to_non_nullable
+              as double,
+      active: null == active
+          ? _value.active
+          : active // ignore: cast_nullable_to_non_nullable
+              as bool,
+      startAt: freezed == startAt
+          ? _value.startAt
+          : startAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      endAt: freezed == endAt
+          ? _value.endAt
+          : endAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       targetName: freezed == targetName
           ? _value.targetName
           : targetName // ignore: cast_nullable_to_non_nullable
               as String?,
-      startDate: null == startDate
-          ? _value.startDate
-          : startDate // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      endDate: null == endDate
-          ? _value.endDate
-          : endDate // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      isActive: null == isActive
-          ? _value.isActive
-          : isActive // ignore: cast_nullable_to_non_nullable
-              as bool,
       description: freezed == description
           ? _value.description
           : description // ignore: cast_nullable_to_non_nullable
@@ -253,14 +245,13 @@ class __$$AdminDiscountImplCopyWithImpl<$Res>
 class _$AdminDiscountImpl implements _AdminDiscount {
   const _$AdminDiscountImpl(
       {required this.id,
-      required this.name,
-      required this.percentage,
-      required this.targetType,
-      this.targetId,
+      @JsonKey(name: 'target_type') required this.targetType,
+      @JsonKey(name: 'target_id') this.targetId,
+      @JsonKey(name: 'percent') required this.percentage,
+      this.active = true,
+      @JsonKey(name: 'start_at') this.startAt,
+      @JsonKey(name: 'end_at') this.endAt,
       this.targetName,
-      required this.startDate,
-      required this.endDate,
-      this.isActive = true,
       this.description,
       this.createdAt,
       this.updatedAt});
@@ -271,23 +262,26 @@ class _$AdminDiscountImpl implements _AdminDiscount {
   @override
   final String id;
   @override
-  final String name;
-  @override
-  final double percentage;
-  @override
+  @JsonKey(name: 'target_type')
   final String targetType;
 // 'product' or 'category'
   @override
+  @JsonKey(name: 'target_id')
   final String? targetId;
   @override
-  final String? targetName;
-  @override
-  final DateTime startDate;
-  @override
-  final DateTime endDate;
+  @JsonKey(name: 'percent')
+  final double percentage;
   @override
   @JsonKey()
-  final bool isActive;
+  final bool active;
+  @override
+  @JsonKey(name: 'start_at')
+  final DateTime? startAt;
+  @override
+  @JsonKey(name: 'end_at')
+  final DateTime? endAt;
+  @override
+  final String? targetName;
   @override
   final String? description;
   @override
@@ -297,7 +291,7 @@ class _$AdminDiscountImpl implements _AdminDiscount {
 
   @override
   String toString() {
-    return 'AdminDiscount(id: $id, name: $name, percentage: $percentage, targetType: $targetType, targetId: $targetId, targetName: $targetName, startDate: $startDate, endDate: $endDate, isActive: $isActive, description: $description, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'AdminDiscount(id: $id, targetType: $targetType, targetId: $targetId, percentage: $percentage, active: $active, startAt: $startAt, endAt: $endAt, targetName: $targetName, description: $description, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -306,20 +300,17 @@ class _$AdminDiscountImpl implements _AdminDiscount {
         (other.runtimeType == runtimeType &&
             other is _$AdminDiscountImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.percentage, percentage) ||
-                other.percentage == percentage) &&
             (identical(other.targetType, targetType) ||
                 other.targetType == targetType) &&
             (identical(other.targetId, targetId) ||
                 other.targetId == targetId) &&
+            (identical(other.percentage, percentage) ||
+                other.percentage == percentage) &&
+            (identical(other.active, active) || other.active == active) &&
+            (identical(other.startAt, startAt) || other.startAt == startAt) &&
+            (identical(other.endAt, endAt) || other.endAt == endAt) &&
             (identical(other.targetName, targetName) ||
                 other.targetName == targetName) &&
-            (identical(other.startDate, startDate) ||
-                other.startDate == startDate) &&
-            (identical(other.endDate, endDate) || other.endDate == endDate) &&
-            (identical(other.isActive, isActive) ||
-                other.isActive == isActive) &&
             (identical(other.description, description) ||
                 other.description == description) &&
             (identical(other.createdAt, createdAt) ||
@@ -333,14 +324,13 @@ class _$AdminDiscountImpl implements _AdminDiscount {
   int get hashCode => Object.hash(
       runtimeType,
       id,
-      name,
-      percentage,
       targetType,
       targetId,
+      percentage,
+      active,
+      startAt,
+      endAt,
       targetName,
-      startDate,
-      endDate,
-      isActive,
       description,
       createdAt,
       updatedAt);
@@ -364,14 +354,13 @@ class _$AdminDiscountImpl implements _AdminDiscount {
 abstract class _AdminDiscount implements AdminDiscount {
   const factory _AdminDiscount(
       {required final String id,
-      required final String name,
-      required final double percentage,
-      required final String targetType,
-      final String? targetId,
+      @JsonKey(name: 'target_type') required final String targetType,
+      @JsonKey(name: 'target_id') final String? targetId,
+      @JsonKey(name: 'percent') required final double percentage,
+      final bool active,
+      @JsonKey(name: 'start_at') final DateTime? startAt,
+      @JsonKey(name: 'end_at') final DateTime? endAt,
       final String? targetName,
-      required final DateTime startDate,
-      required final DateTime endDate,
-      final bool isActive,
       final String? description,
       final DateTime? createdAt,
       final DateTime? updatedAt}) = _$AdminDiscountImpl;
@@ -382,21 +371,24 @@ abstract class _AdminDiscount implements AdminDiscount {
   @override
   String get id;
   @override
-  String get name;
-  @override
-  double get percentage;
-  @override
+  @JsonKey(name: 'target_type')
   String get targetType; // 'product' or 'category'
   @override
+  @JsonKey(name: 'target_id')
   String? get targetId;
   @override
+  @JsonKey(name: 'percent')
+  double get percentage;
+  @override
+  bool get active;
+  @override
+  @JsonKey(name: 'start_at')
+  DateTime? get startAt;
+  @override
+  @JsonKey(name: 'end_at')
+  DateTime? get endAt;
+  @override
   String? get targetName;
-  @override
-  DateTime get startDate;
-  @override
-  DateTime get endDate;
-  @override
-  bool get isActive;
   @override
   String? get description;
   @override

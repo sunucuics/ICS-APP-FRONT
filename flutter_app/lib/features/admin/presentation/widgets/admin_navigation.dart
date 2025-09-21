@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../pages/admin_dashboard_page.dart';
 import '../pages/admin_categories_page.dart';
 import '../pages/admin_products_page.dart';
 import '../pages/admin_orders_page.dart';
@@ -7,7 +8,6 @@ import '../pages/admin_discounts_page.dart';
 import '../pages/admin_services_page.dart';
 import '../pages/admin_users_page.dart';
 import '../pages/admin_comments_page.dart';
-import '../pages/admin_analytics_page.dart';
 import '../pages/admin_notifications_page.dart';
 import '../pages/admin_settings_page.dart';
 
@@ -103,24 +103,17 @@ class AdminNavigation extends StatelessWidget {
               ),
               _buildNavItem(
                 context,
-                Icons.analytics,
-                'Analytics',
+                Icons.notifications,
+                'Bildirimler',
                 9,
                 () => _navigateToTab(context, 9),
               ),
               _buildNavItem(
                 context,
-                Icons.notifications,
-                'Bildirimler',
-                10,
-                () => _navigateToTab(context, 10),
-              ),
-              _buildNavItem(
-                context,
                 Icons.settings,
                 'Ayarlar',
-                11,
-                () => _navigateToTab(context, 11),
+                10,
+                () => _navigateToTab(context, 10),
               ),
             ],
           ),
@@ -167,7 +160,11 @@ class AdminNavigation extends StatelessWidget {
   void _navigateToTab(BuildContext context, int tabIndex) {
     switch (tabIndex) {
       case 0:
-        // Dashboard - already handled by the parent
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const AdminDashboardPage(),
+          ),
+        );
         break;
       case 1:
         Navigator.of(context).push(
@@ -228,18 +225,11 @@ class AdminNavigation extends StatelessWidget {
       case 9:
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => const AdminAnalyticsPage(),
-          ),
-        );
-        break;
-      case 10:
-        Navigator.of(context).push(
-          MaterialPageRoute(
             builder: (context) => const AdminNotificationsPage(),
           ),
         );
         break;
-      case 11:
+      case 10:
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => const AdminSettingsPage(),

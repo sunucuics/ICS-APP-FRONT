@@ -298,7 +298,7 @@ class AdminServicesPage extends ConsumerWidget {
             ? {
                 'Hizmet Adı': service.title,
                 'Açıklama': service.description,
-                'Görsel URL': service.image ?? '',
+                'Görsel': service.image ?? '',
                 'Tür': service.kind,
               }
             : null,
@@ -315,8 +315,9 @@ class AdminServicesPage extends ConsumerWidget {
             maxLines: 3,
           ),
           AdminFormField(
-            label: 'Görsel URL',
-            hint: 'Hizmet görsel URL\'si (opsiyonel)',
+            label: 'Görsel',
+            hint: 'Hizmet görseli seçin (opsiyonel)',
+            isImageField: true,
           ),
           AdminFormField(
             label: 'Tür',
@@ -328,8 +329,8 @@ class AdminServicesPage extends ConsumerWidget {
           final serviceData = {
             'title': data['Hizmet Adı']!,
             'description': data['Açıklama']!,
-            'image': data['Görsel URL']?.isNotEmpty == true
-                ? data['Görsel URL']
+            'image': data['Görsel_file']?.isNotEmpty == true
+                ? data['Görsel_file']
                 : null,
             'kind': data['Tür']!,
             'isUpcoming': service?.isUpcoming ?? false,

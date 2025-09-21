@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/admin_discounts_provider.dart';
+import '../../providers/admin_products_provider.dart';
+import '../../providers/admin_categories_provider.dart';
 import '../widgets/admin_navigation.dart';
 import '../widgets/admin_form_dialog.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../models/admin_discount_model.dart';
+import '../../../../core/models/product_model.dart';
 
 class AdminDiscountsPage extends ConsumerWidget {
   const AdminDiscountsPage({super.key});
@@ -35,10 +38,29 @@ class AdminDiscountsPage extends ConsumerWidget {
         error: (error, stack) =>
             _buildErrorWidget(context, ref, error.toString()),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddDiscountDialog(context, ref),
-        backgroundColor: AppTheme.primaryOrange,
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: Consumer(
+        builder: (context, ref, child) {
+          final productsAsync = ref.watch(adminProductsNotifierProvider);
+          final categoriesAsync = ref.watch(adminCategoriesProvider);
+          final isLoading =
+              productsAsync.isLoading || categoriesAsync.isLoading;
+
+          return FloatingActionButton(
+            onPressed:
+                isLoading ? null : () => _showAddDiscountDialog(context, ref),
+            backgroundColor: isLoading ? Colors.grey : AppTheme.primaryOrange,
+            child: isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : const Icon(Icons.add, color: Colors.white),
+          );
+        },
       ),
       bottomNavigationBar: const AdminNavigation(),
     );
@@ -68,9 +90,9 @@ class AdminDiscountsPage extends ConsumerWidget {
   Widget _buildDiscountCard(
       BuildContext context, WidgetRef ref, AdminDiscount discount) {
     final now = DateTime.now();
-    final isActive = discount.isActive &&
-        now.isAfter(discount.startDate) &&
-        now.isBefore(discount.endDate);
+    final isActive = discount.active &&
+        (discount.startAt == null || now.compareTo(discount.startAt!) >= 0) &&
+        (discount.endAt == null || now.compareTo(discount.endAt!) < 0);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -87,7 +109,7 @@ class AdminDiscountsPage extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    discount.name,
+                    'İndirim #${discount.id.substring(0, 8)}',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -144,7 +166,7 @@ class AdminDiscountsPage extends ConsumerWidget {
                         ),
                       ),
                       Text(
-                        '${discount.targetType == 'product' ? 'Ürün' : 'Kategori'}: ${discount.targetName ?? 'Tümü'}',
+                        '${discount.targetType == 'product' ? 'Ürün' : 'Kategori'}: ${discount.targetId ?? 'Tümü'}',
                         style: const TextStyle(
                           fontWeight: FontWeight.w500,
                         ),
@@ -158,27 +180,28 @@ class AdminDiscountsPage extends ConsumerWidget {
             const SizedBox(height: 12),
 
             // Date Range
-            Row(
-              children: [
-                Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  'Başlangıç: ${_formatDate(discount.startDate)}',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
+            if (discount.startAt != null || discount.endAt != null)
+              Row(
+                children: [
+                  Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Başlangıç: ${discount.startAt != null ? _formatDate(discount.startAt!) : 'Sınırsız'}',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
                   ),
-                ),
-                const Spacer(),
-                Text(
-                  'Bitiş: ${_formatDate(discount.endDate)}',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
+                  const Spacer(),
+                  Text(
+                    'Bitiş: ${discount.endAt != null ? _formatDate(discount.endAt!) : 'Sınırsız'}',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
 
             if (discount.description != null &&
                 discount.description!.isNotEmpty) ...[
@@ -323,7 +346,27 @@ class AdminDiscountsPage extends ConsumerWidget {
   }
 
   void _showAddDiscountDialog(BuildContext context, WidgetRef ref) {
-    _showDiscountFormDialog(context, ref, null);
+    final productsAsync = ref.read(adminProductsNotifierProvider);
+    final categoriesAsync = ref.read(adminCategoriesProvider);
+
+    productsAsync.when(
+      data: (products) => categoriesAsync.when(
+        data: (categories) =>
+            _showDiscountFormDialog(context, ref, null, products, categories),
+        loading: () => ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Kategoriler yükleniyor...')),
+        ),
+        error: (error, stack) => ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Kategori hatası: $error')),
+        ),
+      ),
+      loading: () => ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ürünler yükleniyor...')),
+      ),
+      error: (error, stack) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ürün hatası: $error')),
+      ),
+    );
   }
 
   void _showEditDiscountDialog(
@@ -332,14 +375,15 @@ class AdminDiscountsPage extends ConsumerWidget {
   }
 
   void _showDiscountFormDialog(
-      BuildContext context, WidgetRef ref, AdminDiscount? discount) {
+      BuildContext context, WidgetRef ref, AdminDiscount? discount,
+      [List<Product>? products, List<Category>? categories]) {
     showDialog(
       context: context,
       builder: (context) => AdminFormDialog(
         title: discount == null ? 'Yeni İndirim Ekle' : 'İndirim Düzenle',
         initialData: discount != null
             ? {
-                'İndirim Adı': discount.name,
+                'İndirim Adı': 'İndirim #${discount.id.substring(0, 8)}',
                 'İndirim Oranı': discount.percentage.toString(),
                 'Hedef Tip': discount.targetType,
                 'Hedef ID': discount.targetId ?? '',
@@ -363,12 +407,25 @@ class AdminDiscountsPage extends ConsumerWidget {
           ),
           AdminFormField(
             label: 'Hedef Tip',
-            hint: 'product veya category',
+            hint: 'Hedef tip seçin',
             isRequired: true,
+            dropdownOptions: const ['product', 'category'],
           ),
           AdminFormField(
             label: 'Hedef ID',
-            hint: 'Hedef ürün/kategori ID (opsiyonel)',
+            hint: products != null && categories != null
+                ? 'Ürünler sayfasından ID kopyalayın (opsiyonel)'
+                : 'Hedef ürün/kategori ID (opsiyonel)',
+          ),
+          AdminFormField(
+            label: 'Başlangıç Tarihi',
+            hint: 'Başlangıç tarihini seçin',
+            isDateField: true,
+          ),
+          AdminFormField(
+            label: 'Bitiş Tarihi',
+            hint: 'Bitiş tarihini seçin',
+            isDateField: true,
           ),
           AdminFormField(
             label: 'Açıklama',
@@ -377,14 +434,40 @@ class AdminDiscountsPage extends ConsumerWidget {
           ),
         ],
         onSave: (data) async {
+          // Tarih parsing
+          DateTime? startDate;
+          DateTime? endDate;
+
+          if (data['Başlangıç Tarihi']?.isNotEmpty == true) {
+            final startParts = data['Başlangıç Tarihi']!.split('/');
+            if (startParts.length == 3) {
+              startDate = DateTime(
+                int.parse(startParts[2]), // year
+                int.parse(startParts[1]), // month
+                int.parse(startParts[0]), // day
+              );
+            }
+          }
+
+          if (data['Bitiş Tarihi']?.isNotEmpty == true) {
+            final endParts = data['Bitiş Tarihi']!.split('/');
+            if (endParts.length == 3) {
+              endDate = DateTime(
+                int.parse(endParts[2]), // year
+                int.parse(endParts[1]), // month
+                int.parse(endParts[0]), // day
+              );
+            }
+          }
+
           final discountData = DiscountCreateRequest(
             name: data['İndirim Adı']!,
             percentage: double.parse(data['İndirim Oranı (%)']!),
             targetType: data['Hedef Tip']!,
             targetId:
                 data['Hedef ID']?.isNotEmpty == true ? data['Hedef ID'] : null,
-            startDate: DateTime.now(),
-            endDate: DateTime.now().add(const Duration(days: 30)),
+            startDate: startDate ?? DateTime.now(),
+            endDate: endDate ?? DateTime.now().add(const Duration(days: 30)),
             isActive: true,
             description:
                 data['Açıklama']?.isNotEmpty == true ? data['Açıklama'] : null,
@@ -419,7 +502,7 @@ class AdminDiscountsPage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('İndirim Detayları: ${discount.name}'),
+        title: Text('İndirim Detayları: #${discount.id.substring(0, 8)}'),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -427,11 +510,13 @@ class AdminDiscountsPage extends ConsumerWidget {
             children: [
               Text('İndirim Oranı: %${discount.percentage.toStringAsFixed(0)}'),
               Text('Hedef Tip: ${discount.targetType}'),
-              if (discount.targetName != null)
-                Text('Hedef: ${discount.targetName}'),
-              Text('Başlangıç: ${_formatDate(discount.startDate)}'),
-              Text('Bitiş: ${_formatDate(discount.endDate)}'),
-              Text('Durum: ${discount.isActive ? 'Aktif' : 'Pasif'}'),
+              if (discount.targetId != null)
+                Text('Hedef ID: ${discount.targetId}'),
+              Text(
+                  'Başlangıç: ${discount.startAt != null ? _formatDate(discount.startAt!) : 'Sınırsız'}'),
+              Text(
+                  'Bitiş: ${discount.endAt != null ? _formatDate(discount.endAt!) : 'Sınırsız'}'),
+              Text('Durum: ${discount.active ? 'Aktif' : 'Pasif'}'),
               if (discount.description != null)
                 Text('Açıklama: ${discount.description}'),
               if (discount.createdAt != null)
@@ -456,7 +541,7 @@ class AdminDiscountsPage extends ConsumerWidget {
       builder: (context) => AlertDialog(
         title: const Text('İndirim Sil'),
         content: Text(
-            '${discount.name} indirimini silmek istediğinizden emin misiniz?'),
+            'İndirim #${discount.id.substring(0, 8)} indirimini silmek istediğinizden emin misiniz?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),

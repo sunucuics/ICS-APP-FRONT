@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/admin_repository.dart';
 import '../providers/admin_dashboard_provider.dart';
+import '../providers/admin_products_provider.dart';
 import '../models/admin_discount_model.dart';
 
 // Discounts Provider
@@ -13,14 +14,16 @@ final adminDiscountsProvider = FutureProvider<List<AdminDiscount>>((ref) async {
 final adminDiscountsNotifierProvider = StateNotifierProvider<
     AdminDiscountsNotifier, AsyncValue<List<AdminDiscount>>>((ref) {
   final repository = ref.watch(adminRepositoryProvider);
-  return AdminDiscountsNotifier(repository);
+  return AdminDiscountsNotifier(repository, ref);
 });
 
 class AdminDiscountsNotifier
     extends StateNotifier<AsyncValue<List<AdminDiscount>>> {
   final AdminRepository _repository;
+  final Ref _ref;
 
-  AdminDiscountsNotifier(this._repository) : super(const AsyncValue.loading()) {
+  AdminDiscountsNotifier(this._repository, this._ref)
+      : super(const AsyncValue.loading()) {
     loadDiscounts();
   }
 
@@ -38,6 +41,8 @@ class AdminDiscountsNotifier
     try {
       await _repository.createDiscount(discountData);
       await loadDiscounts(); // Refresh the list
+      // Also refresh products to update prices
+      _ref.read(adminProductsNotifierProvider.notifier).refresh();
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }
@@ -48,6 +53,8 @@ class AdminDiscountsNotifier
     try {
       await _repository.updateDiscount(discountId, discountData);
       await loadDiscounts(); // Refresh the list
+      // Also refresh products to update prices
+      _ref.read(adminProductsNotifierProvider.notifier).refresh();
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }
@@ -57,6 +64,8 @@ class AdminDiscountsNotifier
     try {
       await _repository.deleteDiscount(discountId);
       await loadDiscounts(); // Refresh the list
+      // Also refresh products to update prices
+      _ref.read(adminProductsNotifierProvider.notifier).refresh();
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }

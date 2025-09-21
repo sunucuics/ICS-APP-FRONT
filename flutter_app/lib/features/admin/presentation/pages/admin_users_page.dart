@@ -1,343 +1,411 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/admin_users_provider.dart';
-import '../widgets/admin_navigation.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/models/user_model.dart';
+import '../../providers/admin_users_provider.dart';
 
 class AdminUsersPage extends ConsumerWidget {
   const AdminUsersPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final usersAsync = ref.watch(adminUsersNotifierProvider);
+    final usersAsync = ref.watch(adminUsersProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Kullanıcı Yönetimi'),
         backgroundColor: AppTheme.primaryNavy,
         foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              ref.read(adminUsersNotifierProvider.notifier).refresh();
-            },
-          ),
-        ],
       ),
       body: usersAsync.when(
-        data: (users) => _buildUsersList(context, ref, users),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) =>
-            _buildErrorWidget(context, ref, error.toString()),
-      ),
-      bottomNavigationBar: const AdminNavigation(),
-    );
-  }
-
-  Widget _buildUsersList(
-      BuildContext context, WidgetRef ref, List<UserProfile> users) {
-    if (users.isEmpty) {
-      return _buildEmptyState(context, ref);
-    }
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        await ref.read(adminUsersNotifierProvider.notifier).refresh();
-      },
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: users.length,
-        itemBuilder: (context, index) {
-          final user = users[index];
-          return _buildUserCard(context, ref, user);
+        data: (users) {
+          if (users.isEmpty) {
+            return const Center(
+              child: Text('Henüz kullanıcı bulunmamaktadır.'),
+            );
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: users.length,
+            itemBuilder: (context, index) {
+              final user = users[index];
+              return _buildUserCard(context, ref, user);
+            },
+          );
         },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Text('Kullanıcılar yüklenemedi: $error'),
+        ),
       ),
     );
   }
 
   Widget _buildUserCard(BuildContext context, WidgetRef ref, UserProfile user) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 4,
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // User Avatar
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-                color: AppTheme.primaryNavy.withOpacity(0.1),
-              ),
-              child: Center(
-                child: Text(
-                  user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primaryNavy,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-
-            // User Info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    user.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    user.email,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
-                  ),
-                  Text(
-                    user.phone,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildStatusChip(
-                        user.role == 'admin' ? 'Admin' : 'Kullanıcı',
-                        user.role == 'admin' ? Colors.purple : Colors.blue,
+                      Text(
+                        user.name.isEmpty ? 'İsimsiz Kullanıcı' : user.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
-                      const SizedBox(width: 8),
-                      if (user.isGuest)
-                        _buildStatusChip('Misafir', Colors.orange),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Actions
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                switch (value) {
-                  case 'admin':
-                    _showRoleUpdateConfirmation(context, ref, user, 'admin');
-                    break;
-                  case 'customer':
-                    _showRoleUpdateConfirmation(context, ref, user, 'customer');
-                    break;
-                  case 'details':
-                    _showUserDetails(context, user);
-                    break;
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'details',
-                  child: Row(
-                    children: [
-                      Icon(Icons.info, size: 20),
-                      SizedBox(width: 8),
-                      Text('Detaylar'),
+                      const SizedBox(height: 4),
+                      Text(
+                        user.email.isEmpty ? 'Email yok' : user.email,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                        ),
+                      ),
+                      if (user.phone.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          user.phone,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
-                if (user.role != 'admin')
-                  const PopupMenuItem(
-                    value: 'admin',
-                    child: Row(
+                Column(
+                  children: [
+                    Row(
                       children: [
-                        Icon(Icons.admin_panel_settings,
-                            size: 20, color: Colors.purple),
-                        SizedBox(width: 8),
-                        Text('Admin Yap',
-                            style: TextStyle(color: Colors.purple)),
+                        Chip(
+                          label: Text(
+                            user.role,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          backgroundColor:
+                              user.role == 'admin' ? Colors.red : Colors.blue,
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          onPressed: () =>
+                              _showRoleChangeDialog(context, ref, user),
+                          icon: const Icon(Icons.edit, color: Colors.orange),
+                          tooltip: 'Rol Değiştir',
+                        ),
                       ],
                     ),
-                  ),
-                if (user.role == 'admin')
-                  const PopupMenuItem(
-                    value: 'customer',
-                    child: Row(
+                    const SizedBox(height: 8),
+                    Row(
                       children: [
-                        Icon(Icons.person, size: 20, color: Colors.blue),
-                        SizedBox(width: 8),
-                        Text('Kullanıcı Yap',
-                            style: TextStyle(color: Colors.blue)),
+                        if (user.addresses.isNotEmpty)
+                          IconButton(
+                            onPressed: () =>
+                                _showAddressDetailsDialog(context, user),
+                            icon: const Icon(Icons.location_on,
+                                color: Colors.green),
+                            tooltip: 'Adres Detayları',
+                          ),
+                        IconButton(
+                          onPressed: () =>
+                              _showDeleteDialog(context, ref, user),
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          tooltip: 'Kullanıcıyı Sil',
+                        ),
                       ],
                     ),
-                  ),
+                  ],
+                ),
               ],
             ),
+            if (user.addresses.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              const Text(
+                'Adresler:',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 4),
+              ...user.addresses.take(2).map((address) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      '${address.label ?? 'Adres'}: ${address.name ?? ''}, ${address.city ?? ''}',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 12,
+                      ),
+                    ),
+                  )),
+              if (user.addresses.length > 2)
+                Text(
+                  '... ve ${user.addresses.length - 2} adres daha',
+                  style: TextStyle(
+                    color: Colors.grey[500],
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStatusChip(String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.people_outlined,
-            size: 80,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Henüz kullanıcı yok',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Kullanıcılar kayıt olduğunda burada görünecek',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[500],
-                ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorWidget(BuildContext context, WidgetRef ref, String error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Colors.red,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Hata Oluştu',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            error,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              ref.read(adminUsersNotifierProvider.notifier).refresh();
-            },
-            child: const Text('Tekrar Dene'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showUserDetails(BuildContext context, UserProfile user) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Kullanıcı Detayları: ${user.name}'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('ID: ${user.id}'),
-              Text('Ad: ${user.name}'),
-              Text('E-posta: ${user.email}'),
-              Text('Telefon: ${user.phone}'),
-              Text('Rol: ${user.role}'),
-              Text('Misafir: ${user.isGuest ? 'Evet' : 'Hayır'}'),
-              const SizedBox(height: 16),
-              const Text('Adresler:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              if (user.addresses.isEmpty)
-                const Text('Adres bulunamadı')
-              else
-                ...user.addresses.map((address) => Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text('• ${address.city}, ${address.district}'),
-                    )),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Kapat'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showRoleUpdateConfirmation(
-      BuildContext context, WidgetRef ref, UserProfile user, String newRole) {
-    final roleName = newRole == 'admin' ? 'Admin' : 'Kullanıcı';
+  void _showRoleChangeDialog(
+      BuildContext context, WidgetRef ref, UserProfile user) {
+    String selectedRole = user.role;
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Rol Güncelle'),
-        content: Text(
-            '${user.name} kullanıcısının rolünü $roleName yapmak istediğinizden emin misiniz?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('İptal'),
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Kullanıcı Rolünü Değiştir'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                      '${user.name.isEmpty ? 'Kullanıcı' : user.name} için rol seçin:'),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    value: selectedRole,
+                    decoration: const InputDecoration(
+                      labelText: 'Rol',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'customer',
+                        child: Text('Müşteri'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'admin',
+                        child: Text('Admin'),
+                      ),
+                    ],
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          selectedRole = newValue;
+                        });
+                      }
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('İptal'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    await _updateUserRole(context, ref, user, selectedRole);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Güncelle'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showAddressDetailsDialog(BuildContext context, UserProfile user) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+              '${user.name.isEmpty ? 'Kullanıcı' : user.name} - Adres Detayları'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: user.addresses.length,
+              itemBuilder: (context, index) {
+                final address = user.addresses[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          address.label ?? 'Adres ${index + 1}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildAddressField('Adres Adı', address.name),
+                        _buildAddressField('Şehir', address.city),
+                        _buildAddressField('İlçe', address.district),
+                        _buildAddressField('Mahalle', address.neighborhood),
+                        _buildAddressField('Sokak', address.street),
+                        _buildAddressField('Bina No', address.buildingNo),
+                        _buildAddressField('Kat', address.floor),
+                        _buildAddressField('Daire', address.apartment),
+                        _buildAddressField('Posta Kodu', address.zipCode),
+                        if (address.note != null && address.note!.isNotEmpty)
+                          _buildAddressField('Not', address.note),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await ref
-                  .read(adminUsersNotifierProvider.notifier)
-                  .updateUserRole(user.id, newRole);
-            },
-            style:
-                TextButton.styleFrom(foregroundColor: AppTheme.primaryOrange),
-            child: const Text('Güncelle'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Kapat'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildAddressField(String label, String? value) {
+    if (value == null || value.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text(
+              '$label:',
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 12),
+            ),
           ),
         ],
       ),
     );
+  }
+
+  void _showDeleteDialog(
+      BuildContext context, WidgetRef ref, UserProfile user) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Kullanıcıyı Sil'),
+          content: Text(
+            '${user.name.isEmpty ? 'Bu kullanıcıyı' : user.name} silmek istediğinizden emin misiniz?\n\n'
+            'Bu işlem geri alınamaz.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('İptal'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _deleteUser(context, ref, user);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Sil'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _updateUserRole(BuildContext context, WidgetRef ref,
+      UserProfile user, String newRole) async {
+    try {
+      await ref
+          .read(adminUsersProvider.notifier)
+          .updateUserRole(user.id, newRole);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                '${user.name.isEmpty ? 'Kullanıcı' : user.name} rolü ${newRole == 'admin' ? 'Admin' : 'Müşteri'} olarak güncellendi'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Rol güncellenirken hata oluştu: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteUser(
+      BuildContext context, WidgetRef ref, UserProfile user) async {
+    try {
+      await ref.read(adminUsersProvider.notifier).deleteUser(user.id);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                '${user.name.isEmpty ? 'Kullanıcı' : user.name} başarıyla silindi'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Kullanıcı silinirken hata oluştu: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

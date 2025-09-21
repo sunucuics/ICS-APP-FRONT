@@ -114,7 +114,7 @@ class OrdersListPage extends ConsumerWidget {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => OrderDetailPage(orderId: order.id),
+              builder: (context) => OrderDetailPage(orderId: order.id ?? ''),
             ),
           );
         },
@@ -128,7 +128,7 @@ class OrdersListPage extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Sipariş #${order.id.substring(0, 8)}',
+                    'Sipariş #${(order.id ?? '').substring(0, 8)}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -139,7 +139,7 @@ class OrdersListPage extends ConsumerWidget {
               const SizedBox(height: 12),
 
               // Items preview
-              if (order.items.isNotEmpty) ...[
+              if (order.items?.isNotEmpty == true) ...[
                 Row(
                   children: [
                     // First item image
@@ -150,12 +150,13 @@ class OrdersListPage extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(8),
                         color: Colors.grey[200],
                       ),
-                      child: _getFirstItemImage(order.items.first) != null
+                      child: order.items?.isNotEmpty == true &&
+                              _getFirstItemImage(order.items!.first) != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: CachedNetworkImage(
                                 imageUrl:
-                                    _getFirstItemImage(order.items.first)!,
+                                    _getFirstItemImage(order.items!.first)!,
                                 fit: BoxFit.cover,
                                 placeholder: (context, url) => Container(
                                   color: Colors.grey[200],
@@ -178,9 +179,9 @@ class OrdersListPage extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            order.items.length == 1
-                                ? order.items.first.name
-                                : '${order.items.first.name} ve ${order.items.length - 1} ürün daha',
+                            (order.items?.length ?? 0) == 1
+                                ? (order.items?.first.name ?? 'Ürün Adı Yok')
+                                : '${order.items?.first.name ?? 'Ürün Adı Yok'} ve ${(order.items?.length ?? 0) - 1} ürün daha',
                             style: const TextStyle(
                               fontWeight: FontWeight.w500,
                             ),
@@ -189,7 +190,7 @@ class OrdersListPage extends ConsumerWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${order.items.length} ürün',
+                            '${order.items?.length ?? 0} ürün',
                             style: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 12,
@@ -210,7 +211,7 @@ class OrdersListPage extends ConsumerWidget {
                   // Total amount
                   if (order.totals != null)
                     Text(
-                      '₺${order.totals!.grandTotal.toStringAsFixed(2)}',
+                      '₺${order.totals?.grandTotal?.toStringAsFixed(2) ?? '0.00'}',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).primaryColor,
@@ -218,7 +219,7 @@ class OrdersListPage extends ConsumerWidget {
                     )
                   else
                     Text(
-                      '₺${order.items.fold(0.0, (sum, item) => sum + (item.total ?? item.price * item.quantity)).toStringAsFixed(2)}',
+                      '₺${(order.items?.fold(0.0, (sum, item) => sum + (item.total ?? (item.price ?? 0) * (item.quantity ?? 0))) ?? 0.0).toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).primaryColor,

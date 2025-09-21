@@ -38,7 +38,11 @@ class AdminOrdersNotifier extends StateNotifier<AsyncValue<List<Order>>> {
       await _repository.updateOrderStatus(orderId, status);
       await loadOrders(); // Refresh the list
     } catch (error, stackTrace) {
-      state = AsyncValue.error(error, stackTrace);
+      // Don't set the entire state to error, just log the error
+      // The UI should handle this gracefully
+      print('Error updating order status: $error');
+      // Optionally, you could show a snackbar or toast instead
+      rethrow; // Re-throw to let the UI handle it
     }
   }
 

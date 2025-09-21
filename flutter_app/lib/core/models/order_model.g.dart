@@ -41,10 +41,10 @@ Map<String, dynamic> _$$AddressImplToJson(_$AddressImpl instance) =>
 _$OrderItemImpl _$$OrderItemImplFromJson(Map<String, dynamic> json) =>
     _$OrderItemImpl(
       productId: json['product_id'] as String?,
-      name: json['name'] as String,
+      name: json['name'] as String?,
       title: json['title'] as String?,
-      quantity: (json['quantity'] as num).toInt(),
-      price: (json['price'] as num).toDouble(),
+      quantity: (json['quantity'] as num?)?.toInt(),
+      price: (json['price'] as num?)?.toDouble(),
       unitPrice: (json['unit_price'] as num?)?.toDouble(),
       total: (json['total'] as num?)?.toDouble(),
       lineTotal: (json['line_total'] as num?)?.toDouble(),
@@ -76,13 +76,13 @@ Map<String, dynamic> _$$OrderItemImplToJson(_$OrderItemImpl instance) =>
 
 _$OrderTotalsImpl _$$OrderTotalsImplFromJson(Map<String, dynamic> json) =>
     _$OrderTotalsImpl(
-      itemCount: (json['item_count'] as num).toInt(),
-      subtotal: (json['subtotal'] as num).toDouble(),
-      discount: (json['discount'] as num).toDouble(),
-      shipping: (json['shipping'] as num).toDouble(),
-      tax: (json['tax'] as num).toDouble(),
-      grandTotal: (json['grand_total'] as num).toDouble(),
-      currency: json['currency'] as String,
+      itemCount: (json['item_count'] as num?)?.toInt(),
+      subtotal: (json['subtotal'] as num?)?.toDouble(),
+      discount: (json['discount'] as num?)?.toDouble(),
+      shipping: (json['shipping'] as num?)?.toDouble(),
+      tax: (json['tax'] as num?)?.toDouble(),
+      grandTotal: (json['grand_total'] as num?)?.toDouble(),
+      currency: json['currency'] as String?,
     );
 
 Map<String, dynamic> _$$OrderTotalsImplToJson(_$OrderTotalsImpl instance) =>
@@ -115,15 +115,17 @@ Map<String, dynamic> _$$OrderShipmentImplToJson(_$OrderShipmentImpl instance) =>
     };
 
 _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
-      id: json['id'] as String,
-      userId: json['user_id'] as String,
-      status: _statusFromJson(json['status'] as String),
+      id: json['id'] as String?,
+      userId: json['user_id'] as String?,
+      status: _statusFromJson(json['status'] as String?),
       trackingNumber: json['tracking_number'] as String?,
       shippingProvider: json['shipping_provider'] as String?,
       integrationCode: json['integration_code'] as String?,
-      address: Address.fromJson(json['address'] as Map<String, dynamic>),
-      items: (json['items'] as List<dynamic>)
-          .map((e) => OrderItem.fromJson(e as Map<String, dynamic>))
+      address: json['address'] == null
+          ? null
+          : Address.fromJson(json['address'] as Map<String, dynamic>),
+      items: (json['items'] as List<dynamic>?)
+          ?.map((e) => OrderItem.fromJson(e as Map<String, dynamic>))
           .toList(),
       totals: json['totals'] == null
           ? null
@@ -138,6 +140,9 @@ _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
       updatedAt: json['updated_at'] == null
           ? null
           : DateTime.parse(json['updated_at'] as String),
+      customerName: json['customer_name'] as String?,
+      customerPhone: json['customer_phone'] as String?,
+      customerEmail: json['customer_email'] as String?,
     );
 
 Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
@@ -155,6 +160,9 @@ Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
       'note': instance.note,
       'created_at': instance.createdAt?.toIso8601String(),
       'updated_at': instance.updatedAt?.toIso8601String(),
+      'customer_name': instance.customerName,
+      'customer_phone': instance.customerPhone,
+      'customer_email': instance.customerEmail,
     };
 
 _$OrderCreateRequestImpl _$$OrderCreateRequestImplFromJson(

@@ -5,7 +5,6 @@ import '../../../core/models/comment_model.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/models/service_model.dart';
 import '../models/admin_discount_model.dart';
-import '../models/admin_analytics_model.dart';
 import '../models/admin_notification_model.dart';
 import '../models/admin_settings_model.dart';
 import '../models/admin_filter_model.dart';
@@ -90,15 +89,6 @@ class AdminRepository {
     return await _apiService.deleteComment(commentId);
   }
 
-  // Users
-  Future<List<UserProfile>> getUsers() async {
-    return await _apiService.getUsers();
-  }
-
-  Future<UserProfile> updateUserRole(String userId, String role) async {
-    return await _apiService.updateUserRole(userId, role);
-  }
-
   // Discounts
   Future<List<AdminDiscount>> getDiscounts() async {
     return await _apiService.getDiscounts();
@@ -134,55 +124,6 @@ class AdminRepository {
 
   Future<void> deleteService(String serviceId) async {
     return await _apiService.deleteService(serviceId);
-  }
-
-  // Analytics
-  Future<AnalyticsData> getAnalytics({
-    String? period,
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
-    return await _apiService.getAnalytics(
-      period: period,
-      startDate: startDate,
-      endDate: endDate,
-    );
-  }
-
-  Future<SalesReport> getSalesReport({
-    String? period,
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
-    return await _apiService.getSalesReport(
-      period: period,
-      startDate: startDate,
-      endDate: endDate,
-    );
-  }
-
-  Future<UserActivity> getUserActivity({
-    String? period,
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
-    return await _apiService.getUserActivity(
-      period: period,
-      startDate: startDate,
-      endDate: endDate,
-    );
-  }
-
-  Future<RevenueChart> getRevenueChart({
-    String? period,
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
-    return await _apiService.getRevenueChart(
-      period: period,
-      startDate: startDate,
-      endDate: endDate,
-    );
   }
 
   // Notifications
@@ -254,5 +195,18 @@ class AdminRepository {
   Future<String> exportData(
       String endpoint, ExportOptions exportOptions) async {
     return await _apiService.exportData(endpoint, exportOptions);
+  }
+
+  // User Management
+  Future<List<UserProfile>> getUsers() async {
+    return await _apiService.getUsers();
+  }
+
+  Future<void> deleteUser(String userId) async {
+    return await _apiService.deleteUser(userId);
+  }
+
+  Future<void> updateUserRole(String userId, String role) async {
+    return await _apiService.updateUserRole(userId, role);
   }
 }

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'firebase_options.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/auth_wrapper.dart';
 import 'core/services/navigation_service.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/services/theme_service.dart';
+import 'core/services/fcm_service.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
@@ -14,12 +16,16 @@ import 'features/home/presentation/pages/home_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase initialization - temporarily disabled for testing
+  // Firebase initialization
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
     print('✅ Firebase initialized successfully');
+
+    // Initialize FCM service
+    await FCMService.initialize();
+    print('✅ FCM service initialized successfully');
   } catch (e) {
     print('❌ Firebase initialization failed: $e');
     print('⚠️ Continuing without Firebase...');
@@ -47,6 +53,16 @@ class MyApp extends ConsumerWidget {
       home: const AuthWrapper(),
       debugShowCheckedModeBanner: false,
       navigatorKey: NavigationService.navigatorKey,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('tr', 'TR'), // Turkish
+        Locale('en', 'US'), // English
+      ],
+      locale: const Locale('tr', 'TR'), // Default to Turkish
       routes: {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),

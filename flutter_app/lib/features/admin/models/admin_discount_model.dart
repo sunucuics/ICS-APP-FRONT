@@ -7,14 +7,14 @@ part 'admin_discount_model.g.dart';
 class AdminDiscount with _$AdminDiscount {
   const factory AdminDiscount({
     required String id,
-    required String name,
-    required double percentage,
+    @JsonKey(name: 'target_type')
     required String targetType, // 'product' or 'category'
-    String? targetId,
+    @JsonKey(name: 'target_id') String? targetId,
+    @JsonKey(name: 'percent') required double percentage,
+    @Default(true) bool active,
+    @JsonKey(name: 'start_at') DateTime? startAt,
+    @JsonKey(name: 'end_at') DateTime? endAt,
     String? targetName,
-    required DateTime startDate,
-    required DateTime endDate,
-    @Default(true) bool isActive,
     String? description,
     DateTime? createdAt,
     DateTime? updatedAt,

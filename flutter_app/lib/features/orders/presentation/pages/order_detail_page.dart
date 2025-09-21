@@ -206,7 +206,8 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
                   ),
             ),
             const SizedBox(height: 12),
-            ...order.items.map((item) => _buildOrderItem(context, item)),
+            ...(order.items ?? [])
+                .map((item) => _buildOrderItem(context, item)),
           ],
         ),
       ),
@@ -253,7 +254,7 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.name,
+                  item.name ?? 'Ürün Adı Yok',
                   style: const TextStyle(
                     fontWeight: FontWeight.w500,
                   ),
@@ -273,7 +274,7 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
           ),
           // Price
           Text(
-            '₺${(item.total ?? item.price * item.quantity).toStringAsFixed(2)}',
+            '₺${(item.total ?? (item.price ?? 0) * (item.quantity ?? 0)).toStringAsFixed(2)}',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).primaryColor,
@@ -310,14 +311,14 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (order.address.name != null)
+                      if (order.address?.name != null)
                         Text(
-                          order.address.name!,
+                          order.address!.name!,
                           style: const TextStyle(fontWeight: FontWeight.w500),
                         ),
                       const SizedBox(height: 4),
                       Text(
-                        _formatAddress(order.address),
+                        _formatAddress(order.address!),
                         style: TextStyle(
                           color: Colors.grey[600],
                         ),
@@ -349,15 +350,17 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
                   ),
             ),
             const SizedBox(height: 12),
-            _buildTotalRow('Ara Toplam', totals.subtotal),
-            if (totals.discount > 0)
-              _buildTotalRow('İndirim', -totals.discount, isDiscount: true),
-            if (totals.shipping > 0) _buildTotalRow('Kargo', totals.shipping),
-            if (totals.tax > 0) _buildTotalRow('KDV', totals.tax),
+            _buildTotalRow('Ara Toplam', totals.subtotal ?? 0.0),
+            if ((totals.discount ?? 0) > 0)
+              _buildTotalRow('İndirim', -(totals.discount ?? 0),
+                  isDiscount: true),
+            if ((totals.shipping ?? 0) > 0)
+              _buildTotalRow('Kargo', totals.shipping ?? 0.0),
+            if ((totals.tax ?? 0) > 0) _buildTotalRow('KDV', totals.tax ?? 0.0),
             const Divider(),
             _buildTotalRow(
               'Toplam',
-              totals.grandTotal,
+              totals.grandTotal ?? 0.0,
               isTotal: true,
             ),
           ],
@@ -434,7 +437,7 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
                   ),
             ),
             const SizedBox(height: 12),
-            _buildInfoRow('Sipariş No', order.id),
+            _buildInfoRow('Sipariş No', order.id ?? 'Bilinmeyen'),
             if (order.integrationCode != null)
               _buildInfoRow('Entegrasyon Kodu', order.integrationCode!),
             _buildInfoRow('Sipariş Tarihi', _formatDateTime(order.createdAt)),

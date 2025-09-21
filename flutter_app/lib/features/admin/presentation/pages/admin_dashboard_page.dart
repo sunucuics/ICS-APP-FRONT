@@ -4,6 +4,14 @@ import '../../providers/admin_dashboard_provider.dart';
 import '../widgets/admin_stats_card.dart';
 import '../widgets/admin_navigation.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../features/auth/providers/auth_provider.dart';
+import 'admin_products_page.dart';
+import 'admin_categories_page.dart';
+import 'admin_discounts_page.dart';
+import 'admin_services_page.dart';
+import 'admin_orders_page.dart';
+import 'admin_appointments_page.dart';
+import 'admin_comments_page.dart';
 
 class AdminDashboardPage extends ConsumerWidget {
   const AdminDashboardPage({super.key});
@@ -24,6 +32,10 @@ class AdminDashboardPage extends ConsumerWidget {
             onPressed: () async {
               await ref.refresh(adminDashboardDataProvider);
             },
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => _showLogoutDialog(context, ref),
           ),
         ],
       ),
@@ -119,6 +131,14 @@ class AdminDashboardPage extends ConsumerWidget {
                   value: stats.totalOrders.toString(),
                   icon: Icons.shopping_cart,
                   color: Colors.green,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AdminOrdersPage(),
+                      ),
+                    );
+                  },
                 ),
                 AdminStatsCard(
                   title: 'Toplam Gelir',
@@ -137,12 +157,28 @@ class AdminDashboardPage extends ConsumerWidget {
                   value: stats.pendingComments.toString(),
                   icon: Icons.comment,
                   color: Colors.red,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AdminCommentsPage(),
+                      ),
+                    );
+                  },
                 ),
                 AdminStatsCard(
                   title: 'Yaklaşan Randevu',
                   value: stats.upcomingAppointments.toString(),
                   icon: Icons.event,
                   color: Colors.teal,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AdminAppointmentsPage(),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -173,7 +209,12 @@ class AdminDashboardPage extends ConsumerWidget {
                   Icons.add_box,
                   AppTheme.primaryOrange,
                   () {
-                    // Navigate to add product
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AdminProductsPage(),
+                      ),
+                    );
                   },
                 ),
                 _buildQuickActionCard(
@@ -182,7 +223,12 @@ class AdminDashboardPage extends ConsumerWidget {
                   Icons.category,
                   AppTheme.primaryNavy,
                   () {
-                    // Navigate to add category
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AdminCategoriesPage(),
+                      ),
+                    );
                   },
                 ),
                 _buildQuickActionCard(
@@ -191,7 +237,12 @@ class AdminDashboardPage extends ConsumerWidget {
                   Icons.local_offer,
                   Colors.purple,
                   () {
-                    // Navigate to add discount
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AdminDiscountsPage(),
+                      ),
+                    );
                   },
                 ),
                 _buildQuickActionCard(
@@ -200,7 +251,12 @@ class AdminDashboardPage extends ConsumerWidget {
                   Icons.work,
                   Colors.teal,
                   () {
-                    // Navigate to add service
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AdminServicesPage(),
+                      ),
+                    );
                   },
                 ),
               ],
@@ -292,5 +348,76 @@ class AdminDashboardPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Çıkış Yap'),
+          content: const Text(
+              'Admin panelinden çıkmak istediğinizden emin misiniz?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('İptal'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _performLogout(context, ref);
+              },
+              child: const Text(
+                'Çıkış Yap',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _performLogout(BuildContext context, WidgetRef ref) async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      // Perform logout
+      await ref.read(authProvider.notifier).logout();
+
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // Navigate to login page using direct navigation
+      if (context.mounted) {
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil('/login', (route) => false);
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // Show error message
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Çıkış yapılırken hata oluştu: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

@@ -1,20 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/admin_repository.dart';
-import '../providers/admin_dashboard_provider.dart';
-import '../../../core/models/user_model.dart';
+import 'admin_dashboard_provider.dart';
+import '../../../../core/models/user_model.dart';
 
-// Users Provider
-final adminUsersProvider = FutureProvider<List<UserProfile>>((ref) async {
-  final repository = ref.watch(adminRepositoryProvider);
-  return await repository.getUsers();
-});
-
-// Users State Notifier for CRUD operations
-final adminUsersNotifierProvider =
+final adminUsersProvider =
     StateNotifierProvider<AdminUsersNotifier, AsyncValue<List<UserProfile>>>(
         (ref) {
-  final repository = ref.watch(adminRepositoryProvider);
-  return AdminUsersNotifier(repository);
+  return AdminUsersNotifier(ref.read(adminRepositoryProvider));
 });
 
 class AdminUsersNotifier extends StateNotifier<AsyncValue<List<UserProfile>>> {
@@ -25,25 +17,34 @@ class AdminUsersNotifier extends StateNotifier<AsyncValue<List<UserProfile>>> {
   }
 
   Future<void> loadUsers() async {
-    state = const AsyncValue.loading();
     try {
+      state = const AsyncValue.loading();
       final users = await _repository.getUsers();
       state = AsyncValue.data(users);
-    } catch (error, stackTrace) {
-      state = AsyncValue.error(error, stackTrace);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  Future<void> deleteUser(String userId) async {
+    try {
+      await _repository.deleteUser(userId);
+      await loadUsers(); // Refresh users list after deletion
+    } catch (e) {
+      // Handle error, maybe show a snackbar
+      print('Error deleting user: $e');
+      rethrow;
     }
   }
 
   Future<void> updateUserRole(String userId, String role) async {
     try {
       await _repository.updateUserRole(userId, role);
-      await loadUsers(); // Refresh the list
-    } catch (error, stackTrace) {
-      state = AsyncValue.error(error, stackTrace);
+      await loadUsers(); // Refresh users list after role update
+    } catch (e) {
+      // Handle error, maybe show a snackbar
+      print('Error updating user role: $e');
+      rethrow;
     }
-  }
-
-  Future<void> refresh() async {
-    await loadUsers();
   }
 }

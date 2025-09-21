@@ -32,35 +32,3 @@ Map<String, dynamic> _$$AdminStatsImplToJson(_$AdminStatsImpl instance) =>
       'totalProducts': instance.totalProducts,
       'totalServices': instance.totalServices,
     };
-
-_$AdminDashboardDataImpl _$$AdminDashboardDataImplFromJson(
-        Map<String, dynamic> json) =>
-    _$AdminDashboardDataImpl(
-      stats: AdminStats.fromJson(json['stats'] as Map<String, dynamic>),
-      recentOrders: (json['recentOrders'] as List<dynamic>?)
-              ?.map((e) => e as Map<String, dynamic>)
-              .toList() ??
-          const [],
-      upcomingAppointments: (json['upcomingAppointments'] as List<dynamic>?)
-              ?.map((e) => e as Map<String, dynamic>)
-              .toList() ??
-          const [],
-      lowStockProducts: (json['lowStockProducts'] as List<dynamic>?)
-              ?.map((e) => e as Map<String, dynamic>)
-              .toList() ??
-          const [],
-      recentUsers: (json['recentUsers'] as List<dynamic>?)
-              ?.map((e) => e as Map<String, dynamic>)
-              .toList() ??
-          const [],
-    );
-
-Map<String, dynamic> _$$AdminDashboardDataImplToJson(
-        _$AdminDashboardDataImpl instance) =>
-    <String, dynamic>{
-      'stats': instance.stats,
-      'recentOrders': instance.recentOrders,
-      'upcomingAppointments': instance.upcomingAppointments,
-      'lowStockProducts': instance.lowStockProducts,
-      'recentUsers': instance.recentUsers,
-    };

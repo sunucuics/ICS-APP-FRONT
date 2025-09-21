@@ -72,13 +72,18 @@ class AdminOrdersPage extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Sipariş #${order.id}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    'Sipariş #${order.id ?? 'Bilinmeyen'}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                const SizedBox(width: 8),
                 _buildStatusChip(
                     order.status.displayName, _getStatusColor(order.status)),
               ],
@@ -87,7 +92,7 @@ class AdminOrdersPage extends ConsumerWidget {
             const SizedBox(height: 12),
 
             // Order Items
-            ...order.items.map((item) => Padding(
+            ...(order.items ?? []).map((item) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Row(
                     children: [
@@ -126,7 +131,7 @@ class AdminOrdersPage extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              item.name,
+                              item.name ?? 'Ürün Adı Yok',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w500,
                               ),
@@ -134,7 +139,7 @@ class AdminOrdersPage extends ConsumerWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              'Adet: ${item.quantity}',
+                              'Adet: ${item.quantity ?? 0}',
                               style: TextStyle(
                                 color: Colors.grey[600],
                                 fontSize: 12,
@@ -144,7 +149,7 @@ class AdminOrdersPage extends ConsumerWidget {
                         ),
                       ),
                       Text(
-                        '₺${item.total?.toStringAsFixed(2) ?? (item.price * item.quantity).toStringAsFixed(2)}',
+                        '₺${item.total?.toStringAsFixed(2) ?? ((item.price ?? 0) * (item.quantity ?? 0)).toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: AppTheme.primaryOrange,
@@ -173,7 +178,7 @@ class AdminOrdersPage extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    '₺${order.totals?.grandTotal.toStringAsFixed(2) ?? '0.00'}',
+                    '₺${order.totals?.grandTotal?.toStringAsFixed(2) ?? '0.00'}',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -191,14 +196,18 @@ class AdminOrdersPage extends ConsumerWidget {
               children: [
                 Icon(Icons.person, size: 16, color: Colors.grey[600]),
                 const SizedBox(width: 4),
-                Text(
-                  'Müşteri: ${order.userId}',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
+                Expanded(
+                  child: Text(
+                    'Müşteri: ${order.userId ?? 'Bilinmeyen'}',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
                 const SizedBox(width: 4),
                 Text(
@@ -343,36 +352,59 @@ class AdminOrdersPage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Sipariş Detayları #${order.id}'),
+        title: Text('Sipariş Detayları #${order.id ?? 'Bilinmeyen'}'),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Müşteri ID: ${order.userId}'),
+              Text('Müşteri ID: ${order.userId ?? 'Bilinmeyen'}'),
+              if (order.customerName != null)
+                Text('Müşteri: ${order.customerName}'),
+              if (order.customerPhone != null)
+                Text('Telefon: ${order.customerPhone}'),
+              if (order.customerEmail != null)
+                Text('Email: ${order.customerEmail}'),
               Text('Durum: ${order.status.displayName}'),
               if (order.trackingNumber != null)
                 Text('Takip No: ${order.trackingNumber}'),
               if (order.shippingProvider != null)
                 Text('Kargo: ${order.shippingProvider}'),
               if (order.note != null) Text('Not: ${order.note}'),
+              if (order.address != null) ...[
+                const SizedBox(height: 16),
+                const Text('Adres:',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                    '${order.address?.name ?? ''} - ${order.address?.label ?? ''}'),
+                Text(
+                    '${order.address?.city ?? ''} / ${order.address?.district ?? ''}'),
+                Text(
+                    '${order.address?.neighborhood ?? ''} ${order.address?.street ?? ''}'),
+                Text(
+                    '${order.address?.buildingNo ?? ''} ${order.address?.apartment ?? ''}'),
+                Text('${order.address?.zipCode ?? ''}'),
+              ],
               const SizedBox(height: 16),
               const Text('Ürünler:',
                   style: TextStyle(fontWeight: FontWeight.bold)),
-              ...order.items.map((item) => Padding(
+              ...(order.items ?? []).map((item) => Padding(
                     padding: const EdgeInsets.only(top: 4),
-                    child: Text('• ${item.name} x${item.quantity}'),
+                    child: Text(
+                        '• ${item.name ?? 'Ürün Adı Yok'} x${item.quantity ?? 0}'),
                   )),
               const SizedBox(height: 16),
               if (order.totals != null) ...[
                 const Text('Toplamlar:',
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 Text(
-                    'Ara Toplam: ₺${order.totals!.subtotal.toStringAsFixed(2)}'),
-                Text('Kargo: ₺${order.totals!.shipping.toStringAsFixed(2)}'),
-                Text('Vergi: ₺${order.totals!.tax.toStringAsFixed(2)}'),
+                    'Ara Toplam: ₺${order.totals?.subtotal?.toStringAsFixed(2) ?? '0.00'}'),
                 Text(
-                    'Genel Toplam: ₺${order.totals!.grandTotal.toStringAsFixed(2)}'),
+                    'Kargo: ₺${order.totals?.shipping?.toStringAsFixed(2) ?? '0.00'}'),
+                Text(
+                    'Vergi: ₺${order.totals?.tax?.toStringAsFixed(2) ?? '0.00'}'),
+                Text(
+                    'Genel Toplam: ₺${order.totals?.grandTotal?.toStringAsFixed(2) ?? '0.00'}'),
               ],
             ],
           ),
@@ -412,12 +444,32 @@ class AdminOrdersPage extends ConsumerWidget {
               leading: Radio<OrderStatus>(
                 value: status,
                 groupValue: order.status,
-                onChanged: (value) {
+                onChanged: (value) async {
                   if (value != null) {
                     Navigator.of(context).pop();
-                    ref
-                        .read(adminOrdersNotifierProvider.notifier)
-                        .updateOrderStatus(order.id, value.displayName);
+                    try {
+                      await ref
+                          .read(adminOrdersNotifierProvider.notifier)
+                          .updateOrderStatus(order.id ?? '', value.displayName);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                'Sipariş durumu "${value.displayName}" olarak güncellendi'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      }
+                    } catch (error) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Hata: ${error.toString()}'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
                   }
                 },
               ),

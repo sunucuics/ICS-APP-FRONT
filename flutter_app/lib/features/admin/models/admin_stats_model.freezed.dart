@@ -355,10 +355,6 @@ abstract class _AdminStats implements AdminStats {
       throw _privateConstructorUsedError;
 }
 
-AdminDashboardData _$AdminDashboardDataFromJson(Map<String, dynamic> json) {
-  return _AdminDashboardData.fromJson(json);
-}
-
 /// @nodoc
 mixin _$AdminDashboardData {
   AdminStats get stats => throw _privateConstructorUsedError;
@@ -370,9 +366,6 @@ mixin _$AdminDashboardData {
       throw _privateConstructorUsedError;
   List<Map<String, dynamic>> get recentUsers =>
       throw _privateConstructorUsedError;
-
-  /// Serializes this AdminDashboardData to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of AdminDashboardData
   /// with the given fields replaced by the non-null parameter values.
@@ -517,7 +510,7 @@ class __$$AdminDashboardDataImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$AdminDashboardDataImpl implements _AdminDashboardData {
   const _$AdminDashboardDataImpl(
       {required this.stats,
@@ -529,9 +522,6 @@ class _$AdminDashboardDataImpl implements _AdminDashboardData {
         _upcomingAppointments = upcomingAppointments,
         _lowStockProducts = lowStockProducts,
         _recentUsers = recentUsers;
-
-  factory _$AdminDashboardDataImpl.fromJson(Map<String, dynamic> json) =>
-      _$$AdminDashboardDataImplFromJson(json);
 
   @override
   final AdminStats stats;
@@ -594,7 +584,6 @@ class _$AdminDashboardDataImpl implements _AdminDashboardData {
                 .equals(other._recentUsers, _recentUsers));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -612,13 +601,6 @@ class _$AdminDashboardDataImpl implements _AdminDashboardData {
   _$$AdminDashboardDataImplCopyWith<_$AdminDashboardDataImpl> get copyWith =>
       __$$AdminDashboardDataImplCopyWithImpl<_$AdminDashboardDataImpl>(
           this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$AdminDashboardDataImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _AdminDashboardData implements AdminDashboardData {
@@ -628,9 +610,6 @@ abstract class _AdminDashboardData implements AdminDashboardData {
       final List<Map<String, dynamic>> upcomingAppointments,
       final List<Map<String, dynamic>> lowStockProducts,
       final List<Map<String, dynamic>> recentUsers}) = _$AdminDashboardDataImpl;
-
-  factory _AdminDashboardData.fromJson(Map<String, dynamic> json) =
-      _$AdminDashboardDataImpl.fromJson;
 
   @override
   AdminStats get stats;

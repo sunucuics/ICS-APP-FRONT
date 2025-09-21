@@ -9,14 +9,17 @@ part of 'admin_discount_model.dart';
 _$AdminDiscountImpl _$$AdminDiscountImplFromJson(Map<String, dynamic> json) =>
     _$AdminDiscountImpl(
       id: json['id'] as String,
-      name: json['name'] as String,
-      percentage: (json['percentage'] as num).toDouble(),
-      targetType: json['targetType'] as String,
-      targetId: json['targetId'] as String?,
+      targetType: json['target_type'] as String,
+      targetId: json['target_id'] as String?,
+      percentage: (json['percent'] as num).toDouble(),
+      active: json['active'] as bool? ?? true,
+      startAt: json['start_at'] == null
+          ? null
+          : DateTime.parse(json['start_at'] as String),
+      endAt: json['end_at'] == null
+          ? null
+          : DateTime.parse(json['end_at'] as String),
       targetName: json['targetName'] as String?,
-      startDate: DateTime.parse(json['startDate'] as String),
-      endDate: DateTime.parse(json['endDate'] as String),
-      isActive: json['isActive'] as bool? ?? true,
       description: json['description'] as String?,
       createdAt: json['createdAt'] == null
           ? null
@@ -29,14 +32,13 @@ _$AdminDiscountImpl _$$AdminDiscountImplFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$$AdminDiscountImplToJson(_$AdminDiscountImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'name': instance.name,
-      'percentage': instance.percentage,
-      'targetType': instance.targetType,
-      'targetId': instance.targetId,
+      'target_type': instance.targetType,
+      'target_id': instance.targetId,
+      'percent': instance.percentage,
+      'active': instance.active,
+      'start_at': instance.startAt?.toIso8601String(),
+      'end_at': instance.endAt?.toIso8601String(),
       'targetName': instance.targetName,
-      'startDate': instance.startDate.toIso8601String(),
-      'endDate': instance.endDate.toIso8601String(),
-      'isActive': instance.isActive,
       'description': instance.description,
       'createdAt': instance.createdAt?.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),

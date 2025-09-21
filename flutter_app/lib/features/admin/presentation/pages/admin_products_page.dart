@@ -161,12 +161,40 @@ class AdminProductsPage extends ConsumerWidget {
                   ),
 
                   const SizedBox(height: 4),
-                  Text(
-                    'Stok: ${product.stock}',
-                    style: TextStyle(
-                      color: product.stock > 0 ? Colors.green : Colors.red,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        'Stok: ${product.stock}',
+                        style: TextStyle(
+                          color: product.stock > 0 ? Colors.green : Colors.red,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            Clipboard.setData(ClipboardData(text: product.id));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Ürün ID\'si kopyalandı'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            'ID: ${product.id}',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 11,
+                              fontFamily: 'monospace',
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 8),
@@ -353,10 +381,12 @@ class AdminProductsPage extends ConsumerWidget {
                 'Fiyat': product.price.toString(),
                 'Stok': product.stock.toString(),
                 'Kategori': product.categoryName ?? '',
-                'Görsel URL':
-                    product.images.isNotEmpty ? product.images.first : '',
+                'Görsel': product.images.isNotEmpty ? product.images.first : '',
+                'Durum': product.isUpcoming ? 'Yakında' : 'Aktif',
               }
-            : null,
+            : {
+                'Durum': 'Aktif', // Yeni ürün için varsayılan durum
+              },
         fields: [
           AdminFormField(
             label: 'Ürün Adı',
@@ -388,24 +418,41 @@ class AdminProductsPage extends ConsumerWidget {
             label: 'Kategori',
             hint: 'Kategori seçin',
             isRequired: true,
+            dropdownOptions: categories.map((cat) => cat.name).toList(),
           ),
           AdminFormField(
-            label: 'Görsel URL',
-            hint: 'Ürün görsel URL\'si (opsiyonel)',
+            label: 'Görsel',
+            hint: 'Ürün görseli seçin (opsiyonel)',
+            isImageField: true,
+          ),
+          AdminFormField(
+            label: 'Durum',
+            hint: 'Ürün durumunu seçin',
+            isRequired: true,
+            dropdownOptions: const ['Aktif', 'Yakında'],
           ),
         ],
         onSave: (data) async {
+          // Find category ID from category name
+          final selectedCategory = categories.firstWhere(
+            (cat) => cat.name == data['Kategori'],
+            orElse: () => categories.first,
+          );
+
           final productData = {
-            'title': data['Ürün Adı'],
+            'name': data['Ürün Adı'], // Backend 'name' bekliyor, 'title' değil
             'description':
                 data['Açıklama']?.isNotEmpty == true ? data['Açıklama'] : null,
             'price': double.parse(data['Fiyat']!),
             'stock': int.parse(data['Stok']!),
-            'categoryName': data['Kategori'],
-            'images': data['Görsel URL']?.isNotEmpty == true
-                ? [data['Görsel URL']]
+            'category_name': selectedCategory
+                .name, // Backend 'category_name' bekliyor, 'category_id' değil
+            'images': data['Görsel_file']?.isNotEmpty == true
+                ? [
+                    data['Görsel_file']
+                  ] // For now, we'll use the file path as URL
                 : [],
-            'isUpcoming': product?.isUpcoming ?? false,
+            'is_upcoming': data['Durum'] == 'Yakında',
           };
 
           if (product == null) {

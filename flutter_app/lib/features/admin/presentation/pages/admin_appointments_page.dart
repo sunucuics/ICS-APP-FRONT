@@ -74,13 +74,18 @@ class AdminAppointmentsPage extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Randevu #${appointment.id}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    'Randevu #${appointment.id}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                const SizedBox(width: 8),
                 _buildStatusChip(
                     appointment.status, _getStatusColor(appointment.status)),
               ],
@@ -173,14 +178,18 @@ class AdminAppointmentsPage extends ConsumerWidget {
               children: [
                 Icon(Icons.person, size: 16, color: Colors.grey[600]),
                 const SizedBox(width: 4),
-                Text(
-                  'Müşteri: ${appointment.userId}',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
+                Expanded(
+                  child: Text(
+                    'Müşteri: ${appointment.userId}',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 if (appointment.notes != null && appointment.notes!.isNotEmpty)
                   Icon(Icons.note, size: 16, color: Colors.grey[600]),
               ],

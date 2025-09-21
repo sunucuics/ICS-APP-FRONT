@@ -139,9 +139,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                     ),
                     const SizedBox(height: 12),
                     _buildOrderDetailRow(
-                        'Sipariş No', order.id.substring(0, 8)),
+                        'Sipariş No', (order.id ?? '').substring(0, 8)),
                     _buildOrderDetailRow('Toplam Tutar',
-                        '₺${order.totals?.grandTotal.toStringAsFixed(2) ?? '0.00'}'),
+                        '₺${order.totals?.grandTotal?.toStringAsFixed(2) ?? '0.00'}'),
                     _buildOrderDetailRow(
                         'Ödeme Yöntemi', widget.paymentMethod.displayName),
                     _buildOrderDetailRow('Durum', order.status.displayName),

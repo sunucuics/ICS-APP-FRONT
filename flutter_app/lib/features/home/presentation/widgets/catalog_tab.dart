@@ -131,12 +131,8 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
             child: categoriesAsync.when(
               data: (categories) {
                 // Add "Tümü" category at the beginning
-                // Filter out test categories
-                final filteredCategories = categories
-                    .where((cat) =>
-                        !cat.name.toLowerCase().contains('deneme') &&
-                        !cat.name.toLowerCase().contains('test'))
-                    .toList();
+                // Use all categories (removed test category filtering)
+                final filteredCategories = categories;
 
                 // Fixed categories should appear first
                 final fixedCategories =
@@ -328,13 +324,47 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                             Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  index == 0
-                                      ? Icons.apps
-                                      : _getCategoryIcon(category.name),
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
+                                // Show category image if available, otherwise show icon
+                                if (index == 0)
+                                  Icon(
+                                    Icons.apps,
+                                    color: Colors.white,
+                                    size: 20,
+                                  )
+                                else if (category.coverImage != null &&
+                                    category.coverImage!.isNotEmpty)
+                                  Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      color: Colors.white.withOpacity(0.2),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: CachedNetworkImage(
+                                        imageUrl: category.coverImage!,
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) => Icon(
+                                          _getCategoryIcon(category.name),
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            Icon(
+                                          _getCategoryIcon(category.name),
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  Icon(
+                                    _getCategoryIcon(category.name),
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
                                 const SizedBox(height: 4),
                                 Text(
                                   category.name,

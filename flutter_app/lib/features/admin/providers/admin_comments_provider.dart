@@ -1,20 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/admin_repository.dart';
-import '../providers/admin_dashboard_provider.dart';
-import '../../../core/models/comment_model.dart';
+import 'admin_dashboard_provider.dart';
+import '../../../../core/models/comment_model.dart';
 
-// Comments Provider
-final adminCommentsProvider = FutureProvider<List<Comment>>((ref) async {
-  final repository = ref.watch(adminRepositoryProvider);
-  return await repository.getComments();
-});
-
-// Comments State Notifier for CRUD operations
-final adminCommentsNotifierProvider =
+final adminCommentsProvider =
     StateNotifierProvider<AdminCommentsNotifier, AsyncValue<List<Comment>>>(
         (ref) {
-  final repository = ref.watch(adminRepositoryProvider);
-  return AdminCommentsNotifier(repository);
+  return AdminCommentsNotifier(ref.read(adminRepositoryProvider));
 });
 
 class AdminCommentsNotifier extends StateNotifier<AsyncValue<List<Comment>>> {
@@ -25,13 +17,17 @@ class AdminCommentsNotifier extends StateNotifier<AsyncValue<List<Comment>>> {
   }
 
   Future<void> loadComments() async {
-    state = const AsyncValue.loading();
     try {
+      state = const AsyncValue.loading();
       final comments = await _repository.getComments();
       state = AsyncValue.data(comments);
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }
+  }
+
+  Future<void> refresh() async {
+    await loadComments();
   }
 
   Future<void> approveComment(String commentId) async {
@@ -50,9 +46,5 @@ class AdminCommentsNotifier extends StateNotifier<AsyncValue<List<Comment>>> {
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }
-  }
-
-  Future<void> refresh() async {
-    await loadComments();
   }
 }

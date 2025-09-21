@@ -82,26 +82,27 @@ class AdminCategoriesPage extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(8),
                 color: AppTheme.primaryNavy.withOpacity(0.1),
               ),
-              child: category.image != null && category.image!.isNotEmpty
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        category.image!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
-                            Icons.category,
-                            color: AppTheme.primaryNavy,
-                            size: 30,
-                          );
-                        },
-                      ),
-                    )
-                  : Icon(
-                      Icons.category,
-                      color: AppTheme.primaryNavy,
-                      size: 30,
-                    ),
+              child:
+                  category.coverImage != null && category.coverImage!.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            category.coverImage!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(
+                                Icons.category,
+                                color: AppTheme.primaryNavy,
+                                size: 30,
+                              );
+                            },
+                          ),
+                        )
+                      : Icon(
+                          Icons.category,
+                          color: AppTheme.primaryNavy,
+                          size: 30,
+                        ),
             ),
             const SizedBox(width: 16),
 
@@ -284,21 +285,20 @@ class AdminCategoriesPage extends ConsumerWidget {
             maxLines: 3,
           ),
           AdminFormField(
-            label: 'Görsel URL',
-            hint: 'Kategori görsel URL\'si (opsiyonel)',
+            label: 'Görsel',
+            hint: 'Kategori görseli seçin (opsiyonel)',
+            isImageField: true,
           ),
         ],
         onSave: (data) async {
           final categoryData = {
             'name': data['Kategori Adı'],
             'description':
-                data['Açıklama']?.isNotEmpty == true ? data['Açıklama'] : null,
-            'imageUrl': data['Görsel URL']?.isNotEmpty == true
-                ? data['Görsel URL']
+                data['Açıklama']?.isNotEmpty == true ? data['Açıklama'] : '',
+            'imageUrl': data['Görsel_file']?.isNotEmpty == true
+                ? data['Görsel_file']
                 : null,
-            'isActive': true,
-            'isComingSoon': false,
-            'sortOrder': 0,
+            'is_fixed': false, // Backend expects this field
           };
 
           await ref
@@ -318,7 +318,7 @@ class AdminCategoriesPage extends ConsumerWidget {
         initialData: {
           'Kategori Adı': category.name,
           'Açıklama': category.description ?? '',
-          'Görsel URL': category.image ?? '',
+          'Görsel': category.coverImage ?? '',
         },
         fields: [
           AdminFormField(
@@ -332,8 +332,9 @@ class AdminCategoriesPage extends ConsumerWidget {
             maxLines: 3,
           ),
           AdminFormField(
-            label: 'Görsel URL',
-            hint: 'Kategori görsel URL\'si (opsiyonel)',
+            label: 'Görsel',
+            hint: 'Kategori görseli seçin (opsiyonel)',
+            isImageField: true,
           ),
         ],
         onSave: (data) async {
@@ -341,8 +342,8 @@ class AdminCategoriesPage extends ConsumerWidget {
             'name': data['Kategori Adı'],
             'description':
                 data['Açıklama']?.isNotEmpty == true ? data['Açıklama'] : null,
-            'image': data['Görsel URL']?.isNotEmpty == true
-                ? data['Görsel URL']
+            'image': data['Görsel_file']?.isNotEmpty == true
+                ? data['Görsel_file']
                 : null,
             'isDeleted': category.isDeleted,
             'isFixed': category.isFixed,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/admin_comments_provider.dart';
 import '../widgets/admin_navigation.dart';
@@ -11,19 +10,18 @@ class AdminCommentsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final commentsAsync = ref.watch(adminCommentsNotifierProvider);
+    final commentsAsync = ref.watch(adminCommentsProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Yorum Moderasyonu'),
+        title: const Text('Yorum Yönetimi'),
         backgroundColor: AppTheme.primaryNavy,
         foregroundColor: Colors.white,
-        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              ref.read(adminCommentsNotifierProvider.notifier).refresh();
+              ref.read(adminCommentsProvider.notifier).refresh();
             },
           ),
         ],
@@ -39,14 +37,14 @@ class AdminCommentsPage extends ConsumerWidget {
   }
 
   Widget _buildCommentsList(
-      BuildContext context, WidgetRef ref, List<Comment> comments) {
+      BuildContext context, WidgetRef ref, List<dynamic> comments) {
     if (comments.isEmpty) {
       return _buildEmptyState(context, ref);
     }
 
     return RefreshIndicator(
       onRefresh: () async {
-        await ref.read(adminCommentsNotifierProvider.notifier).refresh();
+        await ref.read(adminCommentsProvider.notifier).refresh();
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -61,6 +59,10 @@ class AdminCommentsPage extends ConsumerWidget {
 
   Widget _buildCommentCard(
       BuildContext context, WidgetRef ref, Comment comment) {
+    final isApproved = !comment.isDeleted && !comment.isHidden;
+    final isHidden = comment.isHidden;
+    final isDeleted = comment.isDeleted;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 4,
@@ -70,160 +72,92 @@ class AdminCommentsPage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Comment Header
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
-                    'Yorum #${comment.id}',
+                    comment.content,
                     style: const TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                _buildStatusChip(
-                  !comment.isHidden ? 'Görünür' : 'Gizli',
-                  !comment.isHidden ? Colors.green : Colors.orange,
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // Rating
-            Row(
-              children: [
-                const Text('Puan: '),
-                ...List.generate(5, (index) {
-                  return Icon(
-                    index < comment.rating ? Icons.star : Icons.star_border,
-                    color: Colors.amber,
-                    size: 20,
-                  );
-                }),
-                const SizedBox(width: 8),
-                Text(
-                  '${comment.rating}/5',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // Comment Content
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                comment.content,
-                style: const TextStyle(
-                  fontSize: 14,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // Comment Info
-            Row(
-              children: [
-                Icon(Icons.person, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  'Kullanıcı: ${comment.userId}',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
-                  ),
-                ),
-                const Spacer(),
-                Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  '${comment.createdAt.day}/${comment.createdAt.month}/${comment.createdAt.year}',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // Target Info
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryNavy.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    comment.targetType == 'product'
-                        ? Icons.inventory
-                        : Icons.work,
-                    size: 16,
-                    color: AppTheme.primaryNavy,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${comment.targetType == 'product' ? 'Ürün' : 'Hizmet'}: ${comment.targetId}',
-                    style: const TextStyle(
-                      fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                ],
-              ),
+                ),
+                _buildStatusChip(isApproved, isHidden, isDeleted),
+              ],
             ),
-
             const SizedBox(height: 12),
-
-            // Actions
             Row(
               children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => _showCommentDetails(context, comment),
-                    child: const Text('Detaylar'),
+                Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                  size: 16,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${comment.rating}/5',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(width: 8),
-                if (comment.isHidden)
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () =>
-                          _showApproveConfirmation(context, ref, comment),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('Göster'),
+                const SizedBox(width: 16),
+                Icon(
+                  Icons.person,
+                  color: Colors.grey[600],
+                  size: 16,
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    'Kullanıcı: ${comment.userId}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Hedef ID: ${comment.targetId}',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[500],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                if (!isApproved)
+                  ElevatedButton.icon(
+                    onPressed: () => _approveComment(context, ref, comment.id),
+                    icon: const Icon(Icons.check, size: 16),
+                    label: const Text('Onayla'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                     ),
                   ),
-                if (!comment.isHidden)
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () =>
-                          _showDeleteConfirmation(context, ref, comment),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('Gizle'),
-                    ),
+                ElevatedButton.icon(
+                  onPressed: () => _deleteComment(context, ref, comment.id),
+                  icon: const Icon(Icons.delete, size: 16),
+                  label: const Text('Sil'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
+                ),
               ],
             ),
           ],
@@ -232,23 +166,76 @@ class AdminCommentsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatusChip(String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
+  Widget _buildStatusChip(bool isApproved, bool isHidden, bool isDeleted) {
+    if (isDeleted) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.red.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.red),
         ),
-      ),
-    );
+        child: const Text(
+          'Silinmiş',
+          style: TextStyle(
+            color: Colors.red,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      );
+    } else if (isHidden) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.orange.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.orange),
+        ),
+        child: const Text(
+          'Gizli',
+          style: TextStyle(
+            color: Colors.orange,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      );
+    } else if (isApproved) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.green.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.green),
+        ),
+        child: const Text(
+          'Onaylı',
+          style: TextStyle(
+            color: Colors.green,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.blue.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.blue),
+        ),
+        child: const Text(
+          'Bekliyor',
+          style: TextStyle(
+            color: Colors.blue,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      );
+    }
   }
 
   Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
@@ -270,7 +257,7 @@ class AdminCommentsPage extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Kullanıcılar yorum yaptığında burada görünecek',
+            'Kullanıcılar ürünlere yorum yaptığında burada görünecek',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[500],
                 ),
@@ -305,7 +292,7 @@ class AdminCommentsPage extends ConsumerWidget {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              ref.read(adminCommentsNotifierProvider.notifier).refresh();
+              ref.read(adminCommentsProvider.notifier).refresh();
             },
             child: const Text('Tekrar Dene'),
           ),
@@ -314,91 +301,71 @@ class AdminCommentsPage extends ConsumerWidget {
     );
   }
 
-  void _showCommentDetails(BuildContext context, Comment comment) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Yorum Detayları #${comment.id}'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Kullanıcı ID: ${comment.userId}'),
-              Text('Hedef Tip: ${comment.targetType}'),
-              Text('Hedef ID: ${comment.targetId}'),
-              Text('Puan: ${comment.rating}/5'),
-              Text('Durum: ${comment.isHidden ? 'Gizli' : 'Görünür'}'),
-              Text(
-                  'Oluşturulma: ${comment.createdAt.day}/${comment.createdAt.month}/${comment.createdAt.year}'),
-              const SizedBox(height: 16),
-              const Text('Yorum:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(comment.content),
-            ],
+  Future<void> _approveComment(
+      BuildContext context, WidgetRef ref, String commentId) async {
+    try {
+      await ref.read(adminCommentsProvider.notifier).approveComment(commentId);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Yorum onaylandı'),
+            backgroundColor: Colors.green,
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Kapat'),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Yorum onaylanırken hata oluştu: $e'),
+            backgroundColor: Colors.red,
           ),
-        ],
-      ),
-    );
+        );
+      }
+    }
   }
 
-  void _showApproveConfirmation(
-      BuildContext context, WidgetRef ref, Comment comment) {
-    showDialog(
+  Future<void> _deleteComment(
+      BuildContext context, WidgetRef ref, String commentId) async {
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Yorum Göster'),
-        content: Text('Bu yorumu göstermek istediğinizden emin misiniz?'),
+        title: const Text('Yorumu Sil'),
+        content: const Text('Bu yorumu silmek istediğinizden emin misiniz?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(context).pop(false),
             child: const Text('İptal'),
           ),
           TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await ref
-                  .read(adminCommentsNotifierProvider.notifier)
-                  .approveComment(comment.id);
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.green),
-            child: const Text('Göster'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Sil', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
-  }
 
-  void _showDeleteConfirmation(
-      BuildContext context, WidgetRef ref, Comment comment) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Yorum Gizle'),
-        content: Text('Bu yorumu gizlemek istediğinizden emin misiniz?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('İptal'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await ref
-                  .read(adminCommentsNotifierProvider.notifier)
-                  .deleteComment(comment.id);
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Gizle'),
-          ),
-        ],
-      ),
-    );
+    if (confirmed == true) {
+      try {
+        await ref.read(adminCommentsProvider.notifier).deleteComment(commentId);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Yorum silindi'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Yorum silinirken hata oluştu: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 }

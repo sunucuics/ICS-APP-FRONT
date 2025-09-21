@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../../../../core/theme/app_theme.dart';
 
 class AdminFormDialog extends StatefulWidget {
@@ -23,6 +25,7 @@ class AdminFormDialog extends StatefulWidget {
 class _AdminFormDialogState extends State<AdminFormDialog> {
   final _formKey = GlobalKey<FormState>();
   final Map<String, TextEditingController> _controllers = {};
+  final Map<String, File?> _selectedImages = {};
   bool _isLoading = false;
 
   @override
@@ -32,6 +35,9 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
       _controllers[field.label] = TextEditingController(
         text: widget.initialData?[field.label] ?? '',
       );
+      if (field.isImageField) {
+        _selectedImages[field.label] = null;
+      }
     }
   }
 
@@ -163,29 +169,111 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
             style: TextStyle(color: Colors.red),
           ),
         const SizedBox(height: 8),
-        TextFormField(
-          controller: _controllers[field.label],
-          maxLines: field.maxLines ?? 1,
-          keyboardType: field.keyboardType,
-          inputFormatters: field.inputFormatters,
-          decoration: InputDecoration(
-            hintText: field.hint,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+        if (field.dropdownOptions != null)
+          _buildDropdownField(field)
+        else if (field.isDateField)
+          _buildDateField(field)
+        else if (field.isImageField)
+          _buildImageField(field)
+        else
+          TextFormField(
+            controller: _controllers[field.label],
+            maxLines: field.maxLines ?? 1,
+            keyboardType: field.keyboardType,
+            inputFormatters: field.inputFormatters,
+            decoration: InputDecoration(
+              hintText: field.hint,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: AppTheme.primaryNavy),
+              ),
             ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppTheme.primaryNavy),
-            ),
+            validator: (value) {
+              if (field.isRequired && (value == null || value.trim().isEmpty)) {
+                return '${field.label} zorunludur';
+              }
+              return null;
+            },
           ),
-          validator: (value) {
-            if (field.isRequired && (value == null || value.trim().isEmpty)) {
-              return '${field.label} zorunludur';
-            }
-            return null;
-          },
-        ),
       ],
+    );
+  }
+
+  Widget _buildDropdownField(AdminFormField field) {
+    return DropdownButtonFormField<String>(
+      value: _controllers[field.label]!.text.isNotEmpty
+          ? _controllers[field.label]!.text
+          : null,
+      decoration: InputDecoration(
+        hintText: field.hint,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppTheme.primaryNavy),
+        ),
+      ),
+      items: field.dropdownOptions!.map((String option) {
+        return DropdownMenuItem<String>(
+          value: option,
+          child: Text(option),
+        );
+      }).toList(),
+      onChanged: (String? newValue) {
+        _controllers[field.label]!.text = newValue ?? '';
+      },
+      validator: (value) {
+        if (field.isRequired && (value == null || value.trim().isEmpty)) {
+          return '${field.label} zorunludur';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildDateField(AdminFormField field) {
+    return InkWell(
+      onTap: () async {
+        final DateTime? picked = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime.now().subtract(const Duration(days: 365)),
+          lastDate: DateTime.now().add(const Duration(days: 365)),
+          locale: const Locale('tr', 'TR'),
+        );
+        if (picked != null) {
+          _controllers[field.label]!.text =
+              '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                _controllers[field.label]!.text.isEmpty
+                    ? field.hint
+                    : _controllers[field.label]!.text,
+                style: TextStyle(
+                  color: _controllers[field.label]!.text.isEmpty
+                      ? Colors.grey[600]
+                      : Colors.black,
+                ),
+              ),
+            ),
+            const Icon(Icons.calendar_today, color: AppTheme.primaryNavy),
+          ],
+        ),
+      ),
     );
   }
 
@@ -202,6 +290,13 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
       final data = <String, String>{};
       for (final entry in _controllers.entries) {
         data[entry.key] = entry.value.text.trim();
+      }
+
+      // Add selected images to data
+      for (final entry in _selectedImages.entries) {
+        if (entry.value != null) {
+          data['${entry.key}_file'] = entry.value!.path;
+        }
       }
 
       await widget.onSave(data);
@@ -232,6 +327,122 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
       }
     }
   }
+
+  Widget _buildImageField(AdminFormField field) {
+    final selectedImage = _selectedImages[field.label];
+
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          height: 120,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: selectedImage != null
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.file(
+                    selectedImage,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              : Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.image,
+                        size: 40,
+                        color: Colors.grey.shade400,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Görsel seçmek için tıklayın',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () => _pickImage(field.label, ImageSource.gallery),
+                icon: const Icon(Icons.photo_library, size: 18),
+                label: const Text('Galeri'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryNavy,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () => _pickImage(field.label, ImageSource.camera),
+                icon: const Icon(Icons.camera_alt, size: 18),
+                label: const Text('Kamera'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryNavy,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                ),
+              ),
+            ),
+            if (selectedImage != null) ...[
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: () => _removeImage(field.label),
+                icon: const Icon(Icons.delete, color: Colors.red),
+                tooltip: 'Görseli kaldır',
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+
+  Future<void> _pickImage(String fieldLabel, ImageSource source) async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 80,
+      );
+
+      if (image != null) {
+        setState(() {
+          _selectedImages[fieldLabel] = File(image.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Görsel seçilirken hata oluştu: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _removeImage(String fieldLabel) {
+    setState(() {
+      _selectedImages[fieldLabel] = null;
+    });
+  }
 }
 
 class AdminFormField {
@@ -241,6 +452,9 @@ class AdminFormField {
   final int? maxLines;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
+  final List<String>? dropdownOptions;
+  final bool isDateField;
+  final bool isImageField;
 
   const AdminFormField({
     required this.label,
@@ -249,5 +463,8 @@ class AdminFormField {
     this.maxLines,
     this.keyboardType,
     this.inputFormatters,
+    this.dropdownOptions,
+    this.isDateField = false,
+    this.isImageField = false,
   });
 }

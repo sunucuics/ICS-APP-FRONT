@@ -9,7 +9,6 @@ import '../../../core/models/comment_model.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/models/service_model.dart';
 import '../models/admin_discount_model.dart';
-import '../models/admin_analytics_model.dart';
 import '../models/admin_notification_model.dart';
 import '../models/admin_settings_model.dart';
 import '../models/admin_filter_model.dart';
@@ -42,11 +41,37 @@ class AdminApiService {
 
   Future<Category> createCategory(Map<String, dynamic> categoryData) async {
     try {
-      final response = await _apiClient.post(
-        '/admin/categories',
-        data: categoryData,
-      );
-      return Category.fromJson(response.data as Map<String, dynamic>);
+      // Check if there's an image file to upload
+      final imageFile = categoryData['imageUrl'];
+
+      if (imageFile != null && imageFile is String && imageFile.isNotEmpty) {
+        // Use multipart/form-data for image upload
+        final formData = FormData();
+
+        // Add category fields
+        formData.fields.addAll([
+          MapEntry('name', categoryData['name'] ?? ''),
+          MapEntry('description', categoryData['description'] ?? ''),
+          MapEntry('is_fixed', categoryData['is_fixed']?.toString() ?? 'false'),
+        ]);
+
+        // Add image file
+        formData.files.add(MapEntry(
+          'cover_image',
+          await MultipartFile.fromFile(imageFile),
+        ));
+
+        final response = await _apiClient.post(
+          '/admin/categories',
+          data: formData,
+        );
+        return Category.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        // For categories without images, we need to handle this differently
+        // Since backend requires cover_image, we'll throw an error
+        throw ApiException(
+            message: 'Kategori oluşturmak için görsel gereklidir');
+      }
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
@@ -88,11 +113,58 @@ class AdminApiService {
 
   Future<Product> createProduct(Map<String, dynamic> productData) async {
     try {
-      final response = await _apiClient.post(
-        '/admin/products',
-        data: productData,
-      );
-      return Product.fromJson(response.data as Map<String, dynamic>);
+      // Check if there are image files to upload
+      final imageFilesRaw = productData['images'];
+      List<String>? imageFiles;
+
+      if (imageFilesRaw is List) {
+        // Filter out null values and convert to List<String>
+        imageFiles = imageFilesRaw
+            .where((item) => item != null && item is String && item.isNotEmpty)
+            .cast<String>()
+            .toList();
+      }
+
+      if (imageFiles != null && imageFiles.isNotEmpty) {
+        // Use multipart/form-data for image upload
+        final formData = FormData();
+
+        // Add product fields
+        formData.fields.addAll([
+          MapEntry('name', productData['name'] ?? ''),
+          MapEntry('description', productData['description'] ?? ''),
+          MapEntry('price', productData['price']?.toString() ?? '0'),
+          MapEntry('stock', productData['stock']?.toString() ?? '0'),
+          MapEntry('category_name', productData['category_name'] ?? ''),
+          MapEntry(
+              'is_upcoming', productData['is_upcoming']?.toString() ?? 'false'),
+        ]);
+
+        // Add image files
+        for (int i = 0; i < imageFiles.length; i++) {
+          final imagePath = imageFiles[i];
+          if (imagePath.isNotEmpty) {
+            final fileName = 'photo${i == 0 ? '_main' : i}';
+            formData.files.add(MapEntry(
+              fileName,
+              await MultipartFile.fromFile(imagePath),
+            ));
+          }
+        }
+
+        final response = await _apiClient.post(
+          '/admin/products/',
+          data: formData,
+        );
+        return Product.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        // Use JSON for products without images
+        final response = await _apiClient.post(
+          '/admin/products',
+          data: productData,
+        );
+        return Product.fromJson(response.data as Map<String, dynamic>);
+      }
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
@@ -199,31 +271,6 @@ class AdminApiService {
     }
   }
 
-  // Users Management
-  Future<List<UserProfile>> getUsers() async {
-    try {
-      final response = await _apiClient.get('/admin/users');
-      final userList = (response.data as List)
-          .map((item) => UserProfile.fromJson(item as Map<String, dynamic>))
-          .toList();
-      return userList;
-    } on DioException catch (e) {
-      throw ApiException.fromDioException(e);
-    }
-  }
-
-  Future<UserProfile> updateUserRole(String userId, String role) async {
-    try {
-      final response = await _apiClient.put(
-        '/admin/users/$userId/role',
-        data: {'role': role},
-      );
-      return UserProfile.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw ApiException.fromDioException(e);
-    }
-  }
-
   // Discounts Management
   Future<List<AdminDiscount>> getDiscounts() async {
     try {
@@ -312,87 +359,6 @@ class AdminApiService {
   Future<void> deleteService(String serviceId) async {
     try {
       await _apiClient.delete('/admin/services/$serviceId');
-    } on DioException catch (e) {
-      throw ApiException.fromDioException(e);
-    }
-  }
-
-  // Analytics
-  Future<AnalyticsData> getAnalytics({
-    String? period,
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
-    try {
-      final queryParams = <String, dynamic>{};
-      if (period != null) queryParams['period'] = period;
-      if (startDate != null)
-        queryParams['start_date'] = startDate.toIso8601String();
-      if (endDate != null) queryParams['end_date'] = endDate.toIso8601String();
-
-      final response = await _apiClient.get('/admin/analytics',
-          queryParameters: queryParams);
-      return AnalyticsData.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw ApiException.fromDioException(e);
-    }
-  }
-
-  Future<SalesReport> getSalesReport({
-    String? period,
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
-    try {
-      final queryParams = <String, dynamic>{};
-      if (period != null) queryParams['period'] = period;
-      if (startDate != null)
-        queryParams['start_date'] = startDate.toIso8601String();
-      if (endDate != null) queryParams['end_date'] = endDate.toIso8601String();
-
-      final response = await _apiClient.get('/admin/analytics/sales',
-          queryParameters: queryParams);
-      return SalesReport.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw ApiException.fromDioException(e);
-    }
-  }
-
-  Future<UserActivity> getUserActivity({
-    String? period,
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
-    try {
-      final queryParams = <String, dynamic>{};
-      if (period != null) queryParams['period'] = period;
-      if (startDate != null)
-        queryParams['start_date'] = startDate.toIso8601String();
-      if (endDate != null) queryParams['end_date'] = endDate.toIso8601String();
-
-      final response = await _apiClient.get('/admin/analytics/users',
-          queryParameters: queryParams);
-      return UserActivity.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw ApiException.fromDioException(e);
-    }
-  }
-
-  Future<RevenueChart> getRevenueChart({
-    String? period,
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
-    try {
-      final queryParams = <String, dynamic>{};
-      if (period != null) queryParams['period'] = period;
-      if (startDate != null)
-        queryParams['start_date'] = startDate.toIso8601String();
-      if (endDate != null) queryParams['end_date'] = endDate.toIso8601String();
-
-      final response = await _apiClient.get('/admin/analytics/revenue',
-          queryParameters: queryParams);
-      return RevenueChart.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
@@ -575,6 +541,36 @@ class AdminApiService {
         data: exportOptions.toJson(),
       );
       return response.data['download_url'] as String;
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  // User Management
+  Future<List<UserProfile>> getUsers() async {
+    try {
+      final response = await _apiClient.get('/admin/users');
+      final userList = (response.data as List)
+          .map((item) => UserProfile.fromJson(item as Map<String, dynamic>))
+          .toList();
+      return userList;
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<void> deleteUser(String userId) async {
+    try {
+      await _apiClient.delete('/admin/users/$userId');
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<void> updateUserRole(String userId, String role) async {
+    try {
+      await _apiClient
+          .put('/admin/users/$userId/role', queryParameters: {'role': role});
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
