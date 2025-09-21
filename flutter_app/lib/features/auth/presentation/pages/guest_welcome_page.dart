@@ -20,19 +20,35 @@ class GuestWelcomePage extends ConsumerWidget {
             children: [
               const SizedBox(height: 40),
 
-              // App Logo
+              // App Logo with Glowing Frame
               Container(
-                width: 160,
-                height: 160,
+                width: 200,
+                height: 200,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).primaryColor.withOpacity(0.3),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                    ),
+                    BoxShadow(
+                      color: Theme.of(context).primaryColor.withOpacity(0.1),
+                      blurRadius: 40,
+                      spreadRadius: 10,
+                    ),
+                  ],
+                  border: Border.all(
+                    color: Theme.of(context).primaryColor.withOpacity(0.5),
+                    width: 2,
+                  ),
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(18),
                   child: Image.asset(
                     'assets/images/ics_logo.jpg',
-                    width: 160,
-                    height: 160,
+                    width: 200,
+                    height: 200,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -42,7 +58,7 @@ class GuestWelcomePage extends ConsumerWidget {
 
               // Welcome Title
               Text(
-                'ICS App\'e Hoş Geldiniz',
+                'Innova Craft Studio',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -53,7 +69,7 @@ class GuestWelcomePage extends ConsumerWidget {
 
               // Welcome Subtitle
               Text(
-                'Ürünlerimizi keşfetmek için misafir olarak devam edebilir veya hesap oluşturabilirsiniz.',
+                'Ürünlerimizi ve hizmetlerimizi keşfetmek için misafir olarak devam edebilir veya hesap oluşturabilirsiniz.',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -325,9 +341,48 @@ class GuestWelcomePage extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Kullanım Koşulları'),
-        content: const Text(
-          'Bu uygulamayı kullanarak kullanım koşullarımızı kabul etmiş olursunuz. '
-          'Detaylı bilgi için lütfen web sitemizi ziyaret edin.',
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                '1. Hizmet Kullanımı',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Innova Craft Studio uygulamasını kullanarak bu koşulları kabul etmiş olursunuz. Uygulama, el yapımı ürünler ve sanat eserleri satışı için tasarlanmıştır.',
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '2. Hesap Sorumluluğu',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Hesap bilgilerinizi güvenli tutmak sizin sorumluluğunuzdadır. Şifrenizi kimseyle paylaşmayın.',
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '3. Ürün Sorumluluğu',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Satın aldığınız ürünlerin kalitesi ve teslimatından sorumluyuz. Ürünler el yapımı olduğu için küçük farklılıklar olabilir.',
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '4. İptal ve İade',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Ürünler özel yapım olduğu için sipariş verildikten sonra iptal edilemez. Hasar durumunda iade yapılır.',
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -344,9 +399,57 @@ class GuestWelcomePage extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Gizlilik Politikası'),
-        content: const Text(
-          'Gizliliğiniz bizim için önemlidir. Kişisel verileriniz güvenli bir şekilde '
-          'işlenir ve üçüncü taraflarla paylaşılmaz.',
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                '1. Veri Toplama',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Hesap oluşturma, sipariş verme ve iletişim sırasında kişisel bilgilerinizi toplarız. Bu bilgiler: ad, soyad, e-posta, telefon ve adres bilgilerinizdir.',
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '2. Veri Kullanımı',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Bilgilerinizi sadece sipariş işleme, teslimat ve müşteri hizmetleri için kullanırız. Pazarlama amaçlı kullanım için ayrı izniniz gerekir.',
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '3. Veri Güvenliği',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Verileriniz SSL şifreleme ile korunur ve güvenli sunucularda saklanır. Kredi kartı bilgileriniz saklanmaz.',
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '4. Veri Paylaşımı',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Kişisel verilerinizi üçüncü taraflarla paylaşmayız. Sadece teslimat için kargo firmalarına gerekli bilgileri veririz.',
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '5. Haklarınız',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Verilerinizi görme, düzeltme, silme ve işlemeyi durdurma hakkınız vardır. Taleplerinizi bize iletebilirsiniz.',
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(

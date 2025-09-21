@@ -133,7 +133,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'ICS App',
+                            'Innova Craft Studio',
                             style: Theme.of(context)
                                 .textTheme
                                 .headlineSmall

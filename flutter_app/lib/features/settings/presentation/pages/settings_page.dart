@@ -114,7 +114,7 @@ class SettingsPage extends ConsumerWidget {
                 _buildInfoItem(
                   context,
                   'Geliştirici',
-                  'ICS Team',
+                  'Innova Craft Studio Team',
                   Icons.person,
                 ),
               ],

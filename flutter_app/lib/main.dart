@@ -40,7 +40,7 @@ class MyApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp(
-      title: 'ICS App',
+      title: 'Innova Craft Studio',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode, // Dynamic theme mode based on user preference

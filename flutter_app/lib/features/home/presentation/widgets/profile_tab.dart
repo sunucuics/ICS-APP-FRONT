@@ -584,7 +584,7 @@ class ProfileTab extends ConsumerWidget {
   void _showAboutDialog(BuildContext context) {
     showAboutDialog(
       context: context,
-      applicationName: 'ICS App',
+      applicationName: 'Innova Craft Studio',
       applicationVersion: '1.0.0',
       applicationIcon: Container(
         padding: const EdgeInsets.all(8),
@@ -599,7 +599,7 @@ class ProfileTab extends ConsumerWidget {
         ),
       ),
       children: const [
-        Text('ICS App - Akıllı Ev ve Hizmet Yönetimi'),
+        Text('Innova Craft Studio - El Yapımı Ürünler ve Sanat Eserleri'),
         SizedBox(height: 16),
         Text(
             'Bu uygulama ile evinizi akıllı hale getirin ve profesyonel hizmetlerden yararlanın.'),

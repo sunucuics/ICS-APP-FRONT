@@ -665,7 +665,8 @@ class HomeTab extends ConsumerWidget {
 
   Future<void> _launchWhatsApp(BuildContext context) async {
     const phoneNumber = '+905333734218';
-    const message = 'Merhaba! ICS App üzerinden iletişime geçmek istiyorum.';
+    const message =
+        'Merhaba! Innova Craft Studio üzerinden iletişime geçmek istiyorum.';
     final url =
         'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}';
 

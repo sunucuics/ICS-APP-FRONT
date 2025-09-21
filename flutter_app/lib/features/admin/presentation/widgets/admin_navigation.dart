@@ -32,95 +32,98 @@ class AdminNavigation extends StatelessWidget {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(
-              context,
-              Icons.dashboard,
-              'Dashboard',
-              0,
-              () => _navigateToTab(context, 0),
-            ),
-            _buildNavItem(
-              context,
-              Icons.category,
-              'Kategoriler',
-              1,
-              () => _navigateToTab(context, 1),
-            ),
-            _buildNavItem(
-              context,
-              Icons.inventory,
-              'Ürünler',
-              2,
-              () => _navigateToTab(context, 2),
-            ),
-            _buildNavItem(
-              context,
-              Icons.shopping_cart,
-              'Siparişler',
-              3,
-              () => _navigateToTab(context, 3),
-            ),
-            _buildNavItem(
-              context,
-              Icons.event,
-              'Randevular',
-              4,
-              () => _navigateToTab(context, 4),
-            ),
-            _buildNavItem(
-              context,
-              Icons.local_offer,
-              'İndirimler',
-              5,
-              () => _navigateToTab(context, 5),
-            ),
-            _buildNavItem(
-              context,
-              Icons.work,
-              'Hizmetler',
-              6,
-              () => _navigateToTab(context, 6),
-            ),
-            _buildNavItem(
-              context,
-              Icons.people,
-              'Kullanıcılar',
-              7,
-              () => _navigateToTab(context, 7),
-            ),
-            _buildNavItem(
-              context,
-              Icons.comment,
-              'Yorumlar',
-              8,
-              () => _navigateToTab(context, 8),
-            ),
-            _buildNavItem(
-              context,
-              Icons.analytics,
-              'Analytics',
-              9,
-              () => _navigateToTab(context, 9),
-            ),
-            _buildNavItem(
-              context,
-              Icons.notifications,
-              'Bildirimler',
-              10,
-              () => _navigateToTab(context, 10),
-            ),
-            _buildNavItem(
-              context,
-              Icons.settings,
-              'Ayarlar',
-              11,
-              () => _navigateToTab(context, 11),
-            ),
-          ],
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildNavItem(
+                context,
+                Icons.dashboard,
+                'Dashboard',
+                0,
+                () => _navigateToTab(context, 0),
+              ),
+              _buildNavItem(
+                context,
+                Icons.category,
+                'Kategoriler',
+                1,
+                () => _navigateToTab(context, 1),
+              ),
+              _buildNavItem(
+                context,
+                Icons.inventory,
+                'Ürünler',
+                2,
+                () => _navigateToTab(context, 2),
+              ),
+              _buildNavItem(
+                context,
+                Icons.shopping_cart,
+                'Siparişler',
+                3,
+                () => _navigateToTab(context, 3),
+              ),
+              _buildNavItem(
+                context,
+                Icons.event,
+                'Randevular',
+                4,
+                () => _navigateToTab(context, 4),
+              ),
+              _buildNavItem(
+                context,
+                Icons.local_offer,
+                'İndirimler',
+                5,
+                () => _navigateToTab(context, 5),
+              ),
+              _buildNavItem(
+                context,
+                Icons.work,
+                'Hizmetler',
+                6,
+                () => _navigateToTab(context, 6),
+              ),
+              _buildNavItem(
+                context,
+                Icons.people,
+                'Kullanıcılar',
+                7,
+                () => _navigateToTab(context, 7),
+              ),
+              _buildNavItem(
+                context,
+                Icons.comment,
+                'Yorumlar',
+                8,
+                () => _navigateToTab(context, 8),
+              ),
+              _buildNavItem(
+                context,
+                Icons.analytics,
+                'Analytics',
+                9,
+                () => _navigateToTab(context, 9),
+              ),
+              _buildNavItem(
+                context,
+                Icons.notifications,
+                'Bildirimler',
+                10,
+                () => _navigateToTab(context, 10),
+              ),
+              _buildNavItem(
+                context,
+                Icons.settings,
+                'Ayarlar',
+                11,
+                () => _navigateToTab(context, 11),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -135,24 +138,28 @@ class AdminNavigation extends StatelessWidget {
   ) {
     return GestureDetector(
       onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            size: 24,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontSize: 10,
-              fontWeight: FontWeight.normal,
+              size: 20,
             ),
-          ),
-        ],
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 9,
+                fontWeight: FontWeight.normal,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
