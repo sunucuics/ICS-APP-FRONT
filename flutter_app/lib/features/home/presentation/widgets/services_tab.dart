@@ -19,27 +19,12 @@ class ServicesTab extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue,
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.work,
-                color: Colors.blue,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              'Hizmetler',
-              style: TextStyle(color: Colors.white),
-            ),
-          ],
+        title: const Text(
+          'Hizmetler',
+          style: TextStyle(color: Colors.white),
         ),
+        centerTitle: true,
+        automaticallyImplyLeading: false,
         actions: [],
       ),
       body: servicesAsync.when(

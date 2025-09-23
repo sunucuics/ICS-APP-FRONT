@@ -136,22 +136,24 @@ class HomePageState extends ConsumerState<HomePage> {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: AppTheme.primaryNavy, // Dark blue background
+                        color:
+                            const Color(0xFFFF6A00), // Brand orange background
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: AppTheme.primaryNavy,
+                          color: const Color(0xFFFF6A00),
                           width: 2,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: AppTheme.primaryNavy.withOpacity(0.6), // Blue glow
-                            blurRadius: 15,
-                            offset: const Offset(0, 4),
-                            spreadRadius: 2,
+                            color: const Color(0xFFFF6A00)
+                                .withOpacity(0.4), // Reduced brand orange glow
+                            blurRadius: 12,
+                            offset: const Offset(0, 3),
+                            spreadRadius: 1,
                           ),
                           BoxShadow(
-                            color: AppTheme.primaryNavy.withOpacity(0.4),
-                            blurRadius: 30,
+                            color: const Color(0xFFFF6A00).withOpacity(0.2),
+                            blurRadius: 20,
                             offset: const Offset(0, 0),
                             spreadRadius: 0,
                           ),
@@ -174,7 +176,7 @@ class HomePageState extends ConsumerState<HomePage> {
                             child: Container(
                               padding: const EdgeInsets.all(4),
                               decoration: const BoxDecoration(
-                                color: Colors.red,
+                                color: Colors.orange,
                                 shape: BoxShape.circle,
                               ),
                               constraints: const BoxConstraints(

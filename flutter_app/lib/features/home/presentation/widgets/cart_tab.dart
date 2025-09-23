@@ -55,7 +55,7 @@ class CartTab extends ConsumerWidget {
                             child: Container(
                               padding: const EdgeInsets.all(2),
                               decoration: BoxDecoration(
-                                color: AppTheme.primaryNavy, // Changed to dark blue
+                                color: Colors.orange, // Changed to orange
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               constraints: const BoxConstraints(
@@ -285,7 +285,8 @@ class CartTab extends ConsumerWidget {
                           '₺${item.price.toStringAsFixed(2)}',
                           style: const TextStyle(
                             decoration: TextDecoration.lineThrough,
-                            color: Colors.white60, // White60 for dark background
+                            color:
+                                Colors.white60, // White60 for dark background
                             fontSize: 12,
                           ),
                         ),
@@ -328,8 +329,8 @@ class CartTab extends ConsumerWidget {
                             : null,
                         icon: const Icon(Icons.add),
                         style: IconButton.styleFrom(
-                          backgroundColor:
-                              AppTheme.primaryNavy.withOpacity(0.2), // Changed to dark blue
+                          backgroundColor: AppTheme.primaryNavy
+                              .withOpacity(0.2), // Changed to dark blue
                           padding: const EdgeInsets.all(8),
                           minimumSize: const Size(32, 32),
                         ),

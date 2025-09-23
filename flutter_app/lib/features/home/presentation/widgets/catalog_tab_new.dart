@@ -342,6 +342,7 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
           foregroundColor: Colors.white,
           elevation: 0,
           centerTitle: true,
+          automaticallyImplyLeading: false, // Remove back button/icon
           flexibleSpace: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(

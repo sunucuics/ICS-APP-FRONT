@@ -664,7 +664,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
                 'Randevu Talebi Oluşturuldu!',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                 textAlign: TextAlign.center,
               ),
@@ -675,7 +675,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
                 'Admin onayından sonra randevunuz aktif olacaktır. '
                 'Randevularım sayfasından durumunuzu takip edebilirsiniz.',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontSize: 16,
                   height: 1.5,
                 ),
@@ -759,7 +759,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
                 'Randevu Alınamadı',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                 textAlign: TextAlign.center,
               ),
@@ -768,7 +768,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
               Text(
                 '❌ Randevu talebi oluşturulurken bir hata oluştu:\n\n$error\n\nLütfen tekrar deneyin.',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontSize: 16,
                   height: 1.5,
                 ),
