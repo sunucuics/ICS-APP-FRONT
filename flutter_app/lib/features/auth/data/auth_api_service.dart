@@ -4,6 +4,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/services/firebase_auth_service.dart';
+import '../../../core/services/fcm_service.dart';
 
 class AuthApiService {
   final ApiClient _apiClient = ApiClient.instance;
@@ -33,29 +34,45 @@ class AuthApiService {
       // Backend'e kullanıcı bilgilerini gönder
       print('🚀 AuthApiService: Sending registration request to backend...');
       print('🚀 AuthApiService: Firebase UID: ${userCredential!.user!.uid}');
+
+      // FCM token'ı al
+      final fcmToken = await FCMService.getFCMToken();
+      print('🚀 AuthApiService: FCM Token: $fcmToken');
+
       final formData = FormData.fromMap({
         'name': request.name,
         'phone': request.phone,
         'email': request.email,
         'password': request.password,
-        'firebase_uid': userCredential.user!.uid,
+        if (fcmToken != null) 'fcm_token': fcmToken,
       });
+
+      // Firebase ID token'ı al ve Authorization header'a ekle
+      final idToken = await userCredential.user!.getIdToken();
 
       final response = await _apiClient.postMultipart(
         ApiEndpoints.authRegister,
         formData,
+        headers: {
+          'Authorization': 'Bearer $idToken',
+        },
       );
       print('🚀 AuthApiService: Backend registration successful');
 
       // Backend'den dönen user profile'ını kullan
       final userProfile = UserProfile.fromJson(response.data['user']);
 
+      // Firebase'den token'ları al (backend'den boş gelebilir)
+      final idToken = await userCredential.user!.getIdToken();
+      final refreshToken =
+          await userCredential.user!.getIdToken(true); // Force refresh
+
       return AuthResponse(
         userId: response.data['user_id'],
         user: userProfile,
-        idToken: response.data['id_token'],
-        refreshToken: response.data['refresh_token'],
-        expiresIn: response.data['expires_in'],
+        idToken: idToken ?? '',
+        refreshToken: refreshToken ?? '',
+        expiresIn: 3600, // Firebase default
       );
     } catch (e) {
       print('🚀 AuthApiService: Registration failed with error: $e');
@@ -101,6 +118,27 @@ class AuthApiService {
     // Firebase ID token'ı al
     final idToken = await userCredential!.user!.getIdToken();
 
+    // FCM token'ı backend'e gönder
+    final fcmToken = await FCMService.getFCMToken();
+    if (fcmToken != null) {
+      try {
+        final formData = FormData.fromMap({
+          'email': request.email,
+          'password': request.password,
+          'fcm_token': fcmToken,
+        });
+
+        await _apiClient.postMultipart(
+          ApiEndpoints.authLogin,
+          formData,
+        );
+        print('🚀 AuthApiService: FCM token updated on login');
+      } catch (e) {
+        print('🚀 AuthApiService: Failed to update FCM token: $e');
+        // FCM token güncelleme hatası login'i engellemez
+      }
+    }
+
     // User profile'ını çek
     final userProfile = await getCurrentUser();
 
@@ -120,10 +158,13 @@ class AuthApiService {
 
   // Logout - Backend logout endpoint'ini çağır, sonra Firebase'den çık
   Future<void> logout() async {
+    print('🚀 AuthApiService: Starting logout process');
+
     try {
       // Backend logout endpoint'ini çağır
       final idToken = await FirebaseAuthService.getIdToken();
       if (idToken != null) {
+        print('🚀 AuthApiService: Calling backend logout endpoint');
         await _apiClient.post(
           ApiEndpoints.authLogout,
           options: Options(
@@ -132,13 +173,18 @@ class AuthApiService {
             },
           ),
         );
+        print('🚀 AuthApiService: Backend logout successful');
+      } else {
+        print('🚀 AuthApiService: No ID token found, skipping backend logout');
       }
     } catch (e) {
-      print('Backend logout failed: $e');
+      print('🚀 AuthApiService: Backend logout failed: $e');
       // Continue with Firebase logout even if backend call fails
     } finally {
       // Firebase'den çık
+      print('🚀 AuthApiService: Signing out from Firebase');
       await FirebaseAuthService.signOut();
+      print('🚀 AuthApiService: Firebase logout completed');
     }
   }
 

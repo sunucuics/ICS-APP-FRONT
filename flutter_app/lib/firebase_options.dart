@@ -31,12 +31,12 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBvQZvQZvQZvQZvQZvQZvQZvQZvQZvQZvQ',
-    appId: '1:123456789:web:abcdef123456789',
-    messagingSenderId: '123456789',
-    projectId: 'ics-app-dev',
-    authDomain: 'ics-app-dev.firebaseapp.com',
-    storageBucket: 'ics-app-dev.appspot.com',
+    apiKey: 'AIzaSyBcynXU45CFDyLSgvOTTk_6K5rRZurR9d0',
+    appId: '1:599937649684:web:3ce2a1a2c1737cab9bab01',
+    messagingSenderId: '599937649684',
+    projectId: 'ics-app-f2598',
+    authDomain: 'ics-app-f2598.firebaseapp.com',
+    storageBucket: 'ics-app-f2598.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -53,25 +53,26 @@ class DefaultFirebaseOptions {
     messagingSenderId: '599937649684',
     projectId: 'ics-app-f2598',
     storageBucket: 'ics-app-f2598.firebasestorage.app',
-    iosClientId: '599937649684-ci86b6q1k2jnaroc1549ki96vv7mgq8s.apps.googleusercontent.com',
+    iosClientId:
+        '599937649684-ci86b6q1k2jnaroc1549ki96vv7mgq8s.apps.googleusercontent.com',
     iosBundleId: 'com.ics.app.icsApp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBvQZvQZvQZvQZvQZvQZvQZvQZvQZvQZvQ',
-    appId: '1:123456789:ios:abcdef123456789',
-    messagingSenderId: '123456789',
-    projectId: 'ics-app-dev',
-    storageBucket: 'ics-app-dev.appspot.com',
-    iosBundleId: 'com.example.icsApp',
+    apiKey: 'AIzaSyCXfh52L-Qx1zLxogasNrPhyvpRkRYufYA',
+    appId: '1:599937649684:ios:d1a2caf66f3a2d0b9bab01',
+    messagingSenderId: '599937649684',
+    projectId: 'ics-app-f2598',
+    storageBucket: 'ics-app-f2598.firebasestorage.app',
+    iosBundleId: 'com.ics.app.icsApp',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBvQZvQZvQZvQZvQZvQZvQZvQZvQZvQZvQ',
-    appId: '1:123456789:web:abcdef123456789',
-    messagingSenderId: '123456789',
-    projectId: 'ics-app-dev',
-    authDomain: 'ics-app-dev.firebaseapp.com',
-    storageBucket: 'ics-app-dev.appspot.com',
+    apiKey: 'AIzaSyBcynXU45CFDyLSgvOTTk_6K5rRZurR9d0',
+    appId: '1:599937649684:web:3ce2a1a2c1737cab9bab01',
+    messagingSenderId: '599937649684',
+    projectId: 'ics-app-f2598',
+    authDomain: 'ics-app-f2598.firebaseapp.com',
+    storageBucket: 'ics-app-f2598.firebasestorage.app',
   );
 }

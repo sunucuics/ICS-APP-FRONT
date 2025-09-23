@@ -21,16 +21,21 @@ NotificationTemplate _$NotificationTemplateFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$NotificationTemplate {
   String get id => throw _privateConstructorUsedError;
-  String get title => throw _privateConstructorUsedError;
-  String get body => throw _privateConstructorUsedError;
-  @JsonKey(name: 'template_type')
-  String get templateType => throw _privateConstructorUsedError;
+  String get name => throw _privateConstructorUsedError;
+  String get subject => throw _privateConstructorUsedError;
+  String get content => throw _privateConstructorUsedError;
+  String get type => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
-  DateTime get createdAt => throw _privateConstructorUsedError;
+  DateTime? get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
-  DateTime get updatedAt => throw _privateConstructorUsedError;
+  DateTime? get updatedAt =>
+      throw _privateConstructorUsedError; // Legacy fields for backward compatibility
+  String? get title => throw _privateConstructorUsedError;
+  String? get body => throw _privateConstructorUsedError;
+  @JsonKey(name: 'template_type')
+  String? get templateType => throw _privateConstructorUsedError;
 
   /// Serializes this NotificationTemplate to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -50,12 +55,16 @@ abstract class $NotificationTemplateCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
-      String title,
-      String body,
-      @JsonKey(name: 'template_type') String templateType,
+      String name,
+      String subject,
+      String content,
+      String type,
       @JsonKey(name: 'is_active') bool isActive,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt});
+      @JsonKey(name: 'created_at') DateTime? createdAt,
+      @JsonKey(name: 'updated_at') DateTime? updatedAt,
+      String? title,
+      String? body,
+      @JsonKey(name: 'template_type') String? templateType});
 }
 
 /// @nodoc
@@ -75,42 +84,62 @@ class _$NotificationTemplateCopyWithImpl<$Res,
   @override
   $Res call({
     Object? id = null,
-    Object? title = null,
-    Object? body = null,
-    Object? templateType = null,
+    Object? name = null,
+    Object? subject = null,
+    Object? content = null,
+    Object? type = null,
     Object? isActive = null,
-    Object? createdAt = null,
-    Object? updatedAt = null,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
+    Object? title = freezed,
+    Object? body = freezed,
+    Object? templateType = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      title: null == title
-          ? _value.title
-          : title // ignore: cast_nullable_to_non_nullable
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
               as String,
-      body: null == body
-          ? _value.body
-          : body // ignore: cast_nullable_to_non_nullable
+      subject: null == subject
+          ? _value.subject
+          : subject // ignore: cast_nullable_to_non_nullable
               as String,
-      templateType: null == templateType
-          ? _value.templateType
-          : templateType // ignore: cast_nullable_to_non_nullable
+      content: null == content
+          ? _value.content
+          : content // ignore: cast_nullable_to_non_nullable
+              as String,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
               as String,
       isActive: null == isActive
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
               as bool,
-      createdAt: null == createdAt
+      createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      updatedAt: null == updatedAt
+              as DateTime?,
+      updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
+      title: freezed == title
+          ? _value.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String?,
+      body: freezed == body
+          ? _value.body
+          : body // ignore: cast_nullable_to_non_nullable
+              as String?,
+      templateType: freezed == templateType
+          ? _value.templateType
+          : templateType // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -125,12 +154,16 @@ abstract class _$$NotificationTemplateImplCopyWith<$Res>
   @useResult
   $Res call(
       {String id,
-      String title,
-      String body,
-      @JsonKey(name: 'template_type') String templateType,
+      String name,
+      String subject,
+      String content,
+      String type,
       @JsonKey(name: 'is_active') bool isActive,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt});
+      @JsonKey(name: 'created_at') DateTime? createdAt,
+      @JsonKey(name: 'updated_at') DateTime? updatedAt,
+      String? title,
+      String? body,
+      @JsonKey(name: 'template_type') String? templateType});
 }
 
 /// @nodoc
@@ -147,42 +180,62 @@ class __$$NotificationTemplateImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? title = null,
-    Object? body = null,
-    Object? templateType = null,
+    Object? name = null,
+    Object? subject = null,
+    Object? content = null,
+    Object? type = null,
     Object? isActive = null,
-    Object? createdAt = null,
-    Object? updatedAt = null,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
+    Object? title = freezed,
+    Object? body = freezed,
+    Object? templateType = freezed,
   }) {
     return _then(_$NotificationTemplateImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      title: null == title
-          ? _value.title
-          : title // ignore: cast_nullable_to_non_nullable
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
               as String,
-      body: null == body
-          ? _value.body
-          : body // ignore: cast_nullable_to_non_nullable
+      subject: null == subject
+          ? _value.subject
+          : subject // ignore: cast_nullable_to_non_nullable
               as String,
-      templateType: null == templateType
-          ? _value.templateType
-          : templateType // ignore: cast_nullable_to_non_nullable
+      content: null == content
+          ? _value.content
+          : content // ignore: cast_nullable_to_non_nullable
+              as String,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
               as String,
       isActive: null == isActive
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
               as bool,
-      createdAt: null == createdAt
+      createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      updatedAt: null == updatedAt
+              as DateTime?,
+      updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
+      title: freezed == title
+          ? _value.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String?,
+      body: freezed == body
+          ? _value.body
+          : body // ignore: cast_nullable_to_non_nullable
+              as String?,
+      templateType: freezed == templateType
+          ? _value.templateType
+          : templateType // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -192,12 +245,16 @@ class __$$NotificationTemplateImplCopyWithImpl<$Res>
 class _$NotificationTemplateImpl implements _NotificationTemplate {
   const _$NotificationTemplateImpl(
       {required this.id,
-      required this.title,
-      required this.body,
-      @JsonKey(name: 'template_type') required this.templateType,
+      required this.name,
+      required this.subject,
+      required this.content,
+      required this.type,
       @JsonKey(name: 'is_active') this.isActive = true,
-      @JsonKey(name: 'created_at') required this.createdAt,
-      @JsonKey(name: 'updated_at') required this.updatedAt});
+      @JsonKey(name: 'created_at') this.createdAt,
+      @JsonKey(name: 'updated_at') this.updatedAt,
+      this.title,
+      this.body,
+      @JsonKey(name: 'template_type') this.templateType});
 
   factory _$NotificationTemplateImpl.fromJson(Map<String, dynamic> json) =>
       _$$NotificationTemplateImplFromJson(json);
@@ -205,25 +262,34 @@ class _$NotificationTemplateImpl implements _NotificationTemplate {
   @override
   final String id;
   @override
-  final String title;
+  final String name;
   @override
-  final String body;
+  final String subject;
   @override
-  @JsonKey(name: 'template_type')
-  final String templateType;
+  final String content;
+  @override
+  final String type;
   @override
   @JsonKey(name: 'is_active')
   final bool isActive;
   @override
   @JsonKey(name: 'created_at')
-  final DateTime createdAt;
+  final DateTime? createdAt;
   @override
   @JsonKey(name: 'updated_at')
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
+// Legacy fields for backward compatibility
+  @override
+  final String? title;
+  @override
+  final String? body;
+  @override
+  @JsonKey(name: 'template_type')
+  final String? templateType;
 
   @override
   String toString() {
-    return 'NotificationTemplate(id: $id, title: $title, body: $body, templateType: $templateType, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'NotificationTemplate(id: $id, name: $name, subject: $subject, content: $content, type: $type, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt, title: $title, body: $body, templateType: $templateType)';
   }
 
   @override
@@ -232,22 +298,26 @@ class _$NotificationTemplateImpl implements _NotificationTemplate {
         (other.runtimeType == runtimeType &&
             other is _$NotificationTemplateImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.title, title) || other.title == title) &&
-            (identical(other.body, body) || other.body == body) &&
-            (identical(other.templateType, templateType) ||
-                other.templateType == templateType) &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.subject, subject) || other.subject == subject) &&
+            (identical(other.content, content) || other.content == content) &&
+            (identical(other.type, type) || other.type == type) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.title, title) || other.title == title) &&
+            (identical(other.body, body) || other.body == body) &&
+            (identical(other.templateType, templateType) ||
+                other.templateType == templateType));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, title, body, templateType,
-      isActive, createdAt, updatedAt);
+  int get hashCode => Object.hash(runtimeType, id, name, subject, content, type,
+      isActive, createdAt, updatedAt, title, body, templateType);
 
   /// Create a copy of NotificationTemplate
   /// with the given fields replaced by the non-null parameter values.
@@ -270,12 +340,16 @@ class _$NotificationTemplateImpl implements _NotificationTemplate {
 abstract class _NotificationTemplate implements NotificationTemplate {
   const factory _NotificationTemplate(
           {required final String id,
-          required final String title,
-          required final String body,
-          @JsonKey(name: 'template_type') required final String templateType,
+          required final String name,
+          required final String subject,
+          required final String content,
+          required final String type,
           @JsonKey(name: 'is_active') final bool isActive,
-          @JsonKey(name: 'created_at') required final DateTime createdAt,
-          @JsonKey(name: 'updated_at') required final DateTime updatedAt}) =
+          @JsonKey(name: 'created_at') final DateTime? createdAt,
+          @JsonKey(name: 'updated_at') final DateTime? updatedAt,
+          final String? title,
+          final String? body,
+          @JsonKey(name: 'template_type') final String? templateType}) =
       _$NotificationTemplateImpl;
 
   factory _NotificationTemplate.fromJson(Map<String, dynamic> json) =
@@ -284,21 +358,29 @@ abstract class _NotificationTemplate implements NotificationTemplate {
   @override
   String get id;
   @override
-  String get title;
+  String get name;
   @override
-  String get body;
+  String get subject;
   @override
-  @JsonKey(name: 'template_type')
-  String get templateType;
+  String get content;
+  @override
+  String get type;
   @override
   @JsonKey(name: 'is_active')
   bool get isActive;
   @override
   @JsonKey(name: 'created_at')
-  DateTime get createdAt;
+  DateTime? get createdAt;
   @override
   @JsonKey(name: 'updated_at')
-  DateTime get updatedAt;
+  DateTime? get updatedAt; // Legacy fields for backward compatibility
+  @override
+  String? get title;
+  @override
+  String? get body;
+  @override
+  @JsonKey(name: 'template_type')
+  String? get templateType;
 
   /// Create a copy of NotificationTemplate
   /// with the given fields replaced by the non-null parameter values.

@@ -23,6 +23,17 @@ class ProfileTab extends ConsumerWidget {
     // If registered user is authenticated, ignore anonymous authentication
     final isActuallyAnonymous = !authState.isAuthenticated && isAnonymous;
 
+    // Listen to auth state changes and navigate when user logs out
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      if (previous?.isAuthenticated == true && next.isAuthenticated == false) {
+        // User has logged out, navigate to login page
+        if (context.mounted) {
+          Navigator.of(context)
+              .pushNamedAndRemoveUntil('/login', (route) => false);
+        }
+      }
+    });
+
     return Scaffold(
       body: authState.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -516,7 +527,7 @@ class ProfileTab extends ConsumerWidget {
                       .read(anonymous.anonymousAuthProvider.notifier)
                       .signOut();
                 } else {
-                  // Sign out from registered auth
+                  // Sign out from registered auth - navigation will be handled by state listener
                   await ref.read(authProvider.notifier).logout();
                 }
               },

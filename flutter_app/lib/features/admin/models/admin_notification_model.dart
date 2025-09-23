@@ -7,12 +7,17 @@ part 'admin_notification_model.g.dart';
 class NotificationTemplate with _$NotificationTemplate {
   const factory NotificationTemplate({
     required String id,
-    required String title,
-    required String body,
-    @JsonKey(name: 'template_type') required String templateType,
+    required String name,
+    required String subject,
+    required String content,
+    required String type,
     @JsonKey(name: 'is_active') @Default(true) bool isActive,
-    @JsonKey(name: 'created_at') required DateTime createdAt,
-    @JsonKey(name: 'updated_at') required DateTime updatedAt,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
+    // Legacy fields for backward compatibility
+    String? title,
+    String? body,
+    @JsonKey(name: 'template_type') String? templateType,
   }) = _NotificationTemplate;
 
   factory NotificationTemplate.fromJson(Map<String, dynamic> json) =>

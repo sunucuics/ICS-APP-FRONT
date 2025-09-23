@@ -20,6 +20,17 @@ class AdminDashboardPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboardDataAsync = ref.watch(adminDashboardDataProvider);
 
+    // Listen to auth state changes and navigate when user logs out
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      if (previous?.isAuthenticated == true && next.isAuthenticated == false) {
+        // User has logged out, navigate to login page
+        if (context.mounted) {
+          Navigator.of(context)
+              .pushNamedAndRemoveUntil('/login', (route) => false);
+        }
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
@@ -29,8 +40,9 @@ class AdminDashboardPage extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () async {
-              await ref.refresh(adminDashboardDataProvider);
+            onPressed: () {
+              // ignore: unused_result
+              ref.refresh(adminDashboardDataProvider);
             },
           ),
           IconButton(
@@ -54,8 +66,10 @@ class AdminDashboardPage extends ConsumerWidget {
     final stats = dashboardData.stats;
 
     return RefreshIndicator(
-      onRefresh: () async {
-        await ref.refresh(adminDashboardDataProvider);
+      onRefresh: () {
+        // ignore: unused_result
+        ref.refresh(adminDashboardDataProvider);
+        return Future.value();
       },
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -380,31 +394,25 @@ class AdminDashboardPage extends ConsumerWidget {
   }
 
   Future<void> _performLogout(BuildContext context, WidgetRef ref) async {
-    try {
-      // Show loading indicator
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
 
-      // Perform logout
+    try {
+      // Perform logout - navigation will be handled by the auth state listener
       await ref.read(authProvider.notifier).logout();
 
-      // Close loading dialog
+      // Close loading dialog after logout completes
       if (context.mounted) {
         Navigator.of(context).pop();
       }
-
-      // Navigate to login page using direct navigation
-      if (context.mounted) {
-        Navigator.of(context)
-            .pushNamedAndRemoveUntil('/login', (route) => false);
-      }
     } catch (e) {
-      // Close loading dialog
+      // Close loading dialog first
       if (context.mounted) {
         Navigator.of(context).pop();
       }

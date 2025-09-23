@@ -57,13 +57,7 @@ class GuestWelcomePage extends ConsumerWidget {
               const SizedBox(height: 32),
 
               // Welcome Title
-              Text(
-                'Innova Craft Studio',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                textAlign: TextAlign.center,
-              ),
+              _buildColoredTitle(context),
 
               const SizedBox(height: 16),
 
@@ -455,6 +449,57 @@ class GuestWelcomePage extends ConsumerWidget {
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Tamam'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildColoredTitle(BuildContext context) {
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+
+    return RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(
+        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+        children: [
+          TextSpan(
+            text: 'Innova Craft ',
+            style: TextStyle(
+              color: isDarkTheme ? Colors.white : Colors.black,
+            ),
+          ),
+          // S - mavi
+          const TextSpan(
+            text: 'S',
+            style: TextStyle(color: Colors.blue),
+          ),
+          // T - turuncu
+          const TextSpan(
+            text: 'T',
+            style: TextStyle(color: Colors.orange),
+          ),
+          // U - yeşil
+          const TextSpan(
+            text: 'U',
+            style: TextStyle(color: Colors.green),
+          ),
+          // D - kırmızı
+          const TextSpan(
+            text: 'D',
+            style: TextStyle(color: Colors.red),
+          ),
+          // I - sarı
+          const TextSpan(
+            text: 'I',
+            style: TextStyle(color: Colors.yellow),
+          ),
+          // O - pembe
+          const TextSpan(
+            text: 'O',
+            style: TextStyle(color: Colors.pink),
           ),
         ],
       ),

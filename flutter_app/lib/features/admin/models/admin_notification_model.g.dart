@@ -10,24 +10,36 @@ _$NotificationTemplateImpl _$$NotificationTemplateImplFromJson(
         Map<String, dynamic> json) =>
     _$NotificationTemplateImpl(
       id: json['id'] as String,
-      title: json['title'] as String,
-      body: json['body'] as String,
-      templateType: json['template_type'] as String,
+      name: json['name'] as String,
+      subject: json['subject'] as String,
+      content: json['content'] as String,
+      type: json['type'] as String,
       isActive: json['is_active'] as bool? ?? true,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: json['created_at'] == null
+          ? null
+          : DateTime.parse(json['created_at'] as String),
+      updatedAt: json['updated_at'] == null
+          ? null
+          : DateTime.parse(json['updated_at'] as String),
+      title: json['title'] as String?,
+      body: json['body'] as String?,
+      templateType: json['template_type'] as String?,
     );
 
 Map<String, dynamic> _$$NotificationTemplateImplToJson(
         _$NotificationTemplateImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'name': instance.name,
+      'subject': instance.subject,
+      'content': instance.content,
+      'type': instance.type,
+      'is_active': instance.isActive,
+      'created_at': instance.createdAt?.toIso8601String(),
+      'updated_at': instance.updatedAt?.toIso8601String(),
       'title': instance.title,
       'body': instance.body,
       'template_type': instance.templateType,
-      'is_active': instance.isActive,
-      'created_at': instance.createdAt.toIso8601String(),
-      'updated_at': instance.updatedAt.toIso8601String(),
     };
 
 _$NotificationRequestImpl _$$NotificationRequestImplFromJson(

@@ -132,16 +132,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          Text(
-                            'Innova Craft Studio',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                          ),
+                          _buildColoredTitle(context),
                           const SizedBox(height: 4),
                           Text(
                             'Hoş geldiniz',
@@ -238,6 +229,57 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildColoredTitle(BuildContext context) {
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+
+    return RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(
+        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+        children: [
+          TextSpan(
+            text: 'Innova Craft ',
+            style: TextStyle(
+              color: isDarkTheme ? Colors.white : Colors.black,
+            ),
+          ),
+          // S - mavi
+          const TextSpan(
+            text: 'S',
+            style: TextStyle(color: Colors.blue),
+          ),
+          // T - turuncu
+          const TextSpan(
+            text: 'T',
+            style: TextStyle(color: Colors.orange),
+          ),
+          // U - yeşil
+          const TextSpan(
+            text: 'U',
+            style: TextStyle(color: Colors.green),
+          ),
+          // D - kırmızı
+          const TextSpan(
+            text: 'D',
+            style: TextStyle(color: Colors.red),
+          ),
+          // I - sarı
+          const TextSpan(
+            text: 'I',
+            style: TextStyle(color: Colors.yellow),
+          ),
+          // O - pembe
+          const TextSpan(
+            text: 'O',
+            style: TextStyle(color: Colors.pink),
+          ),
+        ],
       ),
     );
   }

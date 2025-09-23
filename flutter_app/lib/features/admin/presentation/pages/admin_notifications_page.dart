@@ -69,7 +69,7 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
 
     return RefreshIndicator(
       onRefresh: () async {
-        await ref.refresh(adminNotificationTemplatesProvider);
+        ref.invalidate(adminNotificationTemplatesProvider);
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -90,18 +90,18 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
                 ),
               ),
               title: Text(
-                template.title,
+                template.name ?? template.title ?? 'Başlıksız',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(template.body),
+                  Text(template.content ?? template.body ?? 'İçerik yok'),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       _buildStatusChip(
-                        template.templateType,
+                        template.type ?? template.templateType ?? 'genel',
                         Colors.blue,
                       ),
                       const SizedBox(width: 8),
@@ -172,7 +172,7 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
 
     return RefreshIndicator(
       onRefresh: () async {
-        await ref.refresh(adminNotificationCampaignsProvider);
+        ref.invalidate(adminNotificationCampaignsProvider);
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -308,6 +308,9 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
     String? selectedTemplate;
     List<String> selectedSegments = [];
 
+    // Şablonları al
+    final templatesAsync = ref.watch(adminNotificationTemplatesProvider);
+
     return Column(
       children: [
         TextFormField(
@@ -327,19 +330,69 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
           maxLines: 3,
         ),
         const SizedBox(height: 16),
-        DropdownButtonFormField<String>(
-          value: selectedTemplate,
-          decoration: const InputDecoration(
-            labelText: 'Şablon Seç (Opsiyonel)',
-            border: OutlineInputBorder(),
+        templatesAsync.when(
+          data: (templates) => DropdownButtonFormField<String>(
+            value: selectedTemplate,
+            decoration: const InputDecoration(
+              labelText: 'Şablon Seç (Opsiyonel)',
+              border: OutlineInputBorder(),
+            ),
+            items: [
+              const DropdownMenuItem(
+                  value: null, child: Text('Şablon kullanma')),
+              ...templates.map((template) => DropdownMenuItem(
+                    value: template.id,
+                    child: Text(template.name.isNotEmpty
+                        ? template.name
+                        : (template.title?.isNotEmpty == true
+                            ? template.title!
+                            : 'Başlıksız')),
+                  )),
+            ],
+            onChanged: (value) {
+              selectedTemplate = value;
+              if (value != null) {
+                // Şablon seçildiğinde form alanlarını doldur
+                final template = templates.firstWhere((t) => t.id == value);
+                titleController.text = template.subject.isNotEmpty
+                    ? template.subject
+                    : (template.name.isNotEmpty
+                        ? template.name
+                        : (template.title?.isNotEmpty == true
+                            ? template.title!
+                            : ''));
+                bodyController.text = template.content.isNotEmpty
+                    ? template.content
+                    : (template.body?.isNotEmpty == true ? template.body! : '');
+              } else {
+                // Şablon seçimi kaldırıldığında alanları temizle
+                titleController.clear();
+                bodyController.clear();
+              }
+            },
           ),
-          items: const [
-            DropdownMenuItem(value: null, child: Text('Şablon kullanma')),
-            // Burada şablonlar listesi gelecek
-          ],
-          onChanged: (value) {
-            selectedTemplate = value;
-          },
+          loading: () => DropdownButtonFormField<String>(
+            value: null,
+            decoration: const InputDecoration(
+              labelText: 'Şablonlar yükleniyor...',
+              border: OutlineInputBorder(),
+            ),
+            items: const [
+              DropdownMenuItem(value: null, child: Text('Yükleniyor...'))
+            ],
+            onChanged: null,
+          ),
+          error: (error, stack) => DropdownButtonFormField<String>(
+            value: null,
+            decoration: const InputDecoration(
+              labelText: 'Şablonlar yüklenemedi',
+              border: OutlineInputBorder(),
+            ),
+            items: const [
+              DropdownMenuItem(value: null, child: Text('Hata oluştu'))
+            ],
+            onChanged: null,
+          ),
         ),
         const SizedBox(height: 16),
         const Text(
@@ -529,11 +582,330 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
   }
 
   void _showAddTemplateDialog() {
-    // Şablon ekleme dialog'u
+    final titleController = TextEditingController();
+    final bodyController = TextEditingController();
+    String selectedTemplateType = 'general';
+    bool isActive = true;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Yeni Şablon Ekle'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  controller: titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Şablon Başlığı',
+                    border: OutlineInputBorder(),
+                    hintText: 'Örn: Hoş Geldiniz Bildirimi',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Başlık gereklidir';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: bodyController,
+                  decoration: const InputDecoration(
+                    labelText: 'Şablon İçeriği',
+                    border: OutlineInputBorder(),
+                    hintText: 'Bildirim içeriğini buraya yazın...',
+                  ),
+                  maxLines: 4,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'İçerik gereklidir';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: selectedTemplateType,
+                  decoration: const InputDecoration(
+                    labelText: 'Şablon Türü',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'general',
+                      child: Text('Genel'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'promotional',
+                      child: Text('Promosyon'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'system',
+                      child: Text('Sistem'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'reminder',
+                      child: Text('Hatırlatma'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        selectedTemplateType = value;
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: isActive,
+                      onChanged: (value) {
+                        setState(() {
+                          isActive = value ?? true;
+                        });
+                      },
+                    ),
+                    const Text('Şablonu aktif olarak kaydet'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('İptal'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (titleController.text.isEmpty ||
+                    bodyController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Lütfen tüm alanları doldurun'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                try {
+                  final templateData = {
+                    'id': '', // Backend will generate this
+                    'name': titleController.text,
+                    'subject': titleController.text,
+                    'content': bodyController.text,
+                    'type': selectedTemplateType,
+                    'is_active': isActive,
+                  };
+
+                  await ref
+                      .read(adminNotificationTemplatesNotifierProvider.notifier)
+                      .createTemplate(templateData);
+
+                  if (mounted) {
+                    Navigator.of(context).pop();
+                    // Provider'ı yenile
+                    ref.invalidate(adminNotificationTemplatesProvider);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Şablon başarıyla oluşturuldu!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Şablon oluşturma hatası: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryOrange,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Oluştur'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showEditTemplateDialog(template) {
-    // Şablon düzenleme dialog'u
+    final titleController =
+        TextEditingController(text: template.name ?? template.title ?? '');
+    final bodyController =
+        TextEditingController(text: template.content ?? template.body ?? '');
+    String selectedTemplateType =
+        template.type ?? template.templateType ?? 'general';
+    bool isActive = template.isActive;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Şablon Düzenle'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  controller: titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Şablon Başlığı',
+                    border: OutlineInputBorder(),
+                    hintText: 'Örn: Hoş Geldiniz Bildirimi',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Başlık gereklidir';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: bodyController,
+                  decoration: const InputDecoration(
+                    labelText: 'Şablon İçeriği',
+                    border: OutlineInputBorder(),
+                    hintText: 'Bildirim içeriğini buraya yazın...',
+                  ),
+                  maxLines: 4,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'İçerik gereklidir';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: selectedTemplateType,
+                  decoration: const InputDecoration(
+                    labelText: 'Şablon Türü',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'general',
+                      child: Text('Genel'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'promotional',
+                      child: Text('Promosyon'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'system',
+                      child: Text('Sistem'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'reminder',
+                      child: Text('Hatırlatma'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        selectedTemplateType = value;
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: isActive,
+                      onChanged: (value) {
+                        setState(() {
+                          isActive = value ?? true;
+                        });
+                      },
+                    ),
+                    const Text('Şablonu aktif olarak kaydet'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('İptal'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (titleController.text.isEmpty ||
+                    bodyController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Lütfen tüm alanları doldurun'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                try {
+                  final templateData = {
+                    'id': template.id,
+                    'name': titleController.text,
+                    'subject': titleController.text,
+                    'content': bodyController.text,
+                    'type': selectedTemplateType,
+                    'is_active': isActive,
+                  };
+
+                  await ref
+                      .read(adminNotificationTemplatesNotifierProvider.notifier)
+                      .updateTemplate(template.id, templateData);
+
+                  if (mounted) {
+                    Navigator.of(context).pop();
+                    // Provider'ı yenile
+                    ref.invalidate(adminNotificationTemplatesProvider);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Şablon başarıyla güncellendi!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Şablon güncelleme hatası: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryOrange,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Güncelle'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showDeleteTemplateConfirmation(template) {
@@ -542,7 +914,7 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
       builder: (context) => AlertDialog(
         title: const Text('Şablon Sil'),
         content: Text(
-            '${template.title} şablonunu silmek istediğinizden emin misiniz?'),
+            '${template.name ?? template.title ?? 'Bu'} şablonunu silmek istediğinizden emin misiniz?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -554,6 +926,8 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
               await ref
                   .read(adminNotificationTemplatesNotifierProvider.notifier)
                   .deleteTemplate(template.id);
+              // Provider'ı yenile
+              ref.invalidate(adminNotificationTemplatesProvider);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Sil'),

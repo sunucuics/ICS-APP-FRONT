@@ -206,15 +206,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   // Logout
   Future<void> logout() async {
+    print('🔐 AuthProvider - Starting logout process');
     state = state.copyWith(isLoading: true);
 
     try {
+      print('🔐 AuthProvider - Calling auth repository logout...');
       await _authRepository.logout();
-      // Firebase auth state change will automatically update the state
-      // No need to manually update state here
+      print('🔐 AuthProvider - Logout successful');
+
+      // Immediately update state to logged out since logout was successful
+      state = const AuthState(isAuthenticated: false, isLoading: false);
+      print('🔐 AuthProvider - State updated to logged out');
     } catch (e) {
-      // Even if logout fails, Firebase auth state change will handle it
-      print('Logout error: $e');
+      // Even if logout fails, update state to not loading
+      print('🔐 AuthProvider - Logout error: $e');
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
