@@ -8,6 +8,14 @@ buildscript {
     }
 }
 
+// Java version configuration
+allprojects {
+    tasks.withType<JavaCompile> {
+        sourceCompatibility = JavaVersion.VERSION_17.toString()
+        targetCompatibility = JavaVersion.VERSION_17.toString()
+    }
+}
+
 allprojects {
     repositories {
         google()

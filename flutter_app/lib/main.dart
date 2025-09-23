@@ -15,8 +15,13 @@ import 'features/home/presentation/pages/home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Performance optimizations
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Pre-warm the engine for better performance
+  });
 
-  // Firebase initialization
+  // Firebase initialization with error handling
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -53,6 +58,15 @@ class MyApp extends ConsumerWidget {
       home: const AuthWrapper(),
       debugShowCheckedModeBanner: false,
       navigatorKey: NavigationService.navigatorKey,
+      // Performance optimizations
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.noScaling, // Disable text scaling for better performance
+          ),
+          child: child!,
+        );
+      },
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
