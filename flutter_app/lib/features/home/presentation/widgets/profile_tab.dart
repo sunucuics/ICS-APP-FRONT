@@ -53,8 +53,8 @@ class ProfileTab extends ConsumerWidget {
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            AppTheme.primaryOrange,
-                            AppTheme.secondaryOrange,
+                            AppTheme.primaryNavy,
+                            AppTheme.secondaryNavy,
                           ],
                         ),
                       ),
@@ -147,87 +147,103 @@ class ProfileTab extends ConsumerWidget {
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(
                                 24.0, 20.0, 24.0, 24.0),
-                            child: Column(
-                              children: [
-                                // Profile Avatar
-                                CircleAvatar(
-                                  radius: 50,
-                                  backgroundColor:
-                                      AppTheme.primaryOrange.withOpacity(0.1),
-                                  child: Text(
-                                    isActuallyAnonymous
-                                        ? 'M'
-                                        : _getInitials(
-                                            currentUser?.name ?? 'U'),
-                                    style: TextStyle(
-                                      color: AppTheme.primaryOrange,
-                                      fontSize: 32,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                // User Info
-                                Text(
-                                  isActuallyAnonymous
-                                      ? 'Misafir Kullanıcı'
-                                      : currentUser?.name ?? 'Kullanıcı',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color:
-                                        Theme.of(context).colorScheme.onSurface,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                if (!isActuallyAnonymous &&
-                                    currentUser?.email != null)
-                                  Text(
-                                    currentUser?.email ?? '',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                    ),
-                                  ),
-                                const SizedBox(height: 16),
-                                // Status Badge
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        AppTheme.primaryOrange.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: AppTheme.primaryOrange
-                                          .withOpacity(0.3),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.verified,
-                                        color: AppTheme.primaryOrange,
-                                        size: 16,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
+                            child: Builder(
+                              builder: (context) {
+                                final isDarkTheme =
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark;
+                                final textColor =
+                                    isDarkTheme ? Colors.white : Colors.black;
+                                final subtitleColor = isDarkTheme
+                                    ? Colors.white70
+                                    : Colors.black87;
+                                final avatarBgColor = isDarkTheme
+                                    ? Colors.white.withOpacity(0.2)
+                                    : Colors.black.withOpacity(0.1);
+                                final badgeBgColor = isDarkTheme
+                                    ? Colors.white.withOpacity(0.2)
+                                    : Colors.black.withOpacity(0.1);
+                                final badgeBorderColor = isDarkTheme
+                                    ? Colors.white.withOpacity(0.3)
+                                    : Colors.black.withOpacity(0.2);
+
+                                return Column(
+                                  children: [
+                                    // Profile Avatar
+                                    CircleAvatar(
+                                      radius: 50,
+                                      backgroundColor: avatarBgColor,
+                                      child: Text(
                                         isActuallyAnonymous
-                                            ? 'Misafir'
-                                            : 'Aktif Üye',
+                                            ? 'M'
+                                            : _getInitials(
+                                                currentUser?.name ?? 'U'),
                                         style: TextStyle(
-                                          color: AppTheme.primaryOrange,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 14,
+                                          color: textColor,
+                                          fontSize: 32,
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                                    ),
+                                    const SizedBox(height: 20),
+                                    // User Info
+                                    Text(
+                                      isActuallyAnonymous
+                                          ? 'Misafir Kullanıcı'
+                                          : currentUser?.name ?? 'Kullanıcı',
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: textColor,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    if (!isActuallyAnonymous &&
+                                        currentUser?.email != null)
+                                      Text(
+                                        currentUser?.email ?? '',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: subtitleColor,
+                                        ),
+                                      ),
+                                    const SizedBox(height: 16),
+                                    // Status Badge
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: badgeBgColor,
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: badgeBorderColor,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.verified,
+                                            color: textColor,
+                                            size: 16,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            isActuallyAnonymous
+                                                ? 'Misafir'
+                                                : 'Aktif Üye',
+                                            style: TextStyle(
+                                              color: textColor,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                           ),
                         ),
@@ -416,14 +432,32 @@ class ProfileTab extends ConsumerWidget {
     required VoidCallback onTap,
     bool isDestructive = false,
   }) {
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDarkTheme ? Colors.black : Colors.white;
+    final textColor = isDarkTheme ? Colors.white : Colors.black;
+    final subtitleColor = isDarkTheme ? Colors.white70 : Colors.black87;
+    final iconColor = isDarkTheme ? AppTheme.primaryNavy : AppTheme.primaryNavy;
+    final iconBgColor = isDarkTheme
+        ? AppTheme.primaryNavy.withOpacity(0.2)
+        : AppTheme.primaryNavy.withOpacity(0.1);
+
     return Container(
+      margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
-            width: 1,
-          ),
+        color: cardColor, // Theme-aware background
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppTheme.primaryNavy, // Dark blue border
+          width: 2,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryNavy.withOpacity(0.4), // Blue glow
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+            spreadRadius: 1,
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -438,15 +472,15 @@ class ProfileTab extends ConsumerWidget {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isDestructive
-                        ? AppTheme.errorRed.withOpacity(0.1)
-                        : AppTheme.primaryOrange.withOpacity(0.1),
+                        ? AppTheme.errorRed.withOpacity(0.2)
+                        : iconBgColor, // Theme-aware background
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     icon,
                     color: isDestructive
                         ? AppTheme.errorRed
-                        : AppTheme.primaryOrange,
+                        : iconColor, // Theme-aware icon color
                     size: 24,
                   ),
                 ),
@@ -462,7 +496,7 @@ class ProfileTab extends ConsumerWidget {
                           fontWeight: FontWeight.w600,
                           color: isDestructive
                               ? AppTheme.errorRed
-                              : Theme.of(context).colorScheme.onSurface,
+                              : textColor, // Theme-aware text color
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -470,7 +504,7 @@ class ProfileTab extends ConsumerWidget {
                         subtitle,
                         style: TextStyle(
                           fontSize: 14,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: subtitleColor, // Theme-aware subtitle color
                         ),
                       ),
                     ],
@@ -478,7 +512,7 @@ class ProfileTab extends ConsumerWidget {
                 ),
                 Icon(
                   Icons.chevron_right,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: subtitleColor, // Theme-aware chevron color
                   size: 20,
                 ),
               ],
@@ -593,28 +627,70 @@ class ProfileTab extends ConsumerWidget {
   }
 
   void _showAboutDialog(BuildContext context) {
-    showAboutDialog(
+    showDialog(
       context: context,
-      applicationName: 'Innova Craft Studio',
-      applicationVersion: '1.0.0',
-      applicationIcon: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: AppTheme.primaryOrange,
-          borderRadius: BorderRadius.circular(12),
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  'assets/images/ics_logo.jpg',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Innova Craft Studio',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
         ),
-        child: const Icon(
-          Icons.flash_on,
-          color: Colors.white,
-          size: 32,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '1.0.0',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Hayal Et, Tasarla ve Üret',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Akıllı ev çözümleri, el yapımı ürünler ve profesyonel hizmetler tek çatı altında.',
+              style: TextStyle(fontSize: 14),
+            ),
+          ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Kapat'),
+          ),
+        ],
       ),
-      children: const [
-        Text('Innova Craft Studio - El Yapımı Ürünler ve Sanat Eserleri'),
-        SizedBox(height: 16),
-        Text(
-            'Bu uygulama ile evinizi akıllı hale getirin ve profesyonel hizmetlerden yararlanın.'),
-      ],
     );
   }
 }

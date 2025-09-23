@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'brand_colors.dart';
+import 'app_section.dart';
 
 class AppTheme {
   // Primary Brand Colors
@@ -21,50 +23,71 @@ class AppTheme {
   static const Color whatsappGreenLight = Color(0xFF4AE54A);
   static const Color whatsappGreenDark = Color(0xFF128C7E);
 
-  // Accent Colors
-  static const Color successGreen = Color(0xFF4CAF50);
-  static const Color warningYellow = Color(0xFFFFC107);
-  static const Color errorRed = Color(0xFFF44336);
-  static const Color infoBlue = Color(0xFF2196F3);
+  // Studio Colors
+  static const Color studioBlack = Color(0xFF000000);
+  static const Color categoryCardLightOrange = Color(0xFFFFE0B2);
+  static const Color categoryCardTransparentOrange =
+      Color(0x40FF6B35); // Daha şeffaf turuncu
 
+  // Studio letter colors
+  static const Color studioS = Color(0xFF2196F3); // Mavi
+  static const Color studioT = Color(0xFFFF6B35); // Turuncu
+  static const Color studioU = Color(0xFF4CAF50); // Yeşil
+  static const Color studioD = Color(0xFFF44336); // Kırmızı
+  static const Color studioI = Color(0xFFFFC107); // Sarı
+  static const Color studioO = Color(0xFFE91E63); // Pembe
+
+  // New Design System Colors
   // Light Theme Colors
-  static const Color lightBackground = Color(0xFFF8F9FA);
-  static const Color lightSurface = Color(0xFFFFFFFF);
+  static const Color lightBackground =
+      Color(0xFFF6F7F9); // BG/Primary - gri iç sayfa zemini
+  static const Color lightSurface =
+      Color(0xFFFFFFFF); // BG/Surface - kart/alt bar
   static const Color lightSurfaceVariant = Color(0xFFF1F3F4);
-  static const Color lightOnBackground = Color(0xFF000000);
-  static const Color lightOnSurface = Color(0xFF000000);
-  static const Color lightOnSurfaceVariant = Color(0xFF424242);
-  static const Color lightOutline = Color(0xFFDADCE0);
+  static const Color lightOnBackground = Color(0xFF111111); // Text/High
+  static const Color lightOnSurface = Color(0xFF111111); // Text/High
+  static const Color lightOnSurfaceVariant = Color(0xFF5F6B7A); // Text/Med
+  static const Color lightOutline = Color(0xFFE6E8EC); // Divider
   static const Color lightOutlineVariant = Color(0xFFE8EAED);
 
   // Dark Theme Colors
-  static const Color darkBackground = Color(0xFF0A0A0A);
-  static const Color darkSurface = Color(0xFF1C1C1E);
+  static const Color darkBackground = Color(0xFF0F1115); // BG/Primary
+  static const Color darkSurface = Color(0xFF171A20); // BG/Surface
   static const Color darkSurfaceVariant = Color(0xFF2C2C2E);
-  static const Color darkOnBackground = Color(0xFFFFFFFF);
-  static const Color darkOnSurface = Color(0xFFFFFFFF);
-  static const Color darkOnSurfaceVariant = Color(0xFFB0B0B0);
-  static const Color darkOutline = Color(0xFF3A3A3C);
+  static const Color darkOnBackground = Color(0xFFFFFFFF); // Text/High
+  static const Color darkOnSurface = Color(0xFFFFFFFF); // Text/High
+  static const Color darkOnSurfaceVariant = Color(0xFFB7C1CE); // Text/Med
+  static const Color darkOutline = Color(0xFF252A33); // Divider
   static const Color darkOutlineVariant = Color(0xFF2A2A2C);
+
+  // Status Colors (tüm uygulama ortak)
+  static const Color successGreen = Color(0xFF22C55E);
+  static const Color warningYellow = Color(0xFFF59E0B);
+  static const Color errorRed = Color(0xFFEF4444);
 
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
     scaffoldBackgroundColor: lightBackground,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: primaryOrange,
+    colorScheme: const ColorScheme(
       brightness: Brightness.light,
-      primary: primaryOrange,
-      secondary: secondaryOrange,
-      surface: lightSurface,
-      error: errorRed,
+      primary: Color(0xFFFF6A00), // Store Orange (default)
       onPrimary: Colors.white,
+      secondary: Color(0xFF1E2DFF), // Service Blue
       onSecondary: Colors.white,
+      tertiary: Color(0xFF22C55E), // Success Green
+      onTertiary: Colors.white,
+      surface: lightSurface,
       onSurface: lightOnSurface,
+      background: lightBackground,
+      onBackground: lightOnBackground,
+      error: errorRed,
+      onError: Colors.white,
       outline: lightOutline,
       surfaceContainerHighest: lightSurfaceVariant,
       onSurfaceVariant: lightOnSurfaceVariant,
     ),
+    extensions: const [BrandColors.light],
     appBarTheme: AppBarTheme(
       centerTitle: true,
       elevation: 0,
@@ -227,22 +250,25 @@ class AppTheme {
     useMaterial3: true,
     brightness: Brightness.dark,
     scaffoldBackgroundColor: darkBackground,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: primaryOrange,
+    colorScheme: const ColorScheme(
       brightness: Brightness.dark,
-      primary: primaryOrange,
-      secondary: secondaryOrange,
-      surface: darkSurface,
-      background: darkBackground,
-      error: errorRed,
+      primary: Color(0xFFFF6A00), // Store Orange (default)
       onPrimary: Colors.white,
+      secondary: Color(0xFF1E2DFF), // Service Blue
       onSecondary: Colors.white,
+      tertiary: Color(0xFF22C55E), // Success Green
+      onTertiary: Color(0xFF0B1A0F),
+      surface: darkSurface,
       onSurface: darkOnSurface,
+      background: darkBackground,
       onBackground: darkOnBackground,
+      error: Color(0xFFF87171),
+      onError: Color(0xFF1A1A1A),
       outline: darkOutline,
       surfaceVariant: darkSurfaceVariant,
       onSurfaceVariant: darkOnSurfaceVariant,
     ),
+    extensions: const [BrandColors.dark],
     appBarTheme: AppBarTheme(
       centerTitle: true,
       elevation: 0,
@@ -400,4 +426,73 @@ class AppTheme {
       ),
     ),
   );
+
+  /// Section-based theme override for accent colors
+  static ThemeData themedForSection(BuildContext context, AppSection section) {
+    final base = Theme.of(context);
+    final brand = Theme.of(context).extension<BrandColors>()!;
+
+    switch (section) {
+      case AppSection.services:
+        return base.copyWith(
+          colorScheme: base.colorScheme.copyWith(
+            primary: brand.serviceBlue,
+            secondary: brand.serviceBlue,
+          ),
+          navigationBarTheme: base.navigationBarTheme.copyWith(
+            indicatorColor: brand.serviceBlue.withValues(alpha: 0.15),
+            labelTextStyle: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return TextStyle(
+                  color: brand.serviceBlue,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                );
+              }
+              return base.navigationBarTheme.labelTextStyle?.resolve(states);
+            }),
+            iconTheme: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return IconThemeData(
+                  color: brand.serviceBlue,
+                  size: 26,
+                );
+              }
+              return base.navigationBarTheme.iconTheme?.resolve(states);
+            }),
+          ),
+        );
+      case AppSection.store:
+        return base.copyWith(
+          colorScheme: base.colorScheme.copyWith(
+            primary: brand.storeOrange,
+            secondary: brand.storeOrange,
+          ),
+          navigationBarTheme: base.navigationBarTheme.copyWith(
+            indicatorColor: brand.storeOrange.withValues(alpha: 0.15),
+            labelTextStyle: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return TextStyle(
+                  color: brand.storeOrange,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                );
+              }
+              return base.navigationBarTheme.labelTextStyle?.resolve(states);
+            }),
+            iconTheme: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return IconThemeData(
+                  color: brand.storeOrange,
+                  size: 26,
+                );
+              }
+              return base.navigationBarTheme.iconTheme?.resolve(states);
+            }),
+          ),
+        );
+      default:
+        return base; // Neutral theme for home, cart, profile
+    }
+  }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../cart/providers/cart_provider.dart';
 import '../../../../core/models/cart_model.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class CartTab extends ConsumerWidget {
   const CartTab({super.key});
@@ -147,10 +148,38 @@ class CartTab extends ConsumerWidget {
     final hasDiscount =
         item.finalPrice != null && item.finalPrice! < item.price;
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.black, // Dark background
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppTheme.primaryNavy, // Dark blue border
+          width: 3,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryNavy.withOpacity(0.6), // Enhanced blue glow
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+            spreadRadius: 2,
+          ),
+          BoxShadow(
+            color: AppTheme.primaryNavy.withOpacity(0.4),
+            blurRadius: 40,
+            offset: const Offset(0, 0),
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Card(
+        elevation: 0,
+        color: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
         child: Row(
           children: [
             // Product image
@@ -192,6 +221,7 @@ class CartTab extends ConsumerWidget {
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
+                      color: Colors.white, // White text for dark background
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -200,8 +230,8 @@ class CartTab extends ConsumerWidget {
                     const SizedBox(height: 4),
                     Text(
                       item.categoryName!,
-                      style: TextStyle(
-                        color: Colors.grey[600],
+                      style: const TextStyle(
+                        color: Colors.white70, // White70 for dark background
                         fontSize: 12,
                       ),
                     ),
@@ -212,10 +242,10 @@ class CartTab extends ConsumerWidget {
                     children: [
                       Text(
                         '₺${displayPrice.toStringAsFixed(2)}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: Theme.of(context).primaryColor,
+                          color: Colors.white, // White price text
                         ),
                       ),
                       if (hasDiscount) ...[
@@ -224,7 +254,7 @@ class CartTab extends ConsumerWidget {
                           '₺${item.price.toStringAsFixed(2)}',
                           style: const TextStyle(
                             decoration: TextDecoration.lineThrough,
-                            color: Colors.grey,
+                            color: Colors.white60, // White60 for dark background
                             fontSize: 12,
                           ),
                         ),
@@ -254,6 +284,7 @@ class CartTab extends ConsumerWidget {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
+                          color: Colors.white, // White text for dark background
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -285,6 +316,7 @@ class CartTab extends ConsumerWidget {
           ],
         ),
       ),
+      ),
     );
   }
 
@@ -292,8 +324,17 @@ class CartTab extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        border: Border(top: BorderSide(color: Colors.grey[300]!)),
+        color: Colors.black, // Dark background
+        border: Border(
+          top: BorderSide(color: AppTheme.primaryNavy.withOpacity(0.3)),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryNavy.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -305,14 +346,15 @@ class CartTab extends ConsumerWidget {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
+                  color: Colors.white, // White text for dark background
                 ),
               ),
               Text(
                 '₺${cart.totalBase.toStringAsFixed(2)}',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor,
+                  color: Colors.white, // White text for dark background
                 ),
               ),
             ],
@@ -325,7 +367,11 @@ class CartTab extends ConsumerWidget {
                   ? () => _proceedToCheckout(context, ref, cart)
                   : null,
               style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryNavy, // Dark blue button
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
+                elevation: 4,
+                shadowColor: AppTheme.primaryNavy.withOpacity(0.4),
               ),
               child: const Text(
                 'Siparişi Tamamla',

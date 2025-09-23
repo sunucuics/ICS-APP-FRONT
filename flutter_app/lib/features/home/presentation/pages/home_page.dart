@@ -136,10 +136,26 @@ class HomePageState extends ConsumerState<HomePage> {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: _currentIndex == 2
-                            ? AppTheme.primaryOrange
-                            : AppTheme.primaryOrange,
+                        color: AppTheme.primaryNavy, // Dark blue background
                         shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppTheme.primaryNavy,
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.primaryNavy.withOpacity(0.6), // Blue glow
+                            blurRadius: 15,
+                            offset: const Offset(0, 4),
+                            spreadRadius: 2,
+                          ),
+                          BoxShadow(
+                            color: AppTheme.primaryNavy.withOpacity(0.4),
+                            blurRadius: 30,
+                            offset: const Offset(0, 0),
+                            spreadRadius: 0,
+                          ),
+                        ],
                       ),
                       child: const Icon(
                         Icons.shopping_cart,

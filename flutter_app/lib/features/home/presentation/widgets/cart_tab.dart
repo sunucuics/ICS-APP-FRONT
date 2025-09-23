@@ -23,7 +23,7 @@ class CartTab extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppTheme.primaryOrange,
+                color: AppTheme.primaryNavy, // Changed to dark blue
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
@@ -51,7 +51,7 @@ class CartTab extends ConsumerWidget {
                             child: Container(
                               padding: const EdgeInsets.all(2),
                               decoration: BoxDecoration(
-                                color: AppTheme.primaryOrange,
+                                color: AppTheme.primaryNavy, // Changed to dark blue
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               constraints: const BoxConstraints(
@@ -109,7 +109,7 @@ class CartTab extends ConsumerWidget {
           Icon(
             Icons.shopping_cart_outlined,
             size: 64,
-            color: AppTheme.primaryOrange,
+            color: AppTheme.primaryNavy, // Changed to dark blue
           ),
           const SizedBox(height: 16),
           Text(
@@ -176,12 +176,23 @@ class CartTab extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Colors.black, // Dark background
+        border: Border.all(
+          color: AppTheme.primaryNavy, // Dark blue border
+          width: 3,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 15,
+            color: AppTheme.primaryNavy.withOpacity(0.6), // Enhanced blue glow
+            blurRadius: 20,
             offset: const Offset(0, 8),
+            spreadRadius: 2,
+          ),
+          BoxShadow(
+            color: AppTheme.primaryNavy.withOpacity(0.4),
+            blurRadius: 40,
+            offset: const Offset(0, 0),
+            spreadRadius: 0,
           ),
         ],
       ),
@@ -206,8 +217,8 @@ class CartTab extends ConsumerWidget {
                         placeholder: (context, url) => Container(
                           color: Theme.of(context).colorScheme.surfaceVariant,
                           child: const Center(
-                            child: CircularProgressIndicator(
-                              color: AppTheme.primaryOrange,
+                            child: const CircularProgressIndicator(
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -215,7 +226,7 @@ class CartTab extends ConsumerWidget {
                           color: Theme.of(context).colorScheme.surfaceVariant,
                           child: const Icon(
                             Icons.image_not_supported,
-                            color: AppTheme.primaryOrange,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -223,7 +234,7 @@ class CartTab extends ConsumerWidget {
                   : const Icon(
                       Icons.image_not_supported,
                       size: 32,
-                      color: AppTheme.primaryOrange,
+                      color: Colors.white,
                     ),
             ),
             const SizedBox(width: 12),
@@ -234,10 +245,10 @@ class CartTab extends ConsumerWidget {
                 children: [
                   Text(
                     item.title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: Colors.white, // White text for dark background
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -246,8 +257,8 @@ class CartTab extends ConsumerWidget {
                     const SizedBox(height: 4),
                     Text(
                       item.categoryName!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      style: const TextStyle(
+                        color: Colors.white70, // White70 for dark background
                         fontSize: 12,
                       ),
                     ),
@@ -261,17 +272,16 @@ class CartTab extends ConsumerWidget {
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: AppTheme.primaryOrange,
+                          color: Colors.white, // White price text
                         ),
                       ),
                       if (hasDiscount) ...[
                         const SizedBox(width: 8),
                         Text(
                           '₺${item.price.toStringAsFixed(2)}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             decoration: TextDecoration.lineThrough,
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Colors.white60, // White60 for dark background
                             fontSize: 12,
                           ),
                         ),
@@ -299,10 +309,10 @@ class CartTab extends ConsumerWidget {
                       const SizedBox(width: 12),
                       Text(
                         '${item.qty}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurface,
+                          color: Colors.white, // White text for dark background
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -315,7 +325,7 @@ class CartTab extends ConsumerWidget {
                         icon: const Icon(Icons.add),
                         style: IconButton.styleFrom(
                           backgroundColor:
-                              AppTheme.primaryOrange.withOpacity(0.2),
+                              AppTheme.primaryNavy.withOpacity(0.2), // Changed to dark blue
                           padding: const EdgeInsets.all(8),
                           minimumSize: const Size(32, 32),
                         ),
@@ -342,14 +352,17 @@ class CartTab extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Colors.black, // Dark background
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
         ),
+        border: Border(
+          top: BorderSide(color: AppTheme.primaryNavy.withOpacity(0.3)),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: AppTheme.primaryNavy.withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
@@ -362,10 +375,10 @@ class CartTab extends ConsumerWidget {
             children: [
               Text(
                 'Toplam (${cart.totalQuantity} ürün)',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: Colors.white, // White text for dark background
                 ),
               ),
               Text(
@@ -373,7 +386,7 @@ class CartTab extends ConsumerWidget {
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryOrange,
+                  color: Colors.white, // White text for dark background
                 ),
               ),
             ],
@@ -386,7 +399,11 @@ class CartTab extends ConsumerWidget {
                   ? () => _proceedToCheckout(context, ref, cart)
                   : null,
               style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryNavy, // Dark blue button
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
+                elevation: 4,
+                shadowColor: AppTheme.primaryNavy.withOpacity(0.4),
               ),
               child: Text(
                 'Siparişi Tamamla',

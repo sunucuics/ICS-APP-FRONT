@@ -65,7 +65,7 @@ interface ServiceAvailability {
   is_available: boolean;
 }
 
-const API_BASE_URL = 'http://192.168.1.146:8000';
+const API_BASE_URL = 'https://ics-backend-kn6yhrvlra-ew.a.run.app';
 
 const AppointmentsPage: React.FC = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);

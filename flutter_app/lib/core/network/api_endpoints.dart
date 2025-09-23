@@ -1,7 +1,6 @@
 class ApiEndpoints {
   // Base URL - Google Cloud deployed backend
-  static const String baseUrl =
-      'https://ics-backend-599937649684.europe-west1.run.app';
+  static const String baseUrl = 'https://ics-backend-kn6yhrvlra-ew.a.run.app';
 
   // Debug mode flag
   static const bool isDebug = true;

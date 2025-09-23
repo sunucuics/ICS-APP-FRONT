@@ -430,12 +430,12 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppTheme.infoBlue.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
                 Icons.note_alt_rounded,
-                color: AppTheme.infoBlue,
+                color: Theme.of(context).colorScheme.primary,
                 size: 24,
               ),
             ),

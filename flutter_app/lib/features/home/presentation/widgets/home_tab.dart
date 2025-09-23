@@ -767,32 +767,45 @@ class _FeaturedProductCard extends ConsumerWidget {
       width: 160,
       height: 210, // Even larger cards to prevent overflow
       margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Theme.of(context).colorScheme.surface,
+        border: Border.all(
+          color: AppTheme.primaryOrange, // Bright orange border
+          width: 3, // Thicker border
+        ),
+        boxShadow: [
+          BoxShadow(
+            color:
+                AppTheme.primaryOrange.withOpacity(0.6), // Enhanced orange glow
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+            spreadRadius: 2,
+          ),
+          BoxShadow(
+            color: AppTheme.primaryOrange.withOpacity(0.4),
+            blurRadius: 40,
+            offset: const Offset(0, 0),
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color:
+                Colors.black.withOpacity(0.2), // Subtle black shadow for depth
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Card(
-        elevation: 8,
-        shadowColor: Colors.black.withOpacity(0.3),
+        elevation: 0,
+        color: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            color: Theme.of(context).colorScheme.surface,
-            border: Border.all(
-              color: AppTheme.primaryOrange.withOpacity(0.4),
-              width: 2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.4),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-              BoxShadow(
-                color: AppTheme.primaryOrange.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            color: Colors.transparent,
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
@@ -1014,20 +1027,42 @@ class _FeaturedServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDarkTheme ? Colors.black : Colors.white;
+    final textColor = isDarkTheme ? Colors.white : Colors.black;
+    final descriptionColor = isDarkTheme ? Colors.white70 : Colors.black87;
+
     return Container(
       width: 160,
       height: 190, // Even larger cards to prevent overflow
       margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        color: cardColor, // Theme-aware background
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppTheme.primaryNavy, // Shimmering blue border
+          width: 3,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryNavy.withOpacity(0.6), // Enhanced blue glow
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+            spreadRadius: 2,
+          ),
+          BoxShadow(
+            color: AppTheme.primaryNavy.withOpacity(0.4),
+            blurRadius: 40,
+            offset: const Offset(0, 0),
+            spreadRadius: 0,
+          ),
+        ],
+      ),
       child: Card(
-        color: AppTheme.serviceCardBlue,
-        elevation: 8,
-        shadowColor: AppTheme.serviceCardBlue.withOpacity(0.3),
+        elevation: 0,
+        color: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: AppTheme.serviceCardBlue.withOpacity(0.3),
-            width: 1,
-          ),
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
@@ -1046,7 +1081,9 @@ class _FeaturedServiceCard extends StatelessWidget {
                   height: 70, // Larger image height for better visibility
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    color: Colors.white.withOpacity(0.1),
+                    color: isDarkTheme
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.black.withOpacity(0.05),
                   ),
                   child: featuredService.image != null
                       ? ClipRRect(
@@ -1055,37 +1092,41 @@ class _FeaturedServiceCard extends StatelessWidget {
                             imageUrl: featuredService.image!,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
-                              color: Colors.white.withOpacity(0.1),
-                              child: const Icon(
+                              color: isDarkTheme
+                                  ? Colors.white.withOpacity(0.1)
+                                  : Colors.black.withOpacity(0.05),
+                              child: Icon(
                                 Icons.work,
-                                color: Colors.white,
+                                color: textColor,
                                 size: 32,
                               ),
                             ),
                             errorWidget: (context, url, error) => Container(
-                              color: Colors.white.withOpacity(0.1),
-                              child: const Icon(
+                              color: isDarkTheme
+                                  ? Colors.white.withOpacity(0.1)
+                                  : Colors.black.withOpacity(0.05),
+                              child: Icon(
                                 Icons.work,
-                                color: Colors.white,
+                                color: textColor,
                                 size: 32,
                               ),
                             ),
                           ),
                         )
-                      : const Icon(
+                      : Icon(
                           Icons.work,
                           size: 40,
-                          color: Colors.white,
+                          color: textColor,
                         ),
                 ),
                 const SizedBox(height: 8),
                 // Service title
                 Text(
                   featuredService.title ?? 'Hizmet',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 13, // Larger font size for better readability
-                    color: Colors.white,
+                    color: textColor, // Theme-aware text color
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1096,8 +1137,9 @@ class _FeaturedServiceCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       featuredService.description!,
-                      style: const TextStyle(
-                        color: Colors.white70,
+                      style: TextStyle(
+                        color:
+                            descriptionColor, // Theme-aware description color
                         fontSize: 11, // Larger font size for better readability
                       ),
                       maxLines: 2, // More lines for better readability
@@ -1113,13 +1155,15 @@ class _FeaturedServiceCard extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: isDarkTheme
+                          ? Colors.white.withOpacity(0.2)
+                          : Colors.black.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Yakında',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: textColor, // Theme-aware text color
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1135,8 +1179,10 @@ class _FeaturedServiceCard extends StatelessWidget {
                         onBookAppointment?.call();
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: AppTheme.serviceCardBlue,
+                        backgroundColor:
+                            isDarkTheme ? Colors.white : AppTheme.primaryNavy,
+                        foregroundColor:
+                            isDarkTheme ? AppTheme.primaryNavy : Colors.white,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 6),
                         shape: RoundedRectangleBorder(

@@ -819,7 +819,7 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget>
                               ),
                               child: Icon(
                                 Icons.access_time_rounded,
-                                color: AppTheme.infoBlue,
+                                color: Theme.of(context).colorScheme.primary,
                                 size: 24,
                               ),
                             ),
@@ -897,8 +897,8 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppTheme.infoBlue,
-            AppTheme.infoBlue.withOpacity(0.8),
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.primary.withOpacity(0.8),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -906,7 +906,7 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.infoBlue.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),

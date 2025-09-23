@@ -4,6 +4,7 @@ import '../../../products/providers/products_provider.dart';
 import '../../../products/presentation/pages/category_products_page.dart';
 import '../../../../core/models/product_model.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_section.dart';
 
 class CatalogTabNew extends ConsumerStatefulWidget {
   const CatalogTabNew({super.key});
@@ -105,22 +106,27 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
         width: double.infinity,
         padding: EdgeInsets.all(isInnovaCard ? 20 : 16),
         decoration: BoxDecoration(
-          color:
-              isInnovaCard ? const Color(0xFF0c0ff3) : AppTheme.primaryOrange,
+          color: isInnovaCard
+              ? AppTheme.studioBlack
+              : Colors.black, // Changed to black background for other cards
           borderRadius: BorderRadius.circular(isInnovaCard ? 20 : 16),
           border: Border.all(
-            color: isInnovaCard
-                ? const Color(0xFF0c0ff3).withOpacity(0.3)
-                : AppTheme.primaryOrange.withOpacity(0.3),
-            width: 1,
+            color: AppTheme
+                .primaryOrange, // Shimmering orange border for all cards
+            width: 3,
           ),
           boxShadow: [
             BoxShadow(
-              color: isInnovaCard
-                  ? const Color(0xFF0c0ff3).withOpacity(0.3)
-                  : AppTheme.primaryOrange.withOpacity(0.3),
-              blurRadius: isInnovaCard ? 20 : 12,
+              color: AppTheme.primaryOrange
+                  .withOpacity(0.5), // Enhanced orange glow
+              blurRadius: 20,
               offset: const Offset(0, 8),
+              spreadRadius: 2,
+            ),
+            BoxShadow(
+              color: AppTheme.primaryOrange.withOpacity(0.3),
+              blurRadius: 40,
+              offset: const Offset(0, 0),
               spreadRadius: 0,
             ),
           ],
@@ -132,7 +138,8 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white
+                          .withOpacity(0.2), // White background for black card
                       shape: BoxShape.circle,
                     ),
                     child: Stack(
@@ -141,7 +148,8 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
                           category.name == 'Tümü'
                               ? Icons.grid_view_rounded
                               : _getCategoryIcon(category.name),
-                          color: Colors.white,
+                          color:
+                              Colors.white, // White icons for black background
                           size: 24,
                         ),
                         if (isFixed)
@@ -175,9 +183,10 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
                               child: Text(
                                 category.name,
                                 style: const TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.white,
+                                  color: Colors
+                                      .white, // White text for black background
                                 ),
                               ),
                             ),
@@ -186,13 +195,15 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
+                                  color: Colors.white.withOpacity(
+                                      0.2), // White background for black card
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Text(
                                   'ÖNE ÇIKAN',
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: Colors
+                                        .white, // White text for black background
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -208,8 +219,9 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
                           Text(
                             category.description!,
                             style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.white70,
+                              fontSize: 14,
+                              color: Colors
+                                  .white, // White text for black background
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -219,7 +231,7 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
                   ),
                   const Icon(
                     Icons.arrow_forward_ios_rounded,
-                    color: Colors.white,
+                    color: Colors.white, // White arrow for black background
                     size: 16,
                   ),
                 ],
@@ -231,85 +243,77 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
   Widget _buildInnovaCard(Category category) {
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.3),
-              width: 1,
-            ),
-          ),
-          child: const Icon(
-            Icons.business,
-            color: Colors.white,
-            size: 32,
-          ),
-        ),
-        const SizedBox(width: 16),
         Expanded(
-          child: RichText(
-            text: TextSpan(
-              children: [
-                const TextSpan(
-                  text: 'Innova Craft ',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Text(
+                'Innova Craft',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
-                TextSpan(
-                  text: 'S',
-                  style: TextStyle(
-                    color: Colors.blue[600],
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'S',
+                      style: TextStyle(
+                        color: AppTheme.studioS,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: 't',
+                      style: TextStyle(
+                        color: AppTheme.studioT,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: 'u',
+                      style: TextStyle(
+                        color: AppTheme.studioU,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: 'd',
+                      style: TextStyle(
+                        color: AppTheme.studioD,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: 'i',
+                      style: TextStyle(
+                        color: AppTheme.studioI,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: 'o',
+                      style: TextStyle(
+                        color: AppTheme.studioO,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-                TextSpan(
-                  text: 't',
-                  style: TextStyle(
-                    color: Colors.orange[600],
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextSpan(
-                  text: 'u',
-                  style: TextStyle(
-                    color: Colors.yellow[700],
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextSpan(
-                  text: 'd',
-                  style: TextStyle(
-                    color: Colors.red[600],
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextSpan(
-                  text: 'i',
-                  style: TextStyle(
-                    color: Colors.blue[600],
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextSpan(
-                  text: 'o',
-                  style: TextStyle(
-                    color: Colors.orange[600],
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
         const Icon(
@@ -325,61 +329,67 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(categoriesProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
+    final themed = AppTheme.themedForSection(context, AppSection.store);
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: AppBar(
-        title: const Text('Mağaza'),
-        backgroundColor: AppTheme.primaryOrange,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                AppTheme.primaryOrange,
-                AppTheme.primaryOrange.withOpacity(0.8),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(4),
-          child: Container(
-            height: 4,
+    return Theme(
+      data: themed,
+      child: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.background, // Gri zemin
+        appBar: AppBar(
+          title: const Text('Mağaza'),
+          backgroundColor:
+              Theme.of(context).colorScheme.primary, // Yeni tema sistemi
+          foregroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+          flexibleSpace: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppTheme.primaryNavy,
-                  AppTheme.primaryNavy.withOpacity(0.7),
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.primary.withOpacity(0.8),
                 ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
           ),
-        ),
-        actions: [],
-      ),
-      body: AnimatedBuilder(
-        animation: _fadeAnimation,
-        builder: (context, child) {
-          return FadeTransition(
-            opacity: _fadeAnimation,
-            child: SlideTransition(
-              position: _slideAnimation,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    // Categories horizontal cards
-                    _buildCategoriesSection(categoriesAsync, selectedCategory),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(4),
+            child: Container(
+              height: 4,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.primary.withOpacity(0.7),
                   ],
                 ),
               ),
             ),
-          );
-        },
+          ),
+          actions: [],
+        ),
+        body: AnimatedBuilder(
+          animation: _fadeAnimation,
+          builder: (context, child) {
+            return FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      // Categories horizontal cards
+                      _buildCategoriesSection(
+                          categoriesAsync, selectedCategory),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

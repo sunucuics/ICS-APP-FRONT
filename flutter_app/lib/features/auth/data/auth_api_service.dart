@@ -49,7 +49,7 @@ class AuthApiService {
 
       // Firebase ID token'ı al ve Authorization header'a ekle
       final idToken = await userCredential.user!.getIdToken();
-      
+
       final response = await _apiClient.postMultipart(
         ApiEndpoints.authRegister,
         formData,

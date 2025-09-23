@@ -10,6 +10,7 @@ import '../../../auth/providers/auth_provider.dart';
 import '../../../auth/presentation/pages/guest_upgrade_page.dart';
 import '../../../../core/models/product_model.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_section.dart';
 
 class CatalogTab extends ConsumerStatefulWidget {
   const CatalogTab({super.key});
@@ -70,96 +71,233 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
     final categoriesAsync = ref.watch(categoriesProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
     final productsAsync = ref.watch(productsProvider(selectedCategory));
+    final themed = AppTheme.themedForSection(context, AppSection.store);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: _isSearchVisible
-            ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Ürün ara...',
-                  border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.white70),
-                ),
-                style: const TextStyle(color: Colors.white),
-                onChanged: _onSearchChanged,
-              )
-            : Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryOrange,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.store,
-                      color: Colors.white,
-                      size: 20,
-                    ),
+    return Theme(
+      data: themed,
+      child: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.background, // Gri zemin
+        appBar: AppBar(
+          title: _isSearchVisible
+              ? TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: 'Ürün ara...',
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(color: Colors.white70),
                   ),
-                  const SizedBox(width: 12),
-                  const Text('Mağaza'),
-                ],
+                  style: const TextStyle(color: Colors.white),
+                  onChanged: _onSearchChanged,
+                )
+              : Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.store,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text('Mağaza'),
+                  ],
+                ),
+          actions: [
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceVariant,
+                borderRadius: BorderRadius.circular(12),
               ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(12),
+              child: IconButton(
+                icon: const Icon(Icons.filter_list),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Filtreleme özelliği yakında eklenecek')),
+                  );
+                },
+              ),
             ),
-            child: IconButton(
-              icon: const Icon(Icons.filter_list),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Filtreleme özelliği yakında eklenecek')),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Categories horizontal list
-          Container(
-            height: 80,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: categoriesAsync.when(
-              data: (categories) {
-                // Add "Tümü" category at the beginning
-                // Use all categories (removed test category filtering)
-                final filteredCategories = categories;
+          ],
+        ),
+        body: Column(
+          children: [
+            // Categories horizontal list
+            Container(
+              height: 80,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: categoriesAsync.when(
+                data: (categories) {
+                  // Add "Tümü" category at the beginning
+                  // Use all categories (removed test category filtering)
+                  final filteredCategories = categories;
 
-                // Fixed categories should appear first
-                final fixedCategories =
-                    filteredCategories.where((cat) => cat.isFixed).toList();
-                final regularCategories =
-                    filteredCategories.where((cat) => !cat.isFixed).toList();
+                  // Fixed categories should appear first
+                  final fixedCategories =
+                      filteredCategories.where((cat) => cat.isFixed).toList();
+                  final regularCategories =
+                      filteredCategories.where((cat) => !cat.isFixed).toList();
 
-                final allCategories = [
-                  ...fixedCategories,
-                  const Category(id: '', name: 'Tümü'),
-                  ...regularCategories,
-                ];
+                  final allCategories = [
+                    ...fixedCategories,
+                    const Category(id: '', name: 'Tümü'),
+                    ...regularCategories,
+                  ];
 
-                return ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: allCategories.length,
-                  itemBuilder: (context, index) {
-                    final category = allCategories[index];
-                    final isSelected =
-                        (selectedCategory == null && index == 0) ||
-                            (selectedCategory == category.name);
-                    final isFixed = category.isFixed;
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: allCategories.length,
+                    itemBuilder: (context, index) {
+                      final category = allCategories[index];
+                      final isFixed = category.isFixed;
 
-                    // Special handling for Innova Craft Studio card
-                    if (isFixed &&
-                        category.name.toLowerCase().contains('innova')) {
+                      // Special handling for Innova Craft Studio card
+                      if (isFixed &&
+                          category.name.toLowerCase().contains('innova')) {
+                        return GestureDetector(
+                          onTap: () {
+                            final newCategory =
+                                index == 0 ? null : category.name;
+                            ref.read(selectedCategoryProvider.notifier).state =
+                                newCategory;
+                          },
+                          child: Container(
+                            width: 200, // Larger width for featured card
+                            height: 80,
+                            margin: const EdgeInsets.only(right: 12),
+                            decoration: BoxDecoration(
+                              color: AppTheme.studioBlack,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: AppTheme.studioBlack.withOpacity(0.3),
+                                width: 1,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppTheme.studioBlack.withOpacity(0.3),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Icon(
+                                      Icons.business,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          const TextSpan(
+                                            text: 'Innova Craft ',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: 'S',
+                                            style: TextStyle(
+                                              color: AppTheme.studioS,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: 't',
+                                            style: TextStyle(
+                                              color: AppTheme.studioT,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: 'u',
+                                            style: TextStyle(
+                                              color: AppTheme.studioU,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: 'd',
+                                            style: TextStyle(
+                                              color: AppTheme.studioD,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: 'i',
+                                            style: TextStyle(
+                                              color: AppTheme.studioI,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: 'o',
+                                            style: TextStyle(
+                                              color: AppTheme.studioO,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Text(
+                                      'ÖNE ÇIKAN',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Icon(
+                                    Icons.arrow_forward_ios,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+
                       return GestureDetector(
                         onTap: () {
                           final newCategory = index == 0 ? null : category.name;
@@ -167,356 +305,246 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                               newCategory;
                         },
                         child: Container(
-                          width: 200, // Larger width for featured card
-                          height: 80,
+                          width: 85,
                           margin: const EdgeInsets.only(right: 12),
                           decoration: BoxDecoration(
-                            color: AppTheme.primaryOrange,
-                            borderRadius: BorderRadius.circular(20),
+                            color: AppTheme.categoryCardTransparentOrange,
+                            borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: AppTheme.primaryOrange.withOpacity(0.3),
-                              width: 1,
+                              color: AppTheme.primaryOrange,
+                              width: 3,
                             ),
                             boxShadow: [
                               BoxShadow(
                                 color: AppTheme.primaryOrange.withOpacity(0.3),
-                                blurRadius: 20,
-                                offset: const Offset(0, 8),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: const Icon(
-                                    Icons.business,
-                                    color: Colors.white,
-                                    size: 24,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        const TextSpan(
-                                          text: 'Innova Craft ',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
+                          child: Stack(
+                            children: [
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // Show category image if available, otherwise show icon
+                                  if (index == 0)
+                                    Icon(
+                                      Icons.apps,
+                                      color: Theme.of(context).brightness ==
+                                              Brightness.light
+                                          ? Colors.black
+                                          : Colors.white,
+                                      size: 20,
+                                    )
+                                  else if (category.coverImage != null &&
+                                      category.coverImage!.isNotEmpty)
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        color: Theme.of(context).brightness ==
+                                                Brightness.light
+                                            ? Colors.black.withOpacity(0.1)
+                                            : Colors.white.withOpacity(0.2),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: CachedNetworkImage(
+                                          imageUrl: category.coverImage!,
+                                          fit: BoxFit.cover,
+                                          placeholder: (context, url) => Icon(
+                                            _getCategoryIcon(category.name),
+                                            color:
+                                                Theme.of(context).brightness ==
+                                                        Brightness.light
+                                                    ? Colors.black
+                                                    : Colors.white,
+                                            size: 20,
+                                          ),
+                                          errorWidget: (context, url, error) =>
+                                              Icon(
+                                            _getCategoryIcon(category.name),
+                                            color:
+                                                Theme.of(context).brightness ==
+                                                        Brightness.light
+                                                    ? Colors.black
+                                                    : Colors.white,
+                                            size: 20,
                                           ),
                                         ),
-                                        TextSpan(
-                                          text: 'S',
-                                          style: TextStyle(
-                                            color: Colors.blue[600],
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: 't',
-                                          style: TextStyle(
-                                            color: Colors.orange[600],
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: 'u',
-                                          style: TextStyle(
-                                            color: Colors.yellow[700],
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: 'd',
-                                          style: TextStyle(
-                                            color: Colors.red[600],
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: 'i',
-                                          style: TextStyle(
-                                            color: Colors.blue[600],
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: 'o',
-                                          style: TextStyle(
-                                            color: Colors.orange[600],
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
+                                      ),
+                                    )
+                                  else
+                                    Icon(
+                                      _getCategoryIcon(category.name),
+                                      color: Theme.of(context).brightness ==
+                                              Brightness.light
+                                          ? Colors.black
+                                          : Colors.white,
+                                      size: 20,
                                     ),
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: const Text(
-                                    'ÖNE ÇIKAN',
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    category.name,
                                     style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
+                                      fontSize: Theme.of(context).brightness ==
+                                              Brightness.light
+                                          ? 13
+                                          : 11,
                                       fontWeight: FontWeight.w600,
+                                      color: Theme.of(context).brightness ==
+                                              Brightness.light
+                                          ? Colors.black
+                                          : Colors.white,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                              if (isFixed)
+                                Positioned(
+                                  right: 4,
+                                  top: 4,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.push_pin,
+                                      color: Colors.white,
+                                      size: 8,
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                const Icon(
-                                  Icons.arrow_forward_ios,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                              ],
-                            ),
+                            ],
                           ),
                         ),
                       );
-                    }
-
-                    return GestureDetector(
-                      onTap: () {
-                        final newCategory = index == 0 ? null : category.name;
-                        ref.read(selectedCategoryProvider.notifier).state =
-                            newCategory;
-                      },
-                      child: Container(
-                        width: 85,
-                        margin: const EdgeInsets.only(right: 12),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryOrange,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: AppTheme.primaryOrange.withOpacity(0.3),
-                            width: 1,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppTheme.primaryOrange.withOpacity(0.3),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Stack(
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                // Show category image if available, otherwise show icon
-                                if (index == 0)
-                                  Icon(
-                                    Icons.apps,
-                                    color: Colors.white,
-                                    size: 20,
-                                  )
-                                else if (category.coverImage != null &&
-                                    category.coverImage!.isNotEmpty)
-                                  Container(
-                                    width: 32,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      color: Colors.white.withOpacity(0.2),
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: CachedNetworkImage(
-                                        imageUrl: category.coverImage!,
-                                        fit: BoxFit.cover,
-                                        placeholder: (context, url) => Icon(
-                                          _getCategoryIcon(category.name),
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                        errorWidget: (context, url, error) =>
-                                            Icon(
-                                          _getCategoryIcon(category.name),
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                else
-                                  Icon(
-                                    _getCategoryIcon(category.name),
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  category.name,
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                            if (isFixed)
-                              Positioned(
-                                right: 4,
-                                top: 4,
-                                child: Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.red,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.push_pin,
-                                    color: Colors.white,
-                                    size: 8,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Text('Kategoriler yüklenemedi: $error'),
-              ),
-            ),
-          ),
-
-          // Products grid
-          Expanded(
-            child: productsAsync.when(
-              data: (products) {
-                if (products.isEmpty) {
-                  return const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.shopping_bag_outlined,
-                            size: 64, color: Colors.grey),
-                        SizedBox(height: 16),
-                        Text(
-                          'Bu kategoride henüz ürün bulunmuyor',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                        ),
-                      ],
-                    ),
+                    },
                   );
-                }
-
-                // Filter products based on search query
-                final filteredProducts = _searchQuery.isEmpty
-                    ? products
-                    : products.where((product) {
-                        return product.title
-                                .toLowerCase()
-                                .contains(_searchQuery) ||
-                            product.description
-                                    ?.toLowerCase()
-                                    .contains(_searchQuery) ==
-                                true ||
-                            product.categoryName
-                                    ?.toLowerCase()
-                                    .contains(_searchQuery) ==
-                                true;
-                      }).toList();
-
-                if (filteredProducts.isEmpty && _searchQuery.isNotEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.search_off,
-                            size: 64, color: Colors.grey[400]),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Aradığınız ürün bulunamadı',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '"$_searchQuery" için sonuç bulunamadı',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.7,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemCount: filteredProducts.length,
-                  itemBuilder: (context, index) {
-                    final product = filteredProducts[index];
-                    return _ProductCard(product: product);
-                  },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline,
-                        size: 64, color: Colors.red),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Ürünler yüklenemedi:\n$error',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () =>
-                          ref.refresh(productsProvider(selectedCategory)),
-                      child: const Text('Tekrar Dene'),
-                    ),
-                  ],
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(
+                  child: Text('Kategoriler yüklenemedi: $error'),
                 ),
               ),
             ),
-          ),
-        ],
+
+            // Products grid
+            Expanded(
+              child: productsAsync.when(
+                data: (products) {
+                  if (products.isEmpty) {
+                    return const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.shopping_bag_outlined,
+                              size: 64, color: Colors.grey),
+                          SizedBox(height: 16),
+                          Text(
+                            'Bu kategoride henüz ürün bulunmuyor',
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // Filter products based on search query
+                  final filteredProducts = _searchQuery.isEmpty
+                      ? products
+                      : products.where((product) {
+                          return product.title
+                                  .toLowerCase()
+                                  .contains(_searchQuery) ||
+                              product.description
+                                      ?.toLowerCase()
+                                      .contains(_searchQuery) ==
+                                  true ||
+                              product.categoryName
+                                      ?.toLowerCase()
+                                      .contains(_searchQuery) ==
+                                  true;
+                        }).toList();
+
+                  if (filteredProducts.isEmpty && _searchQuery.isNotEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.search_off,
+                              size: 64, color: Colors.grey[400]),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Aradığınız ürün bulunamadı',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '"$_searchQuery" için sonuç bulunamadı',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.7,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                    ),
+                    itemCount: filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      final product = filteredProducts[index];
+                      return _ProductCard(product: product);
+                    },
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline,
+                          size: 64, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Ürünler yüklenemedi:\n$error',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () =>
+                            ref.refresh(productsProvider(selectedCategory)),
+                        child: const Text('Tekrar Dene'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
