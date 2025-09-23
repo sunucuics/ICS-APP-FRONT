@@ -45,16 +45,16 @@ class ProfileTab extends ConsumerWidget {
                   floating: false,
                   pinned: true,
                   elevation: 0,
-                  backgroundColor: Colors.transparent,
+                  backgroundColor: Colors.blue,
                   flexibleSpace: FlexibleSpaceBar(
                     background: Container(
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            AppTheme.primaryNavy,
-                            AppTheme.secondaryNavy,
+                            Colors.blue,
+                            Colors.blueAccent,
                           ],
                         ),
                       ),

@@ -78,6 +78,7 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.background, // Gri zemin
         appBar: AppBar(
+          backgroundColor: Colors.blue,
           title: _isSearchVisible
               ? TextField(
                   controller: _searchController,
@@ -95,17 +96,20 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
                         Icons.store,
-                        color: Colors.white,
+                        color: Colors.blue,
                         size: 20,
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Text('Mağaza'),
+                    const Text(
+                      'Mağaza',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ],
                 ),
           actions: [

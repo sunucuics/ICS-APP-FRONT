@@ -18,22 +18,26 @@ class CartTab extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blue,
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppTheme.primaryNavy, // Changed to dark blue
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
                 Icons.shopping_cart,
-                color: Colors.white,
+                color: Colors.blue,
                 size: 20,
               ),
             ),
             const SizedBox(width: 12),
-            const Text('Sepet'),
+            const Text(
+              'Sepet',
+              style: TextStyle(color: Colors.white),
+            ),
           ],
         ),
         actions: [

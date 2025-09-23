@@ -18,22 +18,26 @@ class ServicesTab extends ConsumerWidget {
     final servicesAsync = ref.watch(servicesProvider);
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blue,
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppTheme.primaryNavy,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
                 Icons.work,
-                color: Colors.white,
+                color: Colors.blue,
                 size: 20,
               ),
             ),
             const SizedBox(width: 12),
-            const Text('Hizmetler'),
+            const Text(
+              'Hizmetler',
+              style: TextStyle(color: Colors.white),
+            ),
           ],
         ),
         actions: [],
