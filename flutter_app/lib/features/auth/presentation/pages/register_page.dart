@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
-import 'guest_upgrade_page.dart';
 import '../../../home/presentation/pages/home_page.dart';
 
 // Custom phone number formatter
@@ -432,30 +431,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             // Backend hatalarını kullanıcı dostu mesajlara çevir
             if (error.contains('Bu e-posta zaten kayıtlı') ||
                 error.contains('Bu kullanıcı zaten kayıtlı')) {
-              userFriendlyError =
-                  'Bu e-posta adresi zaten kullanılıyor. Giriş yapmak için tıklayın.';
-
-              // Kullanıcıyı login sayfasına yönlendir
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('E-posta Zaten Kayıtlı'),
-                  content: const Text(
-                      'Bu e-posta adresi ile zaten bir hesap bulunmaktadır. Giriş yapmak ister misiniz?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('İptal'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _navigateToSignIn();
-                      },
-                      child: const Text('Giriş Yap'),
-                    ),
-                  ],
-                ),
+              // Kullanıcı zaten kayıtlı ve giriş yapmış durumda
+              // Dialog gösterme, direkt ana sayfaya yönlendir
+              print(
+                  '📱 RegisterPage: User already exists, redirecting to home');
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const HomePage()),
               );
               return; // SnackBar gösterme
             } else if (error.contains('email-already-in-use')) {
@@ -525,9 +506,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   void _continueAsGuest() {
+    // Misafir kullanıcı olarak ana sayfaya git
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => const GuestUpgradePage(),
+        builder: (context) => const HomePage(),
       ),
     );
   }
@@ -830,9 +812,10 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   }
 
   void _continueAsGuest() {
+    // Misafir kullanıcı olarak ana sayfaya git
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => const GuestUpgradePage(),
+        builder: (context) => const HomePage(),
       ),
     );
   }
@@ -846,18 +829,71 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   }
 
   void _showForgotPassword() {
+    final emailController = TextEditingController();
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Şifremi Unuttum'),
-        content: const Text(
-          'Şifre sıfırlama özelliği yakında eklenecek. '
-          'Şimdilik misafir olarak devam edebilirsiniz.',
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+                'E-posta adresinizi girin, şifre sıfırlama bağlantısı gönderelim.'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                labelText: 'E-posta',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Tamam'),
+            child: const Text('İptal'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final email = emailController.text.trim();
+              if (email.isEmpty || !email.contains('@')) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Geçerli bir e-posta adresi girin'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+
+              Navigator.of(context).pop();
+
+              try {
+                await ref.read(authProvider.notifier).resetPassword(email);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'Şifre sıfırlama e-postası gönderildi. E-posta kutunuzu kontrol edin.'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Hata: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Gönder'),
           ),
         ],
       ),

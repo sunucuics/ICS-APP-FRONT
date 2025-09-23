@@ -46,10 +46,11 @@ class AuthWrapper extends ConsumerWidget {
       );
     });
 
-    // Only check registered user authentication
+    // Check both registered user and anonymous user authentication
     final isLoading = authState.isLoading;
+    final anonymousAuthState = ref.watch(anonymous.anonymousAuthProvider);
 
-    if (isLoading) {
+    if (isLoading || anonymousAuthState.isLoading) {
       return const Scaffold(
         body: Center(
           child: Column(
@@ -67,9 +68,14 @@ class AuthWrapper extends ConsumerWidget {
     // If registered user is authenticated, show HomePage
     if (authState.isAuthenticated) {
       return const HomePage();
-    } else {
-      // Show welcome page for unauthenticated users
-      return const GuestWelcomePage();
     }
+    
+    // If anonymous user is authenticated, show HomePage
+    if (anonymousAuthState.hasValue && anonymousAuthState.value != null) {
+      return const HomePage();
+    }
+    
+    // Show welcome page for unauthenticated users
+    return const GuestWelcomePage();
   }
 }
