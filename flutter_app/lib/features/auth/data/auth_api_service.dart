@@ -49,13 +49,15 @@ class AuthApiService {
 
       // Firebase ID token'ı al ve Authorization header'a ekle
       final idToken = await userCredential.user!.getIdToken();
-
+      
       final response = await _apiClient.postMultipart(
         ApiEndpoints.authRegister,
         formData,
-        headers: {
-          'Authorization': 'Bearer $idToken',
-        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $idToken',
+          },
+        ),
       );
       print('🚀 AuthApiService: Backend registration successful');
 
@@ -63,7 +65,6 @@ class AuthApiService {
       final userProfile = UserProfile.fromJson(response.data['user']);
 
       // Firebase'den token'ları al (backend'den boş gelebilir)
-      final idToken = await userCredential.user!.getIdToken();
       final refreshToken =
           await userCredential.user!.getIdToken(true); // Force refresh
 
