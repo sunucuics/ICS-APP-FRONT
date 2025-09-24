@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/anonymous_auth_provider.dart';
 import 'register_page.dart';
 import 'login_page.dart';
+import '../../../home/presentation/pages/home_page.dart';
 
 class GuestWelcomePage extends ConsumerWidget {
   const GuestWelcomePage({super.key});
@@ -293,8 +294,14 @@ class GuestWelcomePage extends ConsumerWidget {
   ) async {
     try {
       await authNotifier.signInAnonymously();
-      // AuthWrapper will automatically show HomePage when anonymous user is authenticated
-      // No need to navigate manually
+      // Navigate to HomePage after successful anonymous sign in
+      if (context.mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const HomePage(),
+          ),
+        );
+      }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -32,6 +32,34 @@
 -keep class com.google.firebase.** { *; }
 -keep class com.google.android.gms.** { *; }
 
+# Keep all model classes for JSON serialization
+-keep class com.ics.app.ics_app.** { *; }
+
+# Keep Dio and network related classes
+-keep class dio.** { *; }
+-keep class retrofit2.** { *; }
+
+# Keep Riverpod providers
+-keep class * extends Provider { *; }
+-keep class * extends StateNotifier { *; }
+
+# Performance optimizations
+-optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*
+-optimizationpasses 5
+-allowaccessmodification
+-dontpreverify
+
+# Keep native methods for better performance
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+# Keep annotations
+-keepattributes *Annotation*
+-keepattributes Signature
+-keepattributes InnerClasses
+-keepattributes EnclosingMethod
+
 # Keep native methods
 -keepclasseswithmembernames class * {
     native <methods>;

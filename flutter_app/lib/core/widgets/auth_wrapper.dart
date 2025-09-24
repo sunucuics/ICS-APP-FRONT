@@ -6,21 +6,36 @@ import '../../features/auth/providers/anonymous_auth_provider.dart'
 import '../../features/auth/presentation/pages/guest_welcome_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 
-class AuthWrapper extends ConsumerWidget {
+class AuthWrapper extends ConsumerStatefulWidget {
   const AuthWrapper({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
+  ConsumerState<AuthWrapper> createState() => _AuthWrapperState();
+}
 
+class _AuthWrapperState extends ConsumerState<AuthWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    // Android performance optimization - delay listener setup
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _setupListeners();
+      }
+    });
+  }
+
+  void _setupListeners() {
     // Handle user sign out - navigate to welcome page
     ref.listen(anonymous.anonymousAuthProvider, (previous, next) {
+      if (!mounted) return;
+      
       next.when(
         data: (user) {
           if (user == null && previous?.value != null) {
             // User signed out, navigate to welcome page
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (context.mounted) {
+              if (mounted) {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
                     builder: (context) => const GuestWelcomePage(),
@@ -34,7 +49,7 @@ class AuthWrapper extends ConsumerWidget {
         error: (error, stack) {
           // On error, show welcome page
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (context.mounted) {
+            if (mounted) {
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                   builder: (context) => const GuestWelcomePage(),
@@ -45,6 +60,11 @@ class AuthWrapper extends ConsumerWidget {
         },
       );
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
 
     // Check both registered user and anonymous user authentication
     final isLoading = authState.isLoading;

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Innova Craft Studio</string>
+    
+    <!-- Notification channels -->
+    <string name="notification_channel_general">Genel Bildirimler</string>
+    <string name="notification_channel_orders">Sipariş Bildirimleri</string>
+    <string name="notification_channel_appointments">Randevu Bildirimleri</string>
+    
+    <!-- Notification descriptions -->
+    <string name="notification_channel_general_desc">Genel uygulama bildirimleri</string>
+    <string name="notification_channel_orders_desc">Sipariş durumu ve güncellemeleri</string>
+    <string name="notification_channel_appointments_desc">Randevu hatırlatmaları ve güncellemeleri</string>
+</resources>

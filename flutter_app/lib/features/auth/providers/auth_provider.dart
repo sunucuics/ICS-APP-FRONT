@@ -133,8 +133,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
       print('🔐 AuthProvider - User ID: ${response.userId}');
       print('🔐 AuthProvider - Token exists: ${response.idToken.isNotEmpty}');
 
-      // Firebase auth state change will automatically update the state
-      // No need to manually update state here
+      // Update state with successful login
+      state = state.copyWith(
+        user: response.user,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      );
 
       // Clear anonymous authentication when user logs in
       try {

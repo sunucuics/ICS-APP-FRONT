@@ -12,9 +12,9 @@ class ApiClient {
   ApiClient() {
     _dio = Dio(BaseOptions(
       baseUrl: ApiEndpoints.baseUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
-      sendTimeout: const Duration(seconds: 10),
+      connectTimeout: const Duration(seconds: 30), // Android için artırıldı
+      receiveTimeout: const Duration(seconds: 30), // Android için artırıldı
+      sendTimeout: const Duration(seconds: 30), // Android için artırıldı
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',

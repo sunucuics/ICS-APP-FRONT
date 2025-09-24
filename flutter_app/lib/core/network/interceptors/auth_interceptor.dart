@@ -85,15 +85,17 @@ class AuthInterceptor extends Interceptor {
       // Check Firebase Auth first
       final firebaseUser = FirebaseAuthService.currentUser;
       if (firebaseUser?.isAnonymous == true) {
-        print('🔐 AuthInterceptor: Firebase guest user 401 error, not redirecting to login');
+        print(
+            '🔐 AuthInterceptor: Firebase guest user 401 error, not redirecting to login');
         handler.next(err);
         return;
       }
-      
+
       // Check Mock Anonymous Auth Service
       final mockAuthService = MockAnonymousAuthService();
       if (mockAuthService.isAnonymous) {
-        print('🔐 AuthInterceptor: Mock guest user 401 error, not redirecting to login');
+        print(
+            '🔐 AuthInterceptor: Mock guest user 401 error, not redirecting to login');
         handler.next(err);
         return;
       }
@@ -114,9 +116,40 @@ class AuthInterceptor extends Interceptor {
         originalRequest.extra['_retried'] = true;
         originalRequest.headers['Authorization'] = 'Bearer $freshToken';
 
-        // Retry the original request
+        // Retry the original request with new FormData
         final dio = Dio();
-        final response = await dio.fetch(originalRequest);
+
+        // Create completely new request to avoid FormData reuse
+        // Don't retry FormData requests to avoid the finalized error
+        if (originalRequest.data is FormData) {
+          print(
+              '🔐 AuthInterceptor: Skipping FormData retry to avoid finalized error');
+          handler.next(err);
+          return;
+        }
+
+        final newRequest = RequestOptions(
+          method: originalRequest.method,
+          path: originalRequest.path,
+          baseUrl: originalRequest.baseUrl,
+          headers: {
+            ...originalRequest.headers,
+            'Authorization': 'Bearer $freshToken',
+          },
+          data: originalRequest.data,
+          queryParameters: originalRequest.queryParameters,
+          connectTimeout: originalRequest.connectTimeout,
+          receiveTimeout: originalRequest.receiveTimeout,
+          sendTimeout: originalRequest.sendTimeout,
+          validateStatus: originalRequest.validateStatus,
+          followRedirects: originalRequest.followRedirects,
+          maxRedirects: originalRequest.maxRedirects,
+          responseType: originalRequest.responseType,
+          contentType: originalRequest.contentType,
+          extra: originalRequest.extra,
+        );
+
+        final response = await dio.fetch(newRequest);
         handler.resolve(response);
         return;
       } else {

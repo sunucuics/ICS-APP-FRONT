@@ -96,20 +96,7 @@ class ProfileTab extends ConsumerWidget {
                                       ),
                                     ],
                                   ),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: IconButton(
-                                      icon: const Icon(
-                                        Icons.logout,
-                                        color: Colors.white,
-                                      ),
-                                      onPressed: () =>
-                                          _showLogoutDialog(context, ref),
-                                    ),
-                                  ),
+                                  // Logout button removed - using bottom button instead
                                 ],
                               ),
                             ],
@@ -372,6 +359,8 @@ class ProfileTab extends ConsumerWidget {
                               onTap: () => _showLogoutDialog(context, ref),
                             ),
                           ),
+                        
+                        // Guest users already have login/register options in "Hesabım" section above
                         const SizedBox(height: 32),
                       ],
                     ),

@@ -27,6 +27,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       print('🔐 LoginPage - Starting login process');
+      
+      // Check if widget is still mounted
+      if (!mounted) return;
+      
       // Clear any previous errors
       ref.read(authProvider.notifier).clearError();
 
@@ -36,6 +40,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           );
 
       print('🔐 LoginPage - Login result: $success');
+      
+      // Check if widget is still mounted after async operation
+      if (!mounted) return;
+      
       print(
           '🔐 LoginPage - Auth state: ${ref.read(authProvider).isAuthenticated}');
 
@@ -94,6 +102,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final isLoading = authState.isLoading;
 
     // AuthWrapper will handle navigation automatically
+    print('🔐 LoginPage - Build: isLoading=$isLoading, isAuthenticated=${authState.isAuthenticated}');
 
     return Scaffold(
       body: SafeArea(

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'dart:io';
 import 'firebase_options.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/splash_screen.dart';
@@ -9,6 +11,10 @@ import 'core/services/navigation_service.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/services/theme_service.dart';
 import 'core/services/fcm_service.dart';
+import 'core/services/android_performance_service.dart';
+import 'core/services/image_cache_service.dart';
+import 'core/services/crash_prevention_service.dart';
+import 'core/services/memory_management_service.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
@@ -16,9 +22,23 @@ import 'features/home/presentation/pages/home_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Performance optimizations
+  // Android performance optimizations
+  if (Platform.isAndroid) {
+    await AndroidPerformanceService.initialize();
+    await ImageCacheService.initialize();
+    await CrashPreventionService.initialize();
+    await MemoryManagementService.initialize();
+  }
+
   WidgetsBinding.instance.addPostFrameCallback((_) {
     // Pre-warm the engine for better performance
+    if (Platform.isAndroid) {
+      // Additional Android-specific performance optimizations
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+    }
   });
 
   // Firebase initialization with error handling
@@ -28,7 +48,7 @@ void main() async {
     );
     print('✅ Firebase initialized successfully');
 
-    // Initialize FCM service
+    // Initialize FCM service with Android-specific timeout
     await FCMService.initialize();
     print('✅ FCM service initialized successfully');
   } catch (e) {

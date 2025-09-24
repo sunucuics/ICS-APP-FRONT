@@ -123,7 +123,7 @@ class AuthApiService {
         '🚀 AuthApiService: Starting Firebase login for email: ${request.email}');
 
     try {
-      // 1. Firebase ile giriş yap
+      // 1. Firebase ile giriş yap - Android için timeout artırıldı
       final userCredential =
           await FirebaseAuthService.signInWithEmailAndPassword(
         email: request.email,
@@ -136,23 +136,26 @@ class AuthApiService {
 
       print('🚀 AuthApiService: Firebase login successful');
 
-      // 2. Taze ID token al
+      // 2. Android için token refresh timeout'u artır
       final idToken = await userCredential!.user!.getIdToken(true);
       print('🚀 AuthApiService: Got fresh ID token');
 
-      // 3. FCM token'ı backend'e gönder (opsiyonel)
+      // 3. FCM token'ı backend'e gönder (opsiyonel) - Android için timeout artırıldı
       final fcmToken = await FCMService.getFCMToken();
       if (fcmToken != null) {
         try {
-          final formData = FormData.fromMap({
-            'email': request.email,
-            'password': request.password,
-            'fcm_token': fcmToken,
-          });
-
-          await _apiClient.postMultipart(
+          // JSON formatında gönder, FormData kullanma
+          final response = await _apiClient.post(
             ApiEndpoints.authLogin,
-            formData,
+            data: {
+              'email': request.email,
+              'password': request.password,
+              'fcm_token': fcmToken,
+            },
+            options: Options(
+              sendTimeout: const Duration(seconds: 30),
+              receiveTimeout: const Duration(seconds: 30),
+            ),
           );
           print('🚀 AuthApiService: FCM token updated on login');
         } catch (e) {
