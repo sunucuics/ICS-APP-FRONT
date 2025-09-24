@@ -18,7 +18,7 @@ class CartTab extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+        backgroundColor: AppTheme.primaryOrange,
         title: Row(
           children: [
             Container(
@@ -26,10 +26,17 @@ class CartTab extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryOrange.withOpacity(0.4),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: const Icon(
                 Icons.shopping_cart,
-                color: Colors.blue,
+                color: AppTheme.primaryOrange,
                 size: 20,
               ),
             ),
@@ -113,7 +120,7 @@ class CartTab extends ConsumerWidget {
           Icon(
             Icons.shopping_cart_outlined,
             size: 64,
-            color: AppTheme.primaryNavy, // Changed to dark blue
+            color: AppTheme.primaryOrange, // Orange color
           ),
           const SizedBox(height: 16),
           Text(
@@ -176,30 +183,50 @@ class CartTab extends ConsumerWidget {
     final hasDiscount =
         item.finalPrice != null && item.finalPrice! < item.price;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.black, // Dark background
-        border: Border.all(
-          color: AppTheme.primaryNavy, // Dark blue border
-          width: 3,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryNavy.withOpacity(0.6), // Enhanced blue glow
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-            spreadRadius: 2,
-          ),
-          BoxShadow(
-            color: AppTheme.primaryNavy.withOpacity(0.4),
-            blurRadius: 40,
-            offset: const Offset(0, 0),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
+    return TweenAnimationBuilder<double>(
+      duration: Duration(milliseconds: 1000 + (index * 200)),
+      tween: Tween(begin: 0.0, end: 1.0),
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: 0.9 + (0.1 * value),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Colors.black, // Dark background
+              border: Border.all(
+                color: AppTheme.primaryOrange, // Orange border
+                width: 3,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryOrange.withOpacity(0.6 * value), // Enhanced orange glow
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                  spreadRadius: 2,
+                ),
+                BoxShadow(
+                  color: AppTheme.primaryOrange.withOpacity(0.4 * value),
+                  blurRadius: 40,
+                  offset: const Offset(0, 0),
+                  spreadRadius: 0,
+                ),
+                // Additional shimmer effect
+                BoxShadow(
+                  color: AppTheme.lightOrange.withOpacity(0.3 * value),
+                  blurRadius: 60,
+                  offset: const Offset(0, 0),
+                  spreadRadius: 1,
+                ),
+                // Pulsing glow effect
+                BoxShadow(
+                  color: AppTheme.primaryOrange.withOpacity(0.2 * (0.5 + 0.5 * value)),
+                  blurRadius: 80,
+                  offset: const Offset(0, 0),
+                  spreadRadius: 3,
+                ),
+              ],
+            ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -329,8 +356,8 @@ class CartTab extends ConsumerWidget {
                             : null,
                         icon: const Icon(Icons.add),
                         style: IconButton.styleFrom(
-                          backgroundColor: AppTheme.primaryNavy
-                              .withOpacity(0.2), // Changed to dark blue
+                          backgroundColor: AppTheme.primaryOrange
+                              .withOpacity(0.2), // Orange background
                           padding: const EdgeInsets.all(8),
                           minimumSize: const Size(32, 32),
                         ),
@@ -350,6 +377,9 @@ class CartTab extends ConsumerWidget {
           ],
         ),
       ),
+          ),
+        );
+      },
     );
   }
 
@@ -363,13 +393,19 @@ class CartTab extends ConsumerWidget {
           topRight: Radius.circular(24),
         ),
         border: Border(
-          top: BorderSide(color: AppTheme.primaryNavy.withOpacity(0.3)),
+          top: BorderSide(color: AppTheme.primaryOrange.withOpacity(0.3)),
         ),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryNavy.withOpacity(0.3),
+            color: AppTheme.primaryOrange.withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, -5),
+          ),
+          // Additional orange glow
+          BoxShadow(
+            color: AppTheme.lightOrange.withOpacity(0.2),
+            blurRadius: 40,
+            offset: const Offset(0, -10),
           ),
         ],
       ),
@@ -399,25 +435,55 @@ class CartTab extends ConsumerWidget {
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: cart.items.isNotEmpty
-                  ? () => _proceedToCheckout(context, ref, cart)
-                  : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryNavy, // Dark blue button
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                elevation: 4,
-                shadowColor: AppTheme.primaryNavy.withOpacity(0.4),
-              ),
-              child: Text(
-                'Siparişi Tamamla',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
-              ),
+            child: TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 2000),
+              tween: Tween(begin: 0.0, end: 1.0),
+              builder: (context, value, child) {
+                return Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.primaryOrange.withOpacity(0.3 * value),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                        spreadRadius: 2,
+                      ),
+                      BoxShadow(
+                        color: AppTheme.lightOrange.withOpacity(0.2 * value),
+                        blurRadius: 40,
+                        offset: const Offset(0, 0),
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: cart.items.isNotEmpty
+                        ? () => _proceedToCheckout(context, ref, cart)
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryOrange, // Orange button
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      elevation: 8,
+                      shadowColor: AppTheme.primaryOrange.withOpacity(0.4),
+                      // Add shimmer effect
+                      side: BorderSide(
+                        color: AppTheme.lightOrange.withOpacity(0.5 * value),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      'Siparişi Tamamla',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -557,8 +623,10 @@ class CartTab extends ConsumerWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: AppTheme.primaryOrange,
                 foregroundColor: Colors.white,
+                elevation: 4,
+                shadowColor: AppTheme.primaryOrange.withOpacity(0.4),
               ),
               child: const Text('Hesap Oluştur'),
             ),

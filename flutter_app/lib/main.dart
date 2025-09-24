@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'firebase_options.dart';
 import 'core/theme/app_theme.dart';
-import 'core/widgets/auth_wrapper.dart';
+import 'core/widgets/splash_screen.dart';
 import 'core/services/navigation_service.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/services/theme_service.dart';
@@ -15,7 +15,7 @@ import 'features/home/presentation/pages/home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Performance optimizations
   WidgetsBinding.instance.addPostFrameCallback((_) {
     // Pre-warm the engine for better performance
@@ -55,14 +55,15 @@ class MyApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode, // Dynamic theme mode based on user preference
-      home: const AuthWrapper(),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
       navigatorKey: NavigationService.navigatorKey,
       // Performance optimizations
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
-            textScaler: TextScaler.noScaling, // Disable text scaling for better performance
+            textScaler: TextScaler
+                .noScaling, // Disable text scaling for better performance
           ),
           child: child!,
         );

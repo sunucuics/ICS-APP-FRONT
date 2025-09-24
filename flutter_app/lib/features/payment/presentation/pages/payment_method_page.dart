@@ -67,9 +67,8 @@ class PaymentMethodPage extends ConsumerWidget {
                   ),
             ),
             const SizedBox(height: 12),
-            _buildSummaryRow('Ara Toplam', summary.subtotal),
+            _buildSummaryRow('Ürün Toplamı', summary.total - summary.shipping),
             _buildSummaryRow('Kargo', summary.shipping),
-            _buildSummaryRow('KDV', summary.tax),
             if (summary.discount > 0)
               _buildSummaryRow('İndirim', -summary.discount, isDiscount: true),
             const Divider(),
@@ -102,7 +101,8 @@ class PaymentMethodPage extends ConsumerWidget {
             '₺${amount.toStringAsFixed(2)}',
             style: TextStyle(
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              color: isDiscount ? Colors.green : (isTotal ? Colors.blue : null),
+              color:
+                  isDiscount ? Colors.green : (isTotal ? Colors.orange : null),
             ),
           ),
         ],
@@ -231,7 +231,7 @@ class PaymentMethodPage extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -255,10 +255,15 @@ class PaymentMethodPage extends ConsumerWidget {
               );
             },
             style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  const Color(0xFFFF6B35), // AppTheme.primaryOrange
+              foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
+              elevation: 8,
+              shadowColor: const Color(0xFFFF6B35).withOpacity(0.4),
             ),
             child: Text(
               'Devam Et - ₺${summary.total.toStringAsFixed(2)}',

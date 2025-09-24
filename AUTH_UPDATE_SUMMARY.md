@@ -27,7 +27,8 @@ Backend ekibinin yeni auth dokümantasyonuna göre Flutter uygulamasındaki auth
 
 #### 4. **Backend URL Update**
 - Eski URL: `https://ics-backend-599937649684.europe-west1.run.app`
-- Yeni URL: `https://ics-backend-kn6yhrvlra-ew.a.run.app`
+- Ara URL: `https://ics-backend-kn6yhrvlra-ew.a.run.app`
+- Yeni URL: `https://ics-backend-443215445942.europe-west1.run.app`
 - Flutter app ve React admin panel güncellendi
 
 ### 🔄 Auth Flow (Client-first)
