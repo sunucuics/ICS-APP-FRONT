@@ -159,6 +159,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
       ),
       backgroundColor: AppTheme.primaryNavy,
       foregroundColor: Colors.white,
+      iconTheme: const IconThemeData(color: Colors.white),
       elevation: 0,
       centerTitle: true,
       flexibleSpace: Container(
@@ -260,10 +261,10 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
                 children: [
                   Text(
                     widget.service.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -271,8 +272,8 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
                   const SizedBox(height: 8),
                   Text(
                     widget.service.description,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 15,
                       height: 1.4,
                     ),
@@ -311,7 +312,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
               'Tarih ve Saat Seçin',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
             ),
           ],
@@ -379,19 +380,19 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
                 children: [
                   Text(
                     'Seçilen Randevu',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 16,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${_selectedDate!.day} ${_getMonthName(_selectedDate!.month)} ${_selectedDate!.year} - $_selectedTime',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ],
@@ -444,7 +445,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
               'Ek Notlar (İsteğe Bağlı)',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
             ),
           ],
@@ -479,10 +480,10 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
               border: InputBorder.none,
               contentPadding: const EdgeInsets.all(20),
             ),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               height: 1.4,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),
