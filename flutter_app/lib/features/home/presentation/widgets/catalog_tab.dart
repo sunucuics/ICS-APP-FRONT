@@ -11,6 +11,7 @@ import '../../../auth/presentation/pages/guest_upgrade_page.dart';
 import '../../../../core/models/product_model.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_section.dart';
+import '../../../../core/network/api_endpoints.dart';
 
 class CatalogTab extends ConsumerStatefulWidget {
   const CatalogTab({super.key});
@@ -72,6 +73,10 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
     final selectedCategory = ref.watch(selectedCategoryProvider);
     final productsAsync = ref.watch(productsProvider(selectedCategory));
     final themed = AppTheme.themedForSection(context, AppSection.store);
+
+    if (ApiEndpoints.isDebug) {
+      print('🏗️ CatalogTab build - selectedCategory: $selectedCategory');
+    }
 
     return Theme(
       data: themed,
@@ -150,8 +155,8 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                       filteredCategories.where((cat) => !cat.isFixed).toList();
 
                   final allCategories = [
-                    ...fixedCategories,
                     const Category(id: '', name: 'Tümü'),
+                    ...fixedCategories,
                     ...regularCategories,
                   ];
 
@@ -169,9 +174,19 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                         return GestureDetector(
                           onTap: () {
                             final newCategory =
-                                index == 0 ? null : category.name;
+                                category.name == 'Tümü' ? null : category.name;
+                            if (ApiEndpoints.isDebug) {
+                              print(
+                                  '🎯 Innova Studio tapped: ${category.name} -> newCategory: $newCategory');
+                              print(
+                                  '🎯 Current selectedCategory: ${ref.read(selectedCategoryProvider)}');
+                            }
                             ref.read(selectedCategoryProvider.notifier).state =
                                 newCategory;
+                            if (ApiEndpoints.isDebug) {
+                              print(
+                                  '🎯 After setting, selectedCategory: ${ref.read(selectedCategoryProvider)}');
+                            }
                           },
                           child: Container(
                             width: 200, // Larger width for featured card
@@ -304,9 +319,20 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
 
                       return GestureDetector(
                         onTap: () {
-                          final newCategory = index == 0 ? null : category.name;
+                          final newCategory =
+                              category.name == 'Tümü' ? null : category.name;
+                          if (ApiEndpoints.isDebug) {
+                            print(
+                                '🎯 Category tapped: ${category.name} -> newCategory: $newCategory');
+                            print(
+                                '🎯 Current selectedCategory: ${ref.read(selectedCategoryProvider)}');
+                          }
                           ref.read(selectedCategoryProvider.notifier).state =
                               newCategory;
+                          if (ApiEndpoints.isDebug) {
+                            print(
+                                '🎯 After setting, selectedCategory: ${ref.read(selectedCategoryProvider)}');
+                          }
                         },
                         child: Container(
                           width: 85,
@@ -332,7 +358,7 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   // Show category image if available, otherwise show icon
-                                  if (index == 0)
+                                  if (category.name == 'Tümü')
                                     Icon(
                                       Icons.apps,
                                       color: Theme.of(context).brightness ==

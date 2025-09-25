@@ -12,15 +12,38 @@ class ProductsApiService {
       queryParameters['category_name'] = categoryName;
     }
 
+    if (ApiEndpoints.isDebug) {
+      print(
+          '🔍 ProductsApiService.getProducts called with categoryName: $categoryName');
+      print('🔍 Query parameters: $queryParameters');
+    }
+
     final response = await _apiClient.get(
       ApiEndpoints.products,
       queryParameters: queryParameters,
     );
 
+    if (ApiEndpoints.isDebug) {
+      print('🔍 Backend response status: ${response.statusCode}');
+      print('🔍 Backend response data type: ${response.data.runtimeType}');
+      print(
+          '🔍 Backend response data length: ${response.data is List ? (response.data as List).length : 'Not a list'}');
+      if (response.data is List && (response.data as List).isNotEmpty) {
+        print('🔍 First product sample: ${(response.data as List).first}');
+      }
+    }
+
     // Backend returns List<Product>
     final productList = (response.data as List)
         .map((item) => Product.fromJson(item as Map<String, dynamic>))
         .toList();
+
+    if (ApiEndpoints.isDebug) {
+      print('🔍 Parsed products count: ${productList.length}');
+      if (productList.isNotEmpty) {
+        print('🔍 First parsed product: ${productList.first.title}');
+      }
+    }
 
     return productList;
   }

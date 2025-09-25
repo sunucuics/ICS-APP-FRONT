@@ -12,7 +12,16 @@ final productsRepositoryProvider = Provider<ProductsRepository>((ref) {
 final productsProvider = FutureProvider.autoDispose
     .family<List<Product>, String?>((ref, categoryName) {
   final repository = ref.read(productsRepositoryProvider);
-  return repository.getProducts(categoryName: categoryName);
+
+  // Force "Tümü" to be treated as null
+  final finalCategoryName = categoryName == 'Tümü' ? null : categoryName;
+
+  if (ApiEndpoints.isDebug) {
+    print(
+        '🛍️ productsProvider called with categoryName: $categoryName -> finalCategoryName: $finalCategoryName');
+  }
+
+  return repository.getProducts(categoryName: finalCategoryName);
 });
 
 // Single Product Provider
@@ -36,7 +45,12 @@ final categoryProvider =
 });
 
 // Selected Category State Provider (for filtering)
-final selectedCategoryProvider = StateProvider<String?>((ref) => null);
+final selectedCategoryProvider = StateProvider<String?>((ref) {
+  if (ApiEndpoints.isDebug) {
+    print('🏗️ selectedCategoryProvider initialized with null');
+  }
+  return null;
+});
 
 // Filtered Products Provider - combines products with selected category
 final filteredProductsProvider =

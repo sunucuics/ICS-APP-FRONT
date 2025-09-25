@@ -8,11 +8,24 @@ class ProductsRepository {
   // Get all products with optional category filter
   Future<List<Product>> getProducts({String? categoryName}) async {
     try {
-      return await _apiService.getProducts(categoryName: categoryName);
+      if (ApiEndpoints.isDebug) {
+        print(
+            '📦 ProductsRepository.getProducts called with categoryName: $categoryName');
+      }
+
+      final products =
+          await _apiService.getProducts(categoryName: categoryName);
+
+      if (ApiEndpoints.isDebug) {
+        print(
+            '📦 ProductsRepository.getProducts returning ${products.length} products');
+      }
+
+      return products;
     } catch (e) {
       // Only print in debug mode
       if (ApiEndpoints.isDebug) {
-        print('Error fetching products: $e');
+        print('❌ Error fetching products: $e');
       }
       rethrow;
     }
