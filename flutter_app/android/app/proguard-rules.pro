@@ -32,6 +32,10 @@
 -keep class com.google.firebase.** { *; }
 -keep class com.google.android.gms.** { *; }
 
+# Google Play Core rules
+-keep class com.google.android.play.core.** { *; }
+-dontwarn com.google.android.play.core.**
+
 # Keep all model classes for JSON serialization
 -keep class com.ics.app.ics_app.** { *; }
 

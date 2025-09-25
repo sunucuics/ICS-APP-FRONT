@@ -15,21 +15,14 @@ class AuthWrapper extends ConsumerStatefulWidget {
 
 class _AuthWrapperState extends ConsumerState<AuthWrapper> {
   @override
-  void initState() {
-    super.initState();
-    // Android performance optimization - delay listener setup
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _setupListeners();
-      }
-    });
-  }
+  Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    final anonymousAuthState = ref.watch(anonymous.anonymousAuthProvider);
 
-  void _setupListeners() {
-    // Handle user sign out - navigate to welcome page
+    // Handle anonymous user sign out - navigate to welcome page
     ref.listen(anonymous.anonymousAuthProvider, (previous, next) {
       if (!mounted) return;
-      
+
       next.when(
         data: (user) {
           if (user == null && previous?.value != null) {
@@ -60,17 +53,13 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
         },
       );
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
 
     // Check both registered user and anonymous user authentication
     final isLoading = authState.isLoading;
-    final anonymousAuthState = ref.watch(anonymous.anonymousAuthProvider);
+    final isAnonymousLoading = anonymousAuthState.isLoading;
 
-    if (isLoading || anonymousAuthState.isLoading) {
+    // Show loading screen while checking authentication
+    if (isLoading || isAnonymousLoading) {
       return const Scaffold(
         body: Center(
           child: Column(
@@ -89,12 +78,12 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
     if (authState.isAuthenticated) {
       return const HomePage();
     }
-    
+
     // If anonymous user is authenticated, show HomePage
     if (anonymousAuthState.hasValue && anonymousAuthState.value != null) {
       return const HomePage();
     }
-    
+
     // Show welcome page for unauthenticated users
     return const GuestWelcomePage();
   }

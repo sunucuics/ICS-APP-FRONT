@@ -6,7 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'dart:io';
 import 'firebase_options.dart';
 import 'core/theme/app_theme.dart';
-import 'core/widgets/splash_screen.dart';
+import 'core/widgets/auth_wrapper.dart';
 import 'core/services/navigation_service.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/services/theme_service.dart';
@@ -75,7 +75,7 @@ class MyApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode, // Dynamic theme mode based on user preference
-      home: const SplashScreen(),
+      home: const AuthWrapper(),
       debugShowCheckedModeBanner: false,
       navigatorKey: NavigationService.navigatorKey,
       // Performance optimizations

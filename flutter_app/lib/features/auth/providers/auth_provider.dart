@@ -54,18 +54,42 @@ class AuthNotifier extends StateNotifier<AuthState> {
   void _listenToAuthStateChanges() {
     try {
       FirebaseAuthService.authStateChanges.listen((User? firebaseUser) async {
+        print(
+            '🔐 AuthProvider: Firebase auth state changed - User: ${firebaseUser?.uid}');
         if (firebaseUser != null) {
           // User is signed in
           await _loadUserProfile();
         } else {
           // User is signed out
+          print('🔐 AuthProvider: User signed out, updating state');
           state = const AuthState(isAuthenticated: false);
         }
       });
+
+      // Also check current auth status immediately on startup
+      _checkInitialAuthStatus();
     } catch (e) {
       print('❌ Firebase auth state listener setup failed: $e');
       // Fallback to manual auth check
       _checkAuthStatusManually();
+    }
+  }
+
+  // Check initial auth status when provider is created
+  Future<void> _checkInitialAuthStatus() async {
+    try {
+      print('🔐 AuthProvider: Checking initial auth status...');
+      final isLoggedIn = await _authRepository.isLoggedIn();
+      print('🔐 AuthProvider: Initial auth status - isLoggedIn: $isLoggedIn');
+
+      if (isLoggedIn) {
+        await _loadUserProfile();
+      } else {
+        state = const AuthState(isAuthenticated: false);
+      }
+    } catch (e) {
+      print('❌ Initial auth check failed: $e');
+      state = const AuthState(isAuthenticated: false);
     }
   }
 

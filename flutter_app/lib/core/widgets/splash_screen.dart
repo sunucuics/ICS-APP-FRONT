@@ -113,10 +113,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     }
   }
 
-  void _checkAuthAndNavigate() {
+  void _checkAuthAndNavigate() async {
+    // Wait a bit for auth providers to initialize
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    if (!mounted) return;
+
     final authState = ref.read(authProvider);
     final anonymousAuthState = ref.read(anonymous.anonymousAuthProvider);
 
+    // Check if user is authenticated (either registered or anonymous)
     if (authState.isAuthenticated ||
         (anonymousAuthState.hasValue && anonymousAuthState.value != null)) {
       Navigator.of(context).pushReplacement(
@@ -125,6 +131,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         ),
       );
     } else {
+      // If not authenticated, navigate to welcome page
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => const GuestWelcomePage(),
