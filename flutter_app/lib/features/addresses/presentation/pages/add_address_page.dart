@@ -18,11 +18,11 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
   final _apartmentController = TextEditingController();
   final _floorController = TextEditingController();
   final _neighborhoodController = TextEditingController();
+  final _districtController = TextEditingController();
   final _zipCodeController = TextEditingController();
   final _noteController = TextEditingController();
 
   String? _selectedCity;
-  String? _selectedDistrict;
   AddressLabel _selectedLabel = AddressLabel.home;
   bool _isLoading = false;
 
@@ -34,6 +34,7 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
     _apartmentController.dispose();
     _floorController.dispose();
     _neighborhoodController.dispose();
+    _districtController.dispose();
     _zipCodeController.dispose();
     _noteController.dispose();
     super.dispose();
@@ -82,17 +83,21 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
               ),
               const SizedBox(height: 16),
 
-              // City and District
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildCityDropdown(),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildDistrictDropdown(),
-                  ),
-                ],
+              // City
+              _buildCityDropdown(),
+              const SizedBox(height: 16),
+
+              // District
+              _buildTextField(
+                controller: _districtController,
+                label: 'İlçe',
+                hint: 'İlçe adını girin',
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'İlçe gerekli';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
 
@@ -234,17 +239,21 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             hintText: 'İl seçin',
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           ),
           items: TurkishCities.cities.map((city) {
             return DropdownMenuItem(
               value: city,
-              child: Text(city),
+              child: Text(
+                city,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
             );
           }).toList(),
           onChanged: (value) {
             setState(() {
               _selectedCity = value;
-              _selectedDistrict = null; // Reset district when city changes
             });
           },
           validator: (value) {
@@ -253,47 +262,7 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
             }
             return null;
           },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDistrictDropdown() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'İlçe',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-        ),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          value: _selectedDistrict,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            hintText: 'İlçe seçin',
-          ),
-          items: _getDistrictsForCity().map((district) {
-            return DropdownMenuItem(
-              value: district,
-              child: Text(district),
-            );
-          }).toList(),
-          onChanged: _selectedCity != null
-              ? (value) {
-                  setState(() {
-                    _selectedDistrict = value;
-                  });
-                }
-              : null,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'İlçe seçimi gerekli';
-            }
-            return null;
-          },
+          isExpanded: true,
         ),
       ],
     );
@@ -331,127 +300,15 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
     );
   }
 
-  List<String> _getDistrictsForCity() {
-    // This is a simplified list. In a real app, you'd fetch this from an API
-    // or use a comprehensive database of Turkish districts
-    switch (_selectedCity) {
-      case 'İstanbul':
-        return [
-          'Adalar',
-          'Arnavutköy',
-          'Ataşehir',
-          'Avcılar',
-          'Bağcılar',
-          'Bahçelievler',
-          'Bakırköy',
-          'Başakşehir',
-          'Bayrampaşa',
-          'Beşiktaş',
-          'Beykoz',
-          'Beylikdüzü',
-          'Beyoğlu',
-          'Büyükçekmece',
-          'Çatalca',
-          'Çekmeköy',
-          'Esenler',
-          'Esenyurt',
-          'Eyüpsultan',
-          'Fatih',
-          'Gaziosmanpaşa',
-          'Güngören',
-          'Kadıköy',
-          'Kağıthane',
-          'Kartal',
-          'Küçükçekmece',
-          'Maltepe',
-          'Pendik',
-          'Sancaktepe',
-          'Sarıyer',
-          'Silivri',
-          'Sultanbeyli',
-          'Sultangazi',
-          'Şile',
-          'Şişli',
-          'Tuzla',
-          'Ümraniye',
-          'Üsküdar',
-          'Zeytinburnu'
-        ];
-      case 'Ankara':
-        return [
-          'Akyurt',
-          'Altındağ',
-          'Ayaş',
-          'Bala',
-          'Beypazarı',
-          'Çamlıdere',
-          'Çankaya',
-          'Çubuk',
-          'Elmadağ',
-          'Etimesgut',
-          'Evren',
-          'Gölbaşı',
-          'Güdül',
-          'Haymana',
-          'Kalecik',
-          'Kazan',
-          'Keçiören',
-          'Kızılcahamam',
-          'Mamak',
-          'Nallıhan',
-          'Polatlı',
-          'Pursaklar',
-          'Sincan',
-          'Şereflikoçhisar',
-          'Yenimahalle'
-        ];
-      case 'İzmir':
-        return [
-          'Aliağa',
-          'Balçova',
-          'Bayındır',
-          'Bayraklı',
-          'Bergama',
-          'Beydağ',
-          'Bornova',
-          'Buca',
-          'Çeşme',
-          'Çiğli',
-          'Dikili',
-          'Foça',
-          'Gaziemir',
-          'Güzelbahçe',
-          'Karabağlar',
-          'Karaburun',
-          'Karşıyaka',
-          'Kemalpaşa',
-          'Kınık',
-          'Kiraz',
-          'Konak',
-          'Menderes',
-          'Menemen',
-          'Narlıdere',
-          'Ödemiş',
-          'Seferihisar',
-          'Selçuk',
-          'Tire',
-          'Torbalı',
-          'Urla'
-        ];
-      default:
-        return ['Merkez']; // Default district for other cities
-    }
-  }
-
   Future<void> _saveAddress() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    if (_selectedCity == null || _selectedDistrict == null) {
+    if (_selectedCity == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Lütfen il ve ilçe seçin'),
+          content: Text('Lütfen il seçin'),
           backgroundColor: Colors.red,
         ),
       );
@@ -467,7 +324,7 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
         name: _nameController.text.trim(),
         label: _selectedLabel.displayName,
         city: _selectedCity!,
-        district: _selectedDistrict!,
+        district: _districtController.text.trim(),
         neighborhood: _neighborhoodController.text.trim(),
         street: _streetController.text.trim(),
         buildingNo: _buildingNoController.text.trim(),
