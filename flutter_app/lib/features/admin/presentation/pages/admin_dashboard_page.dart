@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/admin_dashboard_provider.dart';
+import '../../providers/admin_provider.dart';
 import '../widgets/admin_stats_card.dart';
 import '../widgets/admin_navigation.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -19,6 +20,15 @@ class AdminDashboardPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboardDataAsync = ref.watch(adminDashboardDataProvider);
+    final authState = ref.watch(authProvider);
+    final isAdmin = ref.watch(isAdminProvider);
+
+    // Debug: Print user info
+    print('🔍 Admin Dashboard Debug:');
+    print('   - isAuthenticated: ${authState.isAuthenticated}');
+    print('   - isAdmin: $isAdmin');
+    print('   - user: ${authState.user?.toJson()}');
+    print('   - user role: ${authState.user?.role}');
 
     // Listen to auth state changes and navigate when user logs out
     ref.listen<AuthState>(authProvider, (previous, next) {
@@ -55,7 +65,8 @@ class AdminDashboardPage extends ConsumerWidget {
         data: (dashboardData) =>
             _buildDashboardContent(context, ref, dashboardData),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => _buildErrorWidget(context, error.toString()),
+        error: (error, stack) =>
+            _buildErrorWidget(context, error.toString(), ref),
       ),
       bottomNavigationBar: const AdminNavigation(),
     );
@@ -331,35 +342,73 @@ class AdminDashboardPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorWidget(BuildContext context, String error) {
+  Widget _buildErrorWidget(BuildContext context, String error, WidgetRef ref) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Colors.red,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Hata Oluştu',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            error,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              // Refresh the data
-            },
-            child: const Text('Tekrar Dene'),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.red,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Hata Oluştu',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              error,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            // Debug info
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Debug Bilgisi:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                      'Kullanıcı Role: ${ref.read(authProvider).user?.role ?? 'null'}'),
+                  Text('Admin Kontrolü: ${ref.read(isAdminProvider)}'),
+                  Text(
+                      'Authenticated: ${ref.read(authProvider).isAuthenticated}'),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Not: Backend admin endpoint 403 hatası veriyor. Mock data kullanılıyor.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.orange,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                // Refresh the data
+                ref.refresh(adminDashboardDataProvider);
+              },
+              child: const Text('Tekrar Dene'),
+            ),
+          ],
+        ),
       ),
     );
   }

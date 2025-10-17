@@ -444,6 +444,8 @@ class AdminProductsPage extends ConsumerWidget {
             'description':
                 data['Açıklama']?.isNotEmpty == true ? data['Açıklama'] : null,
             'price': double.parse(data['Fiyat']!),
+            'final_price': double.parse(
+                data['Fiyat']!), // Geçici çözüm: final_price'ı da güncelle
             'stock': int.parse(data['Stok']!),
             'category_name': selectedCategory
                 .name, // Backend 'category_name' bekliyor, 'category_id' değil
@@ -463,6 +465,10 @@ class AdminProductsPage extends ConsumerWidget {
             await ref
                 .read(adminProductsNotifierProvider.notifier)
                 .updateProduct(product.id, productData);
+
+            // Backend cache sorunu için ek refresh
+            await Future.delayed(const Duration(milliseconds: 500));
+            await ref.read(adminProductsNotifierProvider.notifier).refresh();
           }
         },
       ),

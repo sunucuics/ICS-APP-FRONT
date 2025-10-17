@@ -5,7 +5,18 @@ import '../../auth/providers/auth_provider.dart';
 // Admin role check provider
 final isAdminProvider = Provider<bool>((ref) {
   final user = ref.watch(currentUserProvider);
-  return user?.role == 'admin';
+  final isAuthenticated = ref.watch(isAuthenticatedProvider);
+
+  // Check if user is authenticated and has admin role
+  if (isAuthenticated && user != null) {
+    print('🔍 Admin Check: User authenticated');
+    print('   - User role: ${user.role}');
+    print('   - User email: ${user.email}');
+    print('   - Is admin: ${user.role == 'admin'}');
+    return user.role == 'admin';
+  }
+
+  return false;
 });
 
 // Admin user provider
