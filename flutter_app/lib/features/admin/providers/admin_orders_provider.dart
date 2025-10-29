@@ -46,7 +46,78 @@ class AdminOrdersNotifier extends StateNotifier<AsyncValue<List<Order>>> {
     }
   }
 
+  Future<Order> shipOrder(String orderId, OrderShipRequest request) async {
+    try {
+      final order = await _repository.shipOrder(orderId, request);
+      await loadOrders(); // Refresh the list
+      return order;
+    } catch (error, stackTrace) {
+      print('Error shipping order: $error');
+      rethrow;
+    }
+  }
+
+  Future<Order> deliverOrder(String orderId) async {
+    try {
+      final order = await _repository.deliverOrder(orderId);
+      await loadOrders(); // Refresh the list
+      return order;
+    } catch (error, stackTrace) {
+      print('Error delivering order: $error');
+      rethrow;
+    }
+  }
+
+  Future<Order> cancelOrder(String orderId, OrderCancelRequest request) async {
+    try {
+      final order = await _repository.cancelOrder(orderId, request);
+      await loadOrders(); // Refresh the list
+      return order;
+    } catch (error, stackTrace) {
+      print('Error canceling order: $error');
+      rethrow;
+    }
+  }
+
+  Future<void> deleteOrder(String orderId) async {
+    try {
+      await _repository.deleteOrder(orderId);
+      await loadOrders(); // Refresh the list
+    } catch (error, stackTrace) {
+      print('Error deleting order: $error');
+      rethrow;
+    }
+  }
+
   Future<void> refresh() async {
     await loadOrders();
   }
 }
+
+// Admin Orders Queue Provider
+class AdminOrdersQueueNotifier extends StateNotifier<AsyncValue<AdminOrdersQueueResponse>> {
+  final AdminRepository _repository;
+
+  AdminOrdersQueueNotifier(this._repository) : super(const AsyncValue.loading()) {
+    loadOrdersQueue();
+  }
+
+  Future<void> loadOrdersQueue() async {
+    try {
+      state = const AsyncValue.loading();
+      final queueResponse = await _repository.getOrdersQueue();
+      state = AsyncValue.data(queueResponse);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
+
+  Future<void> refresh() async {
+    await loadOrdersQueue();
+  }
+}
+
+final adminOrdersQueueProvider = StateNotifierProvider<AdminOrdersQueueNotifier, AsyncValue<AdminOrdersQueueResponse>>((ref) {
+  final repository = ref.watch(adminRepositoryProvider);
+  return AdminOrdersQueueNotifier(repository);
+});

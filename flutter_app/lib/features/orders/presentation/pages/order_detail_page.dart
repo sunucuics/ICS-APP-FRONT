@@ -62,6 +62,12 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
           _buildStatusCard(context, order),
           const SizedBox(height: 16),
 
+          // Payment Status Card
+          if (order.payment != null) ...[
+            _buildPaymentStatusCard(context, order),
+            const SizedBox(height: 16),
+          ],
+
           // Tracking Info
           if (order.trackingNumber != null) ...[
             _buildTrackingCard(context, order),
@@ -113,8 +119,8 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
               children: [
                 _buildStatusChip(order.status),
                 const Spacer(),
-                if (order.status != const OrderStatus.teslimEdildi() &&
-                    order.status != const OrderStatus.iptal())
+                if (order.status != const OrderStatus.delivered() &&
+                    order.status != const OrderStatus.canceled())
                   ElevatedButton.icon(
                     onPressed: () =>
                         ref.read(orderDetailProvider.notifier).syncStatus(),
@@ -127,6 +133,62 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
                   ),
               ],
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentStatusCard(BuildContext context, Order order) {
+    final payment = order.payment!;
+    
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Ödeme Durumu',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _buildPaymentStatusChip(payment.status),
+                const Spacer(),
+                if (payment.receivedTotal != null)
+                  Text(
+                    '₺${payment.receivedTotal!.toStringAsFixed(2)}',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                  ),
+              ],
+            ),
+            if (payment.provider != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Ödeme Yöntemi: ${payment.provider}',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 12,
+                ),
+              ),
+            ],
+            if (payment.reportedAt != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                'Ödeme Tarihi: ${_formatDateTime(payment.reportedAt)}',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 12,
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -317,12 +379,13 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
                           style: const TextStyle(fontWeight: FontWeight.w500),
                         ),
                       const SizedBox(height: 4),
-                      Text(
-                        _formatAddress(order.address!),
-                        style: TextStyle(
-                          color: Colors.grey[600],
+                      if (order.address != null)
+                        Text(
+                          _formatAddress(order.address!),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -481,29 +544,20 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
     Color textColor = Colors.white;
 
     switch (status) {
-      case OrderStatus.hazirlaniyor:
+      case OrderStatus.preparing:
         chipColor = Colors.orange;
         break;
-      case OrderStatus.siparisAlindi:
-        chipColor = Colors.blue;
-        break;
-      case OrderStatus.kargoyaVerildi:
+      case OrderStatus.shipped:
         chipColor = Colors.purple;
         break;
-      case OrderStatus.yolda:
-        chipColor = Colors.indigo;
-        break;
-      case OrderStatus.dagitimda:
-        chipColor = Colors.teal;
-        break;
-      case OrderStatus.teslimEdildi:
+      case OrderStatus.delivered:
         chipColor = Colors.green;
         break;
-      case OrderStatus.iptal:
+      case OrderStatus.canceled:
         chipColor = Colors.red;
         break;
-      case OrderStatus.iade:
-        chipColor = Colors.grey;
+      case OrderStatus.paymentFailed:
+        chipColor = Colors.red;
         break;
     }
 
@@ -520,6 +574,62 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentStatusChip(String paymentStatus) {
+    Color chipColor;
+    String displayText;
+    IconData icon;
+
+    switch (paymentStatus.toLowerCase()) {
+      case 'paid':
+        chipColor = Colors.green;
+        displayText = 'Ödendi';
+        icon = Icons.check_circle;
+        break;
+      case 'failed':
+        chipColor = Colors.red;
+        displayText = 'Başarısız';
+        icon = Icons.cancel;
+        break;
+      case 'pending':
+        chipColor = Colors.orange;
+        displayText = 'Beklemede';
+        icon = Icons.schedule;
+        break;
+      default:
+        chipColor = Colors.grey;
+        displayText = 'Bilinmiyor';
+        icon = Icons.help;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: chipColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: chipColor.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 16,
+            color: chipColor,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            displayText,
+            style: TextStyle(
+              color: chipColor,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }

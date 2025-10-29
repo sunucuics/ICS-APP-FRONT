@@ -10,7 +10,7 @@ class AdminOrdersPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ordersAsync = ref.watch(adminOrdersNotifierProvider);
+    final ordersQueueAsync = ref.watch(adminOrdersQueueProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -22,13 +22,13 @@ class AdminOrdersPage extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              ref.read(adminOrdersNotifierProvider.notifier).refresh();
+              ref.read(adminOrdersQueueProvider.notifier).refresh();
             },
           ),
         ],
       ),
-      body: ordersAsync.when(
-        data: (orders) => _buildOrdersList(context, ref, orders),
+      body: ordersQueueAsync.when(
+        data: (ordersQueue) => _buildOrdersQueue(context, ref, ordersQueue),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) =>
             _buildErrorWidget(context, ref, error.toString()),
@@ -37,15 +37,71 @@ class AdminOrdersPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildOrdersList(
-      BuildContext context, WidgetRef ref, List<Order> orders) {
-    if (orders.isEmpty) {
+  Widget _buildOrdersQueue(
+      BuildContext context, WidgetRef ref, AdminOrdersQueueResponse ordersQueue) {
+    if (ordersQueue.preparing.isEmpty && ordersQueue.shipped.isEmpty) {
       return _buildEmptyState(context, ref);
+    }
+
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          TabBar(
+            labelColor: AppTheme.primaryNavy,
+            unselectedLabelColor: Colors.grey[600],
+            indicatorColor: AppTheme.primaryOrange,
+            tabs: [
+              Tab(
+                text: 'Hazırlanıyor (${ordersQueue.count.preparing})',
+                icon: const Icon(Icons.shopping_bag),
+              ),
+              Tab(
+                text: 'Kargoda (${ordersQueue.count.shipped})',
+                icon: const Icon(Icons.local_shipping),
+              ),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _buildOrdersList(context, ref, ordersQueue.preparing, 'Hazırlanan sipariş bulunmuyor'),
+                _buildOrdersList(context, ref, ordersQueue.shipped, 'Kargoda sipariş bulunmuyor'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOrdersList(
+      BuildContext context, WidgetRef ref, List<Order> orders, String emptyMessage) {
+    if (orders.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.shopping_cart_outlined,
+              size: 80,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              emptyMessage,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+            ),
+          ],
+        ),
+      );
     }
 
     return RefreshIndicator(
       onRefresh: () async {
-        await ref.read(adminOrdersNotifierProvider.notifier).refresh();
+        await ref.read(adminOrdersQueueProvider.notifier).refresh();
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -84,8 +140,15 @@ class AdminOrdersPage extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                _buildStatusChip(
-                    order.status.displayName, _getStatusColor(order.status)),
+                Row(
+                  children: [
+                    if (order.payment != null) 
+                      _buildPaymentStatusChip(order.payment!.status),
+                    const SizedBox(width: 8),
+                    _buildStatusChip(
+                        order.status.displayName, _getStatusColor(order.status)),
+                  ],
+                ),
               ],
             ),
 
@@ -225,28 +288,7 @@ class AdminOrdersPage extends ConsumerWidget {
             const SizedBox(height: 12),
 
             // Actions
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => _showOrderDetails(context, order),
-                    child: const Text('Detaylar'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () =>
-                        _showStatusUpdateDialog(context, ref, order),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryOrange,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text('Durum Güncelle'),
-                  ),
-                ),
-              ],
-            ),
+            _buildAdminActions(context, ref, order),
           ],
         ),
       ),
@@ -272,16 +314,146 @@ class AdminOrdersPage extends ConsumerWidget {
     );
   }
 
+  Widget _buildPaymentStatusChip(String paymentStatus) {
+    Color chipColor;
+    String displayText;
+    IconData icon;
+
+    switch (paymentStatus.toLowerCase()) {
+      case 'paid':
+        chipColor = Colors.green;
+        displayText = 'Ödendi';
+        icon = Icons.check_circle;
+        break;
+      case 'failed':
+        chipColor = Colors.red;
+        displayText = 'Başarısız';
+        icon = Icons.cancel;
+        break;
+      case 'pending':
+        chipColor = Colors.orange;
+        displayText = 'Beklemede';
+        icon = Icons.schedule;
+        break;
+      default:
+        chipColor = Colors.grey;
+        displayText = 'Bilinmiyor';
+        icon = Icons.help;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: chipColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: chipColor.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 12,
+            color: chipColor,
+          ),
+          const SizedBox(width: 2),
+          Text(
+            displayText,
+            style: TextStyle(
+              color: chipColor,
+              fontSize: 9,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdminActions(BuildContext context, WidgetRef ref, Order order) {
+    return Column(
+      children: [
+        // Primary actions based on status
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => _showOrderDetails(context, order),
+                child: const Text('Detaylar'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            if (order.status == const OrderStatus.preparing()) ...[
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _showShipOrderDialog(context, ref, order),
+                  icon: const Icon(Icons.local_shipping, size: 16),
+                  label: const Text('Kargoya Ver'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryOrange,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+            ] else if (order.status == const OrderStatus.shipped()) ...[
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _deliverOrder(context, ref, order),
+                  icon: const Icon(Icons.check_circle, size: 16),
+                  label: const Text('Teslim Et'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        
+        // Secondary actions
+        if (order.status != const OrderStatus.delivered() && 
+            order.status != const OrderStatus.canceled()) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _showCancelOrderDialog(context, ref, order),
+                  icon: const Icon(Icons.cancel, size: 16),
+                  label: const Text('İptal Et'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: const BorderSide(color: Colors.red),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _showDeleteOrderDialog(context, ref, order),
+                  icon: const Icon(Icons.delete, size: 16),
+                  label: const Text('Sil'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: const BorderSide(color: Colors.red),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
   Color _getStatusColor(OrderStatus status) {
     return status.when(
-      hazirlaniyor: () => Colors.orange,
-      siparisAlindi: () => Colors.blue,
-      kargoyaVerildi: () => Colors.purple,
-      yolda: () => Colors.indigo,
-      dagitimda: () => Colors.teal,
-      teslimEdildi: () => Colors.green,
-      iptal: () => Colors.red,
-      iade: () => Colors.grey,
+      preparing: () => Colors.orange,
+      shipped: () => Colors.purple,
+      delivered: () => Colors.green,
+      canceled: () => Colors.red,
+      paymentFailed: () => Colors.red,
     );
   }
 
@@ -419,70 +591,222 @@ class AdminOrdersPage extends ConsumerWidget {
     );
   }
 
-  void _showStatusUpdateDialog(
-      BuildContext context, WidgetRef ref, Order order) {
-    final statuses = [
-      const OrderStatus.hazirlaniyor(),
-      const OrderStatus.siparisAlindi(),
-      const OrderStatus.kargoyaVerildi(),
-      const OrderStatus.yolda(),
-      const OrderStatus.dagitimda(),
-      const OrderStatus.teslimEdildi(),
-      const OrderStatus.iptal(),
-      const OrderStatus.iade(),
-    ];
+  void _showShipOrderDialog(BuildContext context, WidgetRef ref, Order order) {
+    final trackingController = TextEditingController();
+    final providerController = TextEditingController(text: 'MANUAL');
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sipariş Durumu Güncelle'),
+        title: const Text('Siparişi Kargoya Ver'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: statuses.map((status) {
-            return ListTile(
-              title: Text(status.displayName),
-              leading: Radio<OrderStatus>(
-                value: status,
-                groupValue: order.status,
-                onChanged: (value) async {
-                  if (value != null) {
-                    Navigator.of(context).pop();
-                    try {
-                      await ref
-                          .read(adminOrdersNotifierProvider.notifier)
-                          .updateOrderStatus(order.id ?? '', value.displayName);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'Sipariş durumu "${value.displayName}" olarak güncellendi'),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      }
-                    } catch (error) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Hata: ${error.toString()}'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    }
-                  }
-                },
+          children: [
+            TextField(
+              controller: trackingController,
+              decoration: const InputDecoration(
+                labelText: 'Takip Numarası (Opsiyonel)',
+                hintText: 'Kargo takip numarası',
+                border: OutlineInputBorder(),
               ),
-            );
-          }).toList(),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: providerController,
+              decoration: const InputDecoration(
+                labelText: 'Kargo Firması',
+                hintText: 'MANUAL',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('İptal'),
           ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await _shipOrder(context, ref, order, trackingController.text, providerController.text);
+            },
+            child: const Text('Kargoya Ver'),
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _shipOrder(BuildContext context, WidgetRef ref, Order order, String trackingNumber, String provider) async {
+    try {
+      await ref.read(adminOrdersNotifierProvider.notifier).shipOrder(
+        order.id ?? '',
+        OrderShipRequest(
+          trackingNumber: trackingNumber.isNotEmpty ? trackingNumber : null,
+          provider: provider,
+        ),
+      );
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sipariş kargoya verildi'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        ref.read(adminOrdersQueueProvider.notifier).refresh();
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Hata: ${error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _deliverOrder(BuildContext context, WidgetRef ref, Order order) async {
+    try {
+      await ref.read(adminOrdersNotifierProvider.notifier).deliverOrder(order.id ?? '');
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sipariş teslim edildi olarak işaretlendi'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        ref.read(adminOrdersQueueProvider.notifier).refresh();
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Hata: ${error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showCancelOrderDialog(BuildContext context, WidgetRef ref, Order order) {
+    final reasonController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Siparişi İptal Et'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: reasonController,
+              decoration: const InputDecoration(
+                labelText: 'İptal Sebebi',
+                hintText: 'İptal sebebini giriniz',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('İptal'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await _cancelOrder(context, ref, order, reasonController.text);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('İptal Et'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _cancelOrder(BuildContext context, WidgetRef ref, Order order, String reason) async {
+    try {
+      await ref.read(adminOrdersNotifierProvider.notifier).cancelOrder(
+        order.id ?? '',
+        OrderCancelRequest(reason: reason),
+      );
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sipariş iptal edildi'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        ref.read(adminOrdersQueueProvider.notifier).refresh();
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Hata: ${error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showDeleteOrderDialog(BuildContext context, WidgetRef ref, Order order) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Siparişi Sil'),
+        content: const Text('Bu siparişi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('İptal'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await _deleteOrder(context, ref, order);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Sil'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteOrder(BuildContext context, WidgetRef ref, Order order) async {
+    try {
+      await ref.read(adminOrdersNotifierProvider.notifier).deleteOrder(order.id ?? '');
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sipariş silindi'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        ref.read(adminOrdersQueueProvider.notifier).refresh();
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Hata: ${error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

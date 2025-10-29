@@ -18,75 +18,57 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$OrderStatus {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function() hazirlaniyor,
-    required TResult Function() siparisAlindi,
-    required TResult Function() kargoyaVerildi,
-    required TResult Function() yolda,
-    required TResult Function() dagitimda,
-    required TResult Function() teslimEdildi,
-    required TResult Function() iptal,
-    required TResult Function() iade,
+    required TResult Function() preparing,
+    required TResult Function() shipped,
+    required TResult Function() delivered,
+    required TResult Function() canceled,
+    required TResult Function() paymentFailed,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? hazirlaniyor,
-    TResult? Function()? siparisAlindi,
-    TResult? Function()? kargoyaVerildi,
-    TResult? Function()? yolda,
-    TResult? Function()? dagitimda,
-    TResult? Function()? teslimEdildi,
-    TResult? Function()? iptal,
-    TResult? Function()? iade,
+    TResult? Function()? preparing,
+    TResult? Function()? shipped,
+    TResult? Function()? delivered,
+    TResult? Function()? canceled,
+    TResult? Function()? paymentFailed,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? hazirlaniyor,
-    TResult Function()? siparisAlindi,
-    TResult Function()? kargoyaVerildi,
-    TResult Function()? yolda,
-    TResult Function()? dagitimda,
-    TResult Function()? teslimEdildi,
-    TResult Function()? iptal,
-    TResult Function()? iade,
+    TResult Function()? preparing,
+    TResult Function()? shipped,
+    TResult Function()? delivered,
+    TResult Function()? canceled,
+    TResult Function()? paymentFailed,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(_Hazirlaniyor value) hazirlaniyor,
-    required TResult Function(_SiparisAlindi value) siparisAlindi,
-    required TResult Function(_KargoyaVerildi value) kargoyaVerildi,
-    required TResult Function(_Yolda value) yolda,
-    required TResult Function(_Dagitimda value) dagitimda,
-    required TResult Function(_TeslimEdildi value) teslimEdildi,
-    required TResult Function(_Iptal value) iptal,
-    required TResult Function(_Iade value) iade,
+    required TResult Function(_Preparing value) preparing,
+    required TResult Function(_Shipped value) shipped,
+    required TResult Function(_Delivered value) delivered,
+    required TResult Function(_Canceled value) canceled,
+    required TResult Function(_PaymentFailed value) paymentFailed,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult? Function(_SiparisAlindi value)? siparisAlindi,
-    TResult? Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult? Function(_Yolda value)? yolda,
-    TResult? Function(_Dagitimda value)? dagitimda,
-    TResult? Function(_TeslimEdildi value)? teslimEdildi,
-    TResult? Function(_Iptal value)? iptal,
-    TResult? Function(_Iade value)? iade,
+    TResult? Function(_Preparing value)? preparing,
+    TResult? Function(_Shipped value)? shipped,
+    TResult? Function(_Delivered value)? delivered,
+    TResult? Function(_Canceled value)? canceled,
+    TResult? Function(_PaymentFailed value)? paymentFailed,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult Function(_SiparisAlindi value)? siparisAlindi,
-    TResult Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult Function(_Yolda value)? yolda,
-    TResult Function(_Dagitimda value)? dagitimda,
-    TResult Function(_TeslimEdildi value)? teslimEdildi,
-    TResult Function(_Iptal value)? iptal,
-    TResult Function(_Iade value)? iade,
+    TResult Function(_Preparing value)? preparing,
+    TResult Function(_Shipped value)? shipped,
+    TResult Function(_Delivered value)? delivered,
+    TResult Function(_Canceled value)? canceled,
+    TResult Function(_PaymentFailed value)? paymentFailed,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -114,18 +96,18 @@ class _$OrderStatusCopyWithImpl<$Res, $Val extends OrderStatus>
 }
 
 /// @nodoc
-abstract class _$$HazirlaniyorImplCopyWith<$Res> {
-  factory _$$HazirlaniyorImplCopyWith(
-          _$HazirlaniyorImpl value, $Res Function(_$HazirlaniyorImpl) then) =
-      __$$HazirlaniyorImplCopyWithImpl<$Res>;
+abstract class _$$PreparingImplCopyWith<$Res> {
+  factory _$$PreparingImplCopyWith(
+          _$PreparingImpl value, $Res Function(_$PreparingImpl) then) =
+      __$$PreparingImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$HazirlaniyorImplCopyWithImpl<$Res>
-    extends _$OrderStatusCopyWithImpl<$Res, _$HazirlaniyorImpl>
-    implements _$$HazirlaniyorImplCopyWith<$Res> {
-  __$$HazirlaniyorImplCopyWithImpl(
-      _$HazirlaniyorImpl _value, $Res Function(_$HazirlaniyorImpl) _then)
+class __$$PreparingImplCopyWithImpl<$Res>
+    extends _$OrderStatusCopyWithImpl<$Res, _$PreparingImpl>
+    implements _$$PreparingImplCopyWith<$Res> {
+  __$$PreparingImplCopyWithImpl(
+      _$PreparingImpl _value, $Res Function(_$PreparingImpl) _then)
       : super(_value, _then);
 
   /// Create a copy of OrderStatus
@@ -134,18 +116,18 @@ class __$$HazirlaniyorImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$HazirlaniyorImpl extends _Hazirlaniyor {
-  const _$HazirlaniyorImpl() : super._();
+class _$PreparingImpl extends _Preparing {
+  const _$PreparingImpl() : super._();
 
   @override
   String toString() {
-    return 'OrderStatus.hazirlaniyor()';
+    return 'OrderStatus.preparing()';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$HazirlaniyorImpl);
+        (other.runtimeType == runtimeType && other is _$PreparingImpl);
   }
 
   @override
@@ -154,48 +136,39 @@ class _$HazirlaniyorImpl extends _Hazirlaniyor {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function() hazirlaniyor,
-    required TResult Function() siparisAlindi,
-    required TResult Function() kargoyaVerildi,
-    required TResult Function() yolda,
-    required TResult Function() dagitimda,
-    required TResult Function() teslimEdildi,
-    required TResult Function() iptal,
-    required TResult Function() iade,
+    required TResult Function() preparing,
+    required TResult Function() shipped,
+    required TResult Function() delivered,
+    required TResult Function() canceled,
+    required TResult Function() paymentFailed,
   }) {
-    return hazirlaniyor();
+    return preparing();
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? hazirlaniyor,
-    TResult? Function()? siparisAlindi,
-    TResult? Function()? kargoyaVerildi,
-    TResult? Function()? yolda,
-    TResult? Function()? dagitimda,
-    TResult? Function()? teslimEdildi,
-    TResult? Function()? iptal,
-    TResult? Function()? iade,
+    TResult? Function()? preparing,
+    TResult? Function()? shipped,
+    TResult? Function()? delivered,
+    TResult? Function()? canceled,
+    TResult? Function()? paymentFailed,
   }) {
-    return hazirlaniyor?.call();
+    return preparing?.call();
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? hazirlaniyor,
-    TResult Function()? siparisAlindi,
-    TResult Function()? kargoyaVerildi,
-    TResult Function()? yolda,
-    TResult Function()? dagitimda,
-    TResult Function()? teslimEdildi,
-    TResult Function()? iptal,
-    TResult Function()? iade,
+    TResult Function()? preparing,
+    TResult Function()? shipped,
+    TResult Function()? delivered,
+    TResult Function()? canceled,
+    TResult Function()? paymentFailed,
     required TResult orElse(),
   }) {
-    if (hazirlaniyor != null) {
-      return hazirlaniyor();
+    if (preparing != null) {
+      return preparing();
     }
     return orElse();
   }
@@ -203,71 +176,62 @@ class _$HazirlaniyorImpl extends _Hazirlaniyor {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(_Hazirlaniyor value) hazirlaniyor,
-    required TResult Function(_SiparisAlindi value) siparisAlindi,
-    required TResult Function(_KargoyaVerildi value) kargoyaVerildi,
-    required TResult Function(_Yolda value) yolda,
-    required TResult Function(_Dagitimda value) dagitimda,
-    required TResult Function(_TeslimEdildi value) teslimEdildi,
-    required TResult Function(_Iptal value) iptal,
-    required TResult Function(_Iade value) iade,
+    required TResult Function(_Preparing value) preparing,
+    required TResult Function(_Shipped value) shipped,
+    required TResult Function(_Delivered value) delivered,
+    required TResult Function(_Canceled value) canceled,
+    required TResult Function(_PaymentFailed value) paymentFailed,
   }) {
-    return hazirlaniyor(this);
+    return preparing(this);
   }
 
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult? Function(_SiparisAlindi value)? siparisAlindi,
-    TResult? Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult? Function(_Yolda value)? yolda,
-    TResult? Function(_Dagitimda value)? dagitimda,
-    TResult? Function(_TeslimEdildi value)? teslimEdildi,
-    TResult? Function(_Iptal value)? iptal,
-    TResult? Function(_Iade value)? iade,
+    TResult? Function(_Preparing value)? preparing,
+    TResult? Function(_Shipped value)? shipped,
+    TResult? Function(_Delivered value)? delivered,
+    TResult? Function(_Canceled value)? canceled,
+    TResult? Function(_PaymentFailed value)? paymentFailed,
   }) {
-    return hazirlaniyor?.call(this);
+    return preparing?.call(this);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult Function(_SiparisAlindi value)? siparisAlindi,
-    TResult Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult Function(_Yolda value)? yolda,
-    TResult Function(_Dagitimda value)? dagitimda,
-    TResult Function(_TeslimEdildi value)? teslimEdildi,
-    TResult Function(_Iptal value)? iptal,
-    TResult Function(_Iade value)? iade,
+    TResult Function(_Preparing value)? preparing,
+    TResult Function(_Shipped value)? shipped,
+    TResult Function(_Delivered value)? delivered,
+    TResult Function(_Canceled value)? canceled,
+    TResult Function(_PaymentFailed value)? paymentFailed,
     required TResult orElse(),
   }) {
-    if (hazirlaniyor != null) {
-      return hazirlaniyor(this);
+    if (preparing != null) {
+      return preparing(this);
     }
     return orElse();
   }
 }
 
-abstract class _Hazirlaniyor extends OrderStatus {
-  const factory _Hazirlaniyor() = _$HazirlaniyorImpl;
-  const _Hazirlaniyor._() : super._();
+abstract class _Preparing extends OrderStatus {
+  const factory _Preparing() = _$PreparingImpl;
+  const _Preparing._() : super._();
 }
 
 /// @nodoc
-abstract class _$$SiparisAlindiImplCopyWith<$Res> {
-  factory _$$SiparisAlindiImplCopyWith(
-          _$SiparisAlindiImpl value, $Res Function(_$SiparisAlindiImpl) then) =
-      __$$SiparisAlindiImplCopyWithImpl<$Res>;
+abstract class _$$ShippedImplCopyWith<$Res> {
+  factory _$$ShippedImplCopyWith(
+          _$ShippedImpl value, $Res Function(_$ShippedImpl) then) =
+      __$$ShippedImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$SiparisAlindiImplCopyWithImpl<$Res>
-    extends _$OrderStatusCopyWithImpl<$Res, _$SiparisAlindiImpl>
-    implements _$$SiparisAlindiImplCopyWith<$Res> {
-  __$$SiparisAlindiImplCopyWithImpl(
-      _$SiparisAlindiImpl _value, $Res Function(_$SiparisAlindiImpl) _then)
+class __$$ShippedImplCopyWithImpl<$Res>
+    extends _$OrderStatusCopyWithImpl<$Res, _$ShippedImpl>
+    implements _$$ShippedImplCopyWith<$Res> {
+  __$$ShippedImplCopyWithImpl(
+      _$ShippedImpl _value, $Res Function(_$ShippedImpl) _then)
       : super(_value, _then);
 
   /// Create a copy of OrderStatus
@@ -276,18 +240,18 @@ class __$$SiparisAlindiImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$SiparisAlindiImpl extends _SiparisAlindi {
-  const _$SiparisAlindiImpl() : super._();
+class _$ShippedImpl extends _Shipped {
+  const _$ShippedImpl() : super._();
 
   @override
   String toString() {
-    return 'OrderStatus.siparisAlindi()';
+    return 'OrderStatus.shipped()';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$SiparisAlindiImpl);
+        (other.runtimeType == runtimeType && other is _$ShippedImpl);
   }
 
   @override
@@ -296,48 +260,39 @@ class _$SiparisAlindiImpl extends _SiparisAlindi {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function() hazirlaniyor,
-    required TResult Function() siparisAlindi,
-    required TResult Function() kargoyaVerildi,
-    required TResult Function() yolda,
-    required TResult Function() dagitimda,
-    required TResult Function() teslimEdildi,
-    required TResult Function() iptal,
-    required TResult Function() iade,
+    required TResult Function() preparing,
+    required TResult Function() shipped,
+    required TResult Function() delivered,
+    required TResult Function() canceled,
+    required TResult Function() paymentFailed,
   }) {
-    return siparisAlindi();
+    return shipped();
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? hazirlaniyor,
-    TResult? Function()? siparisAlindi,
-    TResult? Function()? kargoyaVerildi,
-    TResult? Function()? yolda,
-    TResult? Function()? dagitimda,
-    TResult? Function()? teslimEdildi,
-    TResult? Function()? iptal,
-    TResult? Function()? iade,
+    TResult? Function()? preparing,
+    TResult? Function()? shipped,
+    TResult? Function()? delivered,
+    TResult? Function()? canceled,
+    TResult? Function()? paymentFailed,
   }) {
-    return siparisAlindi?.call();
+    return shipped?.call();
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? hazirlaniyor,
-    TResult Function()? siparisAlindi,
-    TResult Function()? kargoyaVerildi,
-    TResult Function()? yolda,
-    TResult Function()? dagitimda,
-    TResult Function()? teslimEdildi,
-    TResult Function()? iptal,
-    TResult Function()? iade,
+    TResult Function()? preparing,
+    TResult Function()? shipped,
+    TResult Function()? delivered,
+    TResult Function()? canceled,
+    TResult Function()? paymentFailed,
     required TResult orElse(),
   }) {
-    if (siparisAlindi != null) {
-      return siparisAlindi();
+    if (shipped != null) {
+      return shipped();
     }
     return orElse();
   }
@@ -345,71 +300,62 @@ class _$SiparisAlindiImpl extends _SiparisAlindi {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(_Hazirlaniyor value) hazirlaniyor,
-    required TResult Function(_SiparisAlindi value) siparisAlindi,
-    required TResult Function(_KargoyaVerildi value) kargoyaVerildi,
-    required TResult Function(_Yolda value) yolda,
-    required TResult Function(_Dagitimda value) dagitimda,
-    required TResult Function(_TeslimEdildi value) teslimEdildi,
-    required TResult Function(_Iptal value) iptal,
-    required TResult Function(_Iade value) iade,
+    required TResult Function(_Preparing value) preparing,
+    required TResult Function(_Shipped value) shipped,
+    required TResult Function(_Delivered value) delivered,
+    required TResult Function(_Canceled value) canceled,
+    required TResult Function(_PaymentFailed value) paymentFailed,
   }) {
-    return siparisAlindi(this);
+    return shipped(this);
   }
 
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult? Function(_SiparisAlindi value)? siparisAlindi,
-    TResult? Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult? Function(_Yolda value)? yolda,
-    TResult? Function(_Dagitimda value)? dagitimda,
-    TResult? Function(_TeslimEdildi value)? teslimEdildi,
-    TResult? Function(_Iptal value)? iptal,
-    TResult? Function(_Iade value)? iade,
+    TResult? Function(_Preparing value)? preparing,
+    TResult? Function(_Shipped value)? shipped,
+    TResult? Function(_Delivered value)? delivered,
+    TResult? Function(_Canceled value)? canceled,
+    TResult? Function(_PaymentFailed value)? paymentFailed,
   }) {
-    return siparisAlindi?.call(this);
+    return shipped?.call(this);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult Function(_SiparisAlindi value)? siparisAlindi,
-    TResult Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult Function(_Yolda value)? yolda,
-    TResult Function(_Dagitimda value)? dagitimda,
-    TResult Function(_TeslimEdildi value)? teslimEdildi,
-    TResult Function(_Iptal value)? iptal,
-    TResult Function(_Iade value)? iade,
+    TResult Function(_Preparing value)? preparing,
+    TResult Function(_Shipped value)? shipped,
+    TResult Function(_Delivered value)? delivered,
+    TResult Function(_Canceled value)? canceled,
+    TResult Function(_PaymentFailed value)? paymentFailed,
     required TResult orElse(),
   }) {
-    if (siparisAlindi != null) {
-      return siparisAlindi(this);
+    if (shipped != null) {
+      return shipped(this);
     }
     return orElse();
   }
 }
 
-abstract class _SiparisAlindi extends OrderStatus {
-  const factory _SiparisAlindi() = _$SiparisAlindiImpl;
-  const _SiparisAlindi._() : super._();
+abstract class _Shipped extends OrderStatus {
+  const factory _Shipped() = _$ShippedImpl;
+  const _Shipped._() : super._();
 }
 
 /// @nodoc
-abstract class _$$KargoyaVerildiImplCopyWith<$Res> {
-  factory _$$KargoyaVerildiImplCopyWith(_$KargoyaVerildiImpl value,
-          $Res Function(_$KargoyaVerildiImpl) then) =
-      __$$KargoyaVerildiImplCopyWithImpl<$Res>;
+abstract class _$$DeliveredImplCopyWith<$Res> {
+  factory _$$DeliveredImplCopyWith(
+          _$DeliveredImpl value, $Res Function(_$DeliveredImpl) then) =
+      __$$DeliveredImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$KargoyaVerildiImplCopyWithImpl<$Res>
-    extends _$OrderStatusCopyWithImpl<$Res, _$KargoyaVerildiImpl>
-    implements _$$KargoyaVerildiImplCopyWith<$Res> {
-  __$$KargoyaVerildiImplCopyWithImpl(
-      _$KargoyaVerildiImpl _value, $Res Function(_$KargoyaVerildiImpl) _then)
+class __$$DeliveredImplCopyWithImpl<$Res>
+    extends _$OrderStatusCopyWithImpl<$Res, _$DeliveredImpl>
+    implements _$$DeliveredImplCopyWith<$Res> {
+  __$$DeliveredImplCopyWithImpl(
+      _$DeliveredImpl _value, $Res Function(_$DeliveredImpl) _then)
       : super(_value, _then);
 
   /// Create a copy of OrderStatus
@@ -418,18 +364,18 @@ class __$$KargoyaVerildiImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$KargoyaVerildiImpl extends _KargoyaVerildi {
-  const _$KargoyaVerildiImpl() : super._();
+class _$DeliveredImpl extends _Delivered {
+  const _$DeliveredImpl() : super._();
 
   @override
   String toString() {
-    return 'OrderStatus.kargoyaVerildi()';
+    return 'OrderStatus.delivered()';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$KargoyaVerildiImpl);
+        (other.runtimeType == runtimeType && other is _$DeliveredImpl);
   }
 
   @override
@@ -438,48 +384,39 @@ class _$KargoyaVerildiImpl extends _KargoyaVerildi {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function() hazirlaniyor,
-    required TResult Function() siparisAlindi,
-    required TResult Function() kargoyaVerildi,
-    required TResult Function() yolda,
-    required TResult Function() dagitimda,
-    required TResult Function() teslimEdildi,
-    required TResult Function() iptal,
-    required TResult Function() iade,
+    required TResult Function() preparing,
+    required TResult Function() shipped,
+    required TResult Function() delivered,
+    required TResult Function() canceled,
+    required TResult Function() paymentFailed,
   }) {
-    return kargoyaVerildi();
+    return delivered();
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? hazirlaniyor,
-    TResult? Function()? siparisAlindi,
-    TResult? Function()? kargoyaVerildi,
-    TResult? Function()? yolda,
-    TResult? Function()? dagitimda,
-    TResult? Function()? teslimEdildi,
-    TResult? Function()? iptal,
-    TResult? Function()? iade,
+    TResult? Function()? preparing,
+    TResult? Function()? shipped,
+    TResult? Function()? delivered,
+    TResult? Function()? canceled,
+    TResult? Function()? paymentFailed,
   }) {
-    return kargoyaVerildi?.call();
+    return delivered?.call();
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? hazirlaniyor,
-    TResult Function()? siparisAlindi,
-    TResult Function()? kargoyaVerildi,
-    TResult Function()? yolda,
-    TResult Function()? dagitimda,
-    TResult Function()? teslimEdildi,
-    TResult Function()? iptal,
-    TResult Function()? iade,
+    TResult Function()? preparing,
+    TResult Function()? shipped,
+    TResult Function()? delivered,
+    TResult Function()? canceled,
+    TResult Function()? paymentFailed,
     required TResult orElse(),
   }) {
-    if (kargoyaVerildi != null) {
-      return kargoyaVerildi();
+    if (delivered != null) {
+      return delivered();
     }
     return orElse();
   }
@@ -487,71 +424,62 @@ class _$KargoyaVerildiImpl extends _KargoyaVerildi {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(_Hazirlaniyor value) hazirlaniyor,
-    required TResult Function(_SiparisAlindi value) siparisAlindi,
-    required TResult Function(_KargoyaVerildi value) kargoyaVerildi,
-    required TResult Function(_Yolda value) yolda,
-    required TResult Function(_Dagitimda value) dagitimda,
-    required TResult Function(_TeslimEdildi value) teslimEdildi,
-    required TResult Function(_Iptal value) iptal,
-    required TResult Function(_Iade value) iade,
+    required TResult Function(_Preparing value) preparing,
+    required TResult Function(_Shipped value) shipped,
+    required TResult Function(_Delivered value) delivered,
+    required TResult Function(_Canceled value) canceled,
+    required TResult Function(_PaymentFailed value) paymentFailed,
   }) {
-    return kargoyaVerildi(this);
+    return delivered(this);
   }
 
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult? Function(_SiparisAlindi value)? siparisAlindi,
-    TResult? Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult? Function(_Yolda value)? yolda,
-    TResult? Function(_Dagitimda value)? dagitimda,
-    TResult? Function(_TeslimEdildi value)? teslimEdildi,
-    TResult? Function(_Iptal value)? iptal,
-    TResult? Function(_Iade value)? iade,
+    TResult? Function(_Preparing value)? preparing,
+    TResult? Function(_Shipped value)? shipped,
+    TResult? Function(_Delivered value)? delivered,
+    TResult? Function(_Canceled value)? canceled,
+    TResult? Function(_PaymentFailed value)? paymentFailed,
   }) {
-    return kargoyaVerildi?.call(this);
+    return delivered?.call(this);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult Function(_SiparisAlindi value)? siparisAlindi,
-    TResult Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult Function(_Yolda value)? yolda,
-    TResult Function(_Dagitimda value)? dagitimda,
-    TResult Function(_TeslimEdildi value)? teslimEdildi,
-    TResult Function(_Iptal value)? iptal,
-    TResult Function(_Iade value)? iade,
+    TResult Function(_Preparing value)? preparing,
+    TResult Function(_Shipped value)? shipped,
+    TResult Function(_Delivered value)? delivered,
+    TResult Function(_Canceled value)? canceled,
+    TResult Function(_PaymentFailed value)? paymentFailed,
     required TResult orElse(),
   }) {
-    if (kargoyaVerildi != null) {
-      return kargoyaVerildi(this);
+    if (delivered != null) {
+      return delivered(this);
     }
     return orElse();
   }
 }
 
-abstract class _KargoyaVerildi extends OrderStatus {
-  const factory _KargoyaVerildi() = _$KargoyaVerildiImpl;
-  const _KargoyaVerildi._() : super._();
+abstract class _Delivered extends OrderStatus {
+  const factory _Delivered() = _$DeliveredImpl;
+  const _Delivered._() : super._();
 }
 
 /// @nodoc
-abstract class _$$YoldaImplCopyWith<$Res> {
-  factory _$$YoldaImplCopyWith(
-          _$YoldaImpl value, $Res Function(_$YoldaImpl) then) =
-      __$$YoldaImplCopyWithImpl<$Res>;
+abstract class _$$CanceledImplCopyWith<$Res> {
+  factory _$$CanceledImplCopyWith(
+          _$CanceledImpl value, $Res Function(_$CanceledImpl) then) =
+      __$$CanceledImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$YoldaImplCopyWithImpl<$Res>
-    extends _$OrderStatusCopyWithImpl<$Res, _$YoldaImpl>
-    implements _$$YoldaImplCopyWith<$Res> {
-  __$$YoldaImplCopyWithImpl(
-      _$YoldaImpl _value, $Res Function(_$YoldaImpl) _then)
+class __$$CanceledImplCopyWithImpl<$Res>
+    extends _$OrderStatusCopyWithImpl<$Res, _$CanceledImpl>
+    implements _$$CanceledImplCopyWith<$Res> {
+  __$$CanceledImplCopyWithImpl(
+      _$CanceledImpl _value, $Res Function(_$CanceledImpl) _then)
       : super(_value, _then);
 
   /// Create a copy of OrderStatus
@@ -560,18 +488,18 @@ class __$$YoldaImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$YoldaImpl extends _Yolda {
-  const _$YoldaImpl() : super._();
+class _$CanceledImpl extends _Canceled {
+  const _$CanceledImpl() : super._();
 
   @override
   String toString() {
-    return 'OrderStatus.yolda()';
+    return 'OrderStatus.canceled()';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$YoldaImpl);
+        (other.runtimeType == runtimeType && other is _$CanceledImpl);
   }
 
   @override
@@ -580,48 +508,39 @@ class _$YoldaImpl extends _Yolda {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function() hazirlaniyor,
-    required TResult Function() siparisAlindi,
-    required TResult Function() kargoyaVerildi,
-    required TResult Function() yolda,
-    required TResult Function() dagitimda,
-    required TResult Function() teslimEdildi,
-    required TResult Function() iptal,
-    required TResult Function() iade,
+    required TResult Function() preparing,
+    required TResult Function() shipped,
+    required TResult Function() delivered,
+    required TResult Function() canceled,
+    required TResult Function() paymentFailed,
   }) {
-    return yolda();
+    return canceled();
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? hazirlaniyor,
-    TResult? Function()? siparisAlindi,
-    TResult? Function()? kargoyaVerildi,
-    TResult? Function()? yolda,
-    TResult? Function()? dagitimda,
-    TResult? Function()? teslimEdildi,
-    TResult? Function()? iptal,
-    TResult? Function()? iade,
+    TResult? Function()? preparing,
+    TResult? Function()? shipped,
+    TResult? Function()? delivered,
+    TResult? Function()? canceled,
+    TResult? Function()? paymentFailed,
   }) {
-    return yolda?.call();
+    return canceled?.call();
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? hazirlaniyor,
-    TResult Function()? siparisAlindi,
-    TResult Function()? kargoyaVerildi,
-    TResult Function()? yolda,
-    TResult Function()? dagitimda,
-    TResult Function()? teslimEdildi,
-    TResult Function()? iptal,
-    TResult Function()? iade,
+    TResult Function()? preparing,
+    TResult Function()? shipped,
+    TResult Function()? delivered,
+    TResult Function()? canceled,
+    TResult Function()? paymentFailed,
     required TResult orElse(),
   }) {
-    if (yolda != null) {
-      return yolda();
+    if (canceled != null) {
+      return canceled();
     }
     return orElse();
   }
@@ -629,71 +548,62 @@ class _$YoldaImpl extends _Yolda {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(_Hazirlaniyor value) hazirlaniyor,
-    required TResult Function(_SiparisAlindi value) siparisAlindi,
-    required TResult Function(_KargoyaVerildi value) kargoyaVerildi,
-    required TResult Function(_Yolda value) yolda,
-    required TResult Function(_Dagitimda value) dagitimda,
-    required TResult Function(_TeslimEdildi value) teslimEdildi,
-    required TResult Function(_Iptal value) iptal,
-    required TResult Function(_Iade value) iade,
+    required TResult Function(_Preparing value) preparing,
+    required TResult Function(_Shipped value) shipped,
+    required TResult Function(_Delivered value) delivered,
+    required TResult Function(_Canceled value) canceled,
+    required TResult Function(_PaymentFailed value) paymentFailed,
   }) {
-    return yolda(this);
+    return canceled(this);
   }
 
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult? Function(_SiparisAlindi value)? siparisAlindi,
-    TResult? Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult? Function(_Yolda value)? yolda,
-    TResult? Function(_Dagitimda value)? dagitimda,
-    TResult? Function(_TeslimEdildi value)? teslimEdildi,
-    TResult? Function(_Iptal value)? iptal,
-    TResult? Function(_Iade value)? iade,
+    TResult? Function(_Preparing value)? preparing,
+    TResult? Function(_Shipped value)? shipped,
+    TResult? Function(_Delivered value)? delivered,
+    TResult? Function(_Canceled value)? canceled,
+    TResult? Function(_PaymentFailed value)? paymentFailed,
   }) {
-    return yolda?.call(this);
+    return canceled?.call(this);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult Function(_SiparisAlindi value)? siparisAlindi,
-    TResult Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult Function(_Yolda value)? yolda,
-    TResult Function(_Dagitimda value)? dagitimda,
-    TResult Function(_TeslimEdildi value)? teslimEdildi,
-    TResult Function(_Iptal value)? iptal,
-    TResult Function(_Iade value)? iade,
+    TResult Function(_Preparing value)? preparing,
+    TResult Function(_Shipped value)? shipped,
+    TResult Function(_Delivered value)? delivered,
+    TResult Function(_Canceled value)? canceled,
+    TResult Function(_PaymentFailed value)? paymentFailed,
     required TResult orElse(),
   }) {
-    if (yolda != null) {
-      return yolda(this);
+    if (canceled != null) {
+      return canceled(this);
     }
     return orElse();
   }
 }
 
-abstract class _Yolda extends OrderStatus {
-  const factory _Yolda() = _$YoldaImpl;
-  const _Yolda._() : super._();
+abstract class _Canceled extends OrderStatus {
+  const factory _Canceled() = _$CanceledImpl;
+  const _Canceled._() : super._();
 }
 
 /// @nodoc
-abstract class _$$DagitimdaImplCopyWith<$Res> {
-  factory _$$DagitimdaImplCopyWith(
-          _$DagitimdaImpl value, $Res Function(_$DagitimdaImpl) then) =
-      __$$DagitimdaImplCopyWithImpl<$Res>;
+abstract class _$$PaymentFailedImplCopyWith<$Res> {
+  factory _$$PaymentFailedImplCopyWith(
+          _$PaymentFailedImpl value, $Res Function(_$PaymentFailedImpl) then) =
+      __$$PaymentFailedImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$DagitimdaImplCopyWithImpl<$Res>
-    extends _$OrderStatusCopyWithImpl<$Res, _$DagitimdaImpl>
-    implements _$$DagitimdaImplCopyWith<$Res> {
-  __$$DagitimdaImplCopyWithImpl(
-      _$DagitimdaImpl _value, $Res Function(_$DagitimdaImpl) _then)
+class __$$PaymentFailedImplCopyWithImpl<$Res>
+    extends _$OrderStatusCopyWithImpl<$Res, _$PaymentFailedImpl>
+    implements _$$PaymentFailedImplCopyWith<$Res> {
+  __$$PaymentFailedImplCopyWithImpl(
+      _$PaymentFailedImpl _value, $Res Function(_$PaymentFailedImpl) _then)
       : super(_value, _then);
 
   /// Create a copy of OrderStatus
@@ -702,18 +612,18 @@ class __$$DagitimdaImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$DagitimdaImpl extends _Dagitimda {
-  const _$DagitimdaImpl() : super._();
+class _$PaymentFailedImpl extends _PaymentFailed {
+  const _$PaymentFailedImpl() : super._();
 
   @override
   String toString() {
-    return 'OrderStatus.dagitimda()';
+    return 'OrderStatus.paymentFailed()';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$DagitimdaImpl);
+        (other.runtimeType == runtimeType && other is _$PaymentFailedImpl);
   }
 
   @override
@@ -722,48 +632,39 @@ class _$DagitimdaImpl extends _Dagitimda {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function() hazirlaniyor,
-    required TResult Function() siparisAlindi,
-    required TResult Function() kargoyaVerildi,
-    required TResult Function() yolda,
-    required TResult Function() dagitimda,
-    required TResult Function() teslimEdildi,
-    required TResult Function() iptal,
-    required TResult Function() iade,
+    required TResult Function() preparing,
+    required TResult Function() shipped,
+    required TResult Function() delivered,
+    required TResult Function() canceled,
+    required TResult Function() paymentFailed,
   }) {
-    return dagitimda();
+    return paymentFailed();
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? hazirlaniyor,
-    TResult? Function()? siparisAlindi,
-    TResult? Function()? kargoyaVerildi,
-    TResult? Function()? yolda,
-    TResult? Function()? dagitimda,
-    TResult? Function()? teslimEdildi,
-    TResult? Function()? iptal,
-    TResult? Function()? iade,
+    TResult? Function()? preparing,
+    TResult? Function()? shipped,
+    TResult? Function()? delivered,
+    TResult? Function()? canceled,
+    TResult? Function()? paymentFailed,
   }) {
-    return dagitimda?.call();
+    return paymentFailed?.call();
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? hazirlaniyor,
-    TResult Function()? siparisAlindi,
-    TResult Function()? kargoyaVerildi,
-    TResult Function()? yolda,
-    TResult Function()? dagitimda,
-    TResult Function()? teslimEdildi,
-    TResult Function()? iptal,
-    TResult Function()? iade,
+    TResult Function()? preparing,
+    TResult Function()? shipped,
+    TResult Function()? delivered,
+    TResult Function()? canceled,
+    TResult Function()? paymentFailed,
     required TResult orElse(),
   }) {
-    if (dagitimda != null) {
-      return dagitimda();
+    if (paymentFailed != null) {
+      return paymentFailed();
     }
     return orElse();
   }
@@ -771,481 +672,47 @@ class _$DagitimdaImpl extends _Dagitimda {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(_Hazirlaniyor value) hazirlaniyor,
-    required TResult Function(_SiparisAlindi value) siparisAlindi,
-    required TResult Function(_KargoyaVerildi value) kargoyaVerildi,
-    required TResult Function(_Yolda value) yolda,
-    required TResult Function(_Dagitimda value) dagitimda,
-    required TResult Function(_TeslimEdildi value) teslimEdildi,
-    required TResult Function(_Iptal value) iptal,
-    required TResult Function(_Iade value) iade,
+    required TResult Function(_Preparing value) preparing,
+    required TResult Function(_Shipped value) shipped,
+    required TResult Function(_Delivered value) delivered,
+    required TResult Function(_Canceled value) canceled,
+    required TResult Function(_PaymentFailed value) paymentFailed,
   }) {
-    return dagitimda(this);
+    return paymentFailed(this);
   }
 
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult? Function(_SiparisAlindi value)? siparisAlindi,
-    TResult? Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult? Function(_Yolda value)? yolda,
-    TResult? Function(_Dagitimda value)? dagitimda,
-    TResult? Function(_TeslimEdildi value)? teslimEdildi,
-    TResult? Function(_Iptal value)? iptal,
-    TResult? Function(_Iade value)? iade,
+    TResult? Function(_Preparing value)? preparing,
+    TResult? Function(_Shipped value)? shipped,
+    TResult? Function(_Delivered value)? delivered,
+    TResult? Function(_Canceled value)? canceled,
+    TResult? Function(_PaymentFailed value)? paymentFailed,
   }) {
-    return dagitimda?.call(this);
+    return paymentFailed?.call(this);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult Function(_SiparisAlindi value)? siparisAlindi,
-    TResult Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult Function(_Yolda value)? yolda,
-    TResult Function(_Dagitimda value)? dagitimda,
-    TResult Function(_TeslimEdildi value)? teslimEdildi,
-    TResult Function(_Iptal value)? iptal,
-    TResult Function(_Iade value)? iade,
+    TResult Function(_Preparing value)? preparing,
+    TResult Function(_Shipped value)? shipped,
+    TResult Function(_Delivered value)? delivered,
+    TResult Function(_Canceled value)? canceled,
+    TResult Function(_PaymentFailed value)? paymentFailed,
     required TResult orElse(),
   }) {
-    if (dagitimda != null) {
-      return dagitimda(this);
+    if (paymentFailed != null) {
+      return paymentFailed(this);
     }
     return orElse();
   }
 }
 
-abstract class _Dagitimda extends OrderStatus {
-  const factory _Dagitimda() = _$DagitimdaImpl;
-  const _Dagitimda._() : super._();
-}
-
-/// @nodoc
-abstract class _$$TeslimEdildiImplCopyWith<$Res> {
-  factory _$$TeslimEdildiImplCopyWith(
-          _$TeslimEdildiImpl value, $Res Function(_$TeslimEdildiImpl) then) =
-      __$$TeslimEdildiImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$TeslimEdildiImplCopyWithImpl<$Res>
-    extends _$OrderStatusCopyWithImpl<$Res, _$TeslimEdildiImpl>
-    implements _$$TeslimEdildiImplCopyWith<$Res> {
-  __$$TeslimEdildiImplCopyWithImpl(
-      _$TeslimEdildiImpl _value, $Res Function(_$TeslimEdildiImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of OrderStatus
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-
-class _$TeslimEdildiImpl extends _TeslimEdildi {
-  const _$TeslimEdildiImpl() : super._();
-
-  @override
-  String toString() {
-    return 'OrderStatus.teslimEdildi()';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$TeslimEdildiImpl);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() hazirlaniyor,
-    required TResult Function() siparisAlindi,
-    required TResult Function() kargoyaVerildi,
-    required TResult Function() yolda,
-    required TResult Function() dagitimda,
-    required TResult Function() teslimEdildi,
-    required TResult Function() iptal,
-    required TResult Function() iade,
-  }) {
-    return teslimEdildi();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? hazirlaniyor,
-    TResult? Function()? siparisAlindi,
-    TResult? Function()? kargoyaVerildi,
-    TResult? Function()? yolda,
-    TResult? Function()? dagitimda,
-    TResult? Function()? teslimEdildi,
-    TResult? Function()? iptal,
-    TResult? Function()? iade,
-  }) {
-    return teslimEdildi?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? hazirlaniyor,
-    TResult Function()? siparisAlindi,
-    TResult Function()? kargoyaVerildi,
-    TResult Function()? yolda,
-    TResult Function()? dagitimda,
-    TResult Function()? teslimEdildi,
-    TResult Function()? iptal,
-    TResult Function()? iade,
-    required TResult orElse(),
-  }) {
-    if (teslimEdildi != null) {
-      return teslimEdildi();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_Hazirlaniyor value) hazirlaniyor,
-    required TResult Function(_SiparisAlindi value) siparisAlindi,
-    required TResult Function(_KargoyaVerildi value) kargoyaVerildi,
-    required TResult Function(_Yolda value) yolda,
-    required TResult Function(_Dagitimda value) dagitimda,
-    required TResult Function(_TeslimEdildi value) teslimEdildi,
-    required TResult Function(_Iptal value) iptal,
-    required TResult Function(_Iade value) iade,
-  }) {
-    return teslimEdildi(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult? Function(_SiparisAlindi value)? siparisAlindi,
-    TResult? Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult? Function(_Yolda value)? yolda,
-    TResult? Function(_Dagitimda value)? dagitimda,
-    TResult? Function(_TeslimEdildi value)? teslimEdildi,
-    TResult? Function(_Iptal value)? iptal,
-    TResult? Function(_Iade value)? iade,
-  }) {
-    return teslimEdildi?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult Function(_SiparisAlindi value)? siparisAlindi,
-    TResult Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult Function(_Yolda value)? yolda,
-    TResult Function(_Dagitimda value)? dagitimda,
-    TResult Function(_TeslimEdildi value)? teslimEdildi,
-    TResult Function(_Iptal value)? iptal,
-    TResult Function(_Iade value)? iade,
-    required TResult orElse(),
-  }) {
-    if (teslimEdildi != null) {
-      return teslimEdildi(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class _TeslimEdildi extends OrderStatus {
-  const factory _TeslimEdildi() = _$TeslimEdildiImpl;
-  const _TeslimEdildi._() : super._();
-}
-
-/// @nodoc
-abstract class _$$IptalImplCopyWith<$Res> {
-  factory _$$IptalImplCopyWith(
-          _$IptalImpl value, $Res Function(_$IptalImpl) then) =
-      __$$IptalImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$IptalImplCopyWithImpl<$Res>
-    extends _$OrderStatusCopyWithImpl<$Res, _$IptalImpl>
-    implements _$$IptalImplCopyWith<$Res> {
-  __$$IptalImplCopyWithImpl(
-      _$IptalImpl _value, $Res Function(_$IptalImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of OrderStatus
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-
-class _$IptalImpl extends _Iptal {
-  const _$IptalImpl() : super._();
-
-  @override
-  String toString() {
-    return 'OrderStatus.iptal()';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$IptalImpl);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() hazirlaniyor,
-    required TResult Function() siparisAlindi,
-    required TResult Function() kargoyaVerildi,
-    required TResult Function() yolda,
-    required TResult Function() dagitimda,
-    required TResult Function() teslimEdildi,
-    required TResult Function() iptal,
-    required TResult Function() iade,
-  }) {
-    return iptal();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? hazirlaniyor,
-    TResult? Function()? siparisAlindi,
-    TResult? Function()? kargoyaVerildi,
-    TResult? Function()? yolda,
-    TResult? Function()? dagitimda,
-    TResult? Function()? teslimEdildi,
-    TResult? Function()? iptal,
-    TResult? Function()? iade,
-  }) {
-    return iptal?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? hazirlaniyor,
-    TResult Function()? siparisAlindi,
-    TResult Function()? kargoyaVerildi,
-    TResult Function()? yolda,
-    TResult Function()? dagitimda,
-    TResult Function()? teslimEdildi,
-    TResult Function()? iptal,
-    TResult Function()? iade,
-    required TResult orElse(),
-  }) {
-    if (iptal != null) {
-      return iptal();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_Hazirlaniyor value) hazirlaniyor,
-    required TResult Function(_SiparisAlindi value) siparisAlindi,
-    required TResult Function(_KargoyaVerildi value) kargoyaVerildi,
-    required TResult Function(_Yolda value) yolda,
-    required TResult Function(_Dagitimda value) dagitimda,
-    required TResult Function(_TeslimEdildi value) teslimEdildi,
-    required TResult Function(_Iptal value) iptal,
-    required TResult Function(_Iade value) iade,
-  }) {
-    return iptal(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult? Function(_SiparisAlindi value)? siparisAlindi,
-    TResult? Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult? Function(_Yolda value)? yolda,
-    TResult? Function(_Dagitimda value)? dagitimda,
-    TResult? Function(_TeslimEdildi value)? teslimEdildi,
-    TResult? Function(_Iptal value)? iptal,
-    TResult? Function(_Iade value)? iade,
-  }) {
-    return iptal?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult Function(_SiparisAlindi value)? siparisAlindi,
-    TResult Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult Function(_Yolda value)? yolda,
-    TResult Function(_Dagitimda value)? dagitimda,
-    TResult Function(_TeslimEdildi value)? teslimEdildi,
-    TResult Function(_Iptal value)? iptal,
-    TResult Function(_Iade value)? iade,
-    required TResult orElse(),
-  }) {
-    if (iptal != null) {
-      return iptal(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class _Iptal extends OrderStatus {
-  const factory _Iptal() = _$IptalImpl;
-  const _Iptal._() : super._();
-}
-
-/// @nodoc
-abstract class _$$IadeImplCopyWith<$Res> {
-  factory _$$IadeImplCopyWith(
-          _$IadeImpl value, $Res Function(_$IadeImpl) then) =
-      __$$IadeImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$IadeImplCopyWithImpl<$Res>
-    extends _$OrderStatusCopyWithImpl<$Res, _$IadeImpl>
-    implements _$$IadeImplCopyWith<$Res> {
-  __$$IadeImplCopyWithImpl(_$IadeImpl _value, $Res Function(_$IadeImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of OrderStatus
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-
-class _$IadeImpl extends _Iade {
-  const _$IadeImpl() : super._();
-
-  @override
-  String toString() {
-    return 'OrderStatus.iade()';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$IadeImpl);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() hazirlaniyor,
-    required TResult Function() siparisAlindi,
-    required TResult Function() kargoyaVerildi,
-    required TResult Function() yolda,
-    required TResult Function() dagitimda,
-    required TResult Function() teslimEdildi,
-    required TResult Function() iptal,
-    required TResult Function() iade,
-  }) {
-    return iade();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? hazirlaniyor,
-    TResult? Function()? siparisAlindi,
-    TResult? Function()? kargoyaVerildi,
-    TResult? Function()? yolda,
-    TResult? Function()? dagitimda,
-    TResult? Function()? teslimEdildi,
-    TResult? Function()? iptal,
-    TResult? Function()? iade,
-  }) {
-    return iade?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? hazirlaniyor,
-    TResult Function()? siparisAlindi,
-    TResult Function()? kargoyaVerildi,
-    TResult Function()? yolda,
-    TResult Function()? dagitimda,
-    TResult Function()? teslimEdildi,
-    TResult Function()? iptal,
-    TResult Function()? iade,
-    required TResult orElse(),
-  }) {
-    if (iade != null) {
-      return iade();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_Hazirlaniyor value) hazirlaniyor,
-    required TResult Function(_SiparisAlindi value) siparisAlindi,
-    required TResult Function(_KargoyaVerildi value) kargoyaVerildi,
-    required TResult Function(_Yolda value) yolda,
-    required TResult Function(_Dagitimda value) dagitimda,
-    required TResult Function(_TeslimEdildi value) teslimEdildi,
-    required TResult Function(_Iptal value) iptal,
-    required TResult Function(_Iade value) iade,
-  }) {
-    return iade(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult? Function(_SiparisAlindi value)? siparisAlindi,
-    TResult? Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult? Function(_Yolda value)? yolda,
-    TResult? Function(_Dagitimda value)? dagitimda,
-    TResult? Function(_TeslimEdildi value)? teslimEdildi,
-    TResult? Function(_Iptal value)? iptal,
-    TResult? Function(_Iade value)? iade,
-  }) {
-    return iade?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Hazirlaniyor value)? hazirlaniyor,
-    TResult Function(_SiparisAlindi value)? siparisAlindi,
-    TResult Function(_KargoyaVerildi value)? kargoyaVerildi,
-    TResult Function(_Yolda value)? yolda,
-    TResult Function(_Dagitimda value)? dagitimda,
-    TResult Function(_TeslimEdildi value)? teslimEdildi,
-    TResult Function(_Iptal value)? iptal,
-    TResult Function(_Iade value)? iade,
-    required TResult orElse(),
-  }) {
-    if (iade != null) {
-      return iade(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class _Iade extends OrderStatus {
-  const factory _Iade() = _$IadeImpl;
-  const _Iade._() : super._();
+abstract class _PaymentFailed extends OrderStatus {
+  const factory _PaymentFailed() = _$PaymentFailedImpl;
+  const _PaymentFailed._() : super._();
 }
 
 Address _$AddressFromJson(Map<String, dynamic> json) {
@@ -2376,6 +1843,309 @@ abstract class _OrderTotals implements OrderTotals {
       throw _privateConstructorUsedError;
 }
 
+OrderPayment _$OrderPaymentFromJson(Map<String, dynamic> json) {
+  return _OrderPayment.fromJson(json);
+}
+
+/// @nodoc
+mixin _$OrderPayment {
+  String get provider => throw _privateConstructorUsedError;
+  String get status => throw _privateConstructorUsedError;
+  @JsonKey(name: 'received_total')
+  double? get receivedTotal => throw _privateConstructorUsedError;
+  String get currency => throw _privateConstructorUsedError;
+  @JsonKey(name: 'payment_type')
+  String? get paymentType => throw _privateConstructorUsedError;
+  @JsonKey(name: 'reported_at')
+  DateTime? get reportedAt => throw _privateConstructorUsedError;
+  Map<String, dynamic>? get paytr => throw _privateConstructorUsedError;
+
+  /// Serializes this OrderPayment to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of OrderPayment
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $OrderPaymentCopyWith<OrderPayment> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $OrderPaymentCopyWith<$Res> {
+  factory $OrderPaymentCopyWith(
+          OrderPayment value, $Res Function(OrderPayment) then) =
+      _$OrderPaymentCopyWithImpl<$Res, OrderPayment>;
+  @useResult
+  $Res call(
+      {String provider,
+      String status,
+      @JsonKey(name: 'received_total') double? receivedTotal,
+      String currency,
+      @JsonKey(name: 'payment_type') String? paymentType,
+      @JsonKey(name: 'reported_at') DateTime? reportedAt,
+      Map<String, dynamic>? paytr});
+}
+
+/// @nodoc
+class _$OrderPaymentCopyWithImpl<$Res, $Val extends OrderPayment>
+    implements $OrderPaymentCopyWith<$Res> {
+  _$OrderPaymentCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of OrderPayment
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? provider = null,
+    Object? status = null,
+    Object? receivedTotal = freezed,
+    Object? currency = null,
+    Object? paymentType = freezed,
+    Object? reportedAt = freezed,
+    Object? paytr = freezed,
+  }) {
+    return _then(_value.copyWith(
+      provider: null == provider
+          ? _value.provider
+          : provider // ignore: cast_nullable_to_non_nullable
+              as String,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      receivedTotal: freezed == receivedTotal
+          ? _value.receivedTotal
+          : receivedTotal // ignore: cast_nullable_to_non_nullable
+              as double?,
+      currency: null == currency
+          ? _value.currency
+          : currency // ignore: cast_nullable_to_non_nullable
+              as String,
+      paymentType: freezed == paymentType
+          ? _value.paymentType
+          : paymentType // ignore: cast_nullable_to_non_nullable
+              as String?,
+      reportedAt: freezed == reportedAt
+          ? _value.reportedAt
+          : reportedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      paytr: freezed == paytr
+          ? _value.paytr
+          : paytr // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$OrderPaymentImplCopyWith<$Res>
+    implements $OrderPaymentCopyWith<$Res> {
+  factory _$$OrderPaymentImplCopyWith(
+          _$OrderPaymentImpl value, $Res Function(_$OrderPaymentImpl) then) =
+      __$$OrderPaymentImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String provider,
+      String status,
+      @JsonKey(name: 'received_total') double? receivedTotal,
+      String currency,
+      @JsonKey(name: 'payment_type') String? paymentType,
+      @JsonKey(name: 'reported_at') DateTime? reportedAt,
+      Map<String, dynamic>? paytr});
+}
+
+/// @nodoc
+class __$$OrderPaymentImplCopyWithImpl<$Res>
+    extends _$OrderPaymentCopyWithImpl<$Res, _$OrderPaymentImpl>
+    implements _$$OrderPaymentImplCopyWith<$Res> {
+  __$$OrderPaymentImplCopyWithImpl(
+      _$OrderPaymentImpl _value, $Res Function(_$OrderPaymentImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of OrderPayment
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? provider = null,
+    Object? status = null,
+    Object? receivedTotal = freezed,
+    Object? currency = null,
+    Object? paymentType = freezed,
+    Object? reportedAt = freezed,
+    Object? paytr = freezed,
+  }) {
+    return _then(_$OrderPaymentImpl(
+      provider: null == provider
+          ? _value.provider
+          : provider // ignore: cast_nullable_to_non_nullable
+              as String,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      receivedTotal: freezed == receivedTotal
+          ? _value.receivedTotal
+          : receivedTotal // ignore: cast_nullable_to_non_nullable
+              as double?,
+      currency: null == currency
+          ? _value.currency
+          : currency // ignore: cast_nullable_to_non_nullable
+              as String,
+      paymentType: freezed == paymentType
+          ? _value.paymentType
+          : paymentType // ignore: cast_nullable_to_non_nullable
+              as String?,
+      reportedAt: freezed == reportedAt
+          ? _value.reportedAt
+          : reportedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      paytr: freezed == paytr
+          ? _value._paytr
+          : paytr // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$OrderPaymentImpl implements _OrderPayment {
+  const _$OrderPaymentImpl(
+      {required this.provider,
+      required this.status,
+      @JsonKey(name: 'received_total') this.receivedTotal,
+      required this.currency,
+      @JsonKey(name: 'payment_type') this.paymentType,
+      @JsonKey(name: 'reported_at') this.reportedAt,
+      final Map<String, dynamic>? paytr})
+      : _paytr = paytr;
+
+  factory _$OrderPaymentImpl.fromJson(Map<String, dynamic> json) =>
+      _$$OrderPaymentImplFromJson(json);
+
+  @override
+  final String provider;
+  @override
+  final String status;
+  @override
+  @JsonKey(name: 'received_total')
+  final double? receivedTotal;
+  @override
+  final String currency;
+  @override
+  @JsonKey(name: 'payment_type')
+  final String? paymentType;
+  @override
+  @JsonKey(name: 'reported_at')
+  final DateTime? reportedAt;
+  final Map<String, dynamic>? _paytr;
+  @override
+  Map<String, dynamic>? get paytr {
+    final value = _paytr;
+    if (value == null) return null;
+    if (_paytr is EqualUnmodifiableMapView) return _paytr;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(value);
+  }
+
+  @override
+  String toString() {
+    return 'OrderPayment(provider: $provider, status: $status, receivedTotal: $receivedTotal, currency: $currency, paymentType: $paymentType, reportedAt: $reportedAt, paytr: $paytr)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$OrderPaymentImpl &&
+            (identical(other.provider, provider) ||
+                other.provider == provider) &&
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.receivedTotal, receivedTotal) ||
+                other.receivedTotal == receivedTotal) &&
+            (identical(other.currency, currency) ||
+                other.currency == currency) &&
+            (identical(other.paymentType, paymentType) ||
+                other.paymentType == paymentType) &&
+            (identical(other.reportedAt, reportedAt) ||
+                other.reportedAt == reportedAt) &&
+            const DeepCollectionEquality().equals(other._paytr, _paytr));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      provider,
+      status,
+      receivedTotal,
+      currency,
+      paymentType,
+      reportedAt,
+      const DeepCollectionEquality().hash(_paytr));
+
+  /// Create a copy of OrderPayment
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$OrderPaymentImplCopyWith<_$OrderPaymentImpl> get copyWith =>
+      __$$OrderPaymentImplCopyWithImpl<_$OrderPaymentImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$OrderPaymentImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _OrderPayment implements OrderPayment {
+  const factory _OrderPayment(
+      {required final String provider,
+      required final String status,
+      @JsonKey(name: 'received_total') final double? receivedTotal,
+      required final String currency,
+      @JsonKey(name: 'payment_type') final String? paymentType,
+      @JsonKey(name: 'reported_at') final DateTime? reportedAt,
+      final Map<String, dynamic>? paytr}) = _$OrderPaymentImpl;
+
+  factory _OrderPayment.fromJson(Map<String, dynamic> json) =
+      _$OrderPaymentImpl.fromJson;
+
+  @override
+  String get provider;
+  @override
+  String get status;
+  @override
+  @JsonKey(name: 'received_total')
+  double? get receivedTotal;
+  @override
+  String get currency;
+  @override
+  @JsonKey(name: 'payment_type')
+  String? get paymentType;
+  @override
+  @JsonKey(name: 'reported_at')
+  DateTime? get reportedAt;
+  @override
+  Map<String, dynamic>? get paytr;
+
+  /// Create a copy of OrderPayment
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$OrderPaymentImplCopyWith<_$OrderPaymentImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 OrderShipment _$OrderShipmentFromJson(Map<String, dynamic> json) {
   return _OrderShipment.fromJson(json);
 }
@@ -2386,6 +2156,10 @@ mixin _$OrderShipment {
   @JsonKey(name: 'tracking_number')
   String? get trackingNumber => throw _privateConstructorUsedError;
   String? get status => throw _privateConstructorUsedError;
+  @JsonKey(name: 'shipped_at')
+  DateTime? get shippedAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'delivered_at')
+  DateTime? get deliveredAt => throw _privateConstructorUsedError;
   bool? get simulated => throw _privateConstructorUsedError;
   String? get log => throw _privateConstructorUsedError;
 
@@ -2409,6 +2183,8 @@ abstract class $OrderShipmentCopyWith<$Res> {
       {String? provider,
       @JsonKey(name: 'tracking_number') String? trackingNumber,
       String? status,
+      @JsonKey(name: 'shipped_at') DateTime? shippedAt,
+      @JsonKey(name: 'delivered_at') DateTime? deliveredAt,
       bool? simulated,
       String? log});
 }
@@ -2431,6 +2207,8 @@ class _$OrderShipmentCopyWithImpl<$Res, $Val extends OrderShipment>
     Object? provider = freezed,
     Object? trackingNumber = freezed,
     Object? status = freezed,
+    Object? shippedAt = freezed,
+    Object? deliveredAt = freezed,
     Object? simulated = freezed,
     Object? log = freezed,
   }) {
@@ -2447,6 +2225,14 @@ class _$OrderShipmentCopyWithImpl<$Res, $Val extends OrderShipment>
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as String?,
+      shippedAt: freezed == shippedAt
+          ? _value.shippedAt
+          : shippedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      deliveredAt: freezed == deliveredAt
+          ? _value.deliveredAt
+          : deliveredAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       simulated: freezed == simulated
           ? _value.simulated
           : simulated // ignore: cast_nullable_to_non_nullable
@@ -2471,6 +2257,8 @@ abstract class _$$OrderShipmentImplCopyWith<$Res>
       {String? provider,
       @JsonKey(name: 'tracking_number') String? trackingNumber,
       String? status,
+      @JsonKey(name: 'shipped_at') DateTime? shippedAt,
+      @JsonKey(name: 'delivered_at') DateTime? deliveredAt,
       bool? simulated,
       String? log});
 }
@@ -2491,6 +2279,8 @@ class __$$OrderShipmentImplCopyWithImpl<$Res>
     Object? provider = freezed,
     Object? trackingNumber = freezed,
     Object? status = freezed,
+    Object? shippedAt = freezed,
+    Object? deliveredAt = freezed,
     Object? simulated = freezed,
     Object? log = freezed,
   }) {
@@ -2507,6 +2297,14 @@ class __$$OrderShipmentImplCopyWithImpl<$Res>
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as String?,
+      shippedAt: freezed == shippedAt
+          ? _value.shippedAt
+          : shippedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      deliveredAt: freezed == deliveredAt
+          ? _value.deliveredAt
+          : deliveredAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       simulated: freezed == simulated
           ? _value.simulated
           : simulated // ignore: cast_nullable_to_non_nullable
@@ -2526,6 +2324,8 @@ class _$OrderShipmentImpl implements _OrderShipment {
       {this.provider,
       @JsonKey(name: 'tracking_number') this.trackingNumber,
       this.status,
+      @JsonKey(name: 'shipped_at') this.shippedAt,
+      @JsonKey(name: 'delivered_at') this.deliveredAt,
       this.simulated,
       this.log});
 
@@ -2540,13 +2340,19 @@ class _$OrderShipmentImpl implements _OrderShipment {
   @override
   final String? status;
   @override
+  @JsonKey(name: 'shipped_at')
+  final DateTime? shippedAt;
+  @override
+  @JsonKey(name: 'delivered_at')
+  final DateTime? deliveredAt;
+  @override
   final bool? simulated;
   @override
   final String? log;
 
   @override
   String toString() {
-    return 'OrderShipment(provider: $provider, trackingNumber: $trackingNumber, status: $status, simulated: $simulated, log: $log)';
+    return 'OrderShipment(provider: $provider, trackingNumber: $trackingNumber, status: $status, shippedAt: $shippedAt, deliveredAt: $deliveredAt, simulated: $simulated, log: $log)';
   }
 
   @override
@@ -2559,6 +2365,10 @@ class _$OrderShipmentImpl implements _OrderShipment {
             (identical(other.trackingNumber, trackingNumber) ||
                 other.trackingNumber == trackingNumber) &&
             (identical(other.status, status) || other.status == status) &&
+            (identical(other.shippedAt, shippedAt) ||
+                other.shippedAt == shippedAt) &&
+            (identical(other.deliveredAt, deliveredAt) ||
+                other.deliveredAt == deliveredAt) &&
             (identical(other.simulated, simulated) ||
                 other.simulated == simulated) &&
             (identical(other.log, log) || other.log == log));
@@ -2566,8 +2376,8 @@ class _$OrderShipmentImpl implements _OrderShipment {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, provider, trackingNumber, status, simulated, log);
+  int get hashCode => Object.hash(runtimeType, provider, trackingNumber, status,
+      shippedAt, deliveredAt, simulated, log);
 
   /// Create a copy of OrderShipment
   /// with the given fields replaced by the non-null parameter values.
@@ -2590,6 +2400,8 @@ abstract class _OrderShipment implements OrderShipment {
       {final String? provider,
       @JsonKey(name: 'tracking_number') final String? trackingNumber,
       final String? status,
+      @JsonKey(name: 'shipped_at') final DateTime? shippedAt,
+      @JsonKey(name: 'delivered_at') final DateTime? deliveredAt,
       final bool? simulated,
       final String? log}) = _$OrderShipmentImpl;
 
@@ -2604,6 +2416,12 @@ abstract class _OrderShipment implements OrderShipment {
   @override
   String? get status;
   @override
+  @JsonKey(name: 'shipped_at')
+  DateTime? get shippedAt;
+  @override
+  @JsonKey(name: 'delivered_at')
+  DateTime? get deliveredAt;
+  @override
   bool? get simulated;
   @override
   String? get log;
@@ -2613,6 +2431,1005 @@ abstract class _OrderShipment implements OrderShipment {
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$OrderShipmentImplCopyWith<_$OrderShipmentImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+OrderStatusHistory _$OrderStatusHistoryFromJson(Map<String, dynamic> json) {
+  return _OrderStatusHistory.fromJson(json);
+}
+
+/// @nodoc
+mixin _$OrderStatusHistory {
+  String get status => throw _privateConstructorUsedError;
+  DateTime get at => throw _privateConstructorUsedError;
+  String get by => throw _privateConstructorUsedError;
+
+  /// Serializes this OrderStatusHistory to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of OrderStatusHistory
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $OrderStatusHistoryCopyWith<OrderStatusHistory> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $OrderStatusHistoryCopyWith<$Res> {
+  factory $OrderStatusHistoryCopyWith(
+          OrderStatusHistory value, $Res Function(OrderStatusHistory) then) =
+      _$OrderStatusHistoryCopyWithImpl<$Res, OrderStatusHistory>;
+  @useResult
+  $Res call({String status, DateTime at, String by});
+}
+
+/// @nodoc
+class _$OrderStatusHistoryCopyWithImpl<$Res, $Val extends OrderStatusHistory>
+    implements $OrderStatusHistoryCopyWith<$Res> {
+  _$OrderStatusHistoryCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of OrderStatusHistory
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? status = null,
+    Object? at = null,
+    Object? by = null,
+  }) {
+    return _then(_value.copyWith(
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      at: null == at
+          ? _value.at
+          : at // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      by: null == by
+          ? _value.by
+          : by // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$OrderStatusHistoryImplCopyWith<$Res>
+    implements $OrderStatusHistoryCopyWith<$Res> {
+  factory _$$OrderStatusHistoryImplCopyWith(_$OrderStatusHistoryImpl value,
+          $Res Function(_$OrderStatusHistoryImpl) then) =
+      __$$OrderStatusHistoryImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String status, DateTime at, String by});
+}
+
+/// @nodoc
+class __$$OrderStatusHistoryImplCopyWithImpl<$Res>
+    extends _$OrderStatusHistoryCopyWithImpl<$Res, _$OrderStatusHistoryImpl>
+    implements _$$OrderStatusHistoryImplCopyWith<$Res> {
+  __$$OrderStatusHistoryImplCopyWithImpl(_$OrderStatusHistoryImpl _value,
+      $Res Function(_$OrderStatusHistoryImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of OrderStatusHistory
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? status = null,
+    Object? at = null,
+    Object? by = null,
+  }) {
+    return _then(_$OrderStatusHistoryImpl(
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      at: null == at
+          ? _value.at
+          : at // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      by: null == by
+          ? _value.by
+          : by // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$OrderStatusHistoryImpl implements _OrderStatusHistory {
+  const _$OrderStatusHistoryImpl(
+      {required this.status, required this.at, required this.by});
+
+  factory _$OrderStatusHistoryImpl.fromJson(Map<String, dynamic> json) =>
+      _$$OrderStatusHistoryImplFromJson(json);
+
+  @override
+  final String status;
+  @override
+  final DateTime at;
+  @override
+  final String by;
+
+  @override
+  String toString() {
+    return 'OrderStatusHistory(status: $status, at: $at, by: $by)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$OrderStatusHistoryImpl &&
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.at, at) || other.at == at) &&
+            (identical(other.by, by) || other.by == by));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, status, at, by);
+
+  /// Create a copy of OrderStatusHistory
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$OrderStatusHistoryImplCopyWith<_$OrderStatusHistoryImpl> get copyWith =>
+      __$$OrderStatusHistoryImplCopyWithImpl<_$OrderStatusHistoryImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$OrderStatusHistoryImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _OrderStatusHistory implements OrderStatusHistory {
+  const factory _OrderStatusHistory(
+      {required final String status,
+      required final DateTime at,
+      required final String by}) = _$OrderStatusHistoryImpl;
+
+  factory _OrderStatusHistory.fromJson(Map<String, dynamic> json) =
+      _$OrderStatusHistoryImpl.fromJson;
+
+  @override
+  String get status;
+  @override
+  DateTime get at;
+  @override
+  String get by;
+
+  /// Create a copy of OrderStatusHistory
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$OrderStatusHistoryImplCopyWith<_$OrderStatusHistoryImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+OrderCustomer _$OrderCustomerFromJson(Map<String, dynamic> json) {
+  return _OrderCustomer.fromJson(json);
+}
+
+/// @nodoc
+mixin _$OrderCustomer {
+  @JsonKey(name: 'full_name')
+  String get fullName => throw _privateConstructorUsedError;
+  String get email => throw _privateConstructorUsedError;
+  String get phone => throw _privateConstructorUsedError;
+  OrderAddress get address => throw _privateConstructorUsedError;
+
+  /// Serializes this OrderCustomer to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of OrderCustomer
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $OrderCustomerCopyWith<OrderCustomer> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $OrderCustomerCopyWith<$Res> {
+  factory $OrderCustomerCopyWith(
+          OrderCustomer value, $Res Function(OrderCustomer) then) =
+      _$OrderCustomerCopyWithImpl<$Res, OrderCustomer>;
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'full_name') String fullName,
+      String email,
+      String phone,
+      OrderAddress address});
+
+  $OrderAddressCopyWith<$Res> get address;
+}
+
+/// @nodoc
+class _$OrderCustomerCopyWithImpl<$Res, $Val extends OrderCustomer>
+    implements $OrderCustomerCopyWith<$Res> {
+  _$OrderCustomerCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of OrderCustomer
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? fullName = null,
+    Object? email = null,
+    Object? phone = null,
+    Object? address = null,
+  }) {
+    return _then(_value.copyWith(
+      fullName: null == fullName
+          ? _value.fullName
+          : fullName // ignore: cast_nullable_to_non_nullable
+              as String,
+      email: null == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      phone: null == phone
+          ? _value.phone
+          : phone // ignore: cast_nullable_to_non_nullable
+              as String,
+      address: null == address
+          ? _value.address
+          : address // ignore: cast_nullable_to_non_nullable
+              as OrderAddress,
+    ) as $Val);
+  }
+
+  /// Create a copy of OrderCustomer
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $OrderAddressCopyWith<$Res> get address {
+    return $OrderAddressCopyWith<$Res>(_value.address, (value) {
+      return _then(_value.copyWith(address: value) as $Val);
+    });
+  }
+}
+
+/// @nodoc
+abstract class _$$OrderCustomerImplCopyWith<$Res>
+    implements $OrderCustomerCopyWith<$Res> {
+  factory _$$OrderCustomerImplCopyWith(
+          _$OrderCustomerImpl value, $Res Function(_$OrderCustomerImpl) then) =
+      __$$OrderCustomerImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'full_name') String fullName,
+      String email,
+      String phone,
+      OrderAddress address});
+
+  @override
+  $OrderAddressCopyWith<$Res> get address;
+}
+
+/// @nodoc
+class __$$OrderCustomerImplCopyWithImpl<$Res>
+    extends _$OrderCustomerCopyWithImpl<$Res, _$OrderCustomerImpl>
+    implements _$$OrderCustomerImplCopyWith<$Res> {
+  __$$OrderCustomerImplCopyWithImpl(
+      _$OrderCustomerImpl _value, $Res Function(_$OrderCustomerImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of OrderCustomer
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? fullName = null,
+    Object? email = null,
+    Object? phone = null,
+    Object? address = null,
+  }) {
+    return _then(_$OrderCustomerImpl(
+      fullName: null == fullName
+          ? _value.fullName
+          : fullName // ignore: cast_nullable_to_non_nullable
+              as String,
+      email: null == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      phone: null == phone
+          ? _value.phone
+          : phone // ignore: cast_nullable_to_non_nullable
+              as String,
+      address: null == address
+          ? _value.address
+          : address // ignore: cast_nullable_to_non_nullable
+              as OrderAddress,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$OrderCustomerImpl implements _OrderCustomer {
+  const _$OrderCustomerImpl(
+      {@JsonKey(name: 'full_name') required this.fullName,
+      required this.email,
+      required this.phone,
+      required this.address});
+
+  factory _$OrderCustomerImpl.fromJson(Map<String, dynamic> json) =>
+      _$$OrderCustomerImplFromJson(json);
+
+  @override
+  @JsonKey(name: 'full_name')
+  final String fullName;
+  @override
+  final String email;
+  @override
+  final String phone;
+  @override
+  final OrderAddress address;
+
+  @override
+  String toString() {
+    return 'OrderCustomer(fullName: $fullName, email: $email, phone: $phone, address: $address)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$OrderCustomerImpl &&
+            (identical(other.fullName, fullName) ||
+                other.fullName == fullName) &&
+            (identical(other.email, email) || other.email == email) &&
+            (identical(other.phone, phone) || other.phone == phone) &&
+            (identical(other.address, address) || other.address == address));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, fullName, email, phone, address);
+
+  /// Create a copy of OrderCustomer
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$OrderCustomerImplCopyWith<_$OrderCustomerImpl> get copyWith =>
+      __$$OrderCustomerImplCopyWithImpl<_$OrderCustomerImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$OrderCustomerImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _OrderCustomer implements OrderCustomer {
+  const factory _OrderCustomer(
+      {@JsonKey(name: 'full_name') required final String fullName,
+      required final String email,
+      required final String phone,
+      required final OrderAddress address}) = _$OrderCustomerImpl;
+
+  factory _OrderCustomer.fromJson(Map<String, dynamic> json) =
+      _$OrderCustomerImpl.fromJson;
+
+  @override
+  @JsonKey(name: 'full_name')
+  String get fullName;
+  @override
+  String get email;
+  @override
+  String get phone;
+  @override
+  OrderAddress get address;
+
+  /// Create a copy of OrderCustomer
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$OrderCustomerImplCopyWith<_$OrderCustomerImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+OrderAddress _$OrderAddressFromJson(Map<String, dynamic> json) {
+  return _OrderAddress.fromJson(json);
+}
+
+/// @nodoc
+mixin _$OrderAddress {
+  @JsonKey(name: 'line1')
+  String get line1 => throw _privateConstructorUsedError;
+  String get city => throw _privateConstructorUsedError;
+  @JsonKey(name: 'postal_code')
+  String get postalCode => throw _privateConstructorUsedError;
+  String get country => throw _privateConstructorUsedError;
+
+  /// Serializes this OrderAddress to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of OrderAddress
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $OrderAddressCopyWith<OrderAddress> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $OrderAddressCopyWith<$Res> {
+  factory $OrderAddressCopyWith(
+          OrderAddress value, $Res Function(OrderAddress) then) =
+      _$OrderAddressCopyWithImpl<$Res, OrderAddress>;
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'line1') String line1,
+      String city,
+      @JsonKey(name: 'postal_code') String postalCode,
+      String country});
+}
+
+/// @nodoc
+class _$OrderAddressCopyWithImpl<$Res, $Val extends OrderAddress>
+    implements $OrderAddressCopyWith<$Res> {
+  _$OrderAddressCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of OrderAddress
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? line1 = null,
+    Object? city = null,
+    Object? postalCode = null,
+    Object? country = null,
+  }) {
+    return _then(_value.copyWith(
+      line1: null == line1
+          ? _value.line1
+          : line1 // ignore: cast_nullable_to_non_nullable
+              as String,
+      city: null == city
+          ? _value.city
+          : city // ignore: cast_nullable_to_non_nullable
+              as String,
+      postalCode: null == postalCode
+          ? _value.postalCode
+          : postalCode // ignore: cast_nullable_to_non_nullable
+              as String,
+      country: null == country
+          ? _value.country
+          : country // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$OrderAddressImplCopyWith<$Res>
+    implements $OrderAddressCopyWith<$Res> {
+  factory _$$OrderAddressImplCopyWith(
+          _$OrderAddressImpl value, $Res Function(_$OrderAddressImpl) then) =
+      __$$OrderAddressImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'line1') String line1,
+      String city,
+      @JsonKey(name: 'postal_code') String postalCode,
+      String country});
+}
+
+/// @nodoc
+class __$$OrderAddressImplCopyWithImpl<$Res>
+    extends _$OrderAddressCopyWithImpl<$Res, _$OrderAddressImpl>
+    implements _$$OrderAddressImplCopyWith<$Res> {
+  __$$OrderAddressImplCopyWithImpl(
+      _$OrderAddressImpl _value, $Res Function(_$OrderAddressImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of OrderAddress
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? line1 = null,
+    Object? city = null,
+    Object? postalCode = null,
+    Object? country = null,
+  }) {
+    return _then(_$OrderAddressImpl(
+      line1: null == line1
+          ? _value.line1
+          : line1 // ignore: cast_nullable_to_non_nullable
+              as String,
+      city: null == city
+          ? _value.city
+          : city // ignore: cast_nullable_to_non_nullable
+              as String,
+      postalCode: null == postalCode
+          ? _value.postalCode
+          : postalCode // ignore: cast_nullable_to_non_nullable
+              as String,
+      country: null == country
+          ? _value.country
+          : country // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$OrderAddressImpl implements _OrderAddress {
+  const _$OrderAddressImpl(
+      {@JsonKey(name: 'line1') required this.line1,
+      required this.city,
+      @JsonKey(name: 'postal_code') required this.postalCode,
+      this.country = 'TR'});
+
+  factory _$OrderAddressImpl.fromJson(Map<String, dynamic> json) =>
+      _$$OrderAddressImplFromJson(json);
+
+  @override
+  @JsonKey(name: 'line1')
+  final String line1;
+  @override
+  final String city;
+  @override
+  @JsonKey(name: 'postal_code')
+  final String postalCode;
+  @override
+  @JsonKey()
+  final String country;
+
+  @override
+  String toString() {
+    return 'OrderAddress(line1: $line1, city: $city, postalCode: $postalCode, country: $country)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$OrderAddressImpl &&
+            (identical(other.line1, line1) || other.line1 == line1) &&
+            (identical(other.city, city) || other.city == city) &&
+            (identical(other.postalCode, postalCode) ||
+                other.postalCode == postalCode) &&
+            (identical(other.country, country) || other.country == country));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, line1, city, postalCode, country);
+
+  /// Create a copy of OrderAddress
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$OrderAddressImplCopyWith<_$OrderAddressImpl> get copyWith =>
+      __$$OrderAddressImplCopyWithImpl<_$OrderAddressImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$OrderAddressImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _OrderAddress implements OrderAddress {
+  const factory _OrderAddress(
+      {@JsonKey(name: 'line1') required final String line1,
+      required final String city,
+      @JsonKey(name: 'postal_code') required final String postalCode,
+      final String country}) = _$OrderAddressImpl;
+
+  factory _OrderAddress.fromJson(Map<String, dynamic> json) =
+      _$OrderAddressImpl.fromJson;
+
+  @override
+  @JsonKey(name: 'line1')
+  String get line1;
+  @override
+  String get city;
+  @override
+  @JsonKey(name: 'postal_code')
+  String get postalCode;
+  @override
+  String get country;
+
+  /// Create a copy of OrderAddress
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$OrderAddressImplCopyWith<_$OrderAddressImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+OrderShipping _$OrderShippingFromJson(Map<String, dynamic> json) {
+  return _OrderShipping.fromJson(json);
+}
+
+/// @nodoc
+mixin _$OrderShipping {
+  String get provider => throw _privateConstructorUsedError;
+
+  /// Serializes this OrderShipping to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of OrderShipping
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $OrderShippingCopyWith<OrderShipping> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $OrderShippingCopyWith<$Res> {
+  factory $OrderShippingCopyWith(
+          OrderShipping value, $Res Function(OrderShipping) then) =
+      _$OrderShippingCopyWithImpl<$Res, OrderShipping>;
+  @useResult
+  $Res call({String provider});
+}
+
+/// @nodoc
+class _$OrderShippingCopyWithImpl<$Res, $Val extends OrderShipping>
+    implements $OrderShippingCopyWith<$Res> {
+  _$OrderShippingCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of OrderShipping
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? provider = null,
+  }) {
+    return _then(_value.copyWith(
+      provider: null == provider
+          ? _value.provider
+          : provider // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$OrderShippingImplCopyWith<$Res>
+    implements $OrderShippingCopyWith<$Res> {
+  factory _$$OrderShippingImplCopyWith(
+          _$OrderShippingImpl value, $Res Function(_$OrderShippingImpl) then) =
+      __$$OrderShippingImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String provider});
+}
+
+/// @nodoc
+class __$$OrderShippingImplCopyWithImpl<$Res>
+    extends _$OrderShippingCopyWithImpl<$Res, _$OrderShippingImpl>
+    implements _$$OrderShippingImplCopyWith<$Res> {
+  __$$OrderShippingImplCopyWithImpl(
+      _$OrderShippingImpl _value, $Res Function(_$OrderShippingImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of OrderShipping
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? provider = null,
+  }) {
+    return _then(_$OrderShippingImpl(
+      provider: null == provider
+          ? _value.provider
+          : provider // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$OrderShippingImpl implements _OrderShipping {
+  const _$OrderShippingImpl({required this.provider});
+
+  factory _$OrderShippingImpl.fromJson(Map<String, dynamic> json) =>
+      _$$OrderShippingImplFromJson(json);
+
+  @override
+  final String provider;
+
+  @override
+  String toString() {
+    return 'OrderShipping(provider: $provider)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$OrderShippingImpl &&
+            (identical(other.provider, provider) ||
+                other.provider == provider));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, provider);
+
+  /// Create a copy of OrderShipping
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$OrderShippingImplCopyWith<_$OrderShippingImpl> get copyWith =>
+      __$$OrderShippingImplCopyWithImpl<_$OrderShippingImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$OrderShippingImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _OrderShipping implements OrderShipping {
+  const factory _OrderShipping({required final String provider}) =
+      _$OrderShippingImpl;
+
+  factory _OrderShipping.fromJson(Map<String, dynamic> json) =
+      _$OrderShippingImpl.fromJson;
+
+  @override
+  String get provider;
+
+  /// Create a copy of OrderShipping
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$OrderShippingImplCopyWith<_$OrderShippingImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+OrderEmailFlags _$OrderEmailFlagsFromJson(Map<String, dynamic> json) {
+  return _OrderEmailFlags.fromJson(json);
+}
+
+/// @nodoc
+mixin _$OrderEmailFlags {
+  @JsonKey(name: 'shipped_sent')
+  bool get shippedSent => throw _privateConstructorUsedError;
+  @JsonKey(name: 'delivered_sent')
+  bool get deliveredSent => throw _privateConstructorUsedError;
+  @JsonKey(name: 'canceled_sent')
+  bool get canceledSent => throw _privateConstructorUsedError;
+
+  /// Serializes this OrderEmailFlags to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of OrderEmailFlags
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $OrderEmailFlagsCopyWith<OrderEmailFlags> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $OrderEmailFlagsCopyWith<$Res> {
+  factory $OrderEmailFlagsCopyWith(
+          OrderEmailFlags value, $Res Function(OrderEmailFlags) then) =
+      _$OrderEmailFlagsCopyWithImpl<$Res, OrderEmailFlags>;
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'shipped_sent') bool shippedSent,
+      @JsonKey(name: 'delivered_sent') bool deliveredSent,
+      @JsonKey(name: 'canceled_sent') bool canceledSent});
+}
+
+/// @nodoc
+class _$OrderEmailFlagsCopyWithImpl<$Res, $Val extends OrderEmailFlags>
+    implements $OrderEmailFlagsCopyWith<$Res> {
+  _$OrderEmailFlagsCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of OrderEmailFlags
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? shippedSent = null,
+    Object? deliveredSent = null,
+    Object? canceledSent = null,
+  }) {
+    return _then(_value.copyWith(
+      shippedSent: null == shippedSent
+          ? _value.shippedSent
+          : shippedSent // ignore: cast_nullable_to_non_nullable
+              as bool,
+      deliveredSent: null == deliveredSent
+          ? _value.deliveredSent
+          : deliveredSent // ignore: cast_nullable_to_non_nullable
+              as bool,
+      canceledSent: null == canceledSent
+          ? _value.canceledSent
+          : canceledSent // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$OrderEmailFlagsImplCopyWith<$Res>
+    implements $OrderEmailFlagsCopyWith<$Res> {
+  factory _$$OrderEmailFlagsImplCopyWith(_$OrderEmailFlagsImpl value,
+          $Res Function(_$OrderEmailFlagsImpl) then) =
+      __$$OrderEmailFlagsImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'shipped_sent') bool shippedSent,
+      @JsonKey(name: 'delivered_sent') bool deliveredSent,
+      @JsonKey(name: 'canceled_sent') bool canceledSent});
+}
+
+/// @nodoc
+class __$$OrderEmailFlagsImplCopyWithImpl<$Res>
+    extends _$OrderEmailFlagsCopyWithImpl<$Res, _$OrderEmailFlagsImpl>
+    implements _$$OrderEmailFlagsImplCopyWith<$Res> {
+  __$$OrderEmailFlagsImplCopyWithImpl(
+      _$OrderEmailFlagsImpl _value, $Res Function(_$OrderEmailFlagsImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of OrderEmailFlags
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? shippedSent = null,
+    Object? deliveredSent = null,
+    Object? canceledSent = null,
+  }) {
+    return _then(_$OrderEmailFlagsImpl(
+      shippedSent: null == shippedSent
+          ? _value.shippedSent
+          : shippedSent // ignore: cast_nullable_to_non_nullable
+              as bool,
+      deliveredSent: null == deliveredSent
+          ? _value.deliveredSent
+          : deliveredSent // ignore: cast_nullable_to_non_nullable
+              as bool,
+      canceledSent: null == canceledSent
+          ? _value.canceledSent
+          : canceledSent // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$OrderEmailFlagsImpl implements _OrderEmailFlags {
+  const _$OrderEmailFlagsImpl(
+      {@JsonKey(name: 'shipped_sent') this.shippedSent = false,
+      @JsonKey(name: 'delivered_sent') this.deliveredSent = false,
+      @JsonKey(name: 'canceled_sent') this.canceledSent = false});
+
+  factory _$OrderEmailFlagsImpl.fromJson(Map<String, dynamic> json) =>
+      _$$OrderEmailFlagsImplFromJson(json);
+
+  @override
+  @JsonKey(name: 'shipped_sent')
+  final bool shippedSent;
+  @override
+  @JsonKey(name: 'delivered_sent')
+  final bool deliveredSent;
+  @override
+  @JsonKey(name: 'canceled_sent')
+  final bool canceledSent;
+
+  @override
+  String toString() {
+    return 'OrderEmailFlags(shippedSent: $shippedSent, deliveredSent: $deliveredSent, canceledSent: $canceledSent)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$OrderEmailFlagsImpl &&
+            (identical(other.shippedSent, shippedSent) ||
+                other.shippedSent == shippedSent) &&
+            (identical(other.deliveredSent, deliveredSent) ||
+                other.deliveredSent == deliveredSent) &&
+            (identical(other.canceledSent, canceledSent) ||
+                other.canceledSent == canceledSent));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, shippedSent, deliveredSent, canceledSent);
+
+  /// Create a copy of OrderEmailFlags
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$OrderEmailFlagsImplCopyWith<_$OrderEmailFlagsImpl> get copyWith =>
+      __$$OrderEmailFlagsImplCopyWithImpl<_$OrderEmailFlagsImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$OrderEmailFlagsImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _OrderEmailFlags implements OrderEmailFlags {
+  const factory _OrderEmailFlags(
+          {@JsonKey(name: 'shipped_sent') final bool shippedSent,
+          @JsonKey(name: 'delivered_sent') final bool deliveredSent,
+          @JsonKey(name: 'canceled_sent') final bool canceledSent}) =
+      _$OrderEmailFlagsImpl;
+
+  factory _OrderEmailFlags.fromJson(Map<String, dynamic> json) =
+      _$OrderEmailFlagsImpl.fromJson;
+
+  @override
+  @JsonKey(name: 'shipped_sent')
+  bool get shippedSent;
+  @override
+  @JsonKey(name: 'delivered_sent')
+  bool get deliveredSent;
+  @override
+  @JsonKey(name: 'canceled_sent')
+  bool get canceledSent;
+
+  /// Create a copy of OrderEmailFlags
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$OrderEmailFlagsImplCopyWith<_$OrderEmailFlagsImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -2647,7 +3464,18 @@ mixin _$Order {
   @JsonKey(name: 'customer_phone')
   String? get customerPhone => throw _privateConstructorUsedError;
   @JsonKey(name: 'customer_email')
-  String? get customerEmail => throw _privateConstructorUsedError;
+  String? get customerEmail =>
+      throw _privateConstructorUsedError; // New backend fields
+  OrderCustomer? get customer => throw _privateConstructorUsedError;
+  OrderShipping? get shipping => throw _privateConstructorUsedError;
+  OrderPayment? get payment => throw _privateConstructorUsedError;
+  @JsonKey(name: 'status_history')
+  List<OrderStatusHistory>? get statusHistory =>
+      throw _privateConstructorUsedError;
+  @JsonKey(name: 'email_flags')
+  OrderEmailFlags? get emailFlags => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_deleted')
+  bool get isDeleted => throw _privateConstructorUsedError;
 
   /// Serializes this Order to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -2680,12 +3508,22 @@ abstract class $OrderCopyWith<$Res> {
       @JsonKey(name: 'updated_at') DateTime? updatedAt,
       @JsonKey(name: 'customer_name') String? customerName,
       @JsonKey(name: 'customer_phone') String? customerPhone,
-      @JsonKey(name: 'customer_email') String? customerEmail});
+      @JsonKey(name: 'customer_email') String? customerEmail,
+      OrderCustomer? customer,
+      OrderShipping? shipping,
+      OrderPayment? payment,
+      @JsonKey(name: 'status_history') List<OrderStatusHistory>? statusHistory,
+      @JsonKey(name: 'email_flags') OrderEmailFlags? emailFlags,
+      @JsonKey(name: 'is_deleted') bool isDeleted});
 
   $OrderStatusCopyWith<$Res> get status;
   $AddressCopyWith<$Res>? get address;
   $OrderTotalsCopyWith<$Res>? get totals;
   $OrderShipmentCopyWith<$Res>? get shipment;
+  $OrderCustomerCopyWith<$Res>? get customer;
+  $OrderShippingCopyWith<$Res>? get shipping;
+  $OrderPaymentCopyWith<$Res>? get payment;
+  $OrderEmailFlagsCopyWith<$Res>? get emailFlags;
 }
 
 /// @nodoc
@@ -2719,6 +3557,12 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
     Object? customerName = freezed,
     Object? customerPhone = freezed,
     Object? customerEmail = freezed,
+    Object? customer = freezed,
+    Object? shipping = freezed,
+    Object? payment = freezed,
+    Object? statusHistory = freezed,
+    Object? emailFlags = freezed,
+    Object? isDeleted = null,
   }) {
     return _then(_value.copyWith(
       id: freezed == id
@@ -2785,6 +3629,30 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
           ? _value.customerEmail
           : customerEmail // ignore: cast_nullable_to_non_nullable
               as String?,
+      customer: freezed == customer
+          ? _value.customer
+          : customer // ignore: cast_nullable_to_non_nullable
+              as OrderCustomer?,
+      shipping: freezed == shipping
+          ? _value.shipping
+          : shipping // ignore: cast_nullable_to_non_nullable
+              as OrderShipping?,
+      payment: freezed == payment
+          ? _value.payment
+          : payment // ignore: cast_nullable_to_non_nullable
+              as OrderPayment?,
+      statusHistory: freezed == statusHistory
+          ? _value.statusHistory
+          : statusHistory // ignore: cast_nullable_to_non_nullable
+              as List<OrderStatusHistory>?,
+      emailFlags: freezed == emailFlags
+          ? _value.emailFlags
+          : emailFlags // ignore: cast_nullable_to_non_nullable
+              as OrderEmailFlags?,
+      isDeleted: null == isDeleted
+          ? _value.isDeleted
+          : isDeleted // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 
@@ -2839,6 +3707,62 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
       return _then(_value.copyWith(shipment: value) as $Val);
     });
   }
+
+  /// Create a copy of Order
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $OrderCustomerCopyWith<$Res>? get customer {
+    if (_value.customer == null) {
+      return null;
+    }
+
+    return $OrderCustomerCopyWith<$Res>(_value.customer!, (value) {
+      return _then(_value.copyWith(customer: value) as $Val);
+    });
+  }
+
+  /// Create a copy of Order
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $OrderShippingCopyWith<$Res>? get shipping {
+    if (_value.shipping == null) {
+      return null;
+    }
+
+    return $OrderShippingCopyWith<$Res>(_value.shipping!, (value) {
+      return _then(_value.copyWith(shipping: value) as $Val);
+    });
+  }
+
+  /// Create a copy of Order
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $OrderPaymentCopyWith<$Res>? get payment {
+    if (_value.payment == null) {
+      return null;
+    }
+
+    return $OrderPaymentCopyWith<$Res>(_value.payment!, (value) {
+      return _then(_value.copyWith(payment: value) as $Val);
+    });
+  }
+
+  /// Create a copy of Order
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $OrderEmailFlagsCopyWith<$Res>? get emailFlags {
+    if (_value.emailFlags == null) {
+      return null;
+    }
+
+    return $OrderEmailFlagsCopyWith<$Res>(_value.emailFlags!, (value) {
+      return _then(_value.copyWith(emailFlags: value) as $Val);
+    });
+  }
 }
 
 /// @nodoc
@@ -2865,7 +3789,13 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
       @JsonKey(name: 'updated_at') DateTime? updatedAt,
       @JsonKey(name: 'customer_name') String? customerName,
       @JsonKey(name: 'customer_phone') String? customerPhone,
-      @JsonKey(name: 'customer_email') String? customerEmail});
+      @JsonKey(name: 'customer_email') String? customerEmail,
+      OrderCustomer? customer,
+      OrderShipping? shipping,
+      OrderPayment? payment,
+      @JsonKey(name: 'status_history') List<OrderStatusHistory>? statusHistory,
+      @JsonKey(name: 'email_flags') OrderEmailFlags? emailFlags,
+      @JsonKey(name: 'is_deleted') bool isDeleted});
 
   @override
   $OrderStatusCopyWith<$Res> get status;
@@ -2875,6 +3805,14 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
   $OrderTotalsCopyWith<$Res>? get totals;
   @override
   $OrderShipmentCopyWith<$Res>? get shipment;
+  @override
+  $OrderCustomerCopyWith<$Res>? get customer;
+  @override
+  $OrderShippingCopyWith<$Res>? get shipping;
+  @override
+  $OrderPaymentCopyWith<$Res>? get payment;
+  @override
+  $OrderEmailFlagsCopyWith<$Res>? get emailFlags;
 }
 
 /// @nodoc
@@ -2906,6 +3844,12 @@ class __$$OrderImplCopyWithImpl<$Res>
     Object? customerName = freezed,
     Object? customerPhone = freezed,
     Object? customerEmail = freezed,
+    Object? customer = freezed,
+    Object? shipping = freezed,
+    Object? payment = freezed,
+    Object? statusHistory = freezed,
+    Object? emailFlags = freezed,
+    Object? isDeleted = null,
   }) {
     return _then(_$OrderImpl(
       id: freezed == id
@@ -2972,6 +3916,30 @@ class __$$OrderImplCopyWithImpl<$Res>
           ? _value.customerEmail
           : customerEmail // ignore: cast_nullable_to_non_nullable
               as String?,
+      customer: freezed == customer
+          ? _value.customer
+          : customer // ignore: cast_nullable_to_non_nullable
+              as OrderCustomer?,
+      shipping: freezed == shipping
+          ? _value.shipping
+          : shipping // ignore: cast_nullable_to_non_nullable
+              as OrderShipping?,
+      payment: freezed == payment
+          ? _value.payment
+          : payment // ignore: cast_nullable_to_non_nullable
+              as OrderPayment?,
+      statusHistory: freezed == statusHistory
+          ? _value._statusHistory
+          : statusHistory // ignore: cast_nullable_to_non_nullable
+              as List<OrderStatusHistory>?,
+      emailFlags: freezed == emailFlags
+          ? _value.emailFlags
+          : emailFlags // ignore: cast_nullable_to_non_nullable
+              as OrderEmailFlags?,
+      isDeleted: null == isDeleted
+          ? _value.isDeleted
+          : isDeleted // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -2996,8 +3964,16 @@ class _$OrderImpl implements _Order {
       @JsonKey(name: 'updated_at') this.updatedAt,
       @JsonKey(name: 'customer_name') this.customerName,
       @JsonKey(name: 'customer_phone') this.customerPhone,
-      @JsonKey(name: 'customer_email') this.customerEmail})
-      : _items = items;
+      @JsonKey(name: 'customer_email') this.customerEmail,
+      this.customer,
+      this.shipping,
+      this.payment,
+      @JsonKey(name: 'status_history')
+      final List<OrderStatusHistory>? statusHistory,
+      @JsonKey(name: 'email_flags') this.emailFlags,
+      @JsonKey(name: 'is_deleted') this.isDeleted = false})
+      : _items = items,
+        _statusHistory = statusHistory;
 
   factory _$OrderImpl.fromJson(Map<String, dynamic> json) =>
       _$$OrderImplFromJson(json);
@@ -3052,10 +4028,34 @@ class _$OrderImpl implements _Order {
   @override
   @JsonKey(name: 'customer_email')
   final String? customerEmail;
+// New backend fields
+  @override
+  final OrderCustomer? customer;
+  @override
+  final OrderShipping? shipping;
+  @override
+  final OrderPayment? payment;
+  final List<OrderStatusHistory>? _statusHistory;
+  @override
+  @JsonKey(name: 'status_history')
+  List<OrderStatusHistory>? get statusHistory {
+    final value = _statusHistory;
+    if (value == null) return null;
+    if (_statusHistory is EqualUnmodifiableListView) return _statusHistory;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
+  @override
+  @JsonKey(name: 'email_flags')
+  final OrderEmailFlags? emailFlags;
+  @override
+  @JsonKey(name: 'is_deleted')
+  final bool isDeleted;
 
   @override
   String toString() {
-    return 'Order(id: $id, userId: $userId, status: $status, trackingNumber: $trackingNumber, shippingProvider: $shippingProvider, integrationCode: $integrationCode, address: $address, items: $items, totals: $totals, shipment: $shipment, note: $note, createdAt: $createdAt, updatedAt: $updatedAt, customerName: $customerName, customerPhone: $customerPhone, customerEmail: $customerEmail)';
+    return 'Order(id: $id, userId: $userId, status: $status, trackingNumber: $trackingNumber, shippingProvider: $shippingProvider, integrationCode: $integrationCode, address: $address, items: $items, totals: $totals, shipment: $shipment, note: $note, createdAt: $createdAt, updatedAt: $updatedAt, customerName: $customerName, customerPhone: $customerPhone, customerEmail: $customerEmail, customer: $customer, shipping: $shipping, payment: $payment, statusHistory: $statusHistory, emailFlags: $emailFlags, isDeleted: $isDeleted)';
   }
 
   @override
@@ -3087,29 +4087,47 @@ class _$OrderImpl implements _Order {
             (identical(other.customerPhone, customerPhone) ||
                 other.customerPhone == customerPhone) &&
             (identical(other.customerEmail, customerEmail) ||
-                other.customerEmail == customerEmail));
+                other.customerEmail == customerEmail) &&
+            (identical(other.customer, customer) ||
+                other.customer == customer) &&
+            (identical(other.shipping, shipping) ||
+                other.shipping == shipping) &&
+            (identical(other.payment, payment) || other.payment == payment) &&
+            const DeepCollectionEquality()
+                .equals(other._statusHistory, _statusHistory) &&
+            (identical(other.emailFlags, emailFlags) ||
+                other.emailFlags == emailFlags) &&
+            (identical(other.isDeleted, isDeleted) ||
+                other.isDeleted == isDeleted));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      userId,
-      status,
-      trackingNumber,
-      shippingProvider,
-      integrationCode,
-      address,
-      const DeepCollectionEquality().hash(_items),
-      totals,
-      shipment,
-      note,
-      createdAt,
-      updatedAt,
-      customerName,
-      customerPhone,
-      customerEmail);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        id,
+        userId,
+        status,
+        trackingNumber,
+        shippingProvider,
+        integrationCode,
+        address,
+        const DeepCollectionEquality().hash(_items),
+        totals,
+        shipment,
+        note,
+        createdAt,
+        updatedAt,
+        customerName,
+        customerPhone,
+        customerEmail,
+        customer,
+        shipping,
+        payment,
+        const DeepCollectionEquality().hash(_statusHistory),
+        emailFlags,
+        isDeleted
+      ]);
 
   /// Create a copy of Order
   /// with the given fields replaced by the non-null parameter values.
@@ -3129,24 +4147,30 @@ class _$OrderImpl implements _Order {
 
 abstract class _Order implements Order {
   const factory _Order(
-          {final String? id,
-          @JsonKey(name: 'user_id') final String? userId,
-          @JsonKey(fromJson: _statusFromJson, toJson: _statusToJson)
-          required final OrderStatus status,
-          @JsonKey(name: 'tracking_number') final String? trackingNumber,
-          @JsonKey(name: 'shipping_provider') final String? shippingProvider,
-          @JsonKey(name: 'integration_code') final String? integrationCode,
-          final Address? address,
-          final List<OrderItem>? items,
-          final OrderTotals? totals,
-          final OrderShipment? shipment,
-          final String? note,
-          @JsonKey(name: 'created_at') final DateTime? createdAt,
-          @JsonKey(name: 'updated_at') final DateTime? updatedAt,
-          @JsonKey(name: 'customer_name') final String? customerName,
-          @JsonKey(name: 'customer_phone') final String? customerPhone,
-          @JsonKey(name: 'customer_email') final String? customerEmail}) =
-      _$OrderImpl;
+      {final String? id,
+      @JsonKey(name: 'user_id') final String? userId,
+      @JsonKey(fromJson: _statusFromJson, toJson: _statusToJson)
+      required final OrderStatus status,
+      @JsonKey(name: 'tracking_number') final String? trackingNumber,
+      @JsonKey(name: 'shipping_provider') final String? shippingProvider,
+      @JsonKey(name: 'integration_code') final String? integrationCode,
+      final Address? address,
+      final List<OrderItem>? items,
+      final OrderTotals? totals,
+      final OrderShipment? shipment,
+      final String? note,
+      @JsonKey(name: 'created_at') final DateTime? createdAt,
+      @JsonKey(name: 'updated_at') final DateTime? updatedAt,
+      @JsonKey(name: 'customer_name') final String? customerName,
+      @JsonKey(name: 'customer_phone') final String? customerPhone,
+      @JsonKey(name: 'customer_email') final String? customerEmail,
+      final OrderCustomer? customer,
+      final OrderShipping? shipping,
+      final OrderPayment? payment,
+      @JsonKey(name: 'status_history')
+      final List<OrderStatusHistory>? statusHistory,
+      @JsonKey(name: 'email_flags') final OrderEmailFlags? emailFlags,
+      @JsonKey(name: 'is_deleted') final bool isDeleted}) = _$OrderImpl;
 
   factory _Order.fromJson(Map<String, dynamic> json) = _$OrderImpl.fromJson;
 
@@ -3191,7 +4215,22 @@ abstract class _Order implements Order {
   String? get customerPhone;
   @override
   @JsonKey(name: 'customer_email')
-  String? get customerEmail;
+  String? get customerEmail; // New backend fields
+  @override
+  OrderCustomer? get customer;
+  @override
+  OrderShipping? get shipping;
+  @override
+  OrderPayment? get payment;
+  @override
+  @JsonKey(name: 'status_history')
+  List<OrderStatusHistory>? get statusHistory;
+  @override
+  @JsonKey(name: 'email_flags')
+  OrderEmailFlags? get emailFlags;
+  @override
+  @JsonKey(name: 'is_deleted')
+  bool get isDeleted;
 
   /// Create a copy of Order
   /// with the given fields replaced by the non-null parameter values.
@@ -3604,8 +4643,10 @@ OrdersListResponse _$OrdersListResponseFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$OrdersListResponse {
-  List<Order> get active => throw _privateConstructorUsedError;
-  List<Order> get past => throw _privateConstructorUsedError;
+  List<Order> get items => throw _privateConstructorUsedError;
+  @JsonKey(name: 'next_cursor')
+  String? get nextCursor => throw _privateConstructorUsedError;
+  int get count => throw _privateConstructorUsedError;
 
   /// Serializes this OrdersListResponse to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -3623,7 +4664,10 @@ abstract class $OrdersListResponseCopyWith<$Res> {
           OrdersListResponse value, $Res Function(OrdersListResponse) then) =
       _$OrdersListResponseCopyWithImpl<$Res, OrdersListResponse>;
   @useResult
-  $Res call({List<Order> active, List<Order> past});
+  $Res call(
+      {List<Order> items,
+      @JsonKey(name: 'next_cursor') String? nextCursor,
+      int count});
 }
 
 /// @nodoc
@@ -3641,18 +4685,23 @@ class _$OrdersListResponseCopyWithImpl<$Res, $Val extends OrdersListResponse>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? active = null,
-    Object? past = null,
+    Object? items = null,
+    Object? nextCursor = freezed,
+    Object? count = null,
   }) {
     return _then(_value.copyWith(
-      active: null == active
-          ? _value.active
-          : active // ignore: cast_nullable_to_non_nullable
+      items: null == items
+          ? _value.items
+          : items // ignore: cast_nullable_to_non_nullable
               as List<Order>,
-      past: null == past
-          ? _value.past
-          : past // ignore: cast_nullable_to_non_nullable
-              as List<Order>,
+      nextCursor: freezed == nextCursor
+          ? _value.nextCursor
+          : nextCursor // ignore: cast_nullable_to_non_nullable
+              as String?,
+      count: null == count
+          ? _value.count
+          : count // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 }
@@ -3665,7 +4714,10 @@ abstract class _$$OrdersListResponseImplCopyWith<$Res>
       __$$OrdersListResponseImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({List<Order> active, List<Order> past});
+  $Res call(
+      {List<Order> items,
+      @JsonKey(name: 'next_cursor') String? nextCursor,
+      int count});
 }
 
 /// @nodoc
@@ -3681,18 +4733,23 @@ class __$$OrdersListResponseImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? active = null,
-    Object? past = null,
+    Object? items = null,
+    Object? nextCursor = freezed,
+    Object? count = null,
   }) {
     return _then(_$OrdersListResponseImpl(
-      active: null == active
-          ? _value._active
-          : active // ignore: cast_nullable_to_non_nullable
+      items: null == items
+          ? _value._items
+          : items // ignore: cast_nullable_to_non_nullable
               as List<Order>,
-      past: null == past
-          ? _value._past
-          : past // ignore: cast_nullable_to_non_nullable
-              as List<Order>,
+      nextCursor: freezed == nextCursor
+          ? _value.nextCursor
+          : nextCursor // ignore: cast_nullable_to_non_nullable
+              as String?,
+      count: null == count
+          ? _value.count
+          : count // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -3701,32 +4758,31 @@ class __$$OrdersListResponseImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$OrdersListResponseImpl implements _OrdersListResponse {
   const _$OrdersListResponseImpl(
-      {required final List<Order> active, required final List<Order> past})
-      : _active = active,
-        _past = past;
+      {required final List<Order> items,
+      @JsonKey(name: 'next_cursor') this.nextCursor,
+      required this.count})
+      : _items = items;
 
   factory _$OrdersListResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$OrdersListResponseImplFromJson(json);
 
-  final List<Order> _active;
+  final List<Order> _items;
   @override
-  List<Order> get active {
-    if (_active is EqualUnmodifiableListView) return _active;
+  List<Order> get items {
+    if (_items is EqualUnmodifiableListView) return _items;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_active);
+    return EqualUnmodifiableListView(_items);
   }
 
-  final List<Order> _past;
   @override
-  List<Order> get past {
-    if (_past is EqualUnmodifiableListView) return _past;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_past);
-  }
+  @JsonKey(name: 'next_cursor')
+  final String? nextCursor;
+  @override
+  final int count;
 
   @override
   String toString() {
-    return 'OrdersListResponse(active: $active, past: $past)';
+    return 'OrdersListResponse(items: $items, nextCursor: $nextCursor, count: $count)';
   }
 
   @override
@@ -3734,16 +4790,16 @@ class _$OrdersListResponseImpl implements _OrdersListResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$OrdersListResponseImpl &&
-            const DeepCollectionEquality().equals(other._active, _active) &&
-            const DeepCollectionEquality().equals(other._past, _past));
+            const DeepCollectionEquality().equals(other._items, _items) &&
+            (identical(other.nextCursor, nextCursor) ||
+                other.nextCursor == nextCursor) &&
+            (identical(other.count, count) || other.count == count));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(_active),
-      const DeepCollectionEquality().hash(_past));
+  int get hashCode => Object.hash(runtimeType,
+      const DeepCollectionEquality().hash(_items), nextCursor, count);
 
   /// Create a copy of OrdersListResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -3764,21 +4820,755 @@ class _$OrdersListResponseImpl implements _OrdersListResponse {
 
 abstract class _OrdersListResponse implements OrdersListResponse {
   const factory _OrdersListResponse(
-      {required final List<Order> active,
-      required final List<Order> past}) = _$OrdersListResponseImpl;
+      {required final List<Order> items,
+      @JsonKey(name: 'next_cursor') final String? nextCursor,
+      required final int count}) = _$OrdersListResponseImpl;
 
   factory _OrdersListResponse.fromJson(Map<String, dynamic> json) =
       _$OrdersListResponseImpl.fromJson;
 
   @override
-  List<Order> get active;
+  List<Order> get items;
   @override
-  List<Order> get past;
+  @JsonKey(name: 'next_cursor')
+  String? get nextCursor;
+  @override
+  int get count;
 
   /// Create a copy of OrdersListResponse
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$OrdersListResponseImplCopyWith<_$OrdersListResponseImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+AdminOrdersQueueResponse _$AdminOrdersQueueResponseFromJson(
+    Map<String, dynamic> json) {
+  return _AdminOrdersQueueResponse.fromJson(json);
+}
+
+/// @nodoc
+mixin _$AdminOrdersQueueResponse {
+  List<Order> get preparing => throw _privateConstructorUsedError;
+  List<Order> get shipped => throw _privateConstructorUsedError;
+  AdminOrdersCount get count => throw _privateConstructorUsedError;
+
+  /// Serializes this AdminOrdersQueueResponse to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of AdminOrdersQueueResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $AdminOrdersQueueResponseCopyWith<AdminOrdersQueueResponse> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $AdminOrdersQueueResponseCopyWith<$Res> {
+  factory $AdminOrdersQueueResponseCopyWith(AdminOrdersQueueResponse value,
+          $Res Function(AdminOrdersQueueResponse) then) =
+      _$AdminOrdersQueueResponseCopyWithImpl<$Res, AdminOrdersQueueResponse>;
+  @useResult
+  $Res call(
+      {List<Order> preparing, List<Order> shipped, AdminOrdersCount count});
+
+  $AdminOrdersCountCopyWith<$Res> get count;
+}
+
+/// @nodoc
+class _$AdminOrdersQueueResponseCopyWithImpl<$Res,
+        $Val extends AdminOrdersQueueResponse>
+    implements $AdminOrdersQueueResponseCopyWith<$Res> {
+  _$AdminOrdersQueueResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of AdminOrdersQueueResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? preparing = null,
+    Object? shipped = null,
+    Object? count = null,
+  }) {
+    return _then(_value.copyWith(
+      preparing: null == preparing
+          ? _value.preparing
+          : preparing // ignore: cast_nullable_to_non_nullable
+              as List<Order>,
+      shipped: null == shipped
+          ? _value.shipped
+          : shipped // ignore: cast_nullable_to_non_nullable
+              as List<Order>,
+      count: null == count
+          ? _value.count
+          : count // ignore: cast_nullable_to_non_nullable
+              as AdminOrdersCount,
+    ) as $Val);
+  }
+
+  /// Create a copy of AdminOrdersQueueResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $AdminOrdersCountCopyWith<$Res> get count {
+    return $AdminOrdersCountCopyWith<$Res>(_value.count, (value) {
+      return _then(_value.copyWith(count: value) as $Val);
+    });
+  }
+}
+
+/// @nodoc
+abstract class _$$AdminOrdersQueueResponseImplCopyWith<$Res>
+    implements $AdminOrdersQueueResponseCopyWith<$Res> {
+  factory _$$AdminOrdersQueueResponseImplCopyWith(
+          _$AdminOrdersQueueResponseImpl value,
+          $Res Function(_$AdminOrdersQueueResponseImpl) then) =
+      __$$AdminOrdersQueueResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {List<Order> preparing, List<Order> shipped, AdminOrdersCount count});
+
+  @override
+  $AdminOrdersCountCopyWith<$Res> get count;
+}
+
+/// @nodoc
+class __$$AdminOrdersQueueResponseImplCopyWithImpl<$Res>
+    extends _$AdminOrdersQueueResponseCopyWithImpl<$Res,
+        _$AdminOrdersQueueResponseImpl>
+    implements _$$AdminOrdersQueueResponseImplCopyWith<$Res> {
+  __$$AdminOrdersQueueResponseImplCopyWithImpl(
+      _$AdminOrdersQueueResponseImpl _value,
+      $Res Function(_$AdminOrdersQueueResponseImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of AdminOrdersQueueResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? preparing = null,
+    Object? shipped = null,
+    Object? count = null,
+  }) {
+    return _then(_$AdminOrdersQueueResponseImpl(
+      preparing: null == preparing
+          ? _value._preparing
+          : preparing // ignore: cast_nullable_to_non_nullable
+              as List<Order>,
+      shipped: null == shipped
+          ? _value._shipped
+          : shipped // ignore: cast_nullable_to_non_nullable
+              as List<Order>,
+      count: null == count
+          ? _value.count
+          : count // ignore: cast_nullable_to_non_nullable
+              as AdminOrdersCount,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$AdminOrdersQueueResponseImpl implements _AdminOrdersQueueResponse {
+  const _$AdminOrdersQueueResponseImpl(
+      {required final List<Order> preparing,
+      required final List<Order> shipped,
+      required this.count})
+      : _preparing = preparing,
+        _shipped = shipped;
+
+  factory _$AdminOrdersQueueResponseImpl.fromJson(Map<String, dynamic> json) =>
+      _$$AdminOrdersQueueResponseImplFromJson(json);
+
+  final List<Order> _preparing;
+  @override
+  List<Order> get preparing {
+    if (_preparing is EqualUnmodifiableListView) return _preparing;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_preparing);
+  }
+
+  final List<Order> _shipped;
+  @override
+  List<Order> get shipped {
+    if (_shipped is EqualUnmodifiableListView) return _shipped;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_shipped);
+  }
+
+  @override
+  final AdminOrdersCount count;
+
+  @override
+  String toString() {
+    return 'AdminOrdersQueueResponse(preparing: $preparing, shipped: $shipped, count: $count)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$AdminOrdersQueueResponseImpl &&
+            const DeepCollectionEquality()
+                .equals(other._preparing, _preparing) &&
+            const DeepCollectionEquality().equals(other._shipped, _shipped) &&
+            (identical(other.count, count) || other.count == count));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(_preparing),
+      const DeepCollectionEquality().hash(_shipped),
+      count);
+
+  /// Create a copy of AdminOrdersQueueResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$AdminOrdersQueueResponseImplCopyWith<_$AdminOrdersQueueResponseImpl>
+      get copyWith => __$$AdminOrdersQueueResponseImplCopyWithImpl<
+          _$AdminOrdersQueueResponseImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$AdminOrdersQueueResponseImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _AdminOrdersQueueResponse implements AdminOrdersQueueResponse {
+  const factory _AdminOrdersQueueResponse(
+      {required final List<Order> preparing,
+      required final List<Order> shipped,
+      required final AdminOrdersCount count}) = _$AdminOrdersQueueResponseImpl;
+
+  factory _AdminOrdersQueueResponse.fromJson(Map<String, dynamic> json) =
+      _$AdminOrdersQueueResponseImpl.fromJson;
+
+  @override
+  List<Order> get preparing;
+  @override
+  List<Order> get shipped;
+  @override
+  AdminOrdersCount get count;
+
+  /// Create a copy of AdminOrdersQueueResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$AdminOrdersQueueResponseImplCopyWith<_$AdminOrdersQueueResponseImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+AdminOrdersCount _$AdminOrdersCountFromJson(Map<String, dynamic> json) {
+  return _AdminOrdersCount.fromJson(json);
+}
+
+/// @nodoc
+mixin _$AdminOrdersCount {
+  int get preparing => throw _privateConstructorUsedError;
+  int get shipped => throw _privateConstructorUsedError;
+
+  /// Serializes this AdminOrdersCount to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of AdminOrdersCount
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $AdminOrdersCountCopyWith<AdminOrdersCount> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $AdminOrdersCountCopyWith<$Res> {
+  factory $AdminOrdersCountCopyWith(
+          AdminOrdersCount value, $Res Function(AdminOrdersCount) then) =
+      _$AdminOrdersCountCopyWithImpl<$Res, AdminOrdersCount>;
+  @useResult
+  $Res call({int preparing, int shipped});
+}
+
+/// @nodoc
+class _$AdminOrdersCountCopyWithImpl<$Res, $Val extends AdminOrdersCount>
+    implements $AdminOrdersCountCopyWith<$Res> {
+  _$AdminOrdersCountCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of AdminOrdersCount
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? preparing = null,
+    Object? shipped = null,
+  }) {
+    return _then(_value.copyWith(
+      preparing: null == preparing
+          ? _value.preparing
+          : preparing // ignore: cast_nullable_to_non_nullable
+              as int,
+      shipped: null == shipped
+          ? _value.shipped
+          : shipped // ignore: cast_nullable_to_non_nullable
+              as int,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$AdminOrdersCountImplCopyWith<$Res>
+    implements $AdminOrdersCountCopyWith<$Res> {
+  factory _$$AdminOrdersCountImplCopyWith(_$AdminOrdersCountImpl value,
+          $Res Function(_$AdminOrdersCountImpl) then) =
+      __$$AdminOrdersCountImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({int preparing, int shipped});
+}
+
+/// @nodoc
+class __$$AdminOrdersCountImplCopyWithImpl<$Res>
+    extends _$AdminOrdersCountCopyWithImpl<$Res, _$AdminOrdersCountImpl>
+    implements _$$AdminOrdersCountImplCopyWith<$Res> {
+  __$$AdminOrdersCountImplCopyWithImpl(_$AdminOrdersCountImpl _value,
+      $Res Function(_$AdminOrdersCountImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of AdminOrdersCount
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? preparing = null,
+    Object? shipped = null,
+  }) {
+    return _then(_$AdminOrdersCountImpl(
+      preparing: null == preparing
+          ? _value.preparing
+          : preparing // ignore: cast_nullable_to_non_nullable
+              as int,
+      shipped: null == shipped
+          ? _value.shipped
+          : shipped // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$AdminOrdersCountImpl implements _AdminOrdersCount {
+  const _$AdminOrdersCountImpl(
+      {required this.preparing, required this.shipped});
+
+  factory _$AdminOrdersCountImpl.fromJson(Map<String, dynamic> json) =>
+      _$$AdminOrdersCountImplFromJson(json);
+
+  @override
+  final int preparing;
+  @override
+  final int shipped;
+
+  @override
+  String toString() {
+    return 'AdminOrdersCount(preparing: $preparing, shipped: $shipped)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$AdminOrdersCountImpl &&
+            (identical(other.preparing, preparing) ||
+                other.preparing == preparing) &&
+            (identical(other.shipped, shipped) || other.shipped == shipped));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, preparing, shipped);
+
+  /// Create a copy of AdminOrdersCount
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$AdminOrdersCountImplCopyWith<_$AdminOrdersCountImpl> get copyWith =>
+      __$$AdminOrdersCountImplCopyWithImpl<_$AdminOrdersCountImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$AdminOrdersCountImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _AdminOrdersCount implements AdminOrdersCount {
+  const factory _AdminOrdersCount(
+      {required final int preparing,
+      required final int shipped}) = _$AdminOrdersCountImpl;
+
+  factory _AdminOrdersCount.fromJson(Map<String, dynamic> json) =
+      _$AdminOrdersCountImpl.fromJson;
+
+  @override
+  int get preparing;
+  @override
+  int get shipped;
+
+  /// Create a copy of AdminOrdersCount
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$AdminOrdersCountImplCopyWith<_$AdminOrdersCountImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+OrderShipRequest _$OrderShipRequestFromJson(Map<String, dynamic> json) {
+  return _OrderShipRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$OrderShipRequest {
+  @JsonKey(name: 'tracking_number')
+  String? get trackingNumber => throw _privateConstructorUsedError;
+  String get provider => throw _privateConstructorUsedError;
+
+  /// Serializes this OrderShipRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of OrderShipRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $OrderShipRequestCopyWith<OrderShipRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $OrderShipRequestCopyWith<$Res> {
+  factory $OrderShipRequestCopyWith(
+          OrderShipRequest value, $Res Function(OrderShipRequest) then) =
+      _$OrderShipRequestCopyWithImpl<$Res, OrderShipRequest>;
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'tracking_number') String? trackingNumber,
+      String provider});
+}
+
+/// @nodoc
+class _$OrderShipRequestCopyWithImpl<$Res, $Val extends OrderShipRequest>
+    implements $OrderShipRequestCopyWith<$Res> {
+  _$OrderShipRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of OrderShipRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? trackingNumber = freezed,
+    Object? provider = null,
+  }) {
+    return _then(_value.copyWith(
+      trackingNumber: freezed == trackingNumber
+          ? _value.trackingNumber
+          : trackingNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
+      provider: null == provider
+          ? _value.provider
+          : provider // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$OrderShipRequestImplCopyWith<$Res>
+    implements $OrderShipRequestCopyWith<$Res> {
+  factory _$$OrderShipRequestImplCopyWith(_$OrderShipRequestImpl value,
+          $Res Function(_$OrderShipRequestImpl) then) =
+      __$$OrderShipRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'tracking_number') String? trackingNumber,
+      String provider});
+}
+
+/// @nodoc
+class __$$OrderShipRequestImplCopyWithImpl<$Res>
+    extends _$OrderShipRequestCopyWithImpl<$Res, _$OrderShipRequestImpl>
+    implements _$$OrderShipRequestImplCopyWith<$Res> {
+  __$$OrderShipRequestImplCopyWithImpl(_$OrderShipRequestImpl _value,
+      $Res Function(_$OrderShipRequestImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of OrderShipRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? trackingNumber = freezed,
+    Object? provider = null,
+  }) {
+    return _then(_$OrderShipRequestImpl(
+      trackingNumber: freezed == trackingNumber
+          ? _value.trackingNumber
+          : trackingNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
+      provider: null == provider
+          ? _value.provider
+          : provider // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$OrderShipRequestImpl implements _OrderShipRequest {
+  const _$OrderShipRequestImpl(
+      {@JsonKey(name: 'tracking_number') this.trackingNumber,
+      this.provider = 'MANUAL'});
+
+  factory _$OrderShipRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$OrderShipRequestImplFromJson(json);
+
+  @override
+  @JsonKey(name: 'tracking_number')
+  final String? trackingNumber;
+  @override
+  @JsonKey()
+  final String provider;
+
+  @override
+  String toString() {
+    return 'OrderShipRequest(trackingNumber: $trackingNumber, provider: $provider)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$OrderShipRequestImpl &&
+            (identical(other.trackingNumber, trackingNumber) ||
+                other.trackingNumber == trackingNumber) &&
+            (identical(other.provider, provider) ||
+                other.provider == provider));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, trackingNumber, provider);
+
+  /// Create a copy of OrderShipRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$OrderShipRequestImplCopyWith<_$OrderShipRequestImpl> get copyWith =>
+      __$$OrderShipRequestImplCopyWithImpl<_$OrderShipRequestImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$OrderShipRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _OrderShipRequest implements OrderShipRequest {
+  const factory _OrderShipRequest(
+      {@JsonKey(name: 'tracking_number') final String? trackingNumber,
+      final String provider}) = _$OrderShipRequestImpl;
+
+  factory _OrderShipRequest.fromJson(Map<String, dynamic> json) =
+      _$OrderShipRequestImpl.fromJson;
+
+  @override
+  @JsonKey(name: 'tracking_number')
+  String? get trackingNumber;
+  @override
+  String get provider;
+
+  /// Create a copy of OrderShipRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$OrderShipRequestImplCopyWith<_$OrderShipRequestImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+OrderCancelRequest _$OrderCancelRequestFromJson(Map<String, dynamic> json) {
+  return _OrderCancelRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$OrderCancelRequest {
+  String get reason => throw _privateConstructorUsedError;
+
+  /// Serializes this OrderCancelRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of OrderCancelRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $OrderCancelRequestCopyWith<OrderCancelRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $OrderCancelRequestCopyWith<$Res> {
+  factory $OrderCancelRequestCopyWith(
+          OrderCancelRequest value, $Res Function(OrderCancelRequest) then) =
+      _$OrderCancelRequestCopyWithImpl<$Res, OrderCancelRequest>;
+  @useResult
+  $Res call({String reason});
+}
+
+/// @nodoc
+class _$OrderCancelRequestCopyWithImpl<$Res, $Val extends OrderCancelRequest>
+    implements $OrderCancelRequestCopyWith<$Res> {
+  _$OrderCancelRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of OrderCancelRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? reason = null,
+  }) {
+    return _then(_value.copyWith(
+      reason: null == reason
+          ? _value.reason
+          : reason // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$OrderCancelRequestImplCopyWith<$Res>
+    implements $OrderCancelRequestCopyWith<$Res> {
+  factory _$$OrderCancelRequestImplCopyWith(_$OrderCancelRequestImpl value,
+          $Res Function(_$OrderCancelRequestImpl) then) =
+      __$$OrderCancelRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String reason});
+}
+
+/// @nodoc
+class __$$OrderCancelRequestImplCopyWithImpl<$Res>
+    extends _$OrderCancelRequestCopyWithImpl<$Res, _$OrderCancelRequestImpl>
+    implements _$$OrderCancelRequestImplCopyWith<$Res> {
+  __$$OrderCancelRequestImplCopyWithImpl(_$OrderCancelRequestImpl _value,
+      $Res Function(_$OrderCancelRequestImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of OrderCancelRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? reason = null,
+  }) {
+    return _then(_$OrderCancelRequestImpl(
+      reason: null == reason
+          ? _value.reason
+          : reason // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$OrderCancelRequestImpl implements _OrderCancelRequest {
+  const _$OrderCancelRequestImpl({required this.reason});
+
+  factory _$OrderCancelRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$OrderCancelRequestImplFromJson(json);
+
+  @override
+  final String reason;
+
+  @override
+  String toString() {
+    return 'OrderCancelRequest(reason: $reason)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$OrderCancelRequestImpl &&
+            (identical(other.reason, reason) || other.reason == reason));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, reason);
+
+  /// Create a copy of OrderCancelRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$OrderCancelRequestImplCopyWith<_$OrderCancelRequestImpl> get copyWith =>
+      __$$OrderCancelRequestImplCopyWithImpl<_$OrderCancelRequestImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$OrderCancelRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _OrderCancelRequest implements OrderCancelRequest {
+  const factory _OrderCancelRequest({required final String reason}) =
+      _$OrderCancelRequestImpl;
+
+  factory _OrderCancelRequest.fromJson(Map<String, dynamic> json) =
+      _$OrderCancelRequestImpl.fromJson;
+
+  @override
+  String get reason;
+
+  /// Create a copy of OrderCancelRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$OrderCancelRequestImplCopyWith<_$OrderCancelRequestImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

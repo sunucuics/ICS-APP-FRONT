@@ -60,10 +60,6 @@ class PaymentStatus with _$PaymentStatus {
 class PaymentMethod with _$PaymentMethod {
   const factory PaymentMethod.creditCard() = _CreditCard;
   const factory PaymentMethod.debitCard() = _DebitCard;
-  const factory PaymentMethod.bankTransfer() = _BankTransfer;
-  const factory PaymentMethod.cashOnDelivery() = _CashOnDelivery;
-  const factory PaymentMethod.digitalWallet() = _DigitalWallet;
-  const factory PaymentMethod.mock() = _Mock;
 
   const PaymentMethod._();
 
@@ -75,18 +71,6 @@ class PaymentMethod with _$PaymentMethod {
       case 'debit_card':
       case 'debitcard':
         return const PaymentMethod.debitCard();
-      case 'bank_transfer':
-      case 'banktransfer':
-        return const PaymentMethod.bankTransfer();
-      case 'cash_on_delivery':
-      case 'cod':
-        return const PaymentMethod.cashOnDelivery();
-      case 'digital_wallet':
-      case 'wallet':
-        return const PaymentMethod.digitalWallet();
-      case 'mock':
-      case 'test':
-        return const PaymentMethod.mock();
       default:
         return const PaymentMethod.creditCard();
     }
@@ -96,10 +80,6 @@ class PaymentMethod with _$PaymentMethod {
     return when(
       creditCard: () => 'Kredi Kartı',
       debitCard: () => 'Banka Kartı',
-      bankTransfer: () => 'Banka Havalesi',
-      cashOnDelivery: () => 'Kapıda Ödeme',
-      digitalWallet: () => 'Dijital Cüzdan',
-      mock: () => 'Test Ödeme',
     );
   }
 
@@ -107,10 +87,6 @@ class PaymentMethod with _$PaymentMethod {
     return when(
       creditCard: () => '💳',
       debitCard: () => '💳',
-      bankTransfer: () => '🏦',
-      cashOnDelivery: () => '💰',
-      digitalWallet: () => '📱',
-      mock: () => '🧪',
     );
   }
 }

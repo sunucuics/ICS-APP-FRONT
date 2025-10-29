@@ -8,21 +8,22 @@ class OrdersApiService {
 
   OrdersApiService(this._dio);
 
-  /// Create a new order from cart or items
+  /// Create a new order from cart
+  /// Backend reads cart from user_id and creates order automatically
+  /// No body needed - just auth header
   Future<Order> createOrder({
-    List<OrderCreateItem>? items,
-    String? note,
+    List<OrderCreateItem>? items, // Ignored - backend reads from cart
+    String? note, // Ignored - backend doesn't accept note in POST
     bool simulate = false,
     bool clearCartOnSuccess = true,
     String? checkoutId,
   }) async {
     try {
+      // Backend documentation says: "Request body → Hiç yok. Sadece auth'lu POST."
+      // Backend reads cart from user_id automatically
       final response = await _dio.post(
         ApiEndpoints.orders,
-        data: OrderCreateRequest(
-          items: items ?? [],
-          note: note,
-        ).toJson(),
+        // No data/body - backend reads cart automatically
         queryParameters: {
           'simulate': simulate,
           'clear_cart_on_success': clearCartOnSuccess,
@@ -36,10 +37,22 @@ class OrdersApiService {
     }
   }
 
-  /// Get user's orders (active and past)
-  Future<OrdersListResponse> getMyOrders() async {
+  /// Get user's orders with filtering and pagination
+  Future<OrdersListResponse> getMyOrders({
+    String? status,
+    int? limit,
+    String? startAfter,
+  }) async {
     try {
-      final response = await _dio.get(ApiEndpoints.orders + '/my');
+      final queryParams = <String, dynamic>{};
+      if (status != null) queryParams['status'] = status;
+      if (limit != null) queryParams['limit'] = limit;
+      if (startAfter != null) queryParams['start_after'] = startAfter;
+
+      final response = await _dio.get(
+        ApiEndpoints.orders,
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
       return OrdersListResponse.fromJson(response.data);
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);

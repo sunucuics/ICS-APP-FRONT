@@ -5,6 +5,7 @@ import '../../../features/orders/providers/orders_provider.dart';
 import '../../../features/addresses/providers/addresses_provider.dart';
 import '../../../features/cart/providers/cart_provider.dart';
 import '../data/mock_payment_service.dart';
+import 'paytr_provider.dart';
 
 // Mock Payment Service Provider
 final mockPaymentServiceProvider = Provider<MockPaymentService>((ref) {
@@ -173,30 +174,49 @@ class CheckoutNotifier extends StateNotifier<AsyncValue<Order?>> {
               ))
           .toList();
 
-      // Create order with simulate=true for mock payment
+      // Create order first (without payment)
       final order = await _ref.read(createOrderHelperProvider)(
         items: orderItems,
         note: orderNote,
-        simulate: true, // Mock payment
-        clearCartOnSuccess: true,
+        simulate: false, // Real order, no simulation
+        clearCartOnSuccess: false, // Don't clear cart yet
       );
 
-      if (order != null) {
-        // Process mock payment
-        final paymentResponse =
-            await _ref.read(paymentProcessingProvider.notifier).processPayment(
-                  amount: order.totals?.grandTotal ?? 0.0,
-                  method: paymentMethod,
-                  description: 'Sipariş #${order.id ?? 'Bilinmeyen'}',
-                  simulateSuccess: simulatePaymentSuccess,
-                );
-
-        if (paymentResponse != null && paymentResponse.status.isSuccess) {
-          state = AsyncValue.data(order);
-          return order;
+      if (order != null && order.id != null) {
+        // Check payment method
+        if (paymentMethod == const PaymentMethod.creditCard()) {
+          // Use PayTR for credit card payments
+          final paytrOrder = await _ref.read(paytrPaymentProvider.notifier).processPayment(
+            orderId: order.id!,
+          );
+          
+          if (paytrOrder != null) {
+            // Clear cart after successful order creation
+            await _ref.read(cartRepositoryProvider).clearCart();
+            state = AsyncValue.data(paytrOrder);
+            return paytrOrder;
+          } else {
+            throw Exception('PayTR ödeme işlemi başlatılamadı');
+          }
         } else {
-          throw Exception(
-              paymentResponse?.errorMessage ?? 'Ödeme işlemi başarısız');
+          // For other payment methods, use mock payment
+          final paymentResponse =
+              await _ref.read(paymentProcessingProvider.notifier).processPayment(
+                    amount: order.totals?.grandTotal ?? 0.0,
+                    method: paymentMethod,
+                    description: 'Sipariş #${order.id ?? 'Bilinmeyen'}',
+                    simulateSuccess: simulatePaymentSuccess,
+                  );
+
+          if (paymentResponse != null && paymentResponse.status.isSuccess) {
+            // Clear cart after successful payment
+            await _ref.read(cartRepositoryProvider).clearCart();
+            state = AsyncValue.data(order);
+            return order;
+          } else {
+            throw Exception(
+                paymentResponse?.errorMessage ?? 'Ödeme işlemi başarısız');
+          }
         }
       } else {
         throw Exception('Sipariş oluşturulamadı');

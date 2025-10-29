@@ -282,10 +282,6 @@ class PaymentMethodPage extends ConsumerWidget {
     return method.when(
       creditCard: () => 'Kredi kartı ile güvenli ödeme',
       debitCard: () => 'Banka kartı ile hızlı ödeme',
-      bankTransfer: () => 'Banka havalesi ile ödeme',
-      cashOnDelivery: () => 'Kapıda nakit ödeme',
-      digitalWallet: () => 'Dijital cüzdan ile ödeme',
-      mock: () => 'Test ödeme sistemi (Geliştirme)',
     );
   }
 }

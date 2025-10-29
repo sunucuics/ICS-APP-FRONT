@@ -34,33 +34,53 @@ class OrdersListPage extends ConsumerWidget {
 
   Widget _buildOrdersContent(
       BuildContext context, WidgetRef ref, OrdersListResponse ordersResponse) {
-    if (ordersResponse.active.isEmpty && ordersResponse.past.isEmpty) {
+    if (ordersResponse.items.isEmpty) {
       return _buildEmptyState(context);
     }
 
+    // Filter orders by status
+    final preparingOrders = ordersResponse.items.where((order) => 
+        order.status == const OrderStatus.preparing()).toList();
+    final shippedOrders = ordersResponse.items.where((order) => 
+        order.status == const OrderStatus.shipped()).toList();
+    final deliveredOrders = ordersResponse.items.where((order) => 
+        order.status == const OrderStatus.delivered()).toList();
+    final canceledOrders = ordersResponse.items.where((order) => 
+        order.status == const OrderStatus.canceled() || 
+        order.status == const OrderStatus.paymentFailed()).toList();
+
     return DefaultTabController(
-      length: 2,
+      length: 4,
       child: Column(
         children: [
           const TabBar(
+            isScrollable: true,
             tabs: [
               Tab(
-                text: 'Aktif Siparişler',
+                text: 'Tümü',
+                icon: Icon(Icons.list),
+              ),
+              Tab(
+                text: 'Hazırlanıyor',
                 icon: Icon(Icons.shopping_bag),
               ),
               Tab(
-                text: 'Geçmiş Siparişler',
-                icon: Icon(Icons.history),
+                text: 'Kargoda',
+                icon: Icon(Icons.local_shipping),
+              ),
+              Tab(
+                text: 'Teslim Edildi',
+                icon: Icon(Icons.check_circle),
               ),
             ],
           ),
           Expanded(
             child: TabBarView(
               children: [
-                _buildOrdersList(context, ref, ordersResponse.active,
-                    'Aktif sipariş bulunmuyor'),
-                _buildOrdersList(context, ref, ordersResponse.past,
-                    'Geçmiş sipariş bulunmuyor'),
+                _buildOrdersList(context, ref, ordersResponse.items, 'Sipariş bulunmuyor'),
+                _buildOrdersList(context, ref, preparingOrders, 'Hazırlanan sipariş bulunmuyor'),
+                _buildOrdersList(context, ref, shippedOrders, 'Kargoda sipariş bulunmuyor'),
+                _buildOrdersList(context, ref, deliveredOrders, 'Teslim edilen sipariş bulunmuyor'),
               ],
             ),
           ),
@@ -133,7 +153,13 @@ class OrdersListPage extends ConsumerWidget {
                           fontWeight: FontWeight.bold,
                         ),
                   ),
-                  _buildStatusChip(order.status),
+                  Row(
+                    children: [
+                      if (order.payment != null) _buildPaymentStatusChip(order.payment!.status),
+                      const SizedBox(width: 8),
+                      _buildStatusChip(order.status),
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -270,29 +296,20 @@ class OrdersListPage extends ConsumerWidget {
     Color textColor = Colors.white;
 
     switch (status) {
-      case OrderStatus.hazirlaniyor:
+      case OrderStatus.preparing:
         chipColor = Colors.orange;
         break;
-      case OrderStatus.siparisAlindi:
-        chipColor = Colors.blue;
-        break;
-      case OrderStatus.kargoyaVerildi:
+      case OrderStatus.shipped:
         chipColor = Colors.purple;
         break;
-      case OrderStatus.yolda:
-        chipColor = Colors.indigo;
-        break;
-      case OrderStatus.dagitimda:
-        chipColor = Colors.teal;
-        break;
-      case OrderStatus.teslimEdildi:
+      case OrderStatus.delivered:
         chipColor = Colors.green;
         break;
-      case OrderStatus.iptal:
+      case OrderStatus.canceled:
         chipColor = Colors.red;
         break;
-      case OrderStatus.iade:
-        chipColor = Colors.grey;
+      case OrderStatus.paymentFailed:
+        chipColor = Colors.red;
         break;
     }
 
@@ -309,6 +326,62 @@ class OrdersListPage extends ConsumerWidget {
           fontSize: 10,
           fontWeight: FontWeight.w500,
         ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentStatusChip(String paymentStatus) {
+    Color chipColor;
+    String displayText;
+    IconData icon;
+
+    switch (paymentStatus.toLowerCase()) {
+      case 'paid':
+        chipColor = Colors.green;
+        displayText = 'Ödendi';
+        icon = Icons.check_circle;
+        break;
+      case 'failed':
+        chipColor = Colors.red;
+        displayText = 'Başarısız';
+        icon = Icons.cancel;
+        break;
+      case 'pending':
+        chipColor = Colors.orange;
+        displayText = 'Beklemede';
+        icon = Icons.schedule;
+        break;
+      default:
+        chipColor = Colors.grey;
+        displayText = 'Bilinmiyor';
+        icon = Icons.help;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: chipColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: chipColor.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 12,
+            color: chipColor,
+          ),
+          const SizedBox(width: 2),
+          Text(
+            displayText,
+            style: TextStyle(
+              color: chipColor,
+              fontSize: 9,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }

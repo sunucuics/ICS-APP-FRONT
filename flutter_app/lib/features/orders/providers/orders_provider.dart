@@ -19,10 +19,18 @@ class OrdersNotifier extends StateNotifier<AsyncValue<OrdersListResponse>> {
     loadOrders();
   }
 
-  Future<void> loadOrders() async {
+  Future<void> loadOrders({
+    String? status,
+    int? limit,
+    String? startAfter,
+  }) async {
     try {
       state = const AsyncValue.loading();
-      final orders = await _repository.getMyOrders();
+      final orders = await _repository.getMyOrders(
+        status: status,
+        limit: limit,
+        startAfter: startAfter,
+      );
       state = AsyncValue.data(orders);
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
@@ -132,7 +140,9 @@ final createOrderProvider =
 // Convenience Providers
 final activeOrdersProvider = Provider<List<Order>>((ref) {
   return ref.watch(ordersProvider).when(
-        data: (ordersResponse) => ordersResponse.active,
+        data: (ordersResponse) => ordersResponse.items.where((order) => 
+            order.status == const OrderStatus.preparing() || 
+            order.status == const OrderStatus.shipped()).toList(),
         loading: () => <Order>[],
         error: (error, stack) => <Order>[],
       );
@@ -140,7 +150,10 @@ final activeOrdersProvider = Provider<List<Order>>((ref) {
 
 final pastOrdersProvider = Provider<List<Order>>((ref) {
   return ref.watch(ordersProvider).when(
-        data: (ordersResponse) => ordersResponse.past,
+        data: (ordersResponse) => ordersResponse.items.where((order) => 
+            order.status == const OrderStatus.delivered() || 
+            order.status == const OrderStatus.canceled() ||
+            order.status == const OrderStatus.paymentFailed()).toList(),
         loading: () => <Order>[],
         error: (error, stack) => <Order>[],
       );
@@ -148,8 +161,7 @@ final pastOrdersProvider = Provider<List<Order>>((ref) {
 
 final ordersCountProvider = Provider<int>((ref) {
   return ref.watch(ordersProvider).when(
-        data: (ordersResponse) =>
-            ordersResponse.active.length + ordersResponse.past.length,
+        data: (ordersResponse) => ordersResponse.items.length,
         loading: () => 0,
         error: (error, stack) => 0,
       );

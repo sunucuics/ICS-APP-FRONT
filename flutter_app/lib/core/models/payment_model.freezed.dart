@@ -887,30 +887,18 @@ mixin _$PaymentMethod {
   TResult when<TResult extends Object?>({
     required TResult Function() creditCard,
     required TResult Function() debitCard,
-    required TResult Function() bankTransfer,
-    required TResult Function() cashOnDelivery,
-    required TResult Function() digitalWallet,
-    required TResult Function() mock,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? creditCard,
     TResult? Function()? debitCard,
-    TResult? Function()? bankTransfer,
-    TResult? Function()? cashOnDelivery,
-    TResult? Function()? digitalWallet,
-    TResult? Function()? mock,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? creditCard,
     TResult Function()? debitCard,
-    TResult Function()? bankTransfer,
-    TResult Function()? cashOnDelivery,
-    TResult Function()? digitalWallet,
-    TResult Function()? mock,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -918,30 +906,18 @@ mixin _$PaymentMethod {
   TResult map<TResult extends Object?>({
     required TResult Function(_CreditCard value) creditCard,
     required TResult Function(_DebitCard value) debitCard,
-    required TResult Function(_BankTransfer value) bankTransfer,
-    required TResult Function(_CashOnDelivery value) cashOnDelivery,
-    required TResult Function(_DigitalWallet value) digitalWallet,
-    required TResult Function(_Mock value) mock,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_CreditCard value)? creditCard,
     TResult? Function(_DebitCard value)? debitCard,
-    TResult? Function(_BankTransfer value)? bankTransfer,
-    TResult? Function(_CashOnDelivery value)? cashOnDelivery,
-    TResult? Function(_DigitalWallet value)? digitalWallet,
-    TResult? Function(_Mock value)? mock,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(_CreditCard value)? creditCard,
     TResult Function(_DebitCard value)? debitCard,
-    TResult Function(_BankTransfer value)? bankTransfer,
-    TResult Function(_CashOnDelivery value)? cashOnDelivery,
-    TResult Function(_DigitalWallet value)? digitalWallet,
-    TResult Function(_Mock value)? mock,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -1011,10 +987,6 @@ class _$CreditCardImpl extends _CreditCard {
   TResult when<TResult extends Object?>({
     required TResult Function() creditCard,
     required TResult Function() debitCard,
-    required TResult Function() bankTransfer,
-    required TResult Function() cashOnDelivery,
-    required TResult Function() digitalWallet,
-    required TResult Function() mock,
   }) {
     return creditCard();
   }
@@ -1024,10 +996,6 @@ class _$CreditCardImpl extends _CreditCard {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? creditCard,
     TResult? Function()? debitCard,
-    TResult? Function()? bankTransfer,
-    TResult? Function()? cashOnDelivery,
-    TResult? Function()? digitalWallet,
-    TResult? Function()? mock,
   }) {
     return creditCard?.call();
   }
@@ -1037,10 +1005,6 @@ class _$CreditCardImpl extends _CreditCard {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? creditCard,
     TResult Function()? debitCard,
-    TResult Function()? bankTransfer,
-    TResult Function()? cashOnDelivery,
-    TResult Function()? digitalWallet,
-    TResult Function()? mock,
     required TResult orElse(),
   }) {
     if (creditCard != null) {
@@ -1054,10 +1018,6 @@ class _$CreditCardImpl extends _CreditCard {
   TResult map<TResult extends Object?>({
     required TResult Function(_CreditCard value) creditCard,
     required TResult Function(_DebitCard value) debitCard,
-    required TResult Function(_BankTransfer value) bankTransfer,
-    required TResult Function(_CashOnDelivery value) cashOnDelivery,
-    required TResult Function(_DigitalWallet value) digitalWallet,
-    required TResult Function(_Mock value) mock,
   }) {
     return creditCard(this);
   }
@@ -1067,10 +1027,6 @@ class _$CreditCardImpl extends _CreditCard {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_CreditCard value)? creditCard,
     TResult? Function(_DebitCard value)? debitCard,
-    TResult? Function(_BankTransfer value)? bankTransfer,
-    TResult? Function(_CashOnDelivery value)? cashOnDelivery,
-    TResult? Function(_DigitalWallet value)? digitalWallet,
-    TResult? Function(_Mock value)? mock,
   }) {
     return creditCard?.call(this);
   }
@@ -1080,10 +1036,6 @@ class _$CreditCardImpl extends _CreditCard {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(_CreditCard value)? creditCard,
     TResult Function(_DebitCard value)? debitCard,
-    TResult Function(_BankTransfer value)? bankTransfer,
-    TResult Function(_CashOnDelivery value)? cashOnDelivery,
-    TResult Function(_DigitalWallet value)? digitalWallet,
-    TResult Function(_Mock value)? mock,
     required TResult orElse(),
   }) {
     if (creditCard != null) {
@@ -1141,10 +1093,6 @@ class _$DebitCardImpl extends _DebitCard {
   TResult when<TResult extends Object?>({
     required TResult Function() creditCard,
     required TResult Function() debitCard,
-    required TResult Function() bankTransfer,
-    required TResult Function() cashOnDelivery,
-    required TResult Function() digitalWallet,
-    required TResult Function() mock,
   }) {
     return debitCard();
   }
@@ -1154,10 +1102,6 @@ class _$DebitCardImpl extends _DebitCard {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? creditCard,
     TResult? Function()? debitCard,
-    TResult? Function()? bankTransfer,
-    TResult? Function()? cashOnDelivery,
-    TResult? Function()? digitalWallet,
-    TResult? Function()? mock,
   }) {
     return debitCard?.call();
   }
@@ -1167,10 +1111,6 @@ class _$DebitCardImpl extends _DebitCard {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? creditCard,
     TResult Function()? debitCard,
-    TResult Function()? bankTransfer,
-    TResult Function()? cashOnDelivery,
-    TResult Function()? digitalWallet,
-    TResult Function()? mock,
     required TResult orElse(),
   }) {
     if (debitCard != null) {
@@ -1184,10 +1124,6 @@ class _$DebitCardImpl extends _DebitCard {
   TResult map<TResult extends Object?>({
     required TResult Function(_CreditCard value) creditCard,
     required TResult Function(_DebitCard value) debitCard,
-    required TResult Function(_BankTransfer value) bankTransfer,
-    required TResult Function(_CashOnDelivery value) cashOnDelivery,
-    required TResult Function(_DigitalWallet value) digitalWallet,
-    required TResult Function(_Mock value) mock,
   }) {
     return debitCard(this);
   }
@@ -1197,10 +1133,6 @@ class _$DebitCardImpl extends _DebitCard {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_CreditCard value)? creditCard,
     TResult? Function(_DebitCard value)? debitCard,
-    TResult? Function(_BankTransfer value)? bankTransfer,
-    TResult? Function(_CashOnDelivery value)? cashOnDelivery,
-    TResult? Function(_DigitalWallet value)? digitalWallet,
-    TResult? Function(_Mock value)? mock,
   }) {
     return debitCard?.call(this);
   }
@@ -1210,10 +1142,6 @@ class _$DebitCardImpl extends _DebitCard {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(_CreditCard value)? creditCard,
     TResult Function(_DebitCard value)? debitCard,
-    TResult Function(_BankTransfer value)? bankTransfer,
-    TResult Function(_CashOnDelivery value)? cashOnDelivery,
-    TResult Function(_DigitalWallet value)? digitalWallet,
-    TResult Function(_Mock value)? mock,
     required TResult orElse(),
   }) {
     if (debitCard != null) {
@@ -1226,525 +1154,6 @@ class _$DebitCardImpl extends _DebitCard {
 abstract class _DebitCard extends PaymentMethod {
   const factory _DebitCard() = _$DebitCardImpl;
   const _DebitCard._() : super._();
-}
-
-/// @nodoc
-abstract class _$$BankTransferImplCopyWith<$Res> {
-  factory _$$BankTransferImplCopyWith(
-          _$BankTransferImpl value, $Res Function(_$BankTransferImpl) then) =
-      __$$BankTransferImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$BankTransferImplCopyWithImpl<$Res>
-    extends _$PaymentMethodCopyWithImpl<$Res, _$BankTransferImpl>
-    implements _$$BankTransferImplCopyWith<$Res> {
-  __$$BankTransferImplCopyWithImpl(
-      _$BankTransferImpl _value, $Res Function(_$BankTransferImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of PaymentMethod
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-
-class _$BankTransferImpl extends _BankTransfer {
-  const _$BankTransferImpl() : super._();
-
-  @override
-  String toString() {
-    return 'PaymentMethod.bankTransfer()';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$BankTransferImpl);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() creditCard,
-    required TResult Function() debitCard,
-    required TResult Function() bankTransfer,
-    required TResult Function() cashOnDelivery,
-    required TResult Function() digitalWallet,
-    required TResult Function() mock,
-  }) {
-    return bankTransfer();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? creditCard,
-    TResult? Function()? debitCard,
-    TResult? Function()? bankTransfer,
-    TResult? Function()? cashOnDelivery,
-    TResult? Function()? digitalWallet,
-    TResult? Function()? mock,
-  }) {
-    return bankTransfer?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? creditCard,
-    TResult Function()? debitCard,
-    TResult Function()? bankTransfer,
-    TResult Function()? cashOnDelivery,
-    TResult Function()? digitalWallet,
-    TResult Function()? mock,
-    required TResult orElse(),
-  }) {
-    if (bankTransfer != null) {
-      return bankTransfer();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_CreditCard value) creditCard,
-    required TResult Function(_DebitCard value) debitCard,
-    required TResult Function(_BankTransfer value) bankTransfer,
-    required TResult Function(_CashOnDelivery value) cashOnDelivery,
-    required TResult Function(_DigitalWallet value) digitalWallet,
-    required TResult Function(_Mock value) mock,
-  }) {
-    return bankTransfer(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_CreditCard value)? creditCard,
-    TResult? Function(_DebitCard value)? debitCard,
-    TResult? Function(_BankTransfer value)? bankTransfer,
-    TResult? Function(_CashOnDelivery value)? cashOnDelivery,
-    TResult? Function(_DigitalWallet value)? digitalWallet,
-    TResult? Function(_Mock value)? mock,
-  }) {
-    return bankTransfer?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_CreditCard value)? creditCard,
-    TResult Function(_DebitCard value)? debitCard,
-    TResult Function(_BankTransfer value)? bankTransfer,
-    TResult Function(_CashOnDelivery value)? cashOnDelivery,
-    TResult Function(_DigitalWallet value)? digitalWallet,
-    TResult Function(_Mock value)? mock,
-    required TResult orElse(),
-  }) {
-    if (bankTransfer != null) {
-      return bankTransfer(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class _BankTransfer extends PaymentMethod {
-  const factory _BankTransfer() = _$BankTransferImpl;
-  const _BankTransfer._() : super._();
-}
-
-/// @nodoc
-abstract class _$$CashOnDeliveryImplCopyWith<$Res> {
-  factory _$$CashOnDeliveryImplCopyWith(_$CashOnDeliveryImpl value,
-          $Res Function(_$CashOnDeliveryImpl) then) =
-      __$$CashOnDeliveryImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$CashOnDeliveryImplCopyWithImpl<$Res>
-    extends _$PaymentMethodCopyWithImpl<$Res, _$CashOnDeliveryImpl>
-    implements _$$CashOnDeliveryImplCopyWith<$Res> {
-  __$$CashOnDeliveryImplCopyWithImpl(
-      _$CashOnDeliveryImpl _value, $Res Function(_$CashOnDeliveryImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of PaymentMethod
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-
-class _$CashOnDeliveryImpl extends _CashOnDelivery {
-  const _$CashOnDeliveryImpl() : super._();
-
-  @override
-  String toString() {
-    return 'PaymentMethod.cashOnDelivery()';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$CashOnDeliveryImpl);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() creditCard,
-    required TResult Function() debitCard,
-    required TResult Function() bankTransfer,
-    required TResult Function() cashOnDelivery,
-    required TResult Function() digitalWallet,
-    required TResult Function() mock,
-  }) {
-    return cashOnDelivery();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? creditCard,
-    TResult? Function()? debitCard,
-    TResult? Function()? bankTransfer,
-    TResult? Function()? cashOnDelivery,
-    TResult? Function()? digitalWallet,
-    TResult? Function()? mock,
-  }) {
-    return cashOnDelivery?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? creditCard,
-    TResult Function()? debitCard,
-    TResult Function()? bankTransfer,
-    TResult Function()? cashOnDelivery,
-    TResult Function()? digitalWallet,
-    TResult Function()? mock,
-    required TResult orElse(),
-  }) {
-    if (cashOnDelivery != null) {
-      return cashOnDelivery();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_CreditCard value) creditCard,
-    required TResult Function(_DebitCard value) debitCard,
-    required TResult Function(_BankTransfer value) bankTransfer,
-    required TResult Function(_CashOnDelivery value) cashOnDelivery,
-    required TResult Function(_DigitalWallet value) digitalWallet,
-    required TResult Function(_Mock value) mock,
-  }) {
-    return cashOnDelivery(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_CreditCard value)? creditCard,
-    TResult? Function(_DebitCard value)? debitCard,
-    TResult? Function(_BankTransfer value)? bankTransfer,
-    TResult? Function(_CashOnDelivery value)? cashOnDelivery,
-    TResult? Function(_DigitalWallet value)? digitalWallet,
-    TResult? Function(_Mock value)? mock,
-  }) {
-    return cashOnDelivery?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_CreditCard value)? creditCard,
-    TResult Function(_DebitCard value)? debitCard,
-    TResult Function(_BankTransfer value)? bankTransfer,
-    TResult Function(_CashOnDelivery value)? cashOnDelivery,
-    TResult Function(_DigitalWallet value)? digitalWallet,
-    TResult Function(_Mock value)? mock,
-    required TResult orElse(),
-  }) {
-    if (cashOnDelivery != null) {
-      return cashOnDelivery(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class _CashOnDelivery extends PaymentMethod {
-  const factory _CashOnDelivery() = _$CashOnDeliveryImpl;
-  const _CashOnDelivery._() : super._();
-}
-
-/// @nodoc
-abstract class _$$DigitalWalletImplCopyWith<$Res> {
-  factory _$$DigitalWalletImplCopyWith(
-          _$DigitalWalletImpl value, $Res Function(_$DigitalWalletImpl) then) =
-      __$$DigitalWalletImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$DigitalWalletImplCopyWithImpl<$Res>
-    extends _$PaymentMethodCopyWithImpl<$Res, _$DigitalWalletImpl>
-    implements _$$DigitalWalletImplCopyWith<$Res> {
-  __$$DigitalWalletImplCopyWithImpl(
-      _$DigitalWalletImpl _value, $Res Function(_$DigitalWalletImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of PaymentMethod
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-
-class _$DigitalWalletImpl extends _DigitalWallet {
-  const _$DigitalWalletImpl() : super._();
-
-  @override
-  String toString() {
-    return 'PaymentMethod.digitalWallet()';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$DigitalWalletImpl);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() creditCard,
-    required TResult Function() debitCard,
-    required TResult Function() bankTransfer,
-    required TResult Function() cashOnDelivery,
-    required TResult Function() digitalWallet,
-    required TResult Function() mock,
-  }) {
-    return digitalWallet();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? creditCard,
-    TResult? Function()? debitCard,
-    TResult? Function()? bankTransfer,
-    TResult? Function()? cashOnDelivery,
-    TResult? Function()? digitalWallet,
-    TResult? Function()? mock,
-  }) {
-    return digitalWallet?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? creditCard,
-    TResult Function()? debitCard,
-    TResult Function()? bankTransfer,
-    TResult Function()? cashOnDelivery,
-    TResult Function()? digitalWallet,
-    TResult Function()? mock,
-    required TResult orElse(),
-  }) {
-    if (digitalWallet != null) {
-      return digitalWallet();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_CreditCard value) creditCard,
-    required TResult Function(_DebitCard value) debitCard,
-    required TResult Function(_BankTransfer value) bankTransfer,
-    required TResult Function(_CashOnDelivery value) cashOnDelivery,
-    required TResult Function(_DigitalWallet value) digitalWallet,
-    required TResult Function(_Mock value) mock,
-  }) {
-    return digitalWallet(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_CreditCard value)? creditCard,
-    TResult? Function(_DebitCard value)? debitCard,
-    TResult? Function(_BankTransfer value)? bankTransfer,
-    TResult? Function(_CashOnDelivery value)? cashOnDelivery,
-    TResult? Function(_DigitalWallet value)? digitalWallet,
-    TResult? Function(_Mock value)? mock,
-  }) {
-    return digitalWallet?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_CreditCard value)? creditCard,
-    TResult Function(_DebitCard value)? debitCard,
-    TResult Function(_BankTransfer value)? bankTransfer,
-    TResult Function(_CashOnDelivery value)? cashOnDelivery,
-    TResult Function(_DigitalWallet value)? digitalWallet,
-    TResult Function(_Mock value)? mock,
-    required TResult orElse(),
-  }) {
-    if (digitalWallet != null) {
-      return digitalWallet(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class _DigitalWallet extends PaymentMethod {
-  const factory _DigitalWallet() = _$DigitalWalletImpl;
-  const _DigitalWallet._() : super._();
-}
-
-/// @nodoc
-abstract class _$$MockImplCopyWith<$Res> {
-  factory _$$MockImplCopyWith(
-          _$MockImpl value, $Res Function(_$MockImpl) then) =
-      __$$MockImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$MockImplCopyWithImpl<$Res>
-    extends _$PaymentMethodCopyWithImpl<$Res, _$MockImpl>
-    implements _$$MockImplCopyWith<$Res> {
-  __$$MockImplCopyWithImpl(_$MockImpl _value, $Res Function(_$MockImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of PaymentMethod
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-
-class _$MockImpl extends _Mock {
-  const _$MockImpl() : super._();
-
-  @override
-  String toString() {
-    return 'PaymentMethod.mock()';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$MockImpl);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() creditCard,
-    required TResult Function() debitCard,
-    required TResult Function() bankTransfer,
-    required TResult Function() cashOnDelivery,
-    required TResult Function() digitalWallet,
-    required TResult Function() mock,
-  }) {
-    return mock();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? creditCard,
-    TResult? Function()? debitCard,
-    TResult? Function()? bankTransfer,
-    TResult? Function()? cashOnDelivery,
-    TResult? Function()? digitalWallet,
-    TResult? Function()? mock,
-  }) {
-    return mock?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? creditCard,
-    TResult Function()? debitCard,
-    TResult Function()? bankTransfer,
-    TResult Function()? cashOnDelivery,
-    TResult Function()? digitalWallet,
-    TResult Function()? mock,
-    required TResult orElse(),
-  }) {
-    if (mock != null) {
-      return mock();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_CreditCard value) creditCard,
-    required TResult Function(_DebitCard value) debitCard,
-    required TResult Function(_BankTransfer value) bankTransfer,
-    required TResult Function(_CashOnDelivery value) cashOnDelivery,
-    required TResult Function(_DigitalWallet value) digitalWallet,
-    required TResult Function(_Mock value) mock,
-  }) {
-    return mock(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_CreditCard value)? creditCard,
-    TResult? Function(_DebitCard value)? debitCard,
-    TResult? Function(_BankTransfer value)? bankTransfer,
-    TResult? Function(_CashOnDelivery value)? cashOnDelivery,
-    TResult? Function(_DigitalWallet value)? digitalWallet,
-    TResult? Function(_Mock value)? mock,
-  }) {
-    return mock?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_CreditCard value)? creditCard,
-    TResult Function(_DebitCard value)? debitCard,
-    TResult Function(_BankTransfer value)? bankTransfer,
-    TResult Function(_CashOnDelivery value)? cashOnDelivery,
-    TResult Function(_DigitalWallet value)? digitalWallet,
-    TResult Function(_Mock value)? mock,
-    required TResult orElse(),
-  }) {
-    if (mock != null) {
-      return mock(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class _Mock extends PaymentMethod {
-  const factory _Mock() = _$MockImpl;
-  const _Mock._() : super._();
 }
 
 PaymentRequest _$PaymentRequestFromJson(Map<String, dynamic> json) {

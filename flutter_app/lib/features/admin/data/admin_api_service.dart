@@ -210,7 +210,7 @@ class AdminApiService {
     }
   }
 
-  // Orders Management
+  // Orders Management - Updated for PayTR integration
   Future<List<Order>> getOrders() async {
     try {
       final response = await _apiClient.get('/admin/orders');
@@ -218,6 +218,56 @@ class AdminApiService {
           .map((item) => Order.fromJson(item as Map<String, dynamic>))
           .toList();
       return orderList;
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<AdminOrdersQueueResponse> getOrdersQueue() async {
+    try {
+      final response = await _apiClient.get('/orders/queue');
+      return AdminOrdersQueueResponse.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<Order> shipOrder(String orderId, OrderShipRequest request) async {
+    try {
+      final response = await _apiClient.put(
+        '/orders/$orderId/ship',
+        data: request.toJson(),
+      );
+      return Order.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<Order> deliverOrder(String orderId) async {
+    try {
+      final response = await _apiClient.put('/orders/$orderId/deliver');
+      return Order.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<Order> cancelOrder(String orderId, OrderCancelRequest request) async {
+    try {
+      final response = await _apiClient.put(
+        '/orders/$orderId/cancel',
+        data: request.toJson(),
+      );
+      return Order.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<void> deleteOrder(String orderId) async {
+    try {
+      await _apiClient.delete('/orders/$orderId');
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }

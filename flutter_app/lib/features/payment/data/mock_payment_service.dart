@@ -128,10 +128,6 @@ class MockPaymentService {
     return [
       const PaymentMethod.creditCard(),
       const PaymentMethod.debitCard(),
-      const PaymentMethod.bankTransfer(),
-      const PaymentMethod.cashOnDelivery(),
-      const PaymentMethod.digitalWallet(),
-      const PaymentMethod.mock(),
     ];
   }
 
@@ -145,10 +141,6 @@ class MockPaymentService {
     return method.when(
       creditCard: () => amount * 0.029, // 2.9% fee
       debitCard: () => amount * 0.015, // 1.5% fee
-      bankTransfer: () => 0.0, // No fee
-      cashOnDelivery: () => amount * 0.05, // 5% fee
-      digitalWallet: () => amount * 0.02, // 2% fee
-      mock: () => 0.0, // No fee for mock
     );
   }
 
@@ -163,10 +155,6 @@ class MockPaymentService {
     return method.when(
       creditCard: () => 'Kredi kartı ile güvenli ödeme',
       debitCard: () => 'Banka kartı ile hızlı ödeme',
-      bankTransfer: () => 'Banka havalesi ile ödeme',
-      cashOnDelivery: () => 'Kapıda nakit ödeme',
-      digitalWallet: () => 'Dijital cüzdan ile ödeme',
-      mock: () => 'Test ödeme sistemi',
     );
   }
 
@@ -175,10 +163,6 @@ class MockPaymentService {
     return method.when(
       creditCard: () => const Duration(seconds: 3),
       debitCard: () => const Duration(seconds: 2),
-      bankTransfer: () => const Duration(seconds: 5),
-      cashOnDelivery: () => const Duration(seconds: 1),
-      digitalWallet: () => const Duration(seconds: 2),
-      mock: () => const Duration(seconds: 2),
     );
   }
 }

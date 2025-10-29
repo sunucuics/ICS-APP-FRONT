@@ -43,9 +43,12 @@ class ApiEndpoints {
   static String cartItem(String productId) => '/cart/items/$productId';
 
   // Orders endpoints
-  static const String orders = '/orders/';
+  static const String orders = '/orders';
   static String order(String orderId) => '/orders/$orderId';
   static String orderTracking(String orderId) => '/orders/$orderId/tracking';
+
+  // PayTR endpoints
+  static const String paytrToken = '/paytr/token';
 
   // Appointments endpoints
   static const String appointments = '/appointments/';

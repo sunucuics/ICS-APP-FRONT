@@ -23,9 +23,17 @@ class OrdersRepository {
     );
   }
 
-  /// Get user's orders (active and past)
-  Future<OrdersListResponse> getMyOrders() async {
-    return await _apiService.getMyOrders();
+  /// Get user's orders with filtering and pagination
+  Future<OrdersListResponse> getMyOrders({
+    String? status,
+    int? limit,
+    String? startAfter,
+  }) async {
+    return await _apiService.getMyOrders(
+      status: status,
+      limit: limit,
+      startAfter: startAfter,
+    );
   }
 
   /// Get order details by ID

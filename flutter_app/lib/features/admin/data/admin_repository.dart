@@ -57,9 +57,29 @@ class AdminRepository {
     return await _apiService.deleteProduct(productId);
   }
 
-  // Orders
+  // Orders - Updated for PayTR integration
   Future<List<Order>> getOrders() async {
     return await _apiService.getOrders();
+  }
+
+  Future<AdminOrdersQueueResponse> getOrdersQueue() async {
+    return await _apiService.getOrdersQueue();
+  }
+
+  Future<Order> shipOrder(String orderId, OrderShipRequest request) async {
+    return await _apiService.shipOrder(orderId, request);
+  }
+
+  Future<Order> deliverOrder(String orderId) async {
+    return await _apiService.deliverOrder(orderId);
+  }
+
+  Future<Order> cancelOrder(String orderId, OrderCancelRequest request) async {
+    return await _apiService.cancelOrder(orderId, request);
+  }
+
+  Future<void> deleteOrder(String orderId) async {
+    return await _apiService.deleteOrder(orderId);
   }
 
   Future<Order> updateOrderStatus(String orderId, String status) async {

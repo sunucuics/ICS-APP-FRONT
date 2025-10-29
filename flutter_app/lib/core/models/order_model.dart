@@ -1,55 +1,55 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'paytr_model.dart';
 
 part 'order_model.freezed.dart';
 part 'order_model.g.dart';
 
-// Order Status Enum
+// Order Status Enum - Updated for backend integration
 @freezed
 class OrderStatus with _$OrderStatus {
-  const factory OrderStatus.hazirlaniyor() = _Hazirlaniyor;
-  const factory OrderStatus.siparisAlindi() = _SiparisAlindi;
-  const factory OrderStatus.kargoyaVerildi() = _KargoyaVerildi;
-  const factory OrderStatus.yolda() = _Yolda;
-  const factory OrderStatus.dagitimda() = _Dagitimda;
-  const factory OrderStatus.teslimEdildi() = _TeslimEdildi;
-  const factory OrderStatus.iptal() = _Iptal;
-  const factory OrderStatus.iade() = _Iade;
+  const factory OrderStatus.preparing() = _Preparing;
+  const factory OrderStatus.shipped() = _Shipped;
+  const factory OrderStatus.delivered() = _Delivered;
+  const factory OrderStatus.canceled() = _Canceled;
+  const factory OrderStatus.paymentFailed() = _PaymentFailed;
 
   const OrderStatus._();
 
   factory OrderStatus.fromString(String status) {
-    switch (status) {
-      case 'Hazırlanıyor':
-        return const OrderStatus.hazirlaniyor();
-      case 'Sipariş Alındı':
-        return const OrderStatus.siparisAlindi();
-      case 'Kargoya Verildi':
-        return const OrderStatus.kargoyaVerildi();
-      case 'Yolda':
-        return const OrderStatus.yolda();
-      case 'Dağıtımda':
-        return const OrderStatus.dagitimda();
-      case 'Teslim Edildi':
-        return const OrderStatus.teslimEdildi();
-      case 'İptal':
-        return const OrderStatus.iptal();
-      case 'İade':
-        return const OrderStatus.iade();
+    switch (status.toLowerCase()) {
+      case 'preparing':
+        return const OrderStatus.preparing();
+      case 'shipped':
+        return const OrderStatus.shipped();
+      case 'delivered':
+        return const OrderStatus.delivered();
+      case 'canceled':
+      case 'cancelled':
+        return const OrderStatus.canceled();
+      case 'payment_failed':
+        return const OrderStatus.paymentFailed();
       default:
-        return const OrderStatus.hazirlaniyor();
+        return const OrderStatus.preparing();
     }
   }
 
   String get displayName {
     return when(
-      hazirlaniyor: () => 'Hazırlanıyor',
-      siparisAlindi: () => 'Sipariş Alındı',
-      kargoyaVerildi: () => 'Kargoya Verildi',
-      yolda: () => 'Yolda',
-      dagitimda: () => 'Dağıtımda',
-      teslimEdildi: () => 'Teslim Edildi',
-      iptal: () => 'İptal',
-      iade: () => 'İade',
+      preparing: () => 'Hazırlanıyor',
+      shipped: () => 'Kargoya Verildi',
+      delivered: () => 'Teslim Edildi',
+      canceled: () => 'İptal Edildi',
+      paymentFailed: () => 'Ödeme Başarısız',
+    );
+  }
+
+  String get backendValue {
+    return when(
+      preparing: () => 'preparing',
+      shipped: () => 'shipped',
+      delivered: () => 'delivered',
+      canceled: () => 'canceled',
+      paymentFailed: () => 'payment_failed',
     );
   }
 }
@@ -117,13 +117,32 @@ class OrderTotals with _$OrderTotals {
       _$OrderTotalsFromJson(json);
 }
 
-// Shipment Model
+// Payment Model
+@freezed
+class OrderPayment with _$OrderPayment {
+  const factory OrderPayment({
+    required String provider,
+    required String status,
+    @JsonKey(name: 'received_total') double? receivedTotal,
+    required String currency,
+    @JsonKey(name: 'payment_type') String? paymentType,
+    @JsonKey(name: 'reported_at') DateTime? reportedAt,
+    Map<String, dynamic>? paytr,
+  }) = _OrderPayment;
+
+  factory OrderPayment.fromJson(Map<String, dynamic> json) =>
+      _$OrderPaymentFromJson(json);
+}
+
+// Shipment Model - Updated for backend integration
 @freezed
 class OrderShipment with _$OrderShipment {
   const factory OrderShipment({
     String? provider,
     @JsonKey(name: 'tracking_number') String? trackingNumber,
     String? status,
+    @JsonKey(name: 'shipped_at') DateTime? shippedAt,
+    @JsonKey(name: 'delivered_at') DateTime? deliveredAt,
     bool? simulated,
     String? log,
   }) = _OrderShipment;
@@ -132,7 +151,72 @@ class OrderShipment with _$OrderShipment {
       _$OrderShipmentFromJson(json);
 }
 
-// Main Order Model
+// Status History Model
+@freezed
+class OrderStatusHistory with _$OrderStatusHistory {
+  const factory OrderStatusHistory({
+    required String status,
+    required DateTime at,
+    required String by,
+  }) = _OrderStatusHistory;
+
+  factory OrderStatusHistory.fromJson(Map<String, dynamic> json) =>
+      _$OrderStatusHistoryFromJson(json);
+}
+
+// Customer Model
+@freezed
+class OrderCustomer with _$OrderCustomer {
+  const factory OrderCustomer({
+    @JsonKey(name: 'full_name') required String fullName,
+    required String email,
+    required String phone,
+    required OrderAddress address,
+  }) = _OrderCustomer;
+
+  factory OrderCustomer.fromJson(Map<String, dynamic> json) =>
+      _$OrderCustomerFromJson(json);
+}
+
+// Order Address Model (simplified for backend)
+@freezed
+class OrderAddress with _$OrderAddress {
+  const factory OrderAddress({
+    @JsonKey(name: 'line1') required String line1,
+    required String city,
+    @JsonKey(name: 'postal_code') required String postalCode,
+    @Default('TR') String country,
+  }) = _OrderAddress;
+
+  factory OrderAddress.fromJson(Map<String, dynamic> json) =>
+      _$OrderAddressFromJson(json);
+}
+
+// Shipping Model
+@freezed
+class OrderShipping with _$OrderShipping {
+  const factory OrderShipping({
+    required String provider,
+  }) = _OrderShipping;
+
+  factory OrderShipping.fromJson(Map<String, dynamic> json) =>
+      _$OrderShippingFromJson(json);
+}
+
+// Email Flags Model
+@freezed
+class OrderEmailFlags with _$OrderEmailFlags {
+  const factory OrderEmailFlags({
+    @JsonKey(name: 'shipped_sent') @Default(false) bool shippedSent,
+    @JsonKey(name: 'delivered_sent') @Default(false) bool deliveredSent,
+    @JsonKey(name: 'canceled_sent') @Default(false) bool canceledSent,
+  }) = _OrderEmailFlags;
+
+  factory OrderEmailFlags.fromJson(Map<String, dynamic> json) =>
+      _$OrderEmailFlagsFromJson(json);
+}
+
+// Main Order Model - Updated for backend integration
 @freezed
 class Order with _$Order {
   const factory Order({
@@ -153,6 +237,13 @@ class Order with _$Order {
     @JsonKey(name: 'customer_name') String? customerName,
     @JsonKey(name: 'customer_phone') String? customerPhone,
     @JsonKey(name: 'customer_email') String? customerEmail,
+    // New backend fields
+    OrderCustomer? customer,
+    OrderShipping? shipping,
+    OrderPayment? payment,
+    @JsonKey(name: 'status_history') List<OrderStatusHistory>? statusHistory,
+    @JsonKey(name: 'email_flags') OrderEmailFlags? emailFlags,
+    @JsonKey(name: 'is_deleted') @Default(false) bool isDeleted,
   }) = _Order;
 
   factory Order.fromJson(Map<String, dynamic> json) => _$OrderFromJson(json);
@@ -160,8 +251,8 @@ class Order with _$Order {
 
 // JSON conversion helpers for OrderStatus
 OrderStatus _statusFromJson(String? status) =>
-    OrderStatus.fromString(status ?? 'Hazırlanıyor');
-String _statusToJson(OrderStatus status) => status.displayName;
+    OrderStatus.fromString(status ?? 'preparing');
+String _statusToJson(OrderStatus status) => status.backendValue;
 
 // Order Create Request Model
 @freezed
@@ -189,14 +280,63 @@ class OrderCreateItem with _$OrderCreateItem {
       _$OrderCreateItemFromJson(json);
 }
 
-// Orders List Response Model
+// Orders List Response Model - Updated for backend integration
 @freezed
 class OrdersListResponse with _$OrdersListResponse {
   const factory OrdersListResponse({
-    required List<Order> active,
-    required List<Order> past,
+    required List<Order> items,
+    @JsonKey(name: 'next_cursor') String? nextCursor,
+    required int count,
   }) = _OrdersListResponse;
 
   factory OrdersListResponse.fromJson(Map<String, dynamic> json) =>
       _$OrdersListResponseFromJson(json);
+}
+
+// Admin Orders Queue Response Model
+@freezed
+class AdminOrdersQueueResponse with _$AdminOrdersQueueResponse {
+  const factory AdminOrdersQueueResponse({
+    required List<Order> preparing,
+    required List<Order> shipped,
+    required AdminOrdersCount count,
+  }) = _AdminOrdersQueueResponse;
+
+  factory AdminOrdersQueueResponse.fromJson(Map<String, dynamic> json) =>
+      _$AdminOrdersQueueResponseFromJson(json);
+}
+
+// Admin Orders Count Model
+@freezed
+class AdminOrdersCount with _$AdminOrdersCount {
+  const factory AdminOrdersCount({
+    required int preparing,
+    required int shipped,
+  }) = _AdminOrdersCount;
+
+  factory AdminOrdersCount.fromJson(Map<String, dynamic> json) =>
+      _$AdminOrdersCountFromJson(json);
+}
+
+// Order Ship Request Model
+@freezed
+class OrderShipRequest with _$OrderShipRequest {
+  const factory OrderShipRequest({
+    @JsonKey(name: 'tracking_number') String? trackingNumber,
+    @Default('MANUAL') String provider,
+  }) = _OrderShipRequest;
+
+  factory OrderShipRequest.fromJson(Map<String, dynamic> json) =>
+      _$OrderShipRequestFromJson(json);
+}
+
+// Order Cancel Request Model
+@freezed
+class OrderCancelRequest with _$OrderCancelRequest {
+  const factory OrderCancelRequest({
+    required String reason,
+  }) = _OrderCancelRequest;
+
+  factory OrderCancelRequest.fromJson(Map<String, dynamic> json) =>
+      _$OrderCancelRequestFromJson(json);
 }

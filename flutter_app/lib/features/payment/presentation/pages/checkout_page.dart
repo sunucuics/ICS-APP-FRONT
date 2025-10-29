@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/models/payment_model.dart';
 import '../../../../core/models/order_model.dart';
 import '../../providers/payment_provider.dart';
+import '../../providers/paytr_provider.dart';
 import '../../../addresses/providers/addresses_provider.dart';
 import '../../../addresses/presentation/pages/add_address_page.dart';
 import '../../../cart/providers/cart_provider.dart';
+import 'paytr_webview_page.dart';
 
 class CheckoutPage extends ConsumerStatefulWidget {
   final PaymentMethod paymentMethod;
@@ -23,7 +25,6 @@ class CheckoutPage extends ConsumerStatefulWidget {
 
 class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   final _noteController = TextEditingController();
-  bool _simulateSuccess = true;
 
   @override
   void initState() {
@@ -42,8 +43,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
-    final currentAddress = ref.watch(currentAddressDataProvider);
-    final cartItems = ref.watch(cartItemsProvider);
     final checkoutAsync = ref.watch(checkoutProvider);
     final isProcessing = ref.watch(isCheckoutProcessingProvider);
 
@@ -263,10 +262,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
 
           // Order Note Section
           _buildOrderNoteSection(context, ref),
-          const SizedBox(height: 24),
-
-          // Test Options Section
-          _buildTestOptionsSection(context, ref),
         ],
       ),
     );
@@ -544,55 +539,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     );
   }
 
-  Widget _buildTestOptionsSection(BuildContext context, WidgetRef ref) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Test Seçenekleri',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: RadioListTile<bool>(
-                    title: const Text('Başarılı'),
-                    subtitle: const Text('Ödeme başarılı'),
-                    value: true,
-                    groupValue: _simulateSuccess,
-                    onChanged: (value) {
-                      setState(() {
-                        _simulateSuccess = value!;
-                      });
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: RadioListTile<bool>(
-                    title: const Text('Başarısız'),
-                    subtitle: const Text('Ödeme başarısız'),
-                    value: false,
-                    groupValue: _simulateSuccess,
-                    onChanged: (value) {
-                      setState(() {
-                        _simulateSuccess = value!;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildCheckoutButton(BuildContext context, WidgetRef ref) {
     final currentAddress = ref.watch(currentAddressDataProvider);
@@ -685,24 +631,58 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     return method.when(
       creditCard: () => 'Kredi kartı ile güvenli ödeme',
       debitCard: () => 'Banka kartı ile hızlı ödeme',
-      bankTransfer: () => 'Banka havalesi ile ödeme',
-      cashOnDelivery: () => 'Kapıda nakit ödeme',
-      digitalWallet: () => 'Dijital cüzdan ile ödeme',
-      mock: () => 'Test ödeme sistemi (Geliştirme)',
     );
   }
 
   Future<void> _processCheckout(BuildContext context, WidgetRef ref) async {
-    final order = await ref.read(checkoutProvider.notifier).processCheckout(
-          paymentMethod: widget.paymentMethod,
-          orderNote: _noteController.text.trim().isEmpty
-              ? null
-              : _noteController.text.trim(),
-          simulatePaymentSuccess: _simulateSuccess,
-        );
+    try {
+      final order = await ref.read(checkoutProvider.notifier).processCheckout(
+            paymentMethod: widget.paymentMethod,
+            orderNote: _noteController.text.trim().isEmpty
+                ? null
+                : _noteController.text.trim(),
+            simulatePaymentSuccess: true,
+          );
 
-    if (order != null && context.mounted) {
-      // Success is handled in the build method
+      if (order != null && context.mounted) {
+        // Check if this is a PayTR payment (credit card)
+        if (widget.paymentMethod == const PaymentMethod.creditCard()) {
+          // Get PayTR token and show WebView
+          final tokenAsync = ref.read(paytrTokenProvider);
+          final tokenResponse = tokenAsync.when(
+            data: (response) => response,
+            loading: () => null,
+            error: (error, stack) => null,
+          );
+
+          if (tokenResponse != null) {
+            // Navigate to PayTR WebView
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => PayTRWebViewPage(
+                  orderId: order.id!,
+                  iframeUrl: tokenResponse.iframeUrl,
+                ),
+              ),
+            );
+          } else {
+            // Fallback to success page
+            // Success is handled in the build method
+          }
+        } else {
+          // For other payment methods, show success page
+          // Success is handled in the build method
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sipariş işlemi başarısız: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
