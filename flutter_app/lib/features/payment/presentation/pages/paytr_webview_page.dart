@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import '../../providers/paytr_provider.dart';
-import '../../../../core/models/paytr_model.dart';
 
-class PayTRWebViewPage extends ConsumerStatefulWidget {
+class PayTRWebViewPage extends StatefulWidget {
   final String orderId;
   final String iframeUrl;
 
@@ -15,10 +12,10 @@ class PayTRWebViewPage extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<PayTRWebViewPage> createState() => _PayTRWebViewPageState();
+  State<PayTRWebViewPage> createState() => _PayTRWebViewPageState();
 }
 
-class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
+class _PayTRWebViewPageState extends State<PayTRWebViewPage> {
   late final WebViewController _controller;
   bool _isLoading = true;
   bool _hasError = false;

@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'paytr_model.dart';
 
 part 'order_model.freezed.dart';
 part 'order_model.g.dart';

@@ -5,7 +5,6 @@ import '../../../features/orders/providers/orders_provider.dart';
 import '../../../features/addresses/providers/addresses_provider.dart';
 import '../../../features/cart/providers/cart_provider.dart';
 import '../data/mock_payment_service.dart';
-import 'paytr_provider.dart';
 
 // Mock Payment Service Provider
 final mockPaymentServiceProvider = Provider<MockPaymentService>((ref) {
@@ -105,7 +104,6 @@ final paymentProcessingProvider = StateNotifierProvider<
 // Payment Summary Provider
 final paymentSummaryProvider = Provider<PaymentSummary>((ref) {
   final cartTotalAsync = ref.watch(cartTotalProvider);
-  final selectedMethod = ref.watch(selectedPaymentMethodProvider);
 
   final subtotal = cartTotalAsync.when(
     data: (cartTotal) => cartTotal.totalPrice,
@@ -114,13 +112,10 @@ final paymentSummaryProvider = Provider<PaymentSummary>((ref) {
   );
 
   final shipping = 0.0; // Free shipping for now
-  final tax = subtotal * 0.18; // 18% VAT
+  final tax = 0.0; // Backend already includes VAT in totalPrice
   final discount = 0.0; // No discount for now
-  final paymentFee = ref
-      .read(mockPaymentServiceProvider)
-      .getPaymentMethodFee(selectedMethod, subtotal);
 
-  final total = subtotal + shipping + tax + paymentFee - discount;
+  final total = subtotal + shipping + tax - discount;
 
   return PaymentSummary(
     subtotal: subtotal,
@@ -164,40 +159,35 @@ class CheckoutNotifier extends StateNotifier<AsyncValue<Order?>> {
         throw Exception('Sepetiniz boş. Lütfen ürün ekleyin.');
       }
 
-      // Create order items from cart
+      // Create order first (without payment)
+      // Convert cart items to order items
       final orderItems = cartItems
           .map((item) => OrderCreateItem(
                 productId: item.productId,
                 name: item.title,
                 quantity: item.qty,
-                price: item.price,
+                price: item.finalPrice ?? item.price,
               ))
           .toList();
 
-      // Create order first (without payment)
       final order = await _ref.read(createOrderHelperProvider)(
-        items: orderItems,
+        items: orderItems, // Send cart items explicitly
         note: orderNote,
         simulate: false, // Real order, no simulation
         clearCartOnSuccess: false, // Don't clear cart yet
       );
 
       if (order != null && order.id != null) {
-        // Check payment method
-        if (paymentMethod == const PaymentMethod.creditCard()) {
-          // Use PayTR for credit card payments
-          final paytrOrder = await _ref.read(paytrPaymentProvider.notifier).processPayment(
-            orderId: order.id!,
-          );
-          
-          if (paytrOrder != null) {
-            // Clear cart after successful order creation
-            await _ref.read(cartRepositoryProvider).clearCart();
-            state = AsyncValue.data(paytrOrder);
-            return paytrOrder;
-          } else {
-            throw Exception('PayTR ödeme işlemi başlatılamadı');
-          }
+        // For credit/debit card payments, we need to use PayTR Direct API
+        // The actual payment will be processed when user fills the form and submits to PayTR
+        // For now, return the order - the checkout page will handle PayTR integration
+        if (paymentMethod == const PaymentMethod.creditCard() ||
+            paymentMethod == const PaymentMethod.debitCard()) {
+          // Order created successfully, PayTR integration will happen in UI
+          // Clear cart after successful order creation
+          await _ref.read(cartRepositoryProvider).clearCart();
+          state = AsyncValue.data(order);
+          return order;
         } else {
           // For other payment methods, use mock payment
           final paymentResponse =

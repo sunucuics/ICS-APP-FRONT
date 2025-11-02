@@ -7,7 +7,7 @@ import '../../providers/paytr_provider.dart';
 import '../../../addresses/providers/addresses_provider.dart';
 import '../../../addresses/presentation/pages/add_address_page.dart';
 import '../../../cart/providers/cart_provider.dart';
-import 'paytr_webview_page.dart';
+import 'paytr_direct_form_page.dart';
 
 class CheckoutPage extends ConsumerStatefulWidget {
   final PaymentMethod paymentMethod;
@@ -409,6 +409,12 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
 
   Widget _buildCartItemsSection(
       BuildContext context, WidgetRef ref, List<dynamic> cartItems) {
+    // Calculate total from cart items
+    final totalAmount = cartItems.fold<double>(
+      0.0,
+      (sum, item) => sum + ((item.finalPrice ?? item.price) * item.qty),
+    );
+    
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -432,7 +438,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  '₺${widget.totalAmount.toStringAsFixed(2)}',
+                  '₺${totalAmount.toStringAsFixed(2)}',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).primaryColor,
@@ -544,6 +550,12 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     final currentAddress = ref.watch(currentAddressDataProvider);
     final cartItems = ref.watch(cartItemsProvider);
 
+    // Calculate total from cart items
+    final totalAmount = cartItems.fold<double>(
+      0.0,
+      (sum, item) => sum + ((item.finalPrice ?? item.price) * item.qty),
+    );
+
     final canCheckout = currentAddress != null && cartItems.isNotEmpty;
 
     return Container(
@@ -572,7 +584,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             ),
             child: Text(
               canCheckout
-                  ? 'Siparişi Tamamla - ₺${widget.totalAmount.toStringAsFixed(2)}'
+                  ? 'Siparişi Tamamla - ₺${totalAmount.toStringAsFixed(2)}'
                   : 'Adres ve Sepet Kontrolü Gerekli',
               style: const TextStyle(
                 fontSize: 16,
@@ -645,34 +657,46 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           );
 
       if (order != null && context.mounted) {
-        // Check if this is a PayTR payment (credit card)
-        if (widget.paymentMethod == const PaymentMethod.creditCard()) {
-          // Get PayTR token and show WebView
-          final tokenAsync = ref.read(paytrTokenProvider);
-          final tokenResponse = tokenAsync.when(
+        // Check if this is a PayTR payment (credit/debit card)
+        if (widget.paymentMethod == const PaymentMethod.creditCard() ||
+            widget.paymentMethod == const PaymentMethod.debitCard()) {
+          // Get PayTR Direct API init
+          await ref.read(paytrDirectInitProvider.notifier).getDirectInit(
+                orderId: order.id!,
+                installmentCount: 0, // For now, no installments
+              );
+
+          final initAsync = ref.read(paytrDirectInitProvider);
+          final initResponse = initAsync.when(
             data: (response) => response,
             loading: () => null,
             error: (error, stack) => null,
           );
 
-          if (tokenResponse != null) {
-            // Navigate to PayTR WebView
+          if (initResponse != null && context.mounted) {
+            // Navigate to PayTR Direct form page
             await Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => PayTRWebViewPage(
+                builder: (context) => PayTRDirectFormPage(
                   orderId: order.id!,
-                  iframeUrl: tokenResponse.iframeUrl,
+                  initResponse: initResponse,
                 ),
               ),
             );
           } else {
-            // Fallback to success page
-            // Success is handled in the build method
+            // Fallback to success page if PayTR init fails
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                      'Ödeme sayfası açılamadı. Siparişiniz oluşturuldu.'),
+                  backgroundColor: Colors.orange,
+                ),
+              );
+            }
           }
-        } else {
-          // For other payment methods, show success page
-          // Success is handled in the build method
         }
+        // For other payment methods, success is handled in the build method
       }
     } catch (e) {
       if (context.mounted) {

@@ -1,7 +1,7 @@
 class ApiEndpoints {
   // Base URL - Google Cloud deployed backend
   static const String baseUrl =
-      'https://ics-backend-443215445942.europe-west1.run.app';
+      'https://ics-api-443215445942.europe-west1.run.app';
 
   // Debug mode flag
   static const bool isDebug = true;
@@ -47,7 +47,17 @@ class ApiEndpoints {
   static String order(String orderId) => '/orders/$orderId';
   static String orderTracking(String orderId) => '/orders/$orderId/tracking';
 
-  // PayTR endpoints
+  // PayTR endpoints - Direct API (new backend integration)
+  static const String paytrDirectInit = '/paytr/direct/init';
+  static const String paytrDirectVerify = '/paytr/direct/verify';
+  static const String paytrCallback = '/paytr/callback';
+  static const String paytrInstallments = '/paytr/installments';
+  
+  // PayTR iFrame API (optional)
+  static const String paytrIframeInit = '/paytr/iframe/init';
+  
+  // Legacy PayTR token endpoint (deprecated)
+  @Deprecated('Use paytrDirectInit instead')
   static const String paytrToken = '/paytr/token';
 
   // Appointments endpoints

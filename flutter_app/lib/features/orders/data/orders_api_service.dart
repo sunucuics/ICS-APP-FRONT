@@ -10,20 +10,25 @@ class OrdersApiService {
 
   /// Create a new order from cart
   /// Backend reads cart from user_id and creates order automatically
-  /// No body needed - just auth header
   Future<Order> createOrder({
-    List<OrderCreateItem>? items, // Ignored - backend reads from cart
-    String? note, // Ignored - backend doesn't accept note in POST
+    List<OrderCreateItem>? items, // Optional - backend reads from cart if empty
+    String? note,
     bool simulate = false,
     bool clearCartOnSuccess = true,
     String? checkoutId,
   }) async {
     try {
-      // Backend documentation says: "Request body → Hiç yok. Sadece auth'lu POST."
-      // Backend reads cart from user_id automatically
+      // Backend reads cart from user_id, so no body needed per Swagger docs
+      print('🔍 [ORDER CREATE DEBUG] Sending POST /orders with empty body');
+      
       final response = await _dio.post(
         ApiEndpoints.orders,
-        // No data/body - backend reads cart automatically
+        data: null, // Explicitly null to avoid Content-Type header
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+          },
+        ),
         queryParameters: {
           'simulate': simulate,
           'clear_cart_on_success': clearCartOnSuccess,
@@ -31,8 +36,11 @@ class OrdersApiService {
         },
       );
 
+      print('🔍 [ORDER CREATE DEBUG] Response: ${response.data}');
       return Order.fromJson(response.data);
     } on DioException catch (e) {
+      print('🔍 [ORDER CREATE DEBUG] Error: ${e.response?.data}');
+      print('🔍 [ORDER CREATE DEBUG] Status code: ${e.response?.statusCode}');
       throw ApiException.fromDioException(e);
     }
   }
