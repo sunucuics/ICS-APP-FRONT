@@ -9,6 +9,7 @@ import '../widgets/admin_form_dialog.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../models/admin_discount_model.dart';
 import '../../../../core/models/product_model.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class AdminDiscountsPage extends ConsumerWidget {
   const AdminDiscountsPage({super.key});
@@ -353,17 +354,17 @@ class AdminDiscountsPage extends ConsumerWidget {
       data: (products) => categoriesAsync.when(
         data: (categories) =>
             _showDiscountFormDialog(context, ref, null, products, categories),
-        loading: () => ScaffoldMessenger.of(context).showSnackBar(
+        loading: () => SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(content: Text('Kategoriler yükleniyor...')),
         ),
-        error: (error, stack) => ScaffoldMessenger.of(context).showSnackBar(
+        error: (error, stack) => SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(content: Text('Kategori hatası: $error')),
         ),
       ),
-      loading: () => ScaffoldMessenger.of(context).showSnackBar(
+      loading: () => SnackBarService.showSnackBar(context: context, snackBar: 
         const SnackBar(content: Text('Ürünler yükleniyor...')),
       ),
-      error: (error, stack) => ScaffoldMessenger.of(context).showSnackBar(
+      error: (error, stack) => SnackBarService.showSnackBar(context: context, snackBar: 
         SnackBar(content: Text('Ürün hatası: $error')),
       ),
     );

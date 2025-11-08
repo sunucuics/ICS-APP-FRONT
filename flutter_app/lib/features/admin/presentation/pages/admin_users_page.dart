@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/models/user_model.dart';
 import '../../providers/admin_users_provider.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class AdminUsersPage extends ConsumerWidget {
   const AdminUsersPage({super.key});
@@ -364,7 +365,7 @@ class AdminUsersPage extends ConsumerWidget {
           .read(adminUsersProvider.notifier)
           .updateUserRole(user.id, newRole);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text(
                 '${user.name.isEmpty ? 'Kullanıcı' : user.name} rolü ${newRole == 'admin' ? 'Admin' : 'Müşteri'} olarak güncellendi'),
@@ -374,7 +375,7 @@ class AdminUsersPage extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Rol güncellenirken hata oluştu: $e'),
             backgroundColor: Colors.red,
@@ -389,7 +390,7 @@ class AdminUsersPage extends ConsumerWidget {
     try {
       await ref.read(adminUsersProvider.notifier).deleteUser(user.id);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text(
                 '${user.name.isEmpty ? 'Kullanıcı' : user.name} başarıyla silindi'),
@@ -399,7 +400,7 @@ class AdminUsersPage extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Kullanıcı silinirken hata oluştu: $e'),
             backgroundColor: Colors.red,

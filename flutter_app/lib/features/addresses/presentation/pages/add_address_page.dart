@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/models/address_model.dart';
 import '../../providers/addresses_provider.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class AddAddressPage extends ConsumerStatefulWidget {
   const AddAddressPage({super.key});
@@ -306,7 +307,7 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
     }
 
     if (_selectedCity == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      SnackBarService.showSnackBar(context: context, snackBar: 
         const SnackBar(
           content: Text('Lütfen il seçin'),
           backgroundColor: Colors.red,
@@ -343,7 +344,7 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
       await ref.read(addressesProvider.notifier).addAddress(address);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(
             content: Text('Adres başarıyla eklendi'),
             backgroundColor: Colors.green,
@@ -353,7 +354,7 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Hata: $error'),
             backgroundColor: Colors.red,

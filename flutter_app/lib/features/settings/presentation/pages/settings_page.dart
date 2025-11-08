@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -154,7 +155,7 @@ class SettingsPage extends ConsumerWidget {
                   'SSS ve kullanım kılavuzu',
                   Icons.help,
                   () {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBarService.showSnackBar(context: context, snackBar: 
                       const SnackBar(
                         content: Text('Yardım merkezi yakında eklenecek'),
                       ),
@@ -168,7 +169,7 @@ class SettingsPage extends ConsumerWidget {
                   'Bizimle iletişime geçin',
                   Icons.contact_support,
                   () {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBarService.showSnackBar(context: context, snackBar: 
                       const SnackBar(
                         content: Text('İletişim sayfası yakında eklenecek'),
                       ),

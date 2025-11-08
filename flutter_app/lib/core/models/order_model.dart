@@ -187,8 +187,51 @@ class OrderAddress with _$OrderAddress {
     @Default('TR') String country,
   }) = _OrderAddress;
 
-  factory OrderAddress.fromJson(Map<String, dynamic> json) =>
-      _$OrderAddressFromJson(json);
+  factory OrderAddress.fromJson(Map<String, dynamic> json) {
+    // If backend already returns expected schema, use generated parser
+    if (json.containsKey('line1')) {
+      return _$OrderAddressFromJson(json);
+    }
+
+    String? _asString(dynamic value) {
+      if (value == null) return null;
+      final str = value.toString().trim();
+      return str.isEmpty ? null : str;
+    }
+
+    String _joinParts(List<String?> parts) {
+      final buffer = StringBuffer();
+      for (final part in parts) {
+        if (part == null || part.trim().isEmpty) continue;
+        if (buffer.isNotEmpty) buffer.write(', ');
+        buffer.write(part.trim());
+      }
+      return buffer.isEmpty ? 'Adres' : buffer.toString();
+    }
+
+    final line1 = _joinParts([
+      _asString(json['label']),
+      _asString(json['street']),
+      _asString(json['buildingNo']),
+      _asString(json['apartment']),
+      _asString(json['floor']),
+      _asString(json['neighborhood']),
+      _asString(json['district']),
+    ]);
+
+    final city = _asString(json['city']) ?? _asString(json['district']) ?? 'İstanbul';
+    final postalCode =
+        _asString(json['postal_code']) ?? _asString(json['zipCode']) ?? '00000';
+    final country =
+        _asString(json['country']) ?? _asString(json['countryCode']) ?? 'TR';
+
+    return _OrderAddress(
+      line1: line1,
+      city: city,
+      postalCode: postalCode,
+      country: country,
+    );
+  }
 }
 
 // Shipping Model

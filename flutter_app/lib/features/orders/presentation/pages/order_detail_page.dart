@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/models/order_model.dart';
 import '../../providers/orders_provider.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class OrderDetailPage extends ConsumerStatefulWidget {
   final String orderId;
@@ -240,7 +241,7 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
                     icon: const Icon(Icons.open_in_new),
                     onPressed: () {
                       // TODO: Open tracking URL
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBarService.showSnackBar(context: context, snackBar: 
                         const SnackBar(
                             content: Text('Takip sayfası yakında eklenecek')),
                       );

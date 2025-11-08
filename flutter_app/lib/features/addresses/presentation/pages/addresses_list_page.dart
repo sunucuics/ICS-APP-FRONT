@@ -4,6 +4,7 @@ import '../../../../core/models/address_model.dart';
 import '../../providers/addresses_provider.dart';
 import 'add_address_page.dart';
 import 'edit_address_page.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class AddressesListPage extends ConsumerWidget {
   const AddressesListPage({super.key});
@@ -282,7 +283,7 @@ class AddressesListPage extends ConsumerWidget {
           .read(addressesProvider.notifier)
           .chooseCurrentAddress(address.id!);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('${address.name} aktif adres olarak ayarlandı'),
             backgroundColor: Colors.green,
@@ -291,7 +292,7 @@ class AddressesListPage extends ConsumerWidget {
       }
     } catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Hata: $error'),
             backgroundColor: Colors.red,
@@ -327,7 +328,7 @@ class AddressesListPage extends ConsumerWidget {
       try {
         await ref.read(addressesProvider.notifier).deleteAddress(address.id!);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBarService.showSnackBar(context: context, snackBar: 
             SnackBar(
               content: Text('${address.name} adresi silindi'),
               backgroundColor: Colors.green,
@@ -336,7 +337,7 @@ class AddressesListPage extends ConsumerWidget {
         }
       } catch (error) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBarService.showSnackBar(context: context, snackBar: 
             SnackBar(
               content: Text('Hata: $error'),
               backgroundColor: Colors.red,

@@ -8,6 +8,7 @@ import '../../../comments/presentation/widgets/comment_form.dart';
 import '../../../comments/presentation/pages/comments_page.dart';
 import '../../../../core/models/product_model.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class ProductDetailPage extends ConsumerStatefulWidget {
   final Product product;
@@ -906,7 +907,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
           );
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content:
                 Text('${widget.product.title} sepete eklendi ($quantity adet)'),
@@ -917,7 +918,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Hata: ${e.toString()}'),
             backgroundColor: Colors.red,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/admin_settings_provider.dart';
 import '../widgets/admin_navigation.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class AdminSettingsPage extends ConsumerStatefulWidget {
   const AdminSettingsPage({super.key});
@@ -525,7 +526,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage>
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(
             content: Text('Genel ayarlar kaydedildi!'),
             backgroundColor: Colors.green,
@@ -534,7 +535,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Ayarlar kaydedilemedi: $e'),
             backgroundColor: Colors.red,
@@ -567,7 +568,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage>
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(
             content: Text('Ödeme ayarları kaydedildi!'),
             backgroundColor: Colors.green,
@@ -576,7 +577,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Ayarlar kaydedilemedi: $e'),
             backgroundColor: Colors.red,

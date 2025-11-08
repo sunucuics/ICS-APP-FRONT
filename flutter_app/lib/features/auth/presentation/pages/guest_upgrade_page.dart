@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/anonymous_auth_provider.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class GuestUpgradePage extends ConsumerStatefulWidget {
   final String? email;
@@ -407,7 +408,7 @@ class _GuestUpgradePageState extends ConsumerState<GuestUpgradePage> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(
             content: Text('Hesap başarıyla oluşturuldu!'),
             backgroundColor: Colors.green,
@@ -419,7 +420,7 @@ class _GuestUpgradePageState extends ConsumerState<GuestUpgradePage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Hesap oluşturma başarısız: $e'),
             backgroundColor: Colors.red,

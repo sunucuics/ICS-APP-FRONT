@@ -4,6 +4,7 @@ import '../../providers/admin_comments_provider.dart';
 import '../widgets/admin_navigation.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/models/comment_model.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class AdminCommentsPage extends ConsumerWidget {
   const AdminCommentsPage({super.key});
@@ -306,7 +307,7 @@ class AdminCommentsPage extends ConsumerWidget {
     try {
       await ref.read(adminCommentsProvider.notifier).approveComment(commentId);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(
             content: Text('Yorum onaylandı'),
             backgroundColor: Colors.green,
@@ -315,7 +316,7 @@ class AdminCommentsPage extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Yorum onaylanırken hata oluştu: $e'),
             backgroundColor: Colors.red,
@@ -349,7 +350,7 @@ class AdminCommentsPage extends ConsumerWidget {
       try {
         await ref.read(adminCommentsProvider.notifier).deleteComment(commentId);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBarService.showSnackBar(context: context, snackBar: 
             const SnackBar(
               content: Text('Yorum silindi'),
               backgroundColor: Colors.red,
@@ -358,7 +359,7 @@ class AdminCommentsPage extends ConsumerWidget {
         }
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBarService.showSnackBar(context: context, snackBar: 
             SnackBar(
               content: Text('Yorum silinirken hata oluştu: $e'),
               backgroundColor: Colors.red,

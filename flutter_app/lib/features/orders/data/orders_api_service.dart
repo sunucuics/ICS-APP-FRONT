@@ -37,7 +37,8 @@ class OrdersApiService {
       );
 
       print('🔍 [ORDER CREATE DEBUG] Response: ${response.data}');
-      return Order.fromJson(response.data);
+      final data = Map<String, dynamic>.from(response.data);
+      return Order.fromJson(_sanitizeOrderJson(data));
     } on DioException catch (e) {
       print('🔍 [ORDER CREATE DEBUG] Error: ${e.response?.data}');
       print('🔍 [ORDER CREATE DEBUG] Status code: ${e.response?.statusCode}');
@@ -61,7 +62,14 @@ class OrdersApiService {
         ApiEndpoints.orders,
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
       );
-      return OrdersListResponse.fromJson(response.data);
+      final data = Map<String, dynamic>.from(response.data);
+      final items = (data['items'] as List<dynamic>? ?? [])
+          .map((item) => _sanitizeOrderJson(
+                Map<String, dynamic>.from(item as Map),
+              ))
+          .toList();
+      data['items'] = items;
+      return OrdersListResponse.fromJson(data);
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
@@ -71,7 +79,8 @@ class OrdersApiService {
   Future<Order> getOrderDetail(String orderId) async {
     try {
       final response = await _dio.get(ApiEndpoints.order(orderId));
-      return Order.fromJson(response.data);
+      final data = Map<String, dynamic>.from(response.data);
+      return Order.fromJson(_sanitizeOrderJson(data));
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
@@ -82,7 +91,8 @@ class OrdersApiService {
     try {
       final response =
           await _dio.post('${ApiEndpoints.order(orderId)}/sync-status');
-      return Order.fromJson(response.data);
+      final data = Map<String, dynamic>.from(response.data);
+      return Order.fromJson(_sanitizeOrderJson(data));
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
@@ -97,4 +107,23 @@ class OrdersApiService {
       throw ApiException.fromDioException(e);
     }
   }
+}
+
+Map<String, dynamic> _sanitizeOrderJson(Map<String, dynamic> json) {
+  final sanitized = Map<String, dynamic>.from(json);
+
+  final payment = sanitized['payment'];
+  if (payment is Map<String, dynamic>) {
+    final hasRequiredPaymentFields =
+        (payment['provider'] != null && payment['status'] != null) &&
+            payment['currency'] != null;
+
+    if (!hasRequiredPaymentFields || payment.isEmpty) {
+      sanitized['payment'] = null;
+    }
+  } else if (payment == null) {
+    sanitized['payment'] = null;
+  }
+
+  return sanitized;
 }

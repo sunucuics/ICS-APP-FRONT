@@ -8,6 +8,7 @@ import '../../../../core/models/product_model.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import 'product_detail_page.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class CategoryProductsPage extends ConsumerStatefulWidget {
   final Category category;
@@ -654,7 +655,7 @@ class _ProductCard extends ConsumerWidget {
 
                                 if (isAnonymous) {
                                   // User is anonymous (guest), show login prompt
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBarService.showSnackBar(context: context, snackBar: 
                                     SnackBar(
                                       content: const Text(
                                           'Sepete eklemek için lütfen giriş yapın'),
@@ -679,7 +680,7 @@ class _ProductCard extends ConsumerWidget {
 
                                 try {
                                   await ref.read(addToCartProvider)(product.id);
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBarService.showSnackBar(context: context, snackBar: 
                                     SnackBar(
                                       content: Text(
                                           '${product.title} sepete eklendi'),
@@ -692,7 +693,7 @@ class _ProductCard extends ConsumerWidget {
                                     ),
                                   );
                                 } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBarService.showSnackBar(context: context, snackBar: 
                                     SnackBar(
                                       content: Text(
                                           'Ürün sepete eklenirken hata oluştu: $e'),

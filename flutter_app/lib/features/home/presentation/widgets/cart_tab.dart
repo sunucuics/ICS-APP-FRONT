@@ -8,6 +8,7 @@ import '../../../auth/presentation/pages/guest_upgrade_page.dart';
 import '../../../../core/models/cart_model.dart';
 import '../../../payment/presentation/pages/payment_method_page.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class CartTab extends ConsumerWidget {
   const CartTab({super.key});
@@ -145,7 +146,7 @@ class CartTab extends ConsumerWidget {
             onPressed: () {
               // Navigate to catalog tab
               // Bu navigation logic'i parent widget'ta handle edilmeli
-              ScaffoldMessenger.of(context).showSnackBar(
+              SnackBarService.showSnackBar(context: context, snackBar: 
                 const SnackBar(content: Text('Mağaza sekmesine geçin')),
               );
             },

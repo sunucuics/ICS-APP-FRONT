@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/models/address_model.dart';
 import '../../providers/addresses_provider.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class EditAddressPage extends ConsumerStatefulWidget {
   final Address address;
@@ -325,7 +326,7 @@ class _EditAddressPageState extends ConsumerState<EditAddressPage> {
     }
 
     if (_selectedCity == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      SnackBarService.showSnackBar(context: context, snackBar: 
         const SnackBar(
           content: Text('Lütfen il seçin'),
           backgroundColor: Colors.red,
@@ -366,7 +367,7 @@ class _EditAddressPageState extends ConsumerState<EditAddressPage> {
           .updateAddress(widget.address.id!, address);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(
             content: Text('Adres başarıyla güncellendi'),
             backgroundColor: Colors.green,
@@ -376,7 +377,7 @@ class _EditAddressPageState extends ConsumerState<EditAddressPage> {
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Hata: $error'),
             backgroundColor: Colors.red,

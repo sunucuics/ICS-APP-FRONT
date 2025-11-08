@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/admin_filter_model.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class AdminFilterWidget extends ConsumerStatefulWidget {
   final FilterState initialFilter;
@@ -365,7 +366,7 @@ class _AdminFilterWidgetState extends ConsumerState<AdminFilterWidget> {
       builder: (context) => _SaveFilterDialog(
         onSave: (name, description) {
           // Filtreyi kaydetme işlemi
-          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBarService.showSnackBar(context: context, snackBar: 
             SnackBar(
               content: Text('Filtre "$name" kaydedildi'),
               backgroundColor: Colors.green,
@@ -382,7 +383,7 @@ class _AdminFilterWidgetState extends ConsumerState<AdminFilterWidget> {
       builder: (context) => _ExportDialog(
         onExport: (format, includeHeaders) {
           // Dışa aktarma işlemi
-          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBarService.showSnackBar(context: context, snackBar: 
             SnackBar(
               content: Text('$format formatında dışa aktarılıyor...'),
               backgroundColor: Colors.blue,

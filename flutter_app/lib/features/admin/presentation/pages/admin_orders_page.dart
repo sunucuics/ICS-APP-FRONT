@@ -4,6 +4,7 @@ import '../../providers/admin_orders_provider.dart';
 import '../widgets/admin_navigation.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/models/order_model.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class AdminOrdersPage extends ConsumerWidget {
   const AdminOrdersPage({super.key});
@@ -649,7 +650,7 @@ class AdminOrdersPage extends ConsumerWidget {
       );
       
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(
             content: Text('Sipariş kargoya verildi'),
             backgroundColor: Colors.green,
@@ -659,7 +660,7 @@ class AdminOrdersPage extends ConsumerWidget {
       }
     } catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Hata: ${error.toString()}'),
             backgroundColor: Colors.red,
@@ -674,7 +675,7 @@ class AdminOrdersPage extends ConsumerWidget {
       await ref.read(adminOrdersNotifierProvider.notifier).deliverOrder(order.id ?? '');
       
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(
             content: Text('Sipariş teslim edildi olarak işaretlendi'),
             backgroundColor: Colors.green,
@@ -684,7 +685,7 @@ class AdminOrdersPage extends ConsumerWidget {
       }
     } catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Hata: ${error.toString()}'),
             backgroundColor: Colors.red,
@@ -741,7 +742,7 @@ class AdminOrdersPage extends ConsumerWidget {
       );
       
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(
             content: Text('Sipariş iptal edildi'),
             backgroundColor: Colors.orange,
@@ -751,7 +752,7 @@ class AdminOrdersPage extends ConsumerWidget {
       }
     } catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Hata: ${error.toString()}'),
             backgroundColor: Colors.red,
@@ -790,7 +791,7 @@ class AdminOrdersPage extends ConsumerWidget {
       await ref.read(adminOrdersNotifierProvider.notifier).deleteOrder(order.id ?? '');
       
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(
             content: Text('Sipariş silindi'),
             backgroundColor: Colors.red,
@@ -800,7 +801,7 @@ class AdminOrdersPage extends ConsumerWidget {
       }
     } catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Hata: ${error.toString()}'),
             backgroundColor: Colors.red,

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class AdminFormDialog extends StatefulWidget {
   final String title;
@@ -303,7 +304,7 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
 
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(
             content: Text('Başarıyla kaydedildi'),
             backgroundColor: Colors.green,
@@ -312,7 +313,7 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Hata: $e'),
             backgroundColor: Colors.red,
@@ -428,7 +429,7 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Görsel seçilirken hata oluştu: $e'),
             backgroundColor: Colors.red,

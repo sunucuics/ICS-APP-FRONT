@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/models/paytr_model.dart';
+import '../../../core/models/order_model.dart';
+import '../../../core/models/cart_model.dart';
 import '../data/paytr_api_service.dart';
 import '../data/paytr_repository.dart';
 import '../../addresses/providers/addresses_provider.dart';
@@ -28,16 +30,23 @@ class PayTRDirectInitNotifier extends StateNotifier<AsyncValue<PayTRDirectInitRe
 
   Future<void> getDirectInit({
     required String orderId,
+    List<OrderItem>? orderItems,
     int installmentCount = 0,
     String? cardType,
   }) async {
     try {
       state = const AsyncValue.loading();
 
-      // Get cart items
-      final cartItems = _ref.read(cartItemsProvider);
-      if (cartItems.isEmpty) {
-        throw Exception('Sepetiniz boş. Lütfen ürün ekleyin.');
+      // Determine basket source: order items (preferred) or current cart
+      List<CartItem> basketItems;
+      if (orderItems != null && orderItems.isNotEmpty) {
+        basketItems = _mapOrderItemsToCartItems(orderItems);
+      } else {
+        final cartItems = _ref.read(cartItemsProvider);
+        if (cartItems.isEmpty) {
+          throw Exception('Sepetiniz boş. Lütfen ürün ekleyin.');
+        }
+        basketItems = cartItems;
       }
 
       // Get user profile
@@ -63,7 +72,7 @@ class PayTRDirectInitNotifier extends StateNotifier<AsyncValue<PayTRDirectInitRe
       // Get PayTR Direct API init
       final initResponse = await _repository.getDirectInit(
         orderId: orderId,
-        cartItems: cartItems,
+        cartItems: basketItems,
         userProfile: userProfile,
         currentAddress: currentAddress,
         installmentCount: installmentCount,
@@ -78,6 +87,32 @@ class PayTRDirectInitNotifier extends StateNotifier<AsyncValue<PayTRDirectInitRe
 
   void clearInit() {
     state = const AsyncValue.data(null);
+  }
+
+  List<CartItem> _mapOrderItemsToCartItems(List<OrderItem> orderItems) {
+    return orderItems.map((item) {
+      final quantity = item.quantity ?? 1;
+      final rawPrice =
+          item.price ?? item.unitPrice ?? (item.total ?? item.lineTotal ?? 0.0);
+      final price = rawPrice ?? 0.0;
+      final computedFinal =
+          item.total != null && quantity > 0 ? (item.total! / quantity) : null;
+      final finalPrice = computedFinal ?? price;
+
+      return CartItem(
+        productId: item.productId ?? '',
+        title: item.name ?? item.title ?? 'Ürün',
+        description: item.product?['description'] as String?,
+        image: item.imageUrl ?? item.product?['image_url'] as String?,
+        price: price,
+        finalPrice: finalPrice,
+        stock: quantity,
+        categoryName: item.product?['category_name'] as String?,
+        qty: quantity,
+        baseSubtotal: finalPrice * quantity,
+        totalBase: finalPrice * quantity,
+      );
+    }).toList();
   }
 }
 

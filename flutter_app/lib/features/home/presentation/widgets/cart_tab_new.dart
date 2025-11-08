@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../cart/providers/cart_provider.dart';
 import '../../../../core/models/cart_model.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class CartTab extends ConsumerWidget {
   const CartTab({super.key});
@@ -110,7 +111,7 @@ class CartTab extends ConsumerWidget {
             onPressed: () {
               // Navigate to catalog tab
               // Bu navigation logic'i parent widget'ta handle edilmeli
-              ScaffoldMessenger.of(context).showSnackBar(
+              SnackBarService.showSnackBar(context: context, snackBar: 
                 const SnackBar(content: Text('Mağaza sekmesine geçin')),
               );
             },
@@ -499,7 +500,7 @@ class CartTab extends ConsumerWidget {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
+                SnackBarService.showSnackBar(context: context, snackBar: 
                   const SnackBar(
                     content:
                         Text('Sipariş oluşturma özelliği yakında eklenecek'),

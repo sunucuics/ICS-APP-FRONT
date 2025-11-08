@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/comments_providers.dart';
 import 'comment_card.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class CommentsList extends ConsumerStatefulWidget {
   final String targetId;
@@ -87,7 +88,7 @@ class _CommentsListState extends ConsumerState<CommentsList> {
         await commentsProvider.deleteComment(commentId: commentId);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBarService.showSnackBar(context: context, snackBar: 
             const SnackBar(
               content: Text('Yorum başarıyla silindi'),
               backgroundColor: Colors.green,
@@ -96,7 +97,7 @@ class _CommentsListState extends ConsumerState<CommentsList> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBarService.showSnackBar(context: context, snackBar: 
             SnackBar(
               content: Text('Yorum silinirken hata oluştu: ${e.toString()}'),
               backgroundColor: Colors.red,

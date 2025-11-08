@@ -12,6 +12,7 @@ import '../../../../core/models/product_model.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_section.dart';
 import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class CatalogTab extends ConsumerStatefulWidget {
   const CatalogTab({super.key});
@@ -127,7 +128,7 @@ class _CatalogTabState extends ConsumerState<CatalogTab> {
               child: IconButton(
                 icon: const Icon(Icons.filter_list),
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBarService.showSnackBar(context: context, snackBar: 
                     const SnackBar(
                         content: Text('Filtreleme özelliği yakında eklenecek')),
                   );
@@ -807,7 +808,7 @@ class _ProductCard extends ConsumerWidget {
           );
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('${product.title} sepete eklendi'),
             duration: const Duration(seconds: 2),
@@ -817,7 +818,7 @@ class _ProductCard extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Hata: ${e.toString()}'),
             backgroundColor: Colors.red,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/comments_providers.dart';
 import '../../../../core/models/comment_model.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class CommentForm extends ConsumerStatefulWidget {
   final String targetId;
@@ -207,7 +208,7 @@ class _CommentFormState extends ConsumerState<CommentForm> {
 
         // Show success message
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBarService.showSnackBar(context: context, snackBar: 
             const SnackBar(
               content: Text('Yorumunuz başarıyla eklendi!'),
               backgroundColor: Colors.green,
@@ -222,7 +223,7 @@ class _CommentFormState extends ConsumerState<CommentForm> {
         if (mounted) {
           final error = commentsProvider
               .getError('add_${widget.targetType}_${widget.targetId}');
-          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBarService.showSnackBar(context: context, snackBar: 
             SnackBar(
               content: Text(error ?? 'Yorum eklenirken bir hata oluştu'),
               backgroundColor: Colors.red,
@@ -232,7 +233,7 @@ class _CommentFormState extends ConsumerState<CommentForm> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Hata: ${e.toString()}'),
             backgroundColor: Colors.red,

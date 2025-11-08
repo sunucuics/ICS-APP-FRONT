@@ -13,6 +13,7 @@ import 'admin_services_page.dart';
 import 'admin_orders_page.dart';
 import 'admin_appointments_page.dart';
 import 'admin_comments_page.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class AdminDashboardPage extends ConsumerWidget {
   const AdminDashboardPage({super.key});
@@ -468,7 +469,7 @@ class AdminDashboardPage extends ConsumerWidget {
 
       // Show error message
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Çıkış yapılırken hata oluştu: $e'),
             backgroundColor: Colors.red,

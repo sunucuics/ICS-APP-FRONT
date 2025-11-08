@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import '../../providers/auth_provider.dart';
 import 'register_page.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -50,7 +51,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (success && mounted) {
         print('🔐 LoginPage - Login successful, navigating to HomePage');
         // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(
             content: Text('Giriş başarılı!'),
             backgroundColor: Colors.green,
@@ -85,7 +86,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             userFriendlyError = 'Giriş yapılırken bir hata oluştu';
           }
 
-          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBarService.showSnackBar(context: context, snackBar: 
             SnackBar(
               content: Text(userFriendlyError),
               backgroundColor: Colors.red,
@@ -283,7 +284,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             onPressed: () async {
               final email = emailController.text.trim();
               if (email.isEmpty || !email.contains('@')) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                SnackBarService.showSnackBar(context: context, snackBar: 
                   const SnackBar(
                     content: Text('Geçerli bir e-posta adresi girin'),
                     backgroundColor: Colors.red,
@@ -297,7 +298,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               try {
                 await ref.read(authProvider.notifier).resetPassword(email);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBarService.showSnackBar(context: context, snackBar: 
                     const SnackBar(
                       content: Text('Şifre sıfırlama e-postası gönderildi. E-posta kutunuzu kontrol edin.'),
                       backgroundColor: Colors.green,
@@ -306,7 +307,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBarService.showSnackBar(context: context, snackBar: 
                     SnackBar(
                       content: Text('Hata: $e'),
                       backgroundColor: Colors.red,

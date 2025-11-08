@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class PayTRWebViewPage extends StatefulWidget {
   final String orderId;
@@ -79,7 +80,7 @@ class _PayTRWebViewPageState extends State<PayTRWebViewPage> {
     // Payment successful - navigate back to orders
     if (mounted) {
       Navigator.of(context).popUntil((route) => route.isFirst);
-      ScaffoldMessenger.of(context).showSnackBar(
+      SnackBarService.showSnackBar(context: context, snackBar: 
         const SnackBar(
           content: Text('Ödeme başarıyla tamamlandı!'),
           backgroundColor: Colors.green,
@@ -92,7 +93,7 @@ class _PayTRWebViewPageState extends State<PayTRWebViewPage> {
     // Payment failed - show error and go back
     if (mounted) {
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
+      SnackBarService.showSnackBar(context: context, snackBar: 
         const SnackBar(
           content: Text('Ödeme işlemi başarısız oldu. Lütfen tekrar deneyin.'),
           backgroundColor: Colors.red,

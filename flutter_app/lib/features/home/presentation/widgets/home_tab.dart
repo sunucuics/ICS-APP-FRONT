@@ -10,6 +10,7 @@ import '../../../appointments/presentation/pages/appointment_booking_page.dart';
 import '../../../../core/models/featured_model.dart';
 import '../../../../core/models/service_model.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class HomeTab extends ConsumerWidget {
   final void Function(int tabIndex)? onNavigateToTab;
@@ -679,7 +680,7 @@ class HomeTab extends ConsumerWidget {
       }
     } catch (e) {
       // Fallback: Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
+      SnackBarService.showSnackBar(context: context, snackBar: 
         SnackBar(
           content: Text('WhatsApp açılamadı: $e'),
           backgroundColor: Colors.red,
@@ -695,7 +696,7 @@ class HomeTab extends ConsumerWidget {
 
     if (!authState.isAuthenticated) {
       // Show login prompt
-      ScaffoldMessenger.of(context).showSnackBar(
+      SnackBarService.showSnackBar(context: context, snackBar: 
         SnackBar(
           content: const Text('Randevu almak için giriş yapmalısınız'),
           backgroundColor: Colors.orange,
@@ -737,7 +738,7 @@ class HomeTab extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Hizmet bilgileri alınamadı: $e'),
             backgroundColor: Colors.red,
@@ -961,8 +962,9 @@ class _FeaturedProductCard extends ConsumerWidget {
                                         productPrice: featuredProduct.price,
                                       );
                                       if (context.mounted) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
+                                        SnackBarService.showSnackBar(
+                                          context: context,
+                                          snackBar:
                                           SnackBar(
                                             content: Text(
                                                 '${featuredProduct.title} sepete eklendi'),
@@ -973,8 +975,9 @@ class _FeaturedProductCard extends ConsumerWidget {
                                       }
                                     } catch (e) {
                                       if (context.mounted) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
+                                        SnackBarService.showSnackBar(
+                                          context: context,
+                                          snackBar:
                                           SnackBar(
                                             content:
                                                 Text('Hata: ${e.toString()}'),

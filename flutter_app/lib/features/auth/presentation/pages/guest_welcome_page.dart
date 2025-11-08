@@ -4,6 +4,7 @@ import '../../providers/anonymous_auth_provider.dart';
 import 'register_page.dart';
 import 'login_page.dart';
 import '../../../home/presentation/pages/home_page.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class GuestWelcomePage extends ConsumerWidget {
   const GuestWelcomePage({super.key});
@@ -304,7 +305,7 @@ class GuestWelcomePage extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Misafir girişi başarısız: $e'),
             backgroundColor: Colors.red,

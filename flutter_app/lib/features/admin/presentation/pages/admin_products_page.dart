@@ -7,6 +7,7 @@ import '../widgets/admin_navigation.dart';
 import '../widgets/admin_form_dialog.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/models/product_model.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class AdminProductsPage extends ConsumerWidget {
   const AdminProductsPage({super.key});
@@ -175,7 +176,7 @@ class AdminProductsPage extends ConsumerWidget {
                         child: GestureDetector(
                           onTap: () {
                             Clipboard.setData(ClipboardData(text: product.id));
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBarService.showSnackBar(context: context, snackBar: 
                               const SnackBar(
                                 content: Text('Ürün ID\'si kopyalandı'),
                                 duration: Duration(seconds: 2),
@@ -345,10 +346,10 @@ class AdminProductsPage extends ConsumerWidget {
     categoriesAsync.when(
       data: (categories) =>
           _showProductFormDialog(context, ref, null, categories),
-      loading: () => ScaffoldMessenger.of(context).showSnackBar(
+      loading: () => SnackBarService.showSnackBar(context: context, snackBar: 
         const SnackBar(content: Text('Kategoriler yükleniyor...')),
       ),
-      error: (error, stack) => ScaffoldMessenger.of(context).showSnackBar(
+      error: (error, stack) => SnackBarService.showSnackBar(context: context, snackBar: 
         SnackBar(content: Text('Kategori hatası: $error')),
       ),
     );
@@ -359,10 +360,10 @@ class AdminProductsPage extends ConsumerWidget {
     categoriesAsync.when(
       data: (categories) =>
           _showProductFormDialog(context, ref, product, categories),
-      loading: () => ScaffoldMessenger.of(context).showSnackBar(
+      loading: () => SnackBarService.showSnackBar(context: context, snackBar: 
         const SnackBar(content: Text('Kategoriler yükleniyor...')),
       ),
-      error: (error, stack) => ScaffoldMessenger.of(context).showSnackBar(
+      error: (error, stack) => SnackBarService.showSnackBar(context: context, snackBar: 
         SnackBar(content: Text('Kategori hatası: $error')),
       ),
     );

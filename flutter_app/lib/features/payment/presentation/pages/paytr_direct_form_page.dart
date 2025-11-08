@@ -3,17 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../../core/models/paytr_model.dart';
-import '../../../orders/providers/orders_provider.dart';
+import '../../../../core/services/snackbar_service.dart';
+import '../../providers/payment_provider.dart';
 
 /// PayTR Direct API form submission page
 /// Creates local HTML form with PayTR fields and submits to PayTR
 class PayTRDirectFormPage extends ConsumerStatefulWidget {
-  final String orderId;
+  final String checkoutId;
   final PayTRDirectInitResponse initResponse;
 
   const PayTRDirectFormPage({
     super.key,
-    required this.orderId,
+    required this.checkoutId,
     required this.initResponse,
   });
 
@@ -365,38 +366,50 @@ class _PayTRDirectFormPageState extends ConsumerState<PayTRDirectFormPage> {
   }
 
   void _handlePaymentSuccess() {
-    // Payment successful - refresh order and navigate back
-    if (mounted) {
-      // Refresh order details
-      ref.read(orderDetailProvider.notifier).loadOrderDetail(widget.orderId);
-      
-      // Navigate back to home
-      Navigator.of(context).popUntil((route) => route.isFirst);
-      
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+    if (!mounted) return;
+    ref
+        .read(checkoutProvider.notifier)
+        .completePayTRPayment()
+        .then((_) {
+      if (!mounted) return;
+      SnackBarService.showSnackBar(
+        context: context,
+        snackBar: const SnackBar(
           content: Text('Ödeme başarıyla tamamlandı! 🎉'),
           backgroundColor: Colors.green,
           duration: Duration(seconds: 3),
         ),
       );
-    }
+    }).catchError((error) {
+      if (!mounted) return;
+      SnackBarService.showSnackBar(
+        context: context,
+        snackBar: SnackBar(
+          content: Text('Sipariş oluşturulamadı: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }).whenComplete(() {
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    });
   }
 
   void _handlePaymentFailure() {
-    // Payment failed - show error and go back
-    if (mounted) {
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'Ödeme işlemi başarısız oldu. Lütfen tekrar deneyin.'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 3),
-        ),
-      );
-    }
+    if (!mounted) return;
+    ref
+        .read(checkoutProvider.notifier)
+        .markPaymentFailed('Ödeme işlemi başarısız oldu. Lütfen tekrar deneyin.');
+    Navigator.of(context).pop();
+    SnackBarService.showSnackBar(
+      context: context,
+      snackBar: const SnackBar(
+        content: Text('Ödeme işlemi başarısız oldu. Lütfen tekrar deneyin.'),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 3),
+      ),
+    );
   }
 
   void _showCloseConfirmation() {
@@ -415,7 +428,10 @@ class _PayTRDirectFormPageState extends ConsumerState<PayTRDirectFormPage> {
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop(); // Close dialog
-              Navigator.of(context).pop(); // Close form page
+              ref
+                  .read(checkoutProvider.notifier)
+                  .markPaymentFailed('Ödeme işlemi iptal edildi.');
+              Navigator.of(context).pop();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
@@ -434,10 +450,9 @@ class _PayTRDirectFormPageState extends ConsumerState<PayTRDirectFormPage> {
       canPop: false,
       onPopInvoked: (didPop) async {
         if (!didPop) {
-          // Refresh order details when leaving payment page
-          await ref
-              .read(orderDetailProvider.notifier)
-              .loadOrderDetail(widget.orderId);
+          ref
+              .read(checkoutProvider.notifier)
+              .markPaymentFailed('Ödeme işlemi iptal edildi.');
         }
       },
       child: Scaffold(

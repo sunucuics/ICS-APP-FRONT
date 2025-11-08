@@ -22,14 +22,17 @@ class PayTRRepository {
       // Calculate total amount
       final totalAmount = cartItems.fold<double>(
         0.0,
-        (sum, item) => sum + (item.finalPrice! * item.qty),
+        (sum, item) {
+          final pricePerUnit = item.finalPrice ?? item.price;
+          return sum + (pricePerUnit * item.qty);
+        },
       );
 
       // Build basket for PayTR
       final basket = cartItems
           .map((item) => PayTRBasketItem(
                 name: item.title,
-                price: item.finalPrice!,
+                price: item.finalPrice ?? item.price,
                 quantity: item.qty,
               ))
           .toList();
@@ -83,14 +86,17 @@ class PayTRRepository {
       // Calculate total amount
       final totalAmount = cartItems.fold<double>(
         0.0,
-        (sum, item) => sum + (item.finalPrice! * item.qty),
+        (sum, item) {
+          final pricePerUnit = item.finalPrice ?? item.price;
+          return sum + (pricePerUnit * item.qty);
+        },
       );
 
       // Build basket for PayTR
       final basket = cartItems
           .map((item) => PayTRBasketItem(
                 name: item.title,
-                price: item.finalPrice!,
+                price: item.finalPrice ?? item.price,
                 quantity: item.qty,
               ))
           .toList();
@@ -152,14 +158,17 @@ class PayTRRepository {
       // Calculate total amount
       final totalAmount = cartItems.fold<double>(
         0.0,
-        (sum, item) => sum + (item.finalPrice! * item.qty),
+        (sum, item) {
+          final pricePerUnit = item.finalPrice ?? item.price;
+          return sum + (pricePerUnit * item.qty);
+        },
       );
 
       // Build basket for PayTR
       final basket = cartItems
           .map((item) => PayTRBasketItem(
                 name: item.title,
-                price: item.finalPrice!,
+                price: item.finalPrice ?? item.price,
                 quantity: item.qty,
               ))
           .toList();

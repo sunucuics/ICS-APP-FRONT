@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
 import '../../../home/presentation/pages/home_page.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 // Custom phone number formatter
 class _PhoneNumberFormatter extends TextInputFormatter {
@@ -410,7 +411,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       if (mounted) {
         if (success) {
           // Show success message
-          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBarService.showSnackBar(context: context, snackBar: 
             const SnackBar(
               content: Text('Hesabınız başarıyla oluşturuldu!'),
               backgroundColor: Colors.green,
@@ -479,7 +480,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             }
           }
 
-          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBarService.showSnackBar(context: context, snackBar: 
             SnackBar(
               content: Text(userFriendlyError),
               backgroundColor: Colors.red,
@@ -489,7 +490,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Kayıt başarısız: $e'),
             backgroundColor: Colors.red,
@@ -761,7 +762,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       if (mounted) {
         if (success) {
           // Show success message
-          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBarService.showSnackBar(context: context, snackBar: 
             const SnackBar(
               content: Text('Giriş başarılı!'),
               backgroundColor: Colors.green,
@@ -785,7 +786,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
             }
           }
 
-          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBarService.showSnackBar(context: context, snackBar: 
             SnackBar(
               content: Text(userFriendlyError),
               backgroundColor: Colors.red,
@@ -795,7 +796,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Giriş başarısız: $e'),
             backgroundColor: Colors.red,
@@ -860,7 +861,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
             onPressed: () async {
               final email = emailController.text.trim();
               if (email.isEmpty || !email.contains('@')) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                SnackBarService.showSnackBar(context: context, snackBar: 
                   const SnackBar(
                     content: Text('Geçerli bir e-posta adresi girin'),
                     backgroundColor: Colors.red,
@@ -874,7 +875,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               try {
                 await ref.read(authProvider.notifier).resetPassword(email);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBarService.showSnackBar(context: context, snackBar: 
                     const SnackBar(
                       content: Text(
                           'Şifre sıfırlama e-postası gönderildi. E-posta kutunuzu kontrol edin.'),
@@ -884,7 +885,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBarService.showSnackBar(context: context, snackBar: 
                     SnackBar(
                       content: Text('Hata: $e'),
                       backgroundColor: Colors.red,

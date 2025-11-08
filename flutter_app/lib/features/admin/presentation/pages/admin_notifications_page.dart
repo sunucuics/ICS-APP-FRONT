@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/admin_notifications_provider.dart';
 import '../widgets/admin_navigation.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/services/snackbar_service.dart';
 
 class AdminNotificationsPage extends ConsumerStatefulWidget {
   const AdminNotificationsPage({super.key});
@@ -686,7 +687,7 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
               onPressed: () async {
                 if (titleController.text.isEmpty ||
                     bodyController.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBarService.showSnackBar(context: context, snackBar: 
                     const SnackBar(
                       content: Text('Lütfen tüm alanları doldurun'),
                       backgroundColor: Colors.red,
@@ -713,7 +714,7 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
                     Navigator.of(context).pop();
                     // Provider'ı yenile
                     ref.invalidate(adminNotificationTemplatesProvider);
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBarService.showSnackBar(context: context, snackBar: 
                       const SnackBar(
                         content: Text('Şablon başarıyla oluşturuldu!'),
                         backgroundColor: Colors.green,
@@ -722,7 +723,7 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
                   }
                 } catch (e) {
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBarService.showSnackBar(context: context, snackBar: 
                       SnackBar(
                         content: Text('Şablon oluşturma hatası: $e'),
                         backgroundColor: Colors.red,
@@ -851,7 +852,7 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
               onPressed: () async {
                 if (titleController.text.isEmpty ||
                     bodyController.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBarService.showSnackBar(context: context, snackBar: 
                     const SnackBar(
                       content: Text('Lütfen tüm alanları doldurun'),
                       backgroundColor: Colors.red,
@@ -878,7 +879,7 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
                     Navigator.of(context).pop();
                     // Provider'ı yenile
                     ref.invalidate(adminNotificationTemplatesProvider);
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBarService.showSnackBar(context: context, snackBar: 
                       const SnackBar(
                         content: Text('Şablon başarıyla güncellendi!'),
                         backgroundColor: Colors.green,
@@ -887,7 +888,7 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
                   }
                 } catch (e) {
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBarService.showSnackBar(context: context, snackBar: 
                       SnackBar(
                         content: Text('Şablon güncelleme hatası: $e'),
                         backgroundColor: Colors.red,
@@ -973,7 +974,7 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
           .sendNotification(title, body, templateId, segments);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(
             content: Text('Bildirim gönderildi!'),
             backgroundColor: Colors.green,
@@ -982,7 +983,7 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text('Bildirim gönderme hatası: $e'),
             backgroundColor: Colors.red,

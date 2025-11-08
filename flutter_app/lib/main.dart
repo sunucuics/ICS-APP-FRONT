@@ -8,6 +8,7 @@ import 'firebase_options.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/auth_wrapper.dart';
 import 'core/services/navigation_service.dart';
+import 'core/services/snackbar_service.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/services/theme_service.dart';
 import 'core/services/fcm_service.dart';
@@ -78,6 +79,7 @@ class MyApp extends ConsumerWidget {
       home: const AuthWrapper(),
       debugShowCheckedModeBanner: false,
       navigatorKey: NavigationService.navigatorKey,
+      scaffoldMessengerKey: SnackBarService.scaffoldMessengerKey,
       // Performance optimizations
       builder: (context, child) {
         return MediaQuery(
