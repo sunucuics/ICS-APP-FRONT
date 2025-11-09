@@ -10,44 +10,21 @@ class PaymentMethodPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedMethod = ref.watch(selectedPaymentMethodProvider);
-    final availableMethods = ref.watch(availablePaymentMethodsProvider);
-    final paymentFees = ref.watch(paymentMethodFeesProvider);
     final summary = ref.watch(paymentSummaryProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ödeme Yöntemi'),
       ),
-      body: Column(
+      body: ListView(
+        padding: const EdgeInsets.all(16),
         children: [
-          // Payment Summary
           _buildPaymentSummary(context, ref, summary),
-
-          // Payment Methods List
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: availableMethods.length,
-              itemBuilder: (context, index) {
-                final method = availableMethods[index];
-                final fee = paymentFees[method] ?? 0.0;
-                final isSelected = selectedMethod == method;
-
-                return _buildPaymentMethodCard(
-                  context,
-                  ref,
-                  method,
-                  fee,
-                  isSelected,
-                );
-              },
-            ),
-          ),
-
-          // Continue Button
-          _buildContinueButton(context, ref),
+          _buildSinglePaymentMethodCard(context, ref, selectedMethod),
+          const SizedBox(height: 100),
         ],
       ),
+      bottomNavigationBar: _buildContinueButton(context, ref),
     );
   }
 
@@ -110,19 +87,23 @@ class PaymentMethodPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildPaymentMethodCard(
+  Widget _buildSinglePaymentMethodCard(
     BuildContext context,
     WidgetRef ref,
-    PaymentMethod method,
-    double fee,
-    bool isSelected,
+    PaymentMethod selectedMethod,
   ) {
+    final method = const PaymentMethod.creditCard();
+    final fee =
+        ref.watch(paymentMethodFeesProvider)[method] ?? 0.0;
+    final isSelected = selectedMethod == method;
+
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.all(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          ref.read(selectedPaymentMethodProvider.notifier).state = method;
+          ref.read(selectedPaymentMethodProvider.notifier).state =
+              const PaymentMethod.creditCard();
         },
         child: Container(
           decoration: BoxDecoration(
@@ -163,7 +144,7 @@ class PaymentMethodPage extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        method.displayName,
+                        'Kart ile Ödeme',
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w500,
@@ -171,7 +152,7 @@ class PaymentMethodPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _getPaymentMethodDescription(method),
+                        'Visa, Mastercard ve banka kartları ile güvenli ödeme',
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 12,
@@ -275,13 +256,6 @@ class PaymentMethodPage extends ConsumerWidget {
           ),
         ),
       ),
-    );
-  }
-
-  String _getPaymentMethodDescription(PaymentMethod method) {
-    return method.when(
-      creditCard: () => 'Kredi kartı ile güvenli ödeme',
-      debitCard: () => 'Banka kartı ile hızlı ödeme',
     );
   }
 }

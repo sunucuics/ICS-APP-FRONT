@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../../core/models/paytr_model.dart';
@@ -28,6 +31,7 @@ class _PayTRDirectFormPageState extends ConsumerState<PayTRDirectFormPage> {
   bool _isLoading = true;
   bool _hasError = false;
   String? _errorMessage;
+  String? _preparedHtml;
 
   @override
   void initState() {
@@ -35,192 +39,364 @@ class _PayTRDirectFormPageState extends ConsumerState<PayTRDirectFormPage> {
     _initializeWebView();
   }
 
-  void _initializeWebView() {
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {
-            if (progress == 100) {
+  Future<void> _initializeWebView() async {
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+      _errorMessage = null;
+    });
+
+    try {
+      _preparedHtml = await _buildHTMLForm();
+      if (!mounted) return;
+
+      _controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onProgress: (int progress) {
+              if (progress == 100) {
+                setState(() {
+                  _isLoading = false;
+                });
+              }
+            },
+            onPageStarted: (String url) {
+              setState(() {
+                _isLoading = true;
+                _hasError = false;
+              });
+            },
+            onPageFinished: (String url) {
               setState(() {
                 _isLoading = false;
               });
-            }
-          },
-          onPageStarted: (String url) {
-            setState(() {
-              _isLoading = true;
-              _hasError = false;
-            });
-          },
-          onPageFinished: (String url) {
-            setState(() {
-              _isLoading = false;
-            });
-            _handleUrlChange(url);
-          },
-          onWebResourceError: (WebResourceError error) {
-            setState(() {
-              _isLoading = false;
-              _hasError = true;
-              _errorMessage = error.description;
-            });
-          },
-        ),
-      )
-      ..loadRequest(Uri.dataFromString(
-        _buildHTMLForm(),
-        mimeType: 'text/html',
-        encoding: Encoding.getByName('utf-8'),
-      ));
+              _handleUrlChange(url);
+            },
+            onWebResourceError: (WebResourceError error) {
+              setState(() {
+                _isLoading = false;
+                _hasError = true;
+                _errorMessage = error.description;
+              });
+            },
+          ),
+        )
+        ..loadRequest(Uri.dataFromString(
+          _preparedHtml!,
+          mimeType: 'text/html',
+          encoding: Encoding.getByName('utf-8'),
+        ));
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+        _errorMessage = error.toString();
+      });
+      debugPrint('PayTR form hazırlama hatası: $error');
+    }
   }
 
-  String _buildHTMLForm() {
+  Future<String> _buildHTMLForm() async {
     final fields = widget.initResponse.fields;
     final action = widget.initResponse.action;
+    final paymentAmountLabel =
+        '${_formatAmount(_parseAmount(fields.paymentAmount))} TL Öde';
+    final icsLogoBase64 =
+        await _loadAssetAsBase64('assets/images/ics_logo.jpg');
+    final securityLogosBase64 =
+        await _loadAssetAsBase64('assets/images/tekparca-logolar-1.jpg');
 
     // Build HTML form with PayTR fields
     return '''
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Güvenli Ödeme - PayTR</title>
   <style>
-    body {
-      margin: 0;
-      padding: 20px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
-    .container {
-      background: white;
-      border-radius: 16px;
-      padding: 30px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      max-width: 500px;
-      width: 100%;
-    }
-    .logo {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .logo svg {
-      width: 80px;
-      height: 80px;
-    }
-    .title {
-      text-align: center;
-      color: #333;
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    .subtitle {
-      text-align: center;
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 30px;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      color: #333;
-      font-weight: 600;
-      font-size: 14px;
-    }
-    .form-group input {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 16px;
-      transition: border-color 0.3s;
-      box-sizing: border-box;
-    }
-    .form-group input:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-    .form-group.small {
-      display: inline-block;
-      width: calc(50% - 5px);
-    }
-    .form-group.small:first-child {
-      margin-right: 10px;
-    }
-    .row {
-      display: flex;
-      gap: 10px;
-    }
-    .row .form-group {
-      flex: 1;
-    }
-    #submitBtn {
-      width: 100%;
-      padding: 16px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-    #submitBtn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-    }
-    #submitBtn:active {
-      transform: translateY(0);
-    }
-    .error {
-      color: #e74c3c;
-      font-size: 12px;
-      margin-top: 5px;
-      display: none;
-    }
-    .loader {
-      display: none;
-      text-align: center;
-      margin-top: 20px;
-    }
-    .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #667eea;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+:root {
+  color-scheme: light dark;
+  --primary-color: #FF6B35;
+  --primary-gradient: #FF8C42;
+  --bg-color: #F6F7F9;
+  --surface-color: #FFFFFF;
+  --surface-alt-color: #F1F3F4;
+  --text-color: #111111;
+  --text-muted: #5F6B7A;
+  --outline-color: #E6E8EC;
+  --shadow-color: rgba(17, 17, 17, 0.08);
+  --error-color: #EF4444;
+  --on-primary: #FFFFFF;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #0F1115;
+    --surface-color: #171A20;
+    --surface-alt-color: #2C2C2E;
+    --text-color: #FFFFFF;
+    --text-muted: #B7C1CE;
+    --outline-color: #252A33;
+    --shadow-color: rgba(0, 0, 0, 0.45);
+  }
+}
+
+body {
+  margin: 0;
+  padding: 24px 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: var(--bg-color);
+  color: var(--text-color);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  background: var(--surface-color);
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 32px 70px var(--shadow-color);
+  width: 100%;
+  max-width: 520px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.header img.logo {
+  width: 140px;
+  height: auto;
+  object-fit: contain;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-color);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--outline-color);
+  border-radius: 16px;
+  font-size: 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+  background-color: var(--surface-alt-color);
+  color: var(--text-color);
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+}
+
+.card-brand {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: var(--surface-color);
+  border: 1px solid var(--outline-color);
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+}
+
+.card-brand.visa { color: #1A1F71; border-color: #1A1F71; background: #EAF0FF; }
+.card-brand.mastercard { color: #EB001B; border-color: #FF5F00; background: #FFF0F0; }
+.card-brand.amex { color: #0A7BC2; border-color: #0A7BC2; background: #E3F2FD; }
+.card-brand.troy { color: #0C9C76; border-color: #0C9C76; background: #E1FDF2; }
+.card-brand.discover { color: #FF6A00; border-color: #FF6A00; background: #FFF3E7; }
+
+.row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.row .form-group {
+  flex: 1;
+  min-width: 160px;
+}
+
+.help-icon {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.tooltip {
+  display: none;
+  margin-top: 8px;
+  background: var(--surface-alt-color);
+  border: 1px solid var(--outline-color);
+  border-radius: 16px;
+  padding: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  box-shadow: 0 16px 36px var(--shadow-color);
+}
+
+.tooltip.active {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-illustration {
+  width: 64px;
+  height: 42px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #dce6f3 0%, #f5f8fc 100%);
+  position: relative;
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-illustration::after {
+  content: 'CVV';
+  position: absolute;
+  right: 8px;
+  top: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #1A202C;
+  background: #FFFFFF;
+  padding: 2px 6px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+#submitBtn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-gradient));
+  color: var(--on-primary);
+  border: none;
+  border-radius: 18px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 18px 38px rgba(255, 107, 53, 0.35);
+  margin-top: 8px;
+}
+
+#submitBtn:active {
+  transform: translateY(1px);
+}
+
+.error {
+  color: var(--error-color);
+  font-size: 12px;
+  margin-top: 6px;
+  display: none;
+}
+
+.loader {
+  display: none;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.spinner {
+  border: 4px solid rgba(0,0,0,0.08);
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.security-note {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 16px;
+}
+
+.security-logos {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.security-logos img {
+  width: 100%;
+  max-width: 220px;
+  object-fit: contain;
+  opacity: 0.9;
+}
+
+.footer {
+  margin-top: 28px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+
+.footer strong {
+  color: var(--text-color);
+}
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="logo">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#667eea">
-        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-        <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
-      </svg>
+    <div class="header">
+      <img class="logo" src="data:image/jpeg;base64,$icsLogoBase64" alt="ICS Logo">
+      <p class="subtitle">Kart bilgilerinizi girin</p>
     </div>
-    <h1 class="title">Güvenli Ödeme</h1>
-    <p class="subtitle">Kart bilgilerinizi girin ve ödemeyi tamamlayın</p>
     
     <form id="paymentForm" method="post" action="$action" accept-charset="utf-8">
       <!-- Hidden PayTR Fields -->
@@ -244,6 +420,8 @@ class _PayTRDirectFormPageState extends ConsumerState<PayTRDirectFormPage> {
       <input type="hidden" name="debug_on" value="${fields.debugOn}">
       <input type="hidden" name="paytr_token" value="${fields.paytrToken}">
       ${fields.cardType != null ? '<input type="hidden" name="card_type" value="${fields.cardType}">' : ''}
+      <input type="hidden" name="expiry_month" id="expiry_month_hidden">
+      <input type="hidden" name="expiry_year" id="expiry_year_hidden">
       
       <!-- Card Input Fields -->
       <div class="form-group">
@@ -254,28 +432,39 @@ class _PayTRDirectFormPageState extends ConsumerState<PayTRDirectFormPage> {
       
       <div class="form-group">
         <label for="card_number">Kart Numarası *</label>
-        <input type="text" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" maxlength="16" required>
+        <div class="input-wrapper">
+          <input type="text" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" maxlength="19" required>
+          <span id="cardBrand" class="card-brand">KART</span>
+        </div>
         <div class="error" id="card_number_error"></div>
       </div>
       
       <div class="row">
         <div class="form-group">
-          <label for="expiry_month">Ay (MM) *</label>
-          <input type="text" id="expiry_month" name="expiry_month" placeholder="12" maxlength="2" required>
-          <div class="error" id="expiry_month_error"></div>
+          <label for="expiry">Son Kullanma Tarihi *</label>
+          <div class="input-wrapper">
+            <input type="text" id="expiry" placeholder="AA / YY" maxlength="7" required>
+          </div>
+          <div class="error" id="expiry_error"></div>
         </div>
         
         <div class="form-group">
-          <label for="expiry_year">Yıl (YY) *</label>
-          <input type="text" id="expiry_year" name="expiry_year" placeholder="30" maxlength="2" required>
-          <div class="error" id="expiry_year_error"></div>
+          <div class="label-row">
+            <label for="cvv">CVV *</label>
+            <button type="button" class="help-icon" id="cvvHelp" aria-label="CVV nedir?">?</button>
+          </div>
+          <div class="input-wrapper">
+            <input type="text" id="cvv" name="cvv" placeholder="123" maxlength="4" required>
+          </div>
+          <div class="error" id="cvv_error"></div>
+          <div class="tooltip" id="cvvTooltip">
+            <div class="card-illustration"></div>
+            <div>
+              <strong>CVV / CVC</strong>
+              <p>Kartınızın arka yüzündeki 3 haneli güvenlik kodudur.</p>
+            </div>
+          </div>
         </div>
-      </div>
-      
-      <div class="form-group">
-        <label for="cvv">CVV *</label>
-        <input type="text" id="cvv" name="cvv" placeholder="123" maxlength="4" required>
-        <div class="error" id="cvv_error"></div>
       </div>
       
       <div class="form-group">
@@ -284,70 +473,178 @@ class _PayTRDirectFormPageState extends ConsumerState<PayTRDirectFormPage> {
         <div class="error" id="email_error"></div>
       </div>
       
-      <button type="submit" id="submitBtn">
-        Ödemeyi Tamamla
-      </button>
+      <button type="submit" id="submitBtn">$paymentAmountLabel</button>
+      <p class="security-note">Ödemeleriniz 256-bit SSL sertifikası ile korunmaktadır.</p>
+      <div class="security-logos">
+        <img src="data:image/jpeg;base64,$securityLogosBase64" alt="Güvenlik logoları">
+      </div>
       
       <div class="loader" id="loader">
         <div class="spinner"></div>
         <p>İşleminiz gerçekleştiriliyor...</p>
       </div>
     </form>
+    <div class="footer">
+      Powered by <strong>PayTR</strong>
+    </div>
   </div>
   
   <script>
-    // Card number formatting
-    document.getElementById('card_number').addEventListener('input', function(e) {
-      let value = e.target.value.replace(/\\s/g, '');
-      let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
-      e.target.value = formattedValue;
-    });
-    
-    // Expiry month validation
-    document.getElementById('expiry_month').addEventListener('input', function(e) {
-      let value = e.target.value.replace(/[^0-9]/g, '');
-      if (value && parseInt(value) > 12) {
-        value = '12';
-      }
-      if (value && parseInt(value) < 1) {
-        value = '01';
-      }
-      e.target.value = value;
-    });
-    
-    // Expiry year validation
-    document.getElementById('expiry_year').addEventListener('input', function(e) {
-      e.target.value = e.target.value.replace(/[^0-9]/g, '');
-    });
-    
-    // CVV validation
-    document.getElementById('cvv').addEventListener('input', function(e) {
-      e.target.value = e.target.value.replace(/[^0-9]/g, '');
-    });
-    
-    // Form submission
-    document.getElementById('paymentForm').addEventListener('submit', function(e) {
-      // Validate form
-      let isValid = true;
-      
-      // Remove card number spaces for submission
-      let cardNumber = document.getElementById('card_number').value;
-      document.getElementById('card_number').value = cardNumber.replace(/\\s/g, '');
-      
-      // Show loader
-      document.getElementById('loader').style.display = 'block';
-      document.getElementById('submitBtn').disabled = true;
-      
-      // If validation fails, show error and stop submission
-      if (!isValid) {
-        e.preventDefault();
-        document.getElementById('loader').style.display = 'none';
-        document.getElementById('submitBtn').disabled = false;
-      }
-    });
-    
-    // Focus first input
-    document.getElementById('cc_owner').focus();
+const cardNumberInput = document.getElementById('card_number');
+const cardBrand = document.getElementById('cardBrand');
+const expiryInput = document.getElementById('expiry');
+const cvvInput = document.getElementById('cvv');
+const cvvHelp = document.getElementById('cvvHelp');
+const cvvTooltip = document.getElementById('cvvTooltip');
+const paymentForm = document.getElementById('paymentForm');
+const expiryMonthHidden = document.getElementById('expiry_month_hidden');
+const expiryYearHidden = document.getElementById('expiry_year_hidden');
+const cardNumberError = document.getElementById('card_number_error');
+const expiryError = document.getElementById('expiry_error');
+const cvvError = document.getElementById('cvv_error');
+const ccOwnerError = document.getElementById('cc_owner_error');
+const emailError = document.getElementById('email_error');
+
+const brandMap = {
+  visa: { label: 'VISA' },
+  mastercard: { label: 'MC' },
+  amex: { label: 'AMEX' },
+  troy: { label: 'TROY' },
+  discover: { label: 'DISC' },
+  default: { label: 'KART' }
+};
+
+function detectBrand(raw) {
+  if (raw.startsWith('4')) return 'visa';
+  if (/^5[1-5]/.test(raw)) return 'mastercard';
+  if (/^(222[1-9]|22[3-9]\\d|2[3-6]\\d\\d|27[01]\\d|2720)/.test(raw)) return 'mastercard';
+  if (/^3[47]/.test(raw)) return 'amex';
+  if (/^9792/.test(raw)) return 'troy';
+  if (/^6/.test(raw)) return 'discover';
+  return 'default';
+}
+
+function updateBrand(raw) {
+  const brandKey = detectBrand(raw);
+  const data = brandMap[brandKey];
+  cardBrand.textContent = data.label;
+  cardBrand.className = 'card-brand ' + brandKey;
+}
+
+function showError(element, message) {
+  if (!element) return;
+  element.textContent = message;
+  element.style.display = 'block';
+}
+
+function hideError(element) {
+  if (!element) return;
+  element.textContent = '';
+  element.style.display = 'none';
+}
+
+cardNumberInput.addEventListener('input', function(e) {
+  let value = e.target.value.replace(/[^0-9]/g, '');
+  if (value.length > 16) value = value.slice(0, 16);
+  const formatted = value.replace(/(.{4})/g, '\$1 ').trim();
+  e.target.value = formatted;
+  updateBrand(value);
+  hideError(cardNumberError);
+});
+
+expiryInput.addEventListener('input', function(e) {
+  let value = e.target.value.replace(/[^0-9]/g, '');
+  if (value.length > 4) value = value.slice(0, 4);
+  if (value.length >= 3) {
+    value = value.slice(0, 2) + ' / ' + value.slice(2);
+  } else if (value.length === 1) {
+    const month = parseInt(value, 10);
+    if (month > 1) value = '0' + value;
+  }
+  e.target.value = value;
+  hideError(expiryError);
+});
+
+cvvInput.addEventListener('input', function(e) {
+  e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 4);
+  hideError(cvvError);
+});
+
+cvvHelp.addEventListener('click', function() {
+  cvvTooltip.classList.toggle('active');
+});
+
+paymentForm.addEventListener('submit', function(e) {
+  let isValid = true;
+  const cardNumberRaw = cardNumberInput.value.replace(/\\s/g, '');
+  const expiryRaw = expiryInput.value.replace(/[^0-9]/g, '');
+  const cvvRaw = cvvInput.value.replace(/[^0-9]/g, '');
+  const ccOwner = document.getElementById('cc_owner').value.trim();
+  const emailValue = document.getElementById('email_visible').value.trim();
+
+  if (ccOwner.length < 2) {
+    showError(ccOwnerError, 'Kart üzerindeki adı girin');
+    isValid = false;
+  } else {
+    hideError(ccOwnerError);
+  }
+
+  if (cardNumberRaw.length < 13 || cardNumberRaw.length > 16) {
+    showError(cardNumberError, 'Kart numarasını kontrol edin');
+    isValid = false;
+  } else {
+    hideError(cardNumberError);
+  }
+
+  if (expiryRaw.length !== 4) {
+    showError(expiryError, 'Son kullanma tarihini AA / YY formatında girin');
+    isValid = false;
+  } else {
+    const month = parseInt(expiryRaw.slice(0, 2), 10);
+    if (month < 1 || month > 12) {
+      showError(expiryError, 'Geçerli bir ay girin');
+      isValid = false;
+    } else {
+      hideError(expiryError);
+    }
+  }
+
+  if (cvvRaw.length < 3 || cvvRaw.length > 4) {
+    showError(cvvError, 'CVV 3 veya 4 haneli olmalıdır');
+    isValid = false;
+  } else {
+    hideError(cvvError);
+  }
+
+  if (!emailValue || !emailValue.includes('@')) {
+    showError(emailError, 'Geçerli bir e-posta girin');
+    isValid = false;
+  } else {
+    hideError(emailError);
+  }
+
+  if (!isValid) {
+    e.preventDefault();
+    return;
+  }
+
+  expiryMonthHidden.value = expiryRaw.slice(0, 2);
+  expiryYearHidden.value = expiryRaw.slice(2);
+  cardNumberInput.value = cardNumberRaw;
+  cvvInput.value = cvvRaw;
+  document.getElementById('loader').style.display = 'block';
+  document.getElementById('submitBtn').disabled = true;
+});
+
+document.getElementById('cc_owner').addEventListener('input', function() {
+  hideError(ccOwnerError);
+});
+
+document.getElementById('email_visible').addEventListener('input', function() {
+  hideError(emailError);
+});
+
+document.getElementById('cc_owner').focus();
   </script>
 </body>
 </html>
@@ -458,8 +755,6 @@ class _PayTRDirectFormPageState extends ConsumerState<PayTRDirectFormPage> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Güvenli Ödeme'),
-          backgroundColor: Colors.purple.shade600,
-          foregroundColor: Colors.white,
           leading: IconButton(
             icon: const Icon(Icons.close),
             onPressed: _showCloseConfirmation,
@@ -473,7 +768,7 @@ class _PayTRDirectFormPageState extends ConsumerState<PayTRDirectFormPage> {
               WebViewWidget(controller: _controller),
             if (_isLoading)
               Container(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.background.withOpacity(0.85),
                 child: const Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -522,11 +817,7 @@ class _PayTRDirectFormPageState extends ConsumerState<PayTRDirectFormPage> {
                   _hasError = false;
                   _isLoading = true;
                 });
-                _controller.loadRequest(Uri.dataFromString(
-                  _buildHTMLForm(),
-                  mimeType: 'text/html',
-                  encoding: Encoding.getByName('utf-8'),
-                ));
+                _initializeWebView();
               },
               icon: const Icon(Icons.refresh),
               label: const Text('Tekrar Dene'),
@@ -543,6 +834,23 @@ class _PayTRDirectFormPageState extends ConsumerState<PayTRDirectFormPage> {
         ),
       ),
     );
+  }
+
+  Future<String> _loadAssetAsBase64(String assetPath) async {
+    final ByteData data = await rootBundle.load(assetPath);
+    final Uint8List bytes = data.buffer.asUint8List();
+    return base64Encode(bytes);
+  }
+
+  double _parseAmount(String paymentAmountString) {
+    final sanitized = paymentAmountString.replaceAll(RegExp(r'[^0-9]'), '');
+    final cents = int.tryParse(sanitized) ?? 0;
+    return cents / 100.0;
+  }
+
+  String _formatAmount(double amount) {
+    final formatted = amount.toStringAsFixed(2);
+    return formatted.replaceAll('.', ',');
   }
 }
 

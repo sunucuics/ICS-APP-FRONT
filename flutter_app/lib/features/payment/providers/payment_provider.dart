@@ -494,22 +494,18 @@ final checkoutProvider =
 
 // Payment Methods Provider
 final availablePaymentMethodsProvider = Provider<List<PaymentMethod>>((ref) {
-  final mockPaymentService = ref.read(mockPaymentServiceProvider);
-  return mockPaymentService.getAvailablePaymentMethods();
+  return const [PaymentMethod.creditCard()];
 });
 
 // Payment Method Fees Provider
 final paymentMethodFeesProvider = Provider<Map<PaymentMethod, double>>((ref) {
   final mockPaymentService = ref.read(mockPaymentServiceProvider);
-  final availableMethods = ref.read(availablePaymentMethodsProvider);
   final summary = ref.read(paymentSummaryProvider);
 
   final fees = <PaymentMethod, double>{};
-  for (final method in availableMethods) {
-    fees[method] =
-        mockPaymentService.getPaymentMethodFee(method, summary.subtotal);
-  }
-
+  final method = const PaymentMethod.creditCard();
+  fees[method] =
+      mockPaymentService.getPaymentMethodFee(method, summary.subtotal);
   return fees;
 });
 

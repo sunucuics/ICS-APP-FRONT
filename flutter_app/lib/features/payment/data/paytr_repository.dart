@@ -27,12 +27,13 @@ class PayTRRepository {
           return sum + (pricePerUnit * item.qty);
         },
       );
+      final normalizedAmount = _roundToTwoDecimals(totalAmount);
 
       // Build basket for PayTR
       final basket = cartItems
           .map((item) => PayTRBasketItem(
                 name: item.title,
-                price: item.finalPrice ?? item.price,
+                price: _roundToTwoDecimals(item.finalPrice ?? item.price),
                 quantity: item.qty,
               ))
           .toList();
@@ -50,11 +51,17 @@ class PayTRRepository {
 
       final addressString = addressParts.join(', ');
 
+      // Debug info for QA/testing
+      // ignore: avoid_print
+      print(
+        '[PayTR] Direct init ⇒ orderId=$orderId amount(TL)=$normalizedAmount basket=${basket.map((e) => '${e.name}:${e.price}x${e.quantity}').join(', ')}',
+      );
+
       // Create PayTR Direct API request
       final request = PayTRDirectInitRequest(
         merchantOid: orderId,
         email: userProfile.email,
-        paymentAmount: totalAmount,
+        paymentAmount: normalizedAmount,
         paymentType: 'card',
         installmentCount: installmentCount,
         currency: 'TL',
@@ -69,7 +76,12 @@ class PayTRRepository {
         debugOn: 1,
       );
 
-      return await _apiService.getDirectInit(request);
+      final response = await _apiService.getDirectInit(request);
+      // ignore: avoid_print
+      print(
+        '[PayTR] Direct init ⇐ orderId=$orderId payment_amount(kuruş)=${response.fields.paymentAmount}',
+      );
+      return response;
     } catch (e) {
       rethrow;
     }
@@ -91,12 +103,13 @@ class PayTRRepository {
           return sum + (pricePerUnit * item.qty);
         },
       );
+      final normalizedAmount = _roundToTwoDecimals(totalAmount);
 
       // Build basket for PayTR
       final basket = cartItems
           .map((item) => PayTRBasketItem(
                 name: item.title,
-                price: item.finalPrice ?? item.price,
+                price: _roundToTwoDecimals(item.finalPrice ?? item.price),
                 quantity: item.qty,
               ))
           .toList();
@@ -118,7 +131,7 @@ class PayTRRepository {
       final request = PayTRIframeInitRequest(
         merchantOid: orderId,
         email: userProfile.email,
-        paymentAmount: totalAmount,
+        paymentAmount: normalizedAmount,
         userName: userProfile.name,
         userAddress: addressString,
         userPhone: userProfile.phone,
@@ -163,12 +176,13 @@ class PayTRRepository {
           return sum + (pricePerUnit * item.qty);
         },
       );
+      final normalizedAmount = _roundToTwoDecimals(totalAmount);
 
       // Build basket for PayTR
       final basket = cartItems
           .map((item) => PayTRBasketItem(
                 name: item.title,
-                price: item.finalPrice ?? item.price,
+                price: _roundToTwoDecimals(item.finalPrice ?? item.price),
                 quantity: item.qty,
               ))
           .toList();
@@ -193,7 +207,7 @@ class PayTRRepository {
         userName: userProfile.name,
         userAddress: addressString,
         userPhone: userProfile.phone,
-        paymentAmount: totalAmount,
+        paymentAmount: normalizedAmount,
         currency: 'TL',
         basket: basket,
         userIp: null, // Backend will handle this
@@ -204,4 +218,7 @@ class PayTRRepository {
       rethrow;
     }
   }
+
+  double _roundToTwoDecimals(double value) =>
+      value.isFinite ? double.parse(value.toStringAsFixed(2)) : 0.0;
 }
