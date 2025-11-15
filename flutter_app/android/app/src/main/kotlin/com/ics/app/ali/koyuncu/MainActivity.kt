@@ -1,5 +1,6 @@
-package com.ics.app.ics_app
+package com.ics.app.ali.koyuncu
 
 import io.flutter.embedding.android.FlutterActivity
 
 class MainActivity : FlutterActivity()
+

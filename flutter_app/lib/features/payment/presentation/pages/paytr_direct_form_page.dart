@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -32,6 +33,7 @@ class _PayTRDirectFormPageState extends ConsumerState<PayTRDirectFormPage> {
   bool _hasError = false;
   String? _errorMessage;
   String? _preparedHtml;
+  bool _controllerReady = false;
 
   @override
   void initState() {
@@ -44,13 +46,11 @@ class _PayTRDirectFormPageState extends ConsumerState<PayTRDirectFormPage> {
       _isLoading = true;
       _hasError = false;
       _errorMessage = null;
+      _controllerReady = false;
     });
 
     try {
-      _preparedHtml = await _buildHTMLForm();
-      if (!mounted) return;
-
-      _controller = WebViewController()
+      final controller = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setNavigationDelegate(
           NavigationDelegate(
@@ -81,12 +81,23 @@ class _PayTRDirectFormPageState extends ConsumerState<PayTRDirectFormPage> {
               });
             },
           ),
-        )
-        ..loadRequest(Uri.dataFromString(
-          _preparedHtml!,
-          mimeType: 'text/html',
-          encoding: Encoding.getByName('utf-8'),
-        ));
+        );
+
+      _controller = controller;
+
+      _preparedHtml = await _buildHTMLForm();
+      if (!mounted) return;
+
+      _controller.loadRequest(Uri.dataFromString(
+        _preparedHtml!,
+        mimeType: 'text/html',
+        encoding: Encoding.getByName('utf-8'),
+      ));
+
+      if (!mounted) return;
+      setState(() {
+        _controllerReady = true;
+      });
     } catch (error) {
       if (!mounted) return;
       setState(() {
@@ -655,42 +666,60 @@ document.getElementById('cc_owner').focus();
     // Check for PayTR success/failure URLs
     if (url.contains('paytr.com') || url.contains('api.innovacraftstudio.com')) {
       if (url.contains('success') || url.contains('ok') || url.contains('/success')) {
-        _handlePaymentSuccess();
+        unawaited(_handlePaymentSuccess());
       } else if (url.contains('fail') || url.contains('error') || url.contains('/fail')) {
         _handlePaymentFailure();
       }
     }
   }
 
-  void _handlePaymentSuccess() {
+  Future<void> _handlePaymentSuccess() async {
     if (!mounted) return;
-    ref
-        .read(checkoutProvider.notifier)
-        .completePayTRPayment()
-        .then((_) {
-      if (!mounted) return;
+
+    try {
+      await ref.read(checkoutProvider.notifier).completePayTRPayment();
+    } catch (_) {
+      // completePayTRPayment zaten state üzerinden hata yönetiyor
+    }
+
+    if (!mounted) return;
+    final checkoutState = ref.read(checkoutProvider);
+
+    SnackBar? snackBar;
+    if (checkoutState.stage == CheckoutStage.completed) {
+      snackBar = const SnackBar(
+        content: Text('Ödeme başarıyla tamamlandı! 🎉'),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 3),
+      );
+    } else if (checkoutState.stage == CheckoutStage.failed &&
+        checkoutState.errorMessage != null) {
+      snackBar = SnackBar(
+        content: Text(checkoutState.errorMessage!),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 4),
+      );
+    } else if (checkoutState.stage == CheckoutStage.awaitingConfirmation &&
+        checkoutState.pollTimedOut) {
+      snackBar = SnackBar(
+        content: const Text(
+          'Ödeme doğrulaması beklenenden uzun sürdü. Sipariş durumunu takip ediyoruz.',
+        ),
+        backgroundColor: Colors.orange,
+        duration: const Duration(seconds: 4),
+      );
+    }
+
+    if (snackBar != null) {
       SnackBarService.showSnackBar(
         context: context,
-        snackBar: const SnackBar(
-          content: Text('Ödeme başarıyla tamamlandı! 🎉'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 3),
-        ),
+        snackBar: snackBar,
       );
-    }).catchError((error) {
-      if (!mounted) return;
-      SnackBarService.showSnackBar(
-        context: context,
-        snackBar: SnackBar(
-          content: Text('Sipariş oluşturulamadı: $error'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }).whenComplete(() {
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-    });
+    }
+
+    if (mounted && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
   }
 
   void _handlePaymentFailure() {
@@ -762,10 +791,7 @@ document.getElementById('cc_owner').focus();
         ),
         body: Stack(
           children: [
-            if (_hasError)
-              _buildErrorWidget()
-            else
-              WebViewWidget(controller: _controller),
+            _buildContent(),
             if (_isLoading)
               Container(
                 color: Theme.of(context).colorScheme.background.withOpacity(0.85),
@@ -784,6 +810,12 @@ document.getElementById('cc_owner').focus();
         ),
       ),
     );
+  }
+
+  Widget _buildContent() {
+    if (_hasError) return _buildErrorWidget();
+    if (_controllerReady) return WebViewWidget(controller: _controller);
+    return const SizedBox.shrink();
   }
 
   Widget _buildErrorWidget() {

@@ -37,7 +37,7 @@
 -dontwarn com.google.android.play.core.**
 
 # Keep all model classes for JSON serialization
--keep class com.ics.app.ics_app.** { *; }
+-keep class com.ics.app.ali.koyuncu.** { *; }
 
 # Keep Dio and network related classes
 -keep class dio.** { *; }

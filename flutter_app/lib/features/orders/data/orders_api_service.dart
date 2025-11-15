@@ -18,12 +18,23 @@ class OrdersApiService {
     String? checkoutId,
   }) async {
     try {
-      // Backend reads cart from user_id, so no body needed per Swagger docs
-      print('🔍 [ORDER CREATE DEBUG] Sending POST /orders with empty body');
-      
+      final payload = <String, dynamic>{};
+      if (items != null && items.isNotEmpty) {
+        payload['items'] = items.map((item) => item.toJson()).toList();
+      }
+      final trimmedNote = note?.trim();
+      if (trimmedNote != null && trimmedNote.isNotEmpty) {
+        payload['note'] = trimmedNote;
+      }
+
+      final requestBody = payload.isEmpty ? null : payload;
+
+      print(
+          '🔍 [ORDER CREATE DEBUG] Sending POST /orders with body: ${requestBody ?? '<empty>'}');
+
       final response = await _dio.post(
         ApiEndpoints.orders,
-        data: null, // Explicitly null to avoid Content-Type header
+        data: requestBody,
         options: Options(
           headers: {
             'Content-Type': 'application/json; charset=utf-8',

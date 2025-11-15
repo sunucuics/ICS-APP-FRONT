@@ -381,6 +381,16 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
     try {
       final order = await _pollForPaymentStatus(currentState.checkoutId!);
 
+      if (order == null) {
+        state = currentState.copyWith(
+          stage: CheckoutStage.awaitingConfirmation,
+          pollTimedOut: true,
+          errorMessage: null,
+          paymentStatus: const PaymentStatus.pending(),
+        );
+        return;
+      }
+
       await _ref.read(cartProvider.notifier).refresh();
       await _ref.read(ordersProvider.notifier).refresh();
 
@@ -389,13 +399,14 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
         order: order,
         paymentStatus: _parsePaymentStatus(order.payment?.status),
         clearPayTR: true,
+        pollTimedOut: false,
       );
     } on TimeoutException {
       state = currentState.copyWith(
-        stage: CheckoutStage.failed,
-        errorMessage:
-            'Ödeme doğrulanamadı. Lütfen siparişinizi kontrol edin.',
+        stage: CheckoutStage.awaitingConfirmation,
         pollTimedOut: true,
+        errorMessage: null,
+        paymentStatus: const PaymentStatus.pending(),
       );
     } on PaymentFailedException catch (error) {
       state = currentState.copyWith(
@@ -410,6 +421,21 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
         paymentStatus: const PaymentStatus.failed(),
       );
     }
+  }
+
+  Future<void> retryPaymentStatusCheck() async {
+    final checkoutId = state.checkoutId;
+    if (checkoutId == null) return;
+
+    state = state.copyWith(
+      stage: CheckoutStage.awaitingConfirmation,
+      errorMessage: null,
+      pollingStartedAt: DateTime.now(),
+      pollAttempts: 0,
+      pollTimedOut: false,
+    );
+
+    await completePayTRPayment();
   }
 
   void markPaymentFailed(String message) {
@@ -449,7 +475,7 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
     }
   }
 
-  Future<Order> _pollForPaymentStatus(String orderId) async {
+  Future<Order?> _pollForPaymentStatus(String orderId) async {
     final repository = _ref.read(ordersRepositoryProvider);
     final start = DateTime.now();
     var attempts = 0;
@@ -457,6 +483,11 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
     while (true) {
       if (attempts > 0) {
         await Future.delayed(_pollInterval);
+      }
+
+      final hasTimedOut = DateTime.now().difference(start) >= _pollTimeout;
+      if (hasTimedOut) {
+        return null;
       }
 
       attempts += 1;
@@ -481,7 +512,7 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
       }
 
       if (DateTime.now().difference(start) >= _pollTimeout) {
-        throw TimeoutException('Payment confirmation timed out');
+        return null;
       }
     }
   }

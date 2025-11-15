@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:599937649684:android:ca1993f6b842bff29bab01",
+        "mobilesdk_app_id": "1:599937649684:android:173ee9810832485b9bab01",
         "android_client_info": {
-          "package_name": "com.example.ics_app"
+          "package_name": "com.ics.app.ali.koyuncu"
         }
       },
       "oauth_client": [

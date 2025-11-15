@@ -105,11 +105,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       case CheckoutStage.awaitingPayment:
         return _buildPendingPaymentState(context, ref, checkoutState);
       case CheckoutStage.awaitingConfirmation:
-        return _buildLoadingState(
-          context,
-          title: 'Ödeme doğrulanıyor',
-          subtitle: 'Ödemeniz PayTR tarafından doğrulanıyor...',
-        );
+        return _buildAwaitingConfirmationState(context, ref, checkoutState);
       case CheckoutStage.completed:
         return _buildSuccessState(context, checkoutState.order);
       case CheckoutStage.failed:
@@ -144,6 +140,73 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             textAlign: TextAlign.center,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAwaitingConfirmationState(
+    BuildContext context,
+    WidgetRef ref,
+    CheckoutState checkoutState,
+  ) {
+    final isTimedOut = checkoutState.pollTimedOut;
+    final checkoutId = checkoutState.checkoutId;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              'Ödeme doğrulanıyor',
+              style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              isTimedOut
+                  ? 'PayTR doğrulaması beklenenden uzun sürdü. Siparişinizi kontrol etmeye devam ediyoruz.'
+                  : 'Ödemeniz PayTR tarafından doğrulanıyor...',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            if (isTimedOut) ...[
+              const SizedBox(height: 16),
+              Text(
+                'Bu durum genellikle birkaç dakika içinde sonuçlanır. Aşağıdan durumu yeniden kontrol edebilir veya Siparişlerim sayfasına gidebilirsiniz.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[700],
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: checkoutId == null
+                    ? null
+                    : () {
+                        ref
+                            .read(checkoutProvider.notifier)
+                            .retryPaymentStatusCheck();
+                      },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Durumu Yeniden Kontrol Et'),
+              ),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+                icon: const Icon(Icons.receipt_long_outlined),
+                label: const Text('Siparişlerimi Görüntüle'),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
