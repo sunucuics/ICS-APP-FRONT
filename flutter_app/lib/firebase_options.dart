@@ -41,7 +41,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBcynXU45CFDyLSgvOTTk_6K5rRZurR9d0',
-    appId: '1:599937649684:android:173ee9810832485b9bab01',
+    appId: '1:599937649684:android:de03d4e430984dfc9bab01',
     messagingSenderId: '599937649684',
     projectId: 'ics-app-f2598',
     storageBucket: 'ics-app-f2598.firebasestorage.app',
@@ -49,24 +49,24 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCXfh52L-Qx1zLxogasNrPhyvpRkRYufYA',
-    appId: '1:599937649684:ios:4cab2c53a934961c9bab01',
+    appId: '1:599937649684:ios:aa4fcb20f3cf22b29bab01',
     messagingSenderId: '599937649684',
     projectId: 'ics-app-f2598',
     storageBucket: 'ics-app-f2598.firebasestorage.app',
     iosClientId:
-        '599937649684-odm70sdhqbcl9dkc9lq7p2a4mlqcng2q.apps.googleusercontent.com',
-    iosBundleId: 'com.ics.app.ali.koyuncu',
+        '599937649684-04o7tctnq16d6i4ua54q55un2d69lenr.apps.googleusercontent.com',
+    iosBundleId: 'com.ali.koyuncu.ics.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyCXfh52L-Qx1zLxogasNrPhyvpRkRYufYA',
-    appId: '1:599937649684:ios:4cab2c53a934961c9bab01',
+    appId: '1:599937649684:ios:aa4fcb20f3cf22b29bab01',
     messagingSenderId: '599937649684',
     projectId: 'ics-app-f2598',
     storageBucket: 'ics-app-f2598.firebasestorage.app',
     iosClientId:
-        '599937649684-odm70sdhqbcl9dkc9lq7p2a4mlqcng2q.apps.googleusercontent.com',
-    iosBundleId: 'com.ics.app.ali.koyuncu',
+        '599937649684-04o7tctnq16d6i4ua54q55un2d69lenr.apps.googleusercontent.com',
+    iosBundleId: 'com.ali.koyuncu.ics.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
