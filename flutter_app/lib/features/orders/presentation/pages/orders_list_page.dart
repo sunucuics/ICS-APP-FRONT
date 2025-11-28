@@ -45,9 +45,6 @@ class OrdersListPage extends ConsumerWidget {
         order.status == const OrderStatus.shipped()).toList();
     final deliveredOrders = ordersResponse.items.where((order) => 
         order.status == const OrderStatus.delivered()).toList();
-    final canceledOrders = ordersResponse.items.where((order) => 
-        order.status == const OrderStatus.canceled() || 
-        order.status == const OrderStatus.paymentFailed()).toList();
 
     return DefaultTabController(
       length: 4,

@@ -223,9 +223,6 @@ flutter_app/
 ### State Management
 - `flutter_riverpod` - Modern state management
 
-### Navigation
-- `go_router` - Deklaratif routing
-
 ### Network & API
 - `dio` - HTTP istemcisi
 - `pretty_dio_logger` - Network log'lama

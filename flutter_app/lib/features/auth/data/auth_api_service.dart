@@ -145,7 +145,7 @@ class AuthApiService {
       if (fcmToken != null) {
         try {
           // JSON formatında gönder, FormData kullanma
-          final response = await _apiClient.post(
+          await _apiClient.post(
             ApiEndpoints.authLogin,
             data: {
               'email': request.email,

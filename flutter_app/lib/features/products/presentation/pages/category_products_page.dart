@@ -422,7 +422,7 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
             onPressed: () {
               final categoryName =
                   widget.category.name.isEmpty ? null : widget.category.name;
-              ref.refresh(productsProvider(categoryName));
+              ref.invalidate(productsProvider(categoryName));
             },
             icon: const Icon(Icons.refresh_rounded),
             label: const Text('Tekrar Dene'),
