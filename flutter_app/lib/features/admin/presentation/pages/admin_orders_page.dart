@@ -5,6 +5,8 @@ import '../widgets/admin_navigation.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/models/order_model.dart';
 import '../../../../core/services/snackbar_service.dart';
+import '../../../../core/network/exceptions/api_exception.dart';
+import '../../../../core/utils/order_utils.dart';
 
 class AdminOrdersPage extends ConsumerWidget {
   const AdminOrdersPage({super.key});
@@ -144,7 +146,7 @@ class AdminOrdersPage extends ConsumerWidget {
                 Row(
                   children: [
                     if (order.payment != null) 
-                      _buildPaymentStatusChip(order.payment!.status),
+                      _buildPaymentStatusChip(order.payment!['status'] as String? ?? 'unknown'),
                     const SizedBox(width: 8),
                     _buildStatusChip(
                         order.status.displayName, _getStatusColor(order.status)),
@@ -525,60 +527,77 @@ class AdminOrdersPage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Sipariş Detayları #${order.id ?? 'Bilinmeyen'}'),
+        title: Text('Sipariş Detayları #${order.id}'),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Müşteri ID: ${order.userId ?? 'Bilinmeyen'}'),
-              if (order.customerName != null)
-                Text('Müşteri: ${order.customerName}'),
-              if (order.customerPhone != null)
-                Text('Telefon: ${order.customerPhone}'),
-              if (order.customerEmail != null)
-                Text('Email: ${order.customerEmail}'),
-              Text('Durum: ${order.status.displayName}'),
-              if (order.trackingNumber != null)
-                Text('Takip No: ${order.trackingNumber}'),
-              if (order.shippingProvider != null)
-                Text('Kargo: ${order.shippingProvider}'),
-              if (order.note != null) Text('Not: ${order.note}'),
-              if (order.address != null) ...[
-                const SizedBox(height: 16),
-                const Text('Adres:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(
-                    '${order.address?.name ?? ''} - ${order.address?.label ?? ''}'),
-                Text(
-                    '${order.address?.city ?? ''} / ${order.address?.district ?? ''}'),
-                Text(
-                    '${order.address?.neighborhood ?? ''} ${order.address?.street ?? ''}'),
-                Text(
-                    '${order.address?.buildingNo ?? ''} ${order.address?.apartment ?? ''}'),
-                Text('${order.address?.zipCode ?? ''}'),
+              // Customer Info
+              Text('Müşteri ID: ${order.userId}'),
+              if (order.customer.fullName != null)
+                Text('Müşteri: ${order.customer.fullName}'),
+              if (order.customer.phone != null)
+                Text('Telefon: ${order.customer.phone}'),
+              if (order.customer.email != null)
+                Text('Email: ${order.customer.email}'),
+              if (order.customer.address != null) ...[
+                const SizedBox(height: 8),
+                const Text('Adres:', style: TextStyle(fontWeight: FontWeight.bold)),
+                if (order.customer.address!.line1 != null)
+                  Text(order.customer.address!.line1!),
+                Text('${order.customer.address!.city ?? ''} ${order.customer.address!.postalCode ?? ''}'),
               ],
               const SizedBox(height: 16),
-              const Text('Ürünler:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              ...(order.items ?? []).map((item) => Padding(
+              // Status
+              Text('Durum: ${order.status.displayName}'),
+              // Shipping Info
+              if (order.shipping.provider != null || order.shipping.trackingNumber != null) ...[
+                const SizedBox(height: 8),
+                const Text('Kargo Bilgileri:', style: TextStyle(fontWeight: FontWeight.bold)),
+                if (order.shipping.provider != null)
+                  Text('Firma: ${order.shipping.provider}'),
+                if (order.shipping.trackingNumber != null)
+                  Text('Takip No: ${order.shipping.trackingNumber}'),
+                if (order.shipping.trackingUrl != null)
+                  Text('Takip URL: ${order.shipping.trackingUrl}'),
+                if (order.shipping.shippedAt != null)
+                  Text('Kargoya Verilme: ${formatDateTime(order.shipping.shippedAt)}'),
+                if (order.shipping.deliveredAt != null)
+                  Text('Teslim Tarihi: ${formatDateTime(order.shipping.deliveredAt)}'),
+              ],
+              // Status History
+              if (order.statusHistory != null && order.statusHistory!.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                const Text('Durum Geçmişi:', style: TextStyle(fontWeight: FontWeight.bold)),
+                ...order.statusHistory!.map((event) => Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        '• ${event.status} - ${formatDateTime(event.at)}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    )),
+              ],
+              if (order.note != null && order.note!.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Text('Not: ${order.note}'),
+              ],
+              const SizedBox(height: 16),
+              const Text('Ürünler:', style: TextStyle(fontWeight: FontWeight.bold)),
+              ...order.items.map((item) => Padding(
                     padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                        '• ${item.name ?? 'Ürün Adı Yok'} x${item.quantity ?? 0}'),
+                    child: Text('• ${item.name} x${item.qty}'),
                   )),
               const SizedBox(height: 16),
-              if (order.totals != null) ...[
-                const Text('Toplamlar:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(
-                    'Ara Toplam: ₺${order.totals?.subtotal?.toStringAsFixed(2) ?? '0.00'}'),
-                Text(
-                    'Kargo: ₺${order.totals?.shipping?.toStringAsFixed(2) ?? '0.00'}'),
-                Text(
-                    'Vergi: ₺${order.totals?.tax?.toStringAsFixed(2) ?? '0.00'}'),
-                Text(
-                    'Genel Toplam: ₺${order.totals?.grandTotal?.toStringAsFixed(2) ?? '0.00'}'),
-              ],
+              const Text('Toplamlar:', style: TextStyle(fontWeight: FontWeight.bold)),
+              if (order.totals.subtotal != null)
+                Text('Ara Toplam: ${formatMoney(order.totals.subtotal!)}'),
+              if (order.totals.shipping != null && order.totals.shipping! > 0)
+                Text('Kargo: ${formatMoney(order.totals.shipping!)}'),
+              if (order.totals.tax != null && order.totals.tax! > 0)
+                Text('Vergi: ${formatMoney(order.totals.tax!)}'),
+              Text('Genel Toplam: ${formatMoney(order.totals.grandTotal)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),
         ),
@@ -594,58 +613,105 @@ class AdminOrdersPage extends ConsumerWidget {
 
   void _showShipOrderDialog(BuildContext context, WidgetRef ref, Order order) {
     final trackingController = TextEditingController();
-    final providerController = TextEditingController(text: 'MANUAL');
+    final trackingUrlController = TextEditingController();
+    String selectedProvider = 'MANUAL';
+    final formKey = GlobalKey<FormState>();
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Siparişi Kargoya Ver'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: trackingController,
-              decoration: const InputDecoration(
-                labelText: 'Takip Numarası (Opsiyonel)',
-                hintText: 'Kargo takip numarası',
-                border: OutlineInputBorder(),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Siparişi Kargoya Ver'),
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButtonFormField<String>(
+                    value: selectedProvider,
+                    decoration: const InputDecoration(
+                      labelText: 'Kargo Firması *',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'MANUAL', child: Text('Manuel')),
+                      DropdownMenuItem(value: 'ARAS', child: Text('Aras Kargo')),
+                      DropdownMenuItem(value: 'YURTICI', child: Text('Yurtiçi Kargo')),
+                      DropdownMenuItem(value: 'MNG', child: Text('MNG Kargo')),
+                      DropdownMenuItem(value: 'PTT', child: Text('PTT Kargo')),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          selectedProvider = value;
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: trackingController,
+                    decoration: const InputDecoration(
+                      labelText: 'Takip Numarası *',
+                      hintText: 'Kargo takip numarası',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Takip numarası zorunludur';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: trackingUrlController,
+                    decoration: const InputDecoration(
+                      labelText: 'Takip URL (Opsiyonel)',
+                      hintText: 'https://...',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: providerController,
-              decoration: const InputDecoration(
-                labelText: 'Kargo Firması',
-                hintText: 'MANUAL',
-                border: OutlineInputBorder(),
-              ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('İptal'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (formKey.currentState?.validate() ?? false) {
+                  Navigator.of(context).pop();
+                  await _shipOrder(
+                    context,
+                    ref,
+                    order,
+                    trackingController.text.trim(),
+                    selectedProvider,
+                    trackingUrlController.text.trim(),
+                  );
+                }
+              },
+              child: const Text('Kargoya Ver'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('İptal'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _shipOrder(context, ref, order, trackingController.text, providerController.text);
-            },
-            child: const Text('Kargoya Ver'),
-          ),
-        ],
       ),
     );
   }
 
-  Future<void> _shipOrder(BuildContext context, WidgetRef ref, Order order, String trackingNumber, String provider) async {
+  Future<void> _shipOrder(BuildContext context, WidgetRef ref, Order order, String trackingNumber, String provider, String trackingUrl) async {
     try {
       await ref.read(adminOrdersNotifierProvider.notifier).shipOrder(
-        order.id ?? '',
+        order.id,
         OrderShipRequest(
-          trackingNumber: trackingNumber.isNotEmpty ? trackingNumber : null,
+          trackingNumber: trackingNumber,
           provider: provider,
+          trackingUrl: trackingUrl.isNotEmpty ? trackingUrl : null,
         ),
       );
       
@@ -657,6 +723,21 @@ class AdminOrdersPage extends ConsumerWidget {
           ),
         );
         ref.read(adminOrdersQueueProvider.notifier).refresh();
+      }
+    } on ApiException catch (e) {
+      if (context.mounted) {
+        String errorMessage = 'Hata: ${e.message}';
+        if (e.statusCode == 409) {
+          errorMessage = 'Geçersiz durum geçişi: Bu sipariş kargoya verilemez';
+        } else if (e.statusCode == 400) {
+          errorMessage = 'Eksik bilgi: Takip numarası zorunludur';
+        }
+        SnackBarService.showSnackBar(context: context, snackBar: 
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (error) {
       if (context.mounted) {
@@ -672,7 +753,7 @@ class AdminOrdersPage extends ConsumerWidget {
 
   Future<void> _deliverOrder(BuildContext context, WidgetRef ref, Order order) async {
     try {
-      await ref.read(adminOrdersNotifierProvider.notifier).deliverOrder(order.id ?? '');
+      await ref.read(adminOrdersNotifierProvider.notifier).deliverOrder(order.id);
       
       if (context.mounted) {
         SnackBarService.showSnackBar(context: context, snackBar: 
@@ -682,6 +763,19 @@ class AdminOrdersPage extends ConsumerWidget {
           ),
         );
         ref.read(adminOrdersQueueProvider.notifier).refresh();
+      }
+    } on ApiException catch (e) {
+      if (context.mounted) {
+        String errorMessage = 'Hata: ${e.message}';
+        if (e.statusCode == 409) {
+          errorMessage = 'Geçersiz durum geçişi: Bu sipariş teslim edilemez';
+        }
+        SnackBarService.showSnackBar(context: context, snackBar: 
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (error) {
       if (context.mounted) {
@@ -737,8 +831,8 @@ class AdminOrdersPage extends ConsumerWidget {
   Future<void> _cancelOrder(BuildContext context, WidgetRef ref, Order order, String reason) async {
     try {
       await ref.read(adminOrdersNotifierProvider.notifier).cancelOrder(
-        order.id ?? '',
-        OrderCancelRequest(reason: reason),
+        order.id,
+        OrderCancelRequest(reason: reason.isNotEmpty ? reason : null),
       );
       
       if (context.mounted) {
@@ -749,6 +843,19 @@ class AdminOrdersPage extends ConsumerWidget {
           ),
         );
         ref.read(adminOrdersQueueProvider.notifier).refresh();
+      }
+    } on ApiException catch (e) {
+      if (context.mounted) {
+        String errorMessage = 'Hata: ${e.message}';
+        if (e.statusCode == 409) {
+          errorMessage = 'Geçersiz durum geçişi: Bu sipariş iptal edilemez';
+        }
+        SnackBarService.showSnackBar(context: context, snackBar: 
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (error) {
       if (context.mounted) {
@@ -788,7 +895,7 @@ class AdminOrdersPage extends ConsumerWidget {
 
   Future<void> _deleteOrder(BuildContext context, WidgetRef ref, Order order) async {
     try {
-      await ref.read(adminOrdersNotifierProvider.notifier).deleteOrder(order.id ?? '');
+      await ref.read(adminOrdersNotifierProvider.notifier).deleteOrder(order.id);
       
       if (context.mounted) {
         SnackBarService.showSnackBar(context: context, snackBar: 

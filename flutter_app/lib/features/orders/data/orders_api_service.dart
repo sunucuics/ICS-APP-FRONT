@@ -10,31 +10,26 @@ class OrdersApiService {
 
   /// Create a new order from cart
   /// Backend reads cart from user_id and creates order automatically
+  /// According to backend docs: Body is empty, backend reads from cart
   Future<Order> createOrder({
-    List<OrderCreateItem>? items, // Optional - backend reads from cart if empty
+    // Deprecated: items parameter - backend reads from cart
+    @Deprecated('Backend reads from cart, items parameter is ignored')
+    List<OrderCreateItem>? items,
+    // Deprecated: note parameter - backend reads from cart
+    @Deprecated('Backend reads from cart, note parameter is ignored')
     String? note,
     bool simulate = false,
     bool clearCartOnSuccess = true,
     String? checkoutId,
   }) async {
     try {
-      final payload = <String, dynamic>{};
-      if (items != null && items.isNotEmpty) {
-        payload['items'] = items.map((item) => item.toJson()).toList();
-      }
-      final trimmedNote = note?.trim();
-      if (trimmedNote != null && trimmedNote.isNotEmpty) {
-        payload['note'] = trimmedNote;
-      }
-
-      final requestBody = payload.isEmpty ? null : payload;
-
-      print(
-          '🔍 [ORDER CREATE DEBUG] Sending POST /orders with body: ${requestBody ?? '<empty>'}');
+      // According to backend documentation, POST /orders has no body
+      // Backend reads cart from user_id automatically
+      print('🔍 [ORDER CREATE DEBUG] Sending POST /orders (no body, backend reads from cart)');
 
       final response = await _dio.post(
         ApiEndpoints.orders,
-        data: requestBody,
+        // No body according to backend docs
         options: Options(
           headers: {
             'Content-Type': 'application/json; charset=utf-8',
@@ -58,16 +53,27 @@ class OrdersApiService {
   }
 
   /// Get user's orders with filtering and pagination
+  /// Query parameters: status (preparing|shipped|delivered|canceled), limit (1..100, default 20), start_after (ISO datetime cursor)
   Future<OrdersListResponse> getMyOrders({
-    String? status,
-    int? limit,
-    String? startAfter,
+    String? status, // preparing|shipped|delivered|canceled
+    int? limit, // 1..100, default 20
+    String? startAfter, // ISO datetime cursor (start_after)
   }) async {
     try {
       final queryParams = <String, dynamic>{};
-      if (status != null) queryParams['status'] = status;
-      if (limit != null) queryParams['limit'] = limit;
-      if (startAfter != null) queryParams['start_after'] = startAfter;
+      if (status != null) {
+        // Validate status
+        final validStatuses = ['preparing', 'shipped', 'delivered', 'canceled'];
+        if (validStatuses.contains(status.toLowerCase())) {
+          queryParams['status'] = status.toLowerCase();
+        }
+      }
+      if (limit != null && limit >= 1 && limit <= 100) {
+        queryParams['limit'] = limit;
+      }
+      if (startAfter != null && startAfter.isNotEmpty) {
+        queryParams['start_after'] = startAfter; // ISO datetime cursor
+      }
 
       final response = await _dio.get(
         ApiEndpoints.orders,

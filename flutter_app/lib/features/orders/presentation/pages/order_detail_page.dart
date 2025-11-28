@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/models/order_model.dart';
 import '../../providers/orders_provider.dart';
 import '../../../../core/services/snackbar_service.dart';
+import '../../../../core/utils/order_utils.dart';
 
 class OrderDetailPage extends ConsumerStatefulWidget {
   final String orderId;
@@ -63,6 +65,12 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
           _buildStatusCard(context, order),
           const SizedBox(height: 16),
 
+          // Status History Timeline
+          if (order.statusHistory != null && order.statusHistory!.isNotEmpty) ...[
+            _buildStatusHistoryCard(context, order),
+            const SizedBox(height: 16),
+          ],
+
           // Payment Status Card
           if (order.payment != null) ...[
             _buildPaymentStatusCard(context, order),
@@ -70,7 +78,7 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
           ],
 
           // Tracking Info
-          if (order.trackingNumber != null) ...[
+          if (order.shipping.provider != null || order.shipping.trackingNumber != null) ...[
             _buildTrackingCard(context, order),
             const SizedBox(height: 16),
           ],
@@ -79,15 +87,19 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
           _buildItemsCard(context, order),
           const SizedBox(height: 16),
 
-          // Address Info
-          _buildAddressCard(context, order),
+          // Customer Info
+          _buildCustomerCard(context, order),
           const SizedBox(height: 16),
 
-          // Totals
-          if (order.totals != null) ...[
-            _buildTotalsCard(context, order),
+          // Address Info (legacy)
+          if (order.address != null) ...[
+            _buildAddressCard(context, order),
             const SizedBox(height: 16),
           ],
+
+          // Totals
+          _buildTotalsCard(context, order),
+          const SizedBox(height: 16),
 
           // Notes
           if (order.note != null && order.note!.isNotEmpty) ...[
@@ -141,7 +153,13 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
   }
 
   Widget _buildPaymentStatusCard(BuildContext context, Order order) {
-    final payment = order.payment!;
+    final payment = order.payment;
+    if (payment == null) return const SizedBox.shrink();
+    
+    final status = payment['status'] as String? ?? 'unknown';
+    final receivedTotal = payment['received_total'] as num?;
+    final provider = payment['provider'] as String?;
+    final reportedAt = payment['reported_at'] as String?;
     
     return Card(
       child: Padding(
@@ -158,11 +176,11 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
             const SizedBox(height: 12),
             Row(
               children: [
-                _buildPaymentStatusChip(payment.status),
+                _buildPaymentStatusChip(status),
                 const Spacer(),
-                if (payment.receivedTotal != null)
+                if (receivedTotal != null)
                   Text(
-                    '₺${payment.receivedTotal!.toStringAsFixed(2)}',
+                    formatMoney(receivedTotal.toDouble()),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).primaryColor,
@@ -170,20 +188,20 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
                   ),
               ],
             ),
-            if (payment.provider != null) ...[
+            if (provider != null) ...[
               const SizedBox(height: 8),
               Text(
-                'Ödeme Yöntemi: ${payment.provider}',
+                'Ödeme Yöntemi: $provider',
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 12,
                 ),
               ),
             ],
-            if (payment.reportedAt != null) ...[
+            if (reportedAt != null) ...[
               const SizedBox(height: 4),
               Text(
-                'Ödeme Tarihi: ${_formatDateTime(payment.reportedAt)}',
+                'Ödeme Tarihi: ${formatDate(reportedAt)}',
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 12,
@@ -197,6 +215,7 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
   }
 
   Widget _buildTrackingCard(BuildContext context, Order order) {
+    final shipping = order.shipping;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -210,45 +229,94 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
                   ),
             ),
             const SizedBox(height: 12),
-            Row(
-              children: [
-                Icon(
-                  Icons.local_shipping,
-                  color: Theme.of(context).primaryColor,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        order.shippingProvider ?? 'Aras Kargo',
-                        style: const TextStyle(fontWeight: FontWeight.w500),
+            if (shipping.provider != null) ...[
+              Row(
+                children: [
+                  Icon(
+                    Icons.local_shipping,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      shipping.provider!,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+            ],
+            if (shipping.trackingNumber != null) ...[
+              Row(
+                children: [
+                  const Text('Takip No: ', style: TextStyle(fontSize: 12)),
+                  Expanded(
+                    child: Text(
+                      shipping.trackingNumber!,
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
                       ),
-                      Text(
-                        'Takip No: ${order.trackingNumber}',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+            ],
+            if (shipping.trackingUrl != null && shipping.trackingUrl!.isNotEmpty) ...[
+              InkWell(
+                onTap: () async {
+                  final uri = Uri.parse(shipping.trackingUrl!);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  } else {
+                    if (context.mounted) {
+                      SnackBarService.showSnackBar(
+                        context: context,
+                        snackBar: const SnackBar(
+                          content: Text('Takip URL\'si açılamadı'),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (order.trackingNumber != null &&
-                    !order.trackingNumber!.startsWith('FAKE-'))
-                  IconButton(
-                    icon: const Icon(Icons.open_in_new),
-                    onPressed: () {
-                      // TODO: Open tracking URL
-                      SnackBarService.showSnackBar(context: context, snackBar: 
-                        const SnackBar(
-                            content: Text('Takip sayfası yakında eklenecek')),
                       );
-                    },
-                  ),
-              ],
-            ),
+                    }
+                  }
+                },
+                child: Row(
+                  children: [
+                    const Icon(Icons.open_in_new, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Takip sayfasını aç',
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontSize: 12,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            if (shipping.shippedAt != null) ...[
+              Text(
+                'Kargoya Verilme: ${formatDateTime(shipping.shippedAt)}',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 4),
+            ],
+            if (shipping.deliveredAt != null)
+              Text(
+                'Teslim Tarihi: ${formatDateTime(shipping.deliveredAt)}',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 12,
+                ),
+              ),
           ],
         ),
       ),
@@ -326,7 +394,7 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Adet: ${item.quantity}',
+                  'Adet: ${item.qty}',
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 12,
@@ -337,13 +405,134 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
           ),
           // Price
           Text(
-            '₺${(item.total ?? (item.price ?? 0) * (item.quantity ?? 0)).toStringAsFixed(2)}',
+            formatMoney((item.finalPrice ?? item.price ?? 0) * item.qty),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).primaryColor,
                 ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStatusHistoryCard(BuildContext context, Order order) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Durum Geçmişi',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            ...order.statusHistory!.asMap().entries.map((entry) {
+              final index = entry.key;
+              final event = entry.value;
+              final isLast = index == order.statusHistory!.length - 1;
+              return _buildStatusHistoryItem(context, event, isLast);
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusHistoryItem(BuildContext context, StatusEvent event, bool isLast) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: getStatusColor(OrderStatus.fromString(event.status)),
+              ),
+            ),
+            if (!isLast)
+              Container(
+                width: 2,
+                height: 40,
+                color: Colors.grey[300],
+              ),
+          ],
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  OrderStatus.fromString(event.status).displayName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  formatDateTime(event.at),
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 12,
+                  ),
+                ),
+                if (event.meta?.reason != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Sebep: ${event.meta!.reason}',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCustomerCard(BuildContext context, Order order) {
+    final customer = order.customer;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Müşteri Bilgileri',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            if (customer.fullName != null)
+              _buildInfoRow('Ad Soyad', customer.fullName!),
+            if (customer.email != null)
+              _buildInfoRow('E-posta', customer.email!),
+            if (customer.phone != null)
+              _buildInfoRow('Telefon', customer.phone!),
+            if (customer.address != null) ...[
+              const SizedBox(height: 8),
+              const Text('Adres:', style: TextStyle(fontWeight: FontWeight.w500)),
+              if (customer.address!.line1 != null)
+                Text(customer.address!.line1!),
+              Text('${customer.address!.city ?? ''} ${customer.address!.postalCode ?? ''}'),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -399,7 +588,7 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
   }
 
   Widget _buildTotalsCard(BuildContext context, Order order) {
-    final totals = order.totals!;
+    final totals = order.totals;
 
     return Card(
       child: Padding(
@@ -424,7 +613,7 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
             const Divider(),
             _buildTotalRow(
               'Toplam',
-              totals.grandTotal ?? 0.0,
+              totals.grandTotal,
               isTotal: true,
             ),
           ],
@@ -448,7 +637,7 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
             ),
           ),
           Text(
-            '₺${amount.toStringAsFixed(2)}',
+            formatMoney(amount),
             style: TextStyle(
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
               color: isDiscount

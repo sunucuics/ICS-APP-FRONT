@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/admin_repository.dart';
 import '../providers/admin_dashboard_provider.dart';
 import '../../../core/models/order_model.dart';
+import '../../../core/network/exceptions/api_exception.dart';
 
 // Orders Provider
 final adminOrdersProvider = FutureProvider<List<Order>>((ref) async {
@@ -37,7 +38,7 @@ class AdminOrdersNotifier extends StateNotifier<AsyncValue<List<Order>>> {
     try {
       await _repository.updateOrderStatus(orderId, status);
       await loadOrders(); // Refresh the list
-    } catch (error, stackTrace) {
+    } catch (error) {
       // Don't set the entire state to error, just log the error
       // The UI should handle this gracefully
       print('Error updating order status: $error');
@@ -51,7 +52,16 @@ class AdminOrdersNotifier extends StateNotifier<AsyncValue<List<Order>>> {
       final order = await _repository.shipOrder(orderId, request);
       await loadOrders(); // Refresh the list
       return order;
-    } catch (error, stackTrace) {
+    } on ApiException catch (e) {
+      // Handle 409 Conflict (invalid state transition)
+      if (e.statusCode == 409) {
+        throw ApiException(
+          message: 'Geçersiz durum geçişi: Bu sipariş kargoya verilemez',
+          statusCode: 409,
+        );
+      }
+      rethrow;
+    } catch (error) {
       print('Error shipping order: $error');
       rethrow;
     }
@@ -62,7 +72,16 @@ class AdminOrdersNotifier extends StateNotifier<AsyncValue<List<Order>>> {
       final order = await _repository.deliverOrder(orderId);
       await loadOrders(); // Refresh the list
       return order;
-    } catch (error, stackTrace) {
+    } on ApiException catch (e) {
+      // Handle 409 Conflict (invalid state transition)
+      if (e.statusCode == 409) {
+        throw ApiException(
+          message: 'Geçersiz durum geçişi: Bu sipariş teslim edilemez',
+          statusCode: 409,
+        );
+      }
+      rethrow;
+    } catch (error) {
       print('Error delivering order: $error');
       rethrow;
     }
@@ -73,7 +92,16 @@ class AdminOrdersNotifier extends StateNotifier<AsyncValue<List<Order>>> {
       final order = await _repository.cancelOrder(orderId, request);
       await loadOrders(); // Refresh the list
       return order;
-    } catch (error, stackTrace) {
+    } on ApiException catch (e) {
+      // Handle 409 Conflict (invalid state transition)
+      if (e.statusCode == 409) {
+        throw ApiException(
+          message: 'Geçersiz durum geçişi: Bu sipariş iptal edilemez',
+          statusCode: 409,
+        );
+      }
+      rethrow;
+    } catch (error) {
       print('Error canceling order: $error');
       rethrow;
     }
@@ -83,7 +111,7 @@ class AdminOrdersNotifier extends StateNotifier<AsyncValue<List<Order>>> {
     try {
       await _repository.deleteOrder(orderId);
       await loadOrders(); // Refresh the list
-    } catch (error, stackTrace) {
+    } catch (error) {
       print('Error deleting order: $error');
       rethrow;
     }
@@ -120,4 +148,70 @@ class AdminOrdersQueueNotifier extends StateNotifier<AsyncValue<AdminOrdersQueue
 final adminOrdersQueueProvider = StateNotifierProvider<AdminOrdersQueueNotifier, AsyncValue<AdminOrdersQueueResponse>>((ref) {
   final repository = ref.watch(adminRepositoryProvider);
   return AdminOrdersQueueNotifier(repository);
+});
+
+// Admin Orders Test Provider
+class AdminOrdersTestNotifier extends StateNotifier<AsyncValue<Order?>> {
+  final AdminRepository _repository;
+
+  AdminOrdersTestNotifier(this._repository) : super(const AsyncValue.data(null));
+
+  Future<Order> createTestOrder() async {
+    try {
+      state = const AsyncValue.loading();
+      final order = await _repository.createTestOrder();
+      state = AsyncValue.data(order);
+      return order;
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+      rethrow;
+    }
+  }
+
+  void clearState() {
+    state = const AsyncValue.data(null);
+  }
+}
+
+final adminOrdersTestProvider = StateNotifierProvider<AdminOrdersTestNotifier, AsyncValue<Order?>>((ref) {
+  final repository = ref.watch(adminRepositoryProvider);
+  return AdminOrdersTestNotifier(repository);
+});
+
+// Admin Email Test Provider
+class AdminEmailTestNotifier extends StateNotifier<AsyncValue<Map<String, dynamic>?>> {
+  final AdminRepository _repository;
+
+  AdminEmailTestNotifier(this._repository) : super(const AsyncValue.data(null));
+
+  Future<Map<String, dynamic>> testEmail() async {
+    try {
+      state = const AsyncValue.loading();
+      final result = await _repository.testEmail();
+      state = AsyncValue.data(result);
+      return result;
+    } on ApiException catch (e) {
+      // Handle 502 Bad Gateway (SMTP connection failed)
+      if (e.statusCode == 502) {
+        throw ApiException(
+          message: 'SMTP bağlantı hatası: E-posta servisi erişilemiyor',
+          statusCode: 502,
+        );
+      }
+      state = AsyncValue.error(e, StackTrace.current);
+      rethrow;
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+      rethrow;
+    }
+  }
+
+  void clearState() {
+    state = const AsyncValue.data(null);
+  }
+}
+
+final adminEmailTestProvider = StateNotifierProvider<AdminEmailTestNotifier, AsyncValue<Map<String, dynamic>?>>((ref) {
+  final repository = ref.watch(adminRepositoryProvider);
+  return AdminEmailTestNotifier(repository);
 });

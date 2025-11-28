@@ -155,7 +155,7 @@ class OrdersListPage extends ConsumerWidget {
                   ),
                   Row(
                     children: [
-                      if (order.payment != null) _buildPaymentStatusChip(order.payment!.status),
+                      if (order.payment != null) _buildPaymentStatusChip(order.payment!['status'] as String? ?? 'unknown'),
                       const SizedBox(width: 8),
                       _buildStatusChip(order.status),
                     ],

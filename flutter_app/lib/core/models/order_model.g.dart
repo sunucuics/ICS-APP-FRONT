@@ -40,60 +40,64 @@ Map<String, dynamic> _$$AddressImplToJson(_$AddressImpl instance) =>
 
 _$OrderItemImpl _$$OrderItemImplFromJson(Map<String, dynamic> json) =>
     _$OrderItemImpl(
-      productId: json['product_id'] as String?,
-      name: json['name'] as String?,
+      productId: json['product_id'] as String,
+      name: json['name'] as String,
+      qty: _qtyFromJson(json['qty']),
+      price: (json['price'] as num?)?.toDouble(),
+      finalPrice: (json['final_price'] as num?)?.toDouble(),
+      imageUrl: json['image_url'] as String?,
+      options: json['options'] as Map<String, dynamic>? ?? const {},
+      product: json['product'] as Map<String, dynamic>?,
       title: json['title'] as String?,
       quantity: (json['quantity'] as num?)?.toInt(),
-      price: (json['price'] as num?)?.toDouble(),
       unitPrice: (json['unit_price'] as num?)?.toDouble(),
       total: (json['total'] as num?)?.toDouble(),
       lineTotal: (json['line_total'] as num?)?.toDouble(),
       currency: json['currency'] as String?,
       sku: json['sku'] as String?,
       variantId: json['variant_id'] as String?,
-      imageUrl: json['image_url'] as String?,
-      options: json['options'] as Map<String, dynamic>? ?? const {},
-      product: json['product'] as Map<String, dynamic>?,
     );
 
 Map<String, dynamic> _$$OrderItemImplToJson(_$OrderItemImpl instance) =>
     <String, dynamic>{
       'product_id': instance.productId,
       'name': instance.name,
+      'qty': instance.qty,
+      'price': instance.price,
+      'final_price': instance.finalPrice,
+      'image_url': instance.imageUrl,
+      'options': instance.options,
+      'product': instance.product,
       'title': instance.title,
       'quantity': instance.quantity,
-      'price': instance.price,
       'unit_price': instance.unitPrice,
       'total': instance.total,
       'line_total': instance.lineTotal,
       'currency': instance.currency,
       'sku': instance.sku,
       'variant_id': instance.variantId,
-      'image_url': instance.imageUrl,
-      'options': instance.options,
-      'product': instance.product,
     };
 
 _$OrderTotalsImpl _$$OrderTotalsImplFromJson(Map<String, dynamic> json) =>
     _$OrderTotalsImpl(
-      itemCount: (json['item_count'] as num?)?.toInt(),
+      grandTotal: (json['grand_total'] as num).toDouble(),
+      currency: json['currency'] as String? ?? 'TRY',
       subtotal: (json['subtotal'] as num?)?.toDouble(),
+      itemCount: (json['item_count'] as num?)?.toInt(),
       discount: (json['discount'] as num?)?.toDouble(),
       shipping: (json['shipping'] as num?)?.toDouble(),
       tax: (json['tax'] as num?)?.toDouble(),
-      grandTotal: (json['grand_total'] as num?)?.toDouble(),
-      currency: json['currency'] as String?,
     );
 
 Map<String, dynamic> _$$OrderTotalsImplToJson(_$OrderTotalsImpl instance) =>
     <String, dynamic>{
-      'item_count': instance.itemCount,
+      'grand_total': instance.grandTotal,
+      'currency': instance.currency,
       'subtotal': instance.subtotal,
+      'item_count': instance.itemCount,
       'discount': instance.discount,
       'shipping': instance.shipping,
       'tax': instance.tax,
-      'grand_total': instance.grandTotal,
-      'currency': instance.currency,
     };
 
 _$OrderPaymentImpl _$$OrderPaymentImplFromJson(Map<String, dynamic> json) =>
@@ -120,28 +124,62 @@ Map<String, dynamic> _$$OrderPaymentImplToJson(_$OrderPaymentImpl instance) =>
       'paytr': instance.paytr,
     };
 
-_$OrderShipmentImpl _$$OrderShipmentImplFromJson(Map<String, dynamic> json) =>
-    _$OrderShipmentImpl(
+_$StatusEventMetaImpl _$$StatusEventMetaImplFromJson(
+        Map<String, dynamic> json) =>
+    _$StatusEventMetaImpl(
+      trackingNumber: json['tracking_number'] as String?,
+      reason: json['reason'] as String?,
+    );
+
+Map<String, dynamic> _$$StatusEventMetaImplToJson(
+        _$StatusEventMetaImpl instance) =>
+    <String, dynamic>{
+      'tracking_number': instance.trackingNumber,
+      'reason': instance.reason,
+    };
+
+_$StatusEventImpl _$$StatusEventImplFromJson(Map<String, dynamic> json) =>
+    _$StatusEventImpl(
+      status: json['status'] as String,
+      at: DateTime.parse(json['at'] as String),
+      by: json['by'] as String?,
+      meta: json['meta'] == null
+          ? null
+          : StatusEventMeta.fromJson(json['meta'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$$StatusEventImplToJson(_$StatusEventImpl instance) =>
+    <String, dynamic>{
+      'status': instance.status,
+      'at': instance.at.toIso8601String(),
+      'by': instance.by,
+      'meta': instance.meta,
+    };
+
+_$ShippingInfoImpl _$$ShippingInfoImplFromJson(Map<String, dynamic> json) =>
+    _$ShippingInfoImpl(
       provider: json['provider'] as String?,
       trackingNumber: json['tracking_number'] as String?,
-      status: json['status'] as String?,
+      trackingUrl: json['tracking_url'] as String?,
       shippedAt: json['shipped_at'] == null
           ? null
           : DateTime.parse(json['shipped_at'] as String),
       deliveredAt: json['delivered_at'] == null
           ? null
           : DateTime.parse(json['delivered_at'] as String),
+      status: json['status'] as String?,
       simulated: json['simulated'] as bool?,
       log: json['log'] as String?,
     );
 
-Map<String, dynamic> _$$OrderShipmentImplToJson(_$OrderShipmentImpl instance) =>
+Map<String, dynamic> _$$ShippingInfoImplToJson(_$ShippingInfoImpl instance) =>
     <String, dynamic>{
       'provider': instance.provider,
       'tracking_number': instance.trackingNumber,
-      'status': instance.status,
+      'tracking_url': instance.trackingUrl,
       'shipped_at': instance.shippedAt?.toIso8601String(),
       'delivered_at': instance.deliveredAt?.toIso8601String(),
+      'status': instance.status,
       'simulated': instance.simulated,
       'log': instance.log,
     };
@@ -162,6 +200,42 @@ Map<String, dynamic> _$$OrderStatusHistoryImplToJson(
       'by': instance.by,
     };
 
+_$CustomerAddressImpl _$$CustomerAddressImplFromJson(
+        Map<String, dynamic> json) =>
+    _$CustomerAddressImpl(
+      line1: json['line1'] as String?,
+      city: json['city'] as String?,
+      postalCode: json['postal_code'] as String?,
+      country: json['country'] as String?,
+    );
+
+Map<String, dynamic> _$$CustomerAddressImplToJson(
+        _$CustomerAddressImpl instance) =>
+    <String, dynamic>{
+      'line1': instance.line1,
+      'city': instance.city,
+      'postal_code': instance.postalCode,
+      'country': instance.country,
+    };
+
+_$CustomerInfoImpl _$$CustomerInfoImplFromJson(Map<String, dynamic> json) =>
+    _$CustomerInfoImpl(
+      fullName: json['full_name'] as String?,
+      email: json['email'] as String?,
+      phone: json['phone'] as String?,
+      address: json['address'] == null
+          ? null
+          : CustomerAddress.fromJson(json['address'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$$CustomerInfoImplToJson(_$CustomerInfoImpl instance) =>
+    <String, dynamic>{
+      'full_name': instance.fullName,
+      'email': instance.email,
+      'phone': instance.phone,
+      'address': instance.address,
+    };
+
 _$OrderCustomerImpl _$$OrderCustomerImplFromJson(Map<String, dynamic> json) =>
     _$OrderCustomerImpl(
       fullName: json['full_name'] as String,
@@ -175,23 +249,7 @@ Map<String, dynamic> _$$OrderCustomerImplToJson(_$OrderCustomerImpl instance) =>
       'full_name': instance.fullName,
       'email': instance.email,
       'phone': instance.phone,
-      'address': instance.address,
-    };
-
-_$OrderAddressImpl _$$OrderAddressImplFromJson(Map<String, dynamic> json) =>
-    _$OrderAddressImpl(
-      line1: json['line1'] as String,
-      city: json['city'] as String,
-      postalCode: json['postal_code'] as String,
-      country: json['country'] as String? ?? 'TR',
-    );
-
-Map<String, dynamic> _$$OrderAddressImplToJson(_$OrderAddressImpl instance) =>
-    <String, dynamic>{
-      'line1': instance.line1,
-      'city': instance.city,
-      'postal_code': instance.postalCode,
-      'country': instance.country,
+      'address': _orderAddressToJson(instance.address),
     };
 
 _$OrderShippingImpl _$$OrderShippingImplFromJson(Map<String, dynamic> json) =>
@@ -221,77 +279,61 @@ Map<String, dynamic> _$$OrderEmailFlagsImplToJson(
     };
 
 _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
-      id: json['id'] as String?,
-      userId: json['user_id'] as String?,
+      id: json['id'] as String,
+      userId: json['user_id'] as String,
+      createdAt: _dateTimeFromJson(json['created_at']),
+      updatedAt: _dateTimeFromJson(json['updated_at']),
+      isDeleted: json['is_deleted'] as bool? ?? false,
       status: _statusFromJson(json['status'] as String?),
+      statusHistory: _statusHistoryFromJson(json['status_history']),
+      customer: _customerInfoFromJson(json['customer']),
+      shipping: _shippingInfoFromJson(json['shipping']),
+      items: (json['items'] as List<dynamic>)
+          .map((e) => OrderItem.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      totals: _totalsFromJson(json['totals']),
+      note: json['note'] as String?,
+      payment: json['payment'] as Map<String, dynamic>?,
       trackingNumber: json['tracking_number'] as String?,
       shippingProvider: json['shipping_provider'] as String?,
       integrationCode: json['integration_code'] as String?,
-      address: json['address'] == null
-          ? null
-          : Address.fromJson(json['address'] as Map<String, dynamic>),
-      items: (json['items'] as List<dynamic>?)
-          ?.map((e) => OrderItem.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      totals: json['totals'] == null
-          ? null
-          : OrderTotals.fromJson(json['totals'] as Map<String, dynamic>),
+      address: _addressFromJson(json['address']),
       shipment: json['shipment'] == null
           ? null
-          : OrderShipment.fromJson(json['shipment'] as Map<String, dynamic>),
-      note: json['note'] as String?,
-      createdAt: json['created_at'] == null
-          ? null
-          : DateTime.parse(json['created_at'] as String),
-      updatedAt: json['updated_at'] == null
-          ? null
-          : DateTime.parse(json['updated_at'] as String),
+          : ShippingInfo.fromJson(json['shipment'] as Map<String, dynamic>),
       customerName: json['customer_name'] as String?,
       customerPhone: json['customer_phone'] as String?,
       customerEmail: json['customer_email'] as String?,
-      customer: json['customer'] == null
-          ? null
-          : OrderCustomer.fromJson(json['customer'] as Map<String, dynamic>),
-      shipping: json['shipping'] == null
-          ? null
-          : OrderShipping.fromJson(json['shipping'] as Map<String, dynamic>),
-      payment: json['payment'] == null
-          ? null
-          : OrderPayment.fromJson(json['payment'] as Map<String, dynamic>),
-      statusHistory: (json['status_history'] as List<dynamic>?)
-          ?.map((e) => OrderStatusHistory.fromJson(e as Map<String, dynamic>))
-          .toList(),
       emailFlags: json['email_flags'] == null
           ? null
           : OrderEmailFlags.fromJson(
               json['email_flags'] as Map<String, dynamic>),
-      isDeleted: json['is_deleted'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'user_id': instance.userId,
+      'created_at': instance.createdAt.toIso8601String(),
+      'updated_at': instance.updatedAt.toIso8601String(),
+      'is_deleted': instance.isDeleted,
       'status': _statusToJson(instance.status),
+      'status_history': instance.statusHistory,
+      'customer': instance.customer,
+      'shipping': instance.shipping,
+      'items': instance.items,
+      'totals': instance.totals,
+      'note': instance.note,
+      'payment': instance.payment,
       'tracking_number': instance.trackingNumber,
       'shipping_provider': instance.shippingProvider,
       'integration_code': instance.integrationCode,
-      'address': instance.address,
-      'items': instance.items,
-      'totals': instance.totals,
+      'address': _addressToJson(instance.address),
       'shipment': instance.shipment,
-      'note': instance.note,
-      'created_at': instance.createdAt?.toIso8601String(),
-      'updated_at': instance.updatedAt?.toIso8601String(),
       'customer_name': instance.customerName,
       'customer_phone': instance.customerPhone,
       'customer_email': instance.customerEmail,
-      'customer': instance.customer,
-      'shipping': instance.shipping,
-      'payment': instance.payment,
-      'status_history': instance.statusHistory,
       'email_flags': instance.emailFlags,
-      'is_deleted': instance.isDeleted,
     };
 
 _$OrderCreateRequestImpl _$$OrderCreateRequestImplFromJson(
@@ -383,8 +425,9 @@ Map<String, dynamic> _$$AdminOrdersCountImplToJson(
 _$OrderShipRequestImpl _$$OrderShipRequestImplFromJson(
         Map<String, dynamic> json) =>
     _$OrderShipRequestImpl(
-      trackingNumber: json['tracking_number'] as String?,
+      trackingNumber: json['tracking_number'] as String,
       provider: json['provider'] as String? ?? 'MANUAL',
+      trackingUrl: json['tracking_url'] as String?,
     );
 
 Map<String, dynamic> _$$OrderShipRequestImplToJson(
@@ -392,12 +435,13 @@ Map<String, dynamic> _$$OrderShipRequestImplToJson(
     <String, dynamic>{
       'tracking_number': instance.trackingNumber,
       'provider': instance.provider,
+      'tracking_url': instance.trackingUrl,
     };
 
 _$OrderCancelRequestImpl _$$OrderCancelRequestImplFromJson(
         Map<String, dynamic> json) =>
     _$OrderCancelRequestImpl(
-      reason: json['reason'] as String,
+      reason: json['reason'] as String?,
     );
 
 Map<String, dynamic> _$$OrderCancelRequestImplToJson(

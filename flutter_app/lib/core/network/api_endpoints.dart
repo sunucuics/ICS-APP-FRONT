@@ -12,6 +12,8 @@ class ApiEndpoints {
   static const String authLogout = '/auth/logout';
   static const String authResetPassword = '/auth/reset-password';
   static const String authCheckEmail = '/auth/check-email';
+  static const String authDeleteInitiate = '/auth/delete-account/initiate';
+  static const String authDeleteVerify = '/auth/delete-account/verify';
 
   // User endpoints
   static const String userProfile = '/users/me';
@@ -46,6 +48,12 @@ class ApiEndpoints {
   static const String orders = '/orders';
   static String order(String orderId) => '/orders/$orderId';
   static String orderTracking(String orderId) => '/orders/$orderId/tracking';
+  static const String ordersQueue = '/orders/queue';
+  static String orderShip(String orderId) => '/orders/$orderId/ship';
+  static String orderDeliver(String orderId) => '/orders/$orderId/deliver';
+  static String orderCancel(String orderId) => '/orders/$orderId/cancel';
+  static const String ordersDev = '/orders/dev';
+  static const String ordersEmailTest = '/orders/_email-test';
 
   // PayTR endpoints - Direct API (new backend integration)
   static const String paytrDirectInit = '/paytr/direct/init';

@@ -225,17 +225,19 @@ class AdminApiService {
 
   Future<AdminOrdersQueueResponse> getOrdersQueue() async {
     try {
-      final response = await _apiClient.get('/orders/queue');
+      final response = await _apiClient.get(ApiEndpoints.ordersQueue);
       return AdminOrdersQueueResponse.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
   }
 
+  /// Ship order - PATCH /orders/{id}/ship
+  /// Body: {tracking_number (required), provider (default: MANUAL), tracking_url (optional)}
   Future<Order> shipOrder(String orderId, OrderShipRequest request) async {
     try {
-      final response = await _apiClient.put(
-        '/orders/$orderId/ship',
+      final response = await _apiClient.patch(
+        ApiEndpoints.orderShip(orderId),
         data: request.toJson(),
       );
       return Order.fromJson(response.data as Map<String, dynamic>);
@@ -244,19 +246,23 @@ class AdminApiService {
     }
   }
 
+  /// Deliver order - PATCH /orders/{id}/deliver
+  /// Body: None
   Future<Order> deliverOrder(String orderId) async {
     try {
-      final response = await _apiClient.put('/orders/$orderId/deliver');
+      final response = await _apiClient.patch(ApiEndpoints.orderDeliver(orderId));
       return Order.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
   }
 
+  /// Cancel order - PATCH /orders/{id}/cancel
+  /// Body: {reason?} (optional)
   Future<Order> cancelOrder(String orderId, OrderCancelRequest request) async {
     try {
-      final response = await _apiClient.put(
-        '/orders/$orderId/cancel',
+      final response = await _apiClient.patch(
+        ApiEndpoints.orderCancel(orderId),
         data: request.toJson(),
       );
       return Order.fromJson(response.data as Map<String, dynamic>);
@@ -265,9 +271,32 @@ class AdminApiService {
     }
   }
 
+  /// Delete order (soft delete) - DELETE /orders/{id}
   Future<void> deleteOrder(String orderId) async {
     try {
-      await _apiClient.delete('/orders/$orderId');
+      await _apiClient.delete(ApiEndpoints.order(orderId));
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Create test order - POST /orders/dev (ADMIN)
+  /// For UI development, creates a fake order
+  Future<Order> createTestOrder() async {
+    try {
+      final response = await _apiClient.post(ApiEndpoints.ordersDev);
+      return Order.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Test email/SMTP health check - POST /orders/_email-test (ADMIN)
+  /// Returns: {ok: true, to: string} or 502 if SMTP fails
+  Future<Map<String, dynamic>> testEmail() async {
+    try {
+      final response = await _apiClient.post(ApiEndpoints.ordersEmailTest);
+      return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }

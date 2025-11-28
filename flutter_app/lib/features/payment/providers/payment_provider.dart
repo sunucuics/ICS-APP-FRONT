@@ -288,7 +288,7 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
           throw Exception('Sipariş oluşturulamadı.');
         }
 
-        final paymentStatus = _parsePaymentStatus(order.payment?.status);
+        final paymentStatus = _parsePaymentStatus(order.payment?['status'] as String?);
 
         final paytrRepository = _ref.read(paytrRepositoryProvider);
         final paytrInit = await paytrRepository.getDirectInit(
@@ -352,7 +352,7 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
         checkoutId: order.id,
         paymentMethod: paymentMethod,
         orderNote: orderNote,
-        paymentStatus: _parsePaymentStatus(order.payment?.status),
+        paymentStatus: _parsePaymentStatus(order.payment?['status'] as String?),
       );
     } catch (error) {
       state = state.copyWith(
@@ -397,7 +397,7 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
       state = currentState.copyWith(
         stage: CheckoutStage.completed,
         order: order,
-        paymentStatus: _parsePaymentStatus(order.payment?.status),
+        paymentStatus: _parsePaymentStatus(order.payment?['status'] as String?),
         clearPayTR: true,
         pollTimedOut: false,
       );
@@ -492,7 +492,7 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
 
       attempts += 1;
       final order = await repository.getOrderDetail(orderId);
-      final paymentStatus = _parsePaymentStatus(order.payment?.status);
+      final paymentStatus = _parsePaymentStatus(order.payment?['status'] as String?);
 
       state = state.copyWith(
         order: order,

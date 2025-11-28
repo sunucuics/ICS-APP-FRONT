@@ -86,6 +86,14 @@ class AdminRepository {
     return await _apiService.updateOrderStatus(orderId, status);
   }
 
+  Future<Order> createTestOrder() async {
+    return await _apiService.createTestOrder();
+  }
+
+  Future<Map<String, dynamic>> testEmail() async {
+    return await _apiService.testEmail();
+  }
+
   // Appointments
   Future<List<AppointmentWithDetails>> getAppointments() async {
     return await _apiService.getAppointments();
