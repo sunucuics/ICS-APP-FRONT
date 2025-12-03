@@ -76,7 +76,7 @@ class LoginRequest with _$LoginRequest {
 class RegisterRequest with _$RegisterRequest {
   const factory RegisterRequest({
     required String name,
-    required String phone,
+    String? phone,
     required String email,
     required String password,
   }) = _RegisterRequest;

@@ -153,15 +153,16 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     }
                   },
                   decoration: InputDecoration(
-                    labelText: 'Telefon',
+                    labelText: 'Telefon (Opsiyonel)',
                     hintText: '555 123 4567',
                     prefixIcon: const Icon(Icons.phone_outlined),
                     border: const OutlineInputBorder(),
                     errorText: _phoneError,
                   ),
                   validator: (value) {
+                    // Phone is optional, only validate format if provided
                     if (value == null || value.trim().isEmpty) {
-                      return 'Telefon numarası gerekli';
+                      return null; // No error if empty
                     }
                     // Backend expects format like '555 123 4567'
                     if (!RegExp(r'^[0-9\s]+$').hasMatch(value)) {
@@ -367,7 +368,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   // Format phone number to backend expected format (555 123 4567)
-  String _formatPhoneNumber(String phone) {
+  // Returns null if phone is empty or null
+  String? _formatPhoneNumber(String? phone) {
+    // Return null if phone is null or empty/whitespace only
+    if (phone == null || phone.trim().isEmpty) {
+      return null;
+    }
+
     // Remove all non-digit characters
     final cleanPhone = phone.replaceAll(RegExp(r'[^\d]'), '');
 

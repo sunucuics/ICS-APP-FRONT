@@ -1208,7 +1208,7 @@ RegisterRequest _$RegisterRequestFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$RegisterRequest {
   String get name => throw _privateConstructorUsedError;
-  String get phone => throw _privateConstructorUsedError;
+  String? get phone => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
   String get password => throw _privateConstructorUsedError;
 
@@ -1228,7 +1228,7 @@ abstract class $RegisterRequestCopyWith<$Res> {
           RegisterRequest value, $Res Function(RegisterRequest) then) =
       _$RegisterRequestCopyWithImpl<$Res, RegisterRequest>;
   @useResult
-  $Res call({String name, String phone, String email, String password});
+  $Res call({String name, String? phone, String email, String password});
 }
 
 /// @nodoc
@@ -1247,7 +1247,7 @@ class _$RegisterRequestCopyWithImpl<$Res, $Val extends RegisterRequest>
   @override
   $Res call({
     Object? name = null,
-    Object? phone = null,
+    Object? phone = freezed,
     Object? email = null,
     Object? password = null,
   }) {
@@ -1256,10 +1256,10 @@ class _$RegisterRequestCopyWithImpl<$Res, $Val extends RegisterRequest>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      phone: null == phone
+      phone: freezed == phone
           ? _value.phone
           : phone // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       email: null == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
@@ -1280,7 +1280,7 @@ abstract class _$$RegisterRequestImplCopyWith<$Res>
       __$$RegisterRequestImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String name, String phone, String email, String password});
+  $Res call({String name, String? phone, String email, String password});
 }
 
 /// @nodoc
@@ -1297,7 +1297,7 @@ class __$$RegisterRequestImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? name = null,
-    Object? phone = null,
+    Object? phone = freezed,
     Object? email = null,
     Object? password = null,
   }) {
@@ -1306,10 +1306,10 @@ class __$$RegisterRequestImplCopyWithImpl<$Res>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      phone: null == phone
+      phone: freezed == phone
           ? _value.phone
           : phone // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       email: null == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
@@ -1327,7 +1327,7 @@ class __$$RegisterRequestImplCopyWithImpl<$Res>
 class _$RegisterRequestImpl implements _RegisterRequest {
   const _$RegisterRequestImpl(
       {required this.name,
-      required this.phone,
+      this.phone,
       required this.email,
       required this.password});
 
@@ -1337,7 +1337,7 @@ class _$RegisterRequestImpl implements _RegisterRequest {
   @override
   final String name;
   @override
-  final String phone;
+  final String? phone;
   @override
   final String email;
   @override
@@ -1384,7 +1384,7 @@ class _$RegisterRequestImpl implements _RegisterRequest {
 abstract class _RegisterRequest implements RegisterRequest {
   const factory _RegisterRequest(
       {required final String name,
-      required final String phone,
+      final String? phone,
       required final String email,
       required final String password}) = _$RegisterRequestImpl;
 
@@ -1394,7 +1394,7 @@ abstract class _RegisterRequest implements RegisterRequest {
   @override
   String get name;
   @override
-  String get phone;
+  String? get phone;
   @override
   String get email;
   @override

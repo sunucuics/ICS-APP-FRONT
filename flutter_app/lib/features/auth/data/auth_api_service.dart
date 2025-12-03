@@ -38,13 +38,19 @@ class AuthApiService {
 
       // 4. Backend'e profil yazdır (Authorization header ile)
       print('🚀 AuthApiService: Sending profile to backend...');
-      final formData = FormData.fromMap({
+      final formDataMap = <String, dynamic>{
         'name': request.name,
-        'phone': request.phone, // Backend expects "555 123 4567" format
         'email': request.email,
         'password': request.password, // Backend validation için gerekli
         if (fcmToken != null) 'fcm_token': fcmToken,
-      });
+      };
+      // Add phone only if provided, otherwise send null
+      if (request.phone != null && request.phone!.isNotEmpty) {
+        formDataMap['phone'] = request.phone; // Backend expects "555 123 4567" format
+      } else {
+        formDataMap['phone'] = null; // Send null if phone is not provided
+      }
+      final formData = FormData.fromMap(formDataMap);
 
       final response = await _apiClient.postMultipart(
         ApiEndpoints.authRegister,

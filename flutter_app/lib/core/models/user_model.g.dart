@@ -109,7 +109,7 @@ _$RegisterRequestImpl _$$RegisterRequestImplFromJson(
         Map<String, dynamic> json) =>
     _$RegisterRequestImpl(
       name: json['name'] as String,
-      phone: json['phone'] as String,
+      phone: json['phone'] as String?,
       email: json['email'] as String,
       password: json['password'] as String,
     );
