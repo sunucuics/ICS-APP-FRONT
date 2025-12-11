@@ -5,24 +5,25 @@ import '../../../core/network/api_endpoints.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/services/firebase_auth_service.dart';
 import '../../../core/services/fcm_service.dart';
+import '../../../core/utils/logger.dart';
 
 class AuthApiService {
   final ApiClient _apiClient = ApiClient.instance;
 
   // Register - Client-first approach: Firebase ile kullanıcı oluştur, sonra backend'e profil yazdır
   Future<AuthResponse> register(RegisterRequest request) async {
-    print(
-        '🚀 AuthApiService: Starting client-first registration for email: ${request.email}');
+    AppLogger.info(
+        'AuthApiService: Starting client-first registration for email: ${AppLogger.maskEmail(request.email)}');
     UserCredential? userCredential;
 
     try {
       // 1. Firebase'de kullanıcı oluştur
-      print('🚀 AuthApiService: Creating Firebase user...');
+      AppLogger.debug('AuthApiService: Creating Firebase user...');
       userCredential = await FirebaseAuthService.createUserWithEmailAndPassword(
         email: request.email,
         password: request.password,
       );
-      print('🚀 AuthApiService: Firebase user created successfully');
+      AppLogger.success('AuthApiService: Firebase user created successfully');
 
       if (userCredential?.user == null) {
         throw Exception('Failed to create Firebase user');
@@ -30,14 +31,14 @@ class AuthApiService {
 
       // 2. Taze ID token al (force refresh)
       final idToken = await userCredential!.user!.getIdToken(true);
-      print('🚀 AuthApiService: Got fresh ID token');
+      AppLogger.debug('AuthApiService: Got fresh ID token');
 
       // 3. FCM token'ı al
       final fcmToken = await FCMService.getFCMToken();
-      print('🚀 AuthApiService: FCM Token: $fcmToken');
+      AppLogger.debug('AuthApiService: FCM Token obtained');
 
       // 4. Backend'e profil yazdır (Authorization header ile)
-      print('🚀 AuthApiService: Sending profile to backend...');
+      AppLogger.debug('AuthApiService: Sending profile to backend...');
       final formDataMap = <String, dynamic>{
         'name': request.name,
         'email': request.email,
@@ -46,7 +47,8 @@ class AuthApiService {
       };
       // Add phone only if provided, otherwise send null
       if (request.phone != null && request.phone!.isNotEmpty) {
-        formDataMap['phone'] = request.phone; // Backend expects "555 123 4567" format
+        formDataMap['phone'] =
+            request.phone; // Backend expects "555 123 4567" format
       } else {
         formDataMap['phone'] = null; // Send null if phone is not provided
       }
@@ -61,7 +63,7 @@ class AuthApiService {
           },
         ),
       );
-      print('🚀 AuthApiService: Backend profile creation successful');
+      AppLogger.success('AuthApiService: Backend profile creation successful');
 
       // 5. Backend'den dönen user profile'ını kullan
       final userProfile = UserProfile.fromJson(response.data['user']);
@@ -74,16 +76,15 @@ class AuthApiService {
         refreshToken: '', // Firebase otomatik yönetir
         expiresIn: 3600, // Firebase default
       );
-    } catch (e) {
-      print('🚀 AuthApiService: Registration failed with error: $e');
-      print('🚀 AuthApiService: Error type: ${e.runtimeType}');
+    } catch (e, stackTrace) {
+      AppLogger.error('AuthApiService: Registration failed', e, stackTrace);
 
       // Eğer kullanıcı zaten kayıtlı hatası alındıysa, Firebase kullanıcısını temizleme
       // Çünkü kullanıcı zaten giriş yapmış durumda
       if (e.toString().contains('Bu kullanıcı zaten kayıtlı') ||
           e.toString().contains('Bu e-posta zaten kayıtlı')) {
-        print(
-            '🚀 AuthApiService: User already exists, keeping Firebase user signed in');
+        AppLogger.info(
+            'AuthApiService: User already exists, keeping Firebase user signed in');
 
         // Kullanıcı zaten giriş yapmış, profil bilgilerini çek
         try {
@@ -96,7 +97,8 @@ class AuthApiService {
             expiresIn: 3600,
           );
         } catch (profileError) {
-          print('🚀 AuthApiService: Failed to get user profile: $profileError');
+          AppLogger.error(
+              'AuthApiService: Failed to get user profile', profileError);
           // Profil çekilemezse Firebase kullanıcısını temizle
           await userCredential!.user!.delete();
           await FirebaseAuthService.signOut();
@@ -106,14 +108,15 @@ class AuthApiService {
 
       // Diğer hatalar için Firebase kullanıcısını temizle
       if (userCredential?.user != null) {
-        print('🚀 AuthApiService: Cleaning up Firebase user due to error...');
+        AppLogger.debug(
+            'AuthApiService: Cleaning up Firebase user due to error...');
         try {
           await userCredential!.user!.delete();
           await FirebaseAuthService.signOut();
-          print('🚀 AuthApiService: Firebase user cleaned up');
+          AppLogger.debug('AuthApiService: Firebase user cleaned up');
         } catch (cleanupError) {
-          print(
-              '🚀 AuthApiService: Failed to cleanup Firebase user: $cleanupError');
+          AppLogger.error(
+              'AuthApiService: Failed to cleanup Firebase user', cleanupError);
           await FirebaseAuthService.signOut(); // En azından sign out yap
         }
       }
@@ -125,8 +128,8 @@ class AuthApiService {
 
   // Login - Firebase ile giriş yap (önerilen yaklaşım)
   Future<AuthResponse> login(LoginRequest request) async {
-    print(
-        '🚀 AuthApiService: Starting Firebase login for email: ${request.email}');
+    AppLogger.info(
+        'AuthApiService: Starting Firebase login for email: ${AppLogger.maskEmail(request.email)}');
 
     try {
       // 1. Firebase ile giriş yap - Android için timeout artırıldı
@@ -140,11 +143,11 @@ class AuthApiService {
         throw Exception('Failed to sign in with Firebase');
       }
 
-      print('🚀 AuthApiService: Firebase login successful');
+      AppLogger.success('AuthApiService: Firebase login successful');
 
       // 2. Android için token refresh timeout'u artır
       final idToken = await userCredential!.user!.getIdToken(true);
-      print('🚀 AuthApiService: Got fresh ID token');
+      AppLogger.debug('AuthApiService: Got fresh ID token');
 
       // 3. FCM token'ı backend'e gönder (opsiyonel) - Android için timeout artırıldı
       final fcmToken = await FCMService.getFCMToken();
@@ -163,9 +166,9 @@ class AuthApiService {
               receiveTimeout: const Duration(seconds: 30),
             ),
           );
-          print('🚀 AuthApiService: FCM token updated on login');
+          AppLogger.debug('AuthApiService: FCM token updated on login');
         } catch (e) {
-          print('🚀 AuthApiService: Failed to update FCM token: $e');
+          AppLogger.warning('AuthApiService: Failed to update FCM token', e);
           // FCM token güncelleme hatası login'i engellemez
         }
       }
@@ -180,15 +183,16 @@ class AuthApiService {
         refreshToken: '', // Firebase otomatik yönetir
         expiresIn: 3600, // Firebase tokens expire in 1 hour
       );
-    } catch (e) {
-      print('🚀 AuthApiService: Login failed with error: $e');
+    } catch (e, stackTrace) {
+      AppLogger.error('AuthApiService: Login failed', e, stackTrace);
       rethrow;
     }
   }
 
   // Reset Password - Backend endpoint kullan (FIREBASE_WEB_API_KEY gerekli)
   Future<void> resetPassword(String email) async {
-    print('🚀 AuthApiService: Sending password reset for email: $email');
+    AppLogger.info(
+        'AuthApiService: Sending password reset for email: ${AppLogger.maskEmail(email)}');
 
     try {
       // Backend endpoint'ini kullan (Firebase REST API proxy)
@@ -196,24 +200,25 @@ class AuthApiService {
         ApiEndpoints.authResetPassword,
         queryParameters: {'email': email},
       );
-      print('🚀 AuthApiService: Password reset email sent successfully');
+      AppLogger.success(
+          'AuthApiService: Password reset email sent successfully');
     } catch (e) {
-      print('🚀 AuthApiService: Password reset failed: $e');
+      AppLogger.error('AuthApiService: Password reset failed', e);
       // Fallback: Firebase SDK kullan
-      print('🚀 AuthApiService: Falling back to Firebase SDK...');
+      AppLogger.debug('AuthApiService: Falling back to Firebase SDK...');
       await FirebaseAuthService.sendPasswordResetEmail(email);
     }
   }
 
   // Logout - Backend logout endpoint'ini çağır, sonra Firebase'den çık
   Future<void> logout() async {
-    print('🚀 AuthApiService: Starting logout process');
+    AppLogger.debug('AuthApiService: Starting logout process');
 
     try {
       // 1. Backend logout endpoint'ini çağır (tüm refresh token'ları iptal eder)
       final idToken = await FirebaseAuthService.getIdToken();
       if (idToken != null) {
-        print('🚀 AuthApiService: Calling backend logout endpoint');
+        AppLogger.debug('AuthApiService: Calling backend logout endpoint');
         await _apiClient.post(
           ApiEndpoints.authLogout,
           options: Options(
@@ -222,18 +227,19 @@ class AuthApiService {
             },
           ),
         );
-        print('🚀 AuthApiService: Backend logout successful');
+        AppLogger.success('AuthApiService: Backend logout successful');
       } else {
-        print('🚀 AuthApiService: No ID token found, skipping backend logout');
+        AppLogger.debug(
+            'AuthApiService: No ID token found, skipping backend logout');
       }
     } catch (e) {
-      print('🚀 AuthApiService: Backend logout failed: $e');
+      AppLogger.warning('AuthApiService: Backend logout failed', e);
       // Continue with Firebase logout even if backend call fails
     } finally {
       // 2. Firebase'den çık
-      print('🚀 AuthApiService: Signing out from Firebase');
+      AppLogger.debug('AuthApiService: Signing out from Firebase');
       await FirebaseAuthService.signOut();
-      print('🚀 AuthApiService: Firebase logout completed');
+      AppLogger.success('AuthApiService: Firebase logout completed');
     }
   }
 

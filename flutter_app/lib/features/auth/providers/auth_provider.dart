@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/services/firebase_auth_service.dart';
+import '../../../core/utils/logger.dart';
 import '../data/auth_repository.dart';
 import 'anonymous_auth_provider.dart' as anonymous;
 
@@ -45,6 +46,7 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _authRepository;
   final Ref _ref;
+  bool _isInitialized = false;
 
   AuthNotifier(this._authRepository, this._ref) : super(const AuthState()) {
     _listenToAuthStateChanges();
@@ -54,42 +56,57 @@ class AuthNotifier extends StateNotifier<AuthState> {
   void _listenToAuthStateChanges() {
     try {
       FirebaseAuthService.authStateChanges.listen((User? firebaseUser) async {
-        print(
-            '🔐 AuthProvider: Firebase auth state changed - User: ${firebaseUser?.uid}');
+        AppLogger.debug(
+            'AuthProvider: Firebase auth state changed - User: ${firebaseUser?.uid ?? 'null'}');
         if (firebaseUser != null) {
           // User is signed in
           await _loadUserProfile();
         } else {
           // User is signed out
-          print('🔐 AuthProvider: User signed out, updating state');
+          AppLogger.debug('AuthProvider: User signed out, updating state');
           state = const AuthState(isAuthenticated: false);
         }
       });
 
-      // Also check current auth status immediately on startup
+      // Check current auth status immediately on startup (optimized)
       _checkInitialAuthStatus();
     } catch (e) {
-      print('❌ Firebase auth state listener setup failed: $e');
+      AppLogger.error('Firebase auth state listener setup failed', e);
       // Fallback to manual auth check
       _checkAuthStatusManually();
     }
   }
 
-  // Check initial auth status when provider is created
+  // Check initial auth status when provider is created (optimized with timeout)
   Future<void> _checkInitialAuthStatus() async {
+    if (_isInitialized) return;
+
     try {
-      print('🔐 AuthProvider: Checking initial auth status...');
-      final isLoggedIn = await _authRepository.isLoggedIn();
-      print('🔐 AuthProvider: Initial auth status - isLoggedIn: $isLoggedIn');
+      AppLogger.debug('AuthProvider: Checking initial auth status...');
+
+      // Fast check - just Firebase auth state (no API call)
+      final isLoggedIn = await _authRepository
+          .isLoggedIn()
+          .timeout(const Duration(seconds: 2), onTimeout: () {
+        AppLogger.warning('Auth check timeout, assuming not logged in');
+        return false;
+      });
+
+      AppLogger.debug(
+          'AuthProvider: Initial auth status - isLoggedIn: $isLoggedIn');
 
       if (isLoggedIn) {
+        // Load user profile with timeout
         await _loadUserProfile();
       } else {
         state = const AuthState(isAuthenticated: false);
       }
+
+      _isInitialized = true;
     } catch (e) {
-      print('❌ Initial auth check failed: $e');
+      AppLogger.error('Initial auth check failed', e);
       state = const AuthState(isAuthenticated: false);
+      _isInitialized = true;
     }
   }
 
@@ -103,17 +120,27 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = const AuthState(isAuthenticated: false);
       }
     } catch (e) {
-      print('❌ Manual auth check failed: $e');
+      AppLogger.error('Manual auth check failed', e);
       state = const AuthState(isAuthenticated: false);
     }
   }
 
-  // Load user profile when Firebase user is authenticated
+  // Load user profile when Firebase user is authenticated (optimized with timeout)
   Future<void> _loadUserProfile() async {
-    state = state.copyWith(isLoading: true, error: null);
+    // Don't set loading if already authenticated (prevents UI flicker)
+    if (!state.isAuthenticated) {
+      state = state.copyWith(isLoading: true, error: null);
+    }
 
     try {
-      final user = await _authRepository.getCurrentUser();
+      // Add timeout to prevent blocking on slow network
+      final user = await _authRepository
+          .getCurrentUser()
+          .timeout(const Duration(seconds: 5), onTimeout: () {
+        AppLogger.warning('User profile load timeout');
+        return null;
+      });
+
       if (user != null) {
         state = state.copyWith(
           user: user,
@@ -124,8 +151,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         // Firebase user exists but backend user fetch failed
         // This means the user was created in Firebase but not in backend
         // Sign out from Firebase to clean up the state
-        print(
-            '⚠️ Firebase user exists but backend user not found. Signing out...');
+        AppLogger.warning(
+            'Firebase user exists but backend user not found. Signing out...');
         await FirebaseAuthService.signOut();
         state = state.copyWith(
           isAuthenticated: false,
@@ -135,7 +162,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       }
     } catch (e) {
       // If there's an error, also sign out to clean up the state
-      print('⚠️ Error loading user profile: $e. Signing out...');
+      AppLogger.error('Error loading user profile. Signing out...', e);
       await FirebaseAuthService.signOut();
       state = state.copyWith(
         error: e.toString(),
@@ -147,15 +174,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   // Login
   Future<bool> login(String email, String password) async {
-    print('🔐 AuthProvider - Starting login for: $email');
+    AppLogger.info(
+        'AuthProvider - Starting login for: ${AppLogger.maskEmail(email)}');
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      print('🔐 AuthProvider - Calling auth repository login...');
+      AppLogger.debug('AuthProvider - Calling auth repository login...');
       final response = await _authRepository.login(email, password);
-      print('🔐 AuthProvider - Login successful, user: ${response.user.email}');
-      print('🔐 AuthProvider - User ID: ${response.userId}');
-      print('🔐 AuthProvider - Token exists: ${response.idToken.isNotEmpty}');
+      AppLogger.success(
+          'AuthProvider - Login successful, user: ${AppLogger.maskEmail(response.user.email ?? '')}');
+      AppLogger.debug('AuthProvider - User ID: ${response.userId}');
+      AppLogger.debug(
+          'AuthProvider - Token exists: ${response.idToken.isNotEmpty}');
 
       // Update state with successful login
       state = state.copyWith(
@@ -168,16 +198,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Clear anonymous authentication when user logs in
       try {
         await _ref.read(anonymous.anonymousAuthProvider.notifier).signOut();
-        print('🔐 AuthProvider - Anonymous auth cleared');
+        AppLogger.debug('AuthProvider - Anonymous auth cleared');
       } catch (e) {
-        print('🔐 AuthProvider - Error clearing anonymous auth: $e');
+        AppLogger.warning('AuthProvider - Error clearing anonymous auth', e);
       }
 
-      print('🔐 AuthProvider - Login completed successfully');
+      AppLogger.success('AuthProvider - Login completed successfully');
       return true;
-    } catch (e) {
-      print('🔐 AuthProvider - Login failed: $e');
-      print('🔐 AuthProvider - Error type: ${e.runtimeType}');
+    } catch (e, stackTrace) {
+      AppLogger.error('AuthProvider - Login failed', e, stackTrace);
       state = state.copyWith(
         error: e.toString(),
         isLoading: false,
@@ -235,20 +264,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   // Logout
   Future<void> logout() async {
-    print('🔐 AuthProvider - Starting logout process');
+    AppLogger.debug('AuthProvider - Starting logout process');
     state = state.copyWith(isLoading: true);
 
     try {
-      print('🔐 AuthProvider - Calling auth repository logout...');
+      AppLogger.debug('AuthProvider - Calling auth repository logout...');
       await _authRepository.logout();
-      print('🔐 AuthProvider - Logout successful');
+      AppLogger.success('AuthProvider - Logout successful');
 
       // Immediately update state to logged out since logout was successful
       state = const AuthState(isAuthenticated: false, isLoading: false);
-      print('🔐 AuthProvider - State updated to logged out');
+      AppLogger.debug('AuthProvider - State updated to logged out');
     } catch (e) {
       // Even if logout fails, update state to not loading
-      print('🔐 AuthProvider - Logout error: $e');
+      AppLogger.error('AuthProvider - Logout error', e);
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
@@ -268,7 +297,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = state.copyWith(user: user);
       }
     } catch (e) {
-      print('Failed to refresh user: $e');
+      AppLogger.error('Failed to refresh user', e);
     }
   }
 }

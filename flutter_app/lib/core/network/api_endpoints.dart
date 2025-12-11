@@ -1,10 +1,12 @@
+import 'package:flutter/foundation.dart';
+
 class ApiEndpoints {
   // Base URL - Google Cloud deployed backend
   static const String baseUrl =
       'https://ics-api-443215445942.europe-west1.run.app';
 
-  // Debug mode flag
-  static const bool isDebug = true;
+  // Debug mode flag - automatically detects debug/release mode
+  static bool get isDebug => kDebugMode;
 
   // Auth endpoints
   static const String authRegister = '/auth/register';
@@ -60,10 +62,10 @@ class ApiEndpoints {
   static const String paytrDirectVerify = '/paytr/direct/verify';
   static const String paytrCallback = '/paytr/callback';
   static const String paytrInstallments = '/paytr/installments';
-  
+
   // PayTR iFrame API (optional)
   static const String paytrIframeInit = '/paytr/iframe/init';
-  
+
   // Legacy PayTR token endpoint (deprecated)
   @Deprecated('Use paytrDirectInit instead')
   static const String paytrToken = '/paytr/token';
@@ -103,6 +105,12 @@ class ApiEndpoints {
   static const String featured = '/featured';
   static const String featuredProducts = '/featured/products';
   static const String featuredServices = '/featured/services';
+
+  // Notifications endpoints
+  static const String notifications = '/notifications';
+  static String notification(String id) => '/notifications/$id';
+  static String notificationRead(String id) => '/notifications/$id/read';
+  static const String notificationsReadAll = '/notifications/read-all';
 
   // Admin endpoints (not needed for mobile app, but kept for reference)
   static const String adminCategories = '/admin/categories';

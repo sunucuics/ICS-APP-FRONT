@@ -16,17 +16,42 @@ class AuthWrapper extends ConsumerStatefulWidget {
 class _AuthWrapperState extends ConsumerState<AuthWrapper> {
   @override
   Widget build(BuildContext context) {
+    // Optimize: Check registered auth first (most common case)
     final authState = ref.watch(authProvider);
-    final anonymousAuthState = ref.watch(anonymous.anonymousAuthProvider);
 
-    // Handle anonymous user sign out - navigate to welcome page
-    ref.listen(anonymous.anonymousAuthProvider, (previous, next) {
-      if (!mounted) return;
+    // If registered user is authenticated, show HomePage immediately
+    // No need to check anonymous auth
+    if (authState.isAuthenticated) {
+      return const HomePage();
+    }
 
-      next.when(
-        data: (user) {
-          if (user == null && previous?.value != null) {
-            // User signed out, navigate to welcome page
+    // Only check anonymous auth if registered auth is not loading and not authenticated
+    // This prevents unnecessary provider initialization
+    if (!authState.isLoading) {
+      final anonymousAuthState = ref.watch(anonymous.anonymousAuthProvider);
+
+      // Handle anonymous user sign out - navigate to welcome page
+      ref.listen(anonymous.anonymousAuthProvider, (previous, next) {
+        if (!mounted) return;
+
+        next.when(
+          data: (user) {
+            if (user == null && previous?.value != null) {
+              // User signed out, navigate to welcome page
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const GuestWelcomePage(),
+                    ),
+                  );
+                }
+              });
+            }
+          },
+          loading: () {},
+          error: (error, stack) {
+            // On error, show welcome page
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 Navigator.of(context).pushReplacement(
@@ -36,30 +61,32 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
                 );
               }
             });
-          }
-        },
-        loading: () {},
-        error: (error, stack) {
-          // On error, show welcome page
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => const GuestWelcomePage(),
-                ),
-              );
-            }
-          });
-        },
-      );
-    });
+          },
+        );
+      });
 
-    // Check both registered user and anonymous user authentication
-    final isLoading = authState.isLoading;
-    final isAnonymousLoading = anonymousAuthState.isLoading;
+      // Show loading screen while checking anonymous authentication
+      if (anonymousAuthState.isLoading) {
+        return const Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Yükleniyor...'),
+              ],
+            ),
+          ),
+        );
+      }
 
-    // Show loading screen while checking authentication
-    if (isLoading || isAnonymousLoading) {
+      // If anonymous user is authenticated, show HomePage
+      if (anonymousAuthState.hasValue && anonymousAuthState.value != null) {
+        return const HomePage();
+      }
+    } else {
+      // Show loading screen while checking registered authentication
       return const Scaffold(
         body: Center(
           child: Column(
@@ -72,16 +99,6 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
           ),
         ),
       );
-    }
-
-    // If registered user is authenticated, show HomePage
-    if (authState.isAuthenticated) {
-      return const HomePage();
-    }
-
-    // If anonymous user is authenticated, show HomePage
-    if (anonymousAuthState.hasValue && anonymousAuthState.value != null) {
-      return const HomePage();
     }
 
     // Show welcome page for unauthenticated users

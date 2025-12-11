@@ -1,11 +1,23 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class FCMService {
   static final FirebaseMessaging _firebaseMessaging =
       FirebaseMessaging.instance;
   static String? _fcmToken;
+  static const _secureStorage = FlutterSecureStorage(
+    aOptions: AndroidOptions(
+      encryptedSharedPreferences: true,
+    ),
+    iOptions: IOSOptions(
+      accessibility: KeychainAccessibility.first_unlock_this_device,
+    ),
+  );
+  static const String _fcmTokenKey = 'fcm_token';
+
+  // Callback for refreshing notifications when a message is received
+  static VoidCallback? onNotificationReceived;
 
   /// Initialize FCM service
   static Future<void> initialize() async {
@@ -53,6 +65,11 @@ class FCMService {
         if (message.notification != null) {
           debugPrint(
               'Message also contained a notification: ${message.notification}');
+
+          // Refresh notifications list when a notification is received
+          if (onNotificationReceived != null) {
+            onNotificationReceived!();
+          }
         }
       });
     } catch (e) {
@@ -81,21 +98,19 @@ class FCMService {
     }
   }
 
-  /// Save token to local storage
+  /// Save token to secure storage
   static Future<void> _saveTokenToStorage(String token) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('fcm_token', token);
+      await _secureStorage.write(key: _fcmTokenKey, value: token);
     } catch (e) {
       debugPrint('Error saving FCM token: $e');
     }
   }
 
-  /// Get token from local storage
+  /// Get token from secure storage
   static Future<String?> getTokenFromStorage() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getString('fcm_token');
+      return await _secureStorage.read(key: _fcmTokenKey);
     } catch (e) {
       debugPrint('Error getting FCM token from storage: $e');
       return null;
@@ -129,4 +144,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint('Handling a background message: ${message.messageId}');
   debugPrint('Message data: ${message.data}');
   debugPrint('Message notification: ${message.notification?.title}');
+
+  // Note: In background handler, we can't directly refresh the UI
+  // The notification will be shown by the system, and when user opens the app,
+  // the notifications list will be refreshed automatically
 }

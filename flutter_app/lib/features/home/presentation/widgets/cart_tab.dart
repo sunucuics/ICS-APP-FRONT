@@ -8,107 +8,26 @@ import '../../../auth/presentation/pages/guest_upgrade_page.dart';
 import '../../../../core/models/cart_model.dart';
 import '../../../payment/presentation/pages/payment_method_page.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/services/snackbar_service.dart';
 
 class CartTab extends ConsumerWidget {
-  const CartTab({super.key});
+  final void Function(int tabIndex)? onNavigateToTab;
+
+  const CartTab({super.key, this.onNavigateToTab});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cartAsync = ref.watch(cartProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppTheme.primaryOrange,
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.primaryOrange.withOpacity(0.4),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.shopping_cart,
-                color: AppTheme.primaryOrange,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              'Sepet',
-              style: TextStyle(color: Colors.white),
-            ),
-          ],
+      body: SafeArea(
+        child: cartAsync.when(
+          data: (cart) => cart.items.isEmpty
+              ? _buildEmptyCart(context)
+              : _buildCartContent(context, ref, cart),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) =>
+              _buildErrorState(context, ref, error.toString()),
         ),
-        actions: [
-          // Cart item count badge
-          cartAsync.when(
-            data: (cart) => cart.items.isNotEmpty
-                ? IconButton(
-                    icon: Stack(
-                      children: [
-                        const Icon(Icons.shopping_cart),
-                        if (cart.totalQuantity > 0)
-                          Positioned(
-                            right: 0,
-                            top: 0,
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                color: Colors.orange, // Changed to orange
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              constraints: const BoxConstraints(
-                                minWidth: 16,
-                                minHeight: 16,
-                              ),
-                              child: Text(
-                                '${cart.totalQuantity}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    onPressed: () {},
-                  )
-                : const SizedBox.shrink(),
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-          // Clear cart button
-          cartAsync.when(
-            data: (cart) => cart.items.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.delete_sweep),
-                    onPressed: () => _showClearCartDialog(context, ref),
-                  )
-                : const SizedBox.shrink(),
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-        ],
-      ),
-      body: cartAsync.when(
-        data: (cart) => cart.items.isEmpty
-            ? _buildEmptyCart(context)
-            : _buildCartContent(context, ref, cart),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) =>
-            _buildErrorState(context, ref, error.toString()),
       ),
     );
   }
@@ -144,11 +63,8 @@ class CartTab extends ConsumerWidget {
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () {
-              // Navigate to catalog tab
-              // Bu navigation logic'i parent widget'ta handle edilmeli
-              SnackBarService.showSnackBar(context: context, snackBar: 
-                const SnackBar(content: Text('Mağaza sekmesine geçin')),
-              );
+              // Navigate to store tab (index 3)
+              onNavigateToTab?.call(3);
             },
             icon: const Icon(Icons.store),
             label: const Text('Mağazaya Git'),
@@ -201,7 +117,8 @@ class CartTab extends ConsumerWidget {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.primaryOrange.withOpacity(0.6 * value), // Enhanced orange glow
+                  color: AppTheme.primaryOrange
+                      .withOpacity(0.6 * value), // Enhanced orange glow
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                   spreadRadius: 2,
@@ -221,163 +138,172 @@ class CartTab extends ConsumerWidget {
                 ),
                 // Pulsing glow effect
                 BoxShadow(
-                  color: AppTheme.primaryOrange.withOpacity(0.2 * (0.5 + 0.5 * value)),
+                  color: AppTheme.primaryOrange
+                      .withOpacity(0.2 * (0.5 + 0.5 * value)),
                   blurRadius: 80,
                   offset: const Offset(0, 0),
                   spreadRadius: 3,
                 ),
               ],
             ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            // Product image
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: Theme.of(context).colorScheme.surfaceVariant,
-              ),
-              child: item.image != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: CachedNetworkImage(
-                        imageUrl: item.image!,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
-                          color: Theme.of(context).colorScheme.surfaceVariant,
-                          child: const Center(
-                            child: const CircularProgressIndicator(
-                              color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  // Product image
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: Theme.of(context).colorScheme.surfaceVariant,
+                    ),
+                    child: item.image != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: CachedNetworkImage(
+                              imageUrl: item.image!,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceVariant,
+                                child: const Center(
+                                  child: const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceVariant,
+                                child: const Icon(
+                                  Icons.image_not_supported,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          color: Theme.of(context).colorScheme.surfaceVariant,
-                          child: const Icon(
+                          )
+                        : const Icon(
                             Icons.image_not_supported,
+                            size: 32,
                             color: Colors.white,
                           ),
-                        ),
-                      ),
-                    )
-                  : const Icon(
-                      Icons.image_not_supported,
-                      size: 32,
-                      color: Colors.white,
-                    ),
-            ),
-            const SizedBox(width: 12),
-            // Product details
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: Colors.white, // White text for dark background
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                  if (item.categoryName != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      item.categoryName!,
-                      style: const TextStyle(
-                        color: Colors.white70, // White70 for dark background
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 8),
-                  // Price
-                  Row(
-                    children: [
-                      Text(
-                        '₺${displayPrice.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Colors.white, // White price text
-                        ),
-                      ),
-                      if (hasDiscount) ...[
-                        const SizedBox(width: 8),
+                  const SizedBox(width: 12),
+                  // Product details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          '₺${item.price.toStringAsFixed(2)}',
+                          item.title,
                           style: const TextStyle(
-                            decoration: TextDecoration.lineThrough,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
                             color:
-                                Colors.white60, // White60 for dark background
-                            fontSize: 12,
+                                Colors.white, // White text for dark background
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (item.categoryName != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            item.categoryName!,
+                            style: const TextStyle(
+                              color:
+                                  Colors.white70, // White70 for dark background
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 8),
+                        // Price
+                        Row(
+                          children: [
+                            Text(
+                              '₺${displayPrice.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.white, // White price text
+                              ),
+                            ),
+                            if (hasDiscount) ...[
+                              const SizedBox(width: 8),
+                              Text(
+                                '₺${item.price.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  decoration: TextDecoration.lineThrough,
+                                  color: Colors
+                                      .white60, // White60 for dark background
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        // Quantity controls
+                        Row(
+                          children: [
+                            // Decrease quantity
+                            IconButton(
+                              onPressed: item.qty > 1
+                                  ? () => _updateQuantity(
+                                      ref, item.productId, item.qty - 1)
+                                  : null,
+                              icon: const Icon(Icons.remove),
+                              style: IconButton.styleFrom(
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceVariant,
+                                padding: const EdgeInsets.all(8),
+                                minimumSize: const Size(32, 32),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              '${item.qty}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors
+                                    .white, // White text for dark background
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            // Increase quantity
+                            IconButton(
+                              onPressed: item.qty < item.stock
+                                  ? () => _updateQuantity(
+                                      ref, item.productId, item.qty + 1)
+                                  : null,
+                              icon: const Icon(Icons.add),
+                              style: IconButton.styleFrom(
+                                backgroundColor: AppTheme.primaryOrange
+                                    .withOpacity(0.2), // Orange background
+                                padding: const EdgeInsets.all(8),
+                                minimumSize: const Size(32, 32),
+                              ),
+                            ),
+                            const Spacer(),
+                            // Remove item
+                            IconButton(
+                              onPressed: () => _removeItem(ref, item.productId),
+                              icon: const Icon(Icons.delete,
+                                  color: AppTheme.errorRed),
+                            ),
+                          ],
                         ),
                       ],
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  // Quantity controls
-                  Row(
-                    children: [
-                      // Decrease quantity
-                      IconButton(
-                        onPressed: item.qty > 1
-                            ? () => _updateQuantity(
-                                ref, item.productId, item.qty - 1)
-                            : null,
-                        icon: const Icon(Icons.remove),
-                        style: IconButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.surfaceVariant,
-                          padding: const EdgeInsets.all(8),
-                          minimumSize: const Size(32, 32),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        '${item.qty}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white, // White text for dark background
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      // Increase quantity
-                      IconButton(
-                        onPressed: item.qty < item.stock
-                            ? () => _updateQuantity(
-                                ref, item.productId, item.qty + 1)
-                            : null,
-                        icon: const Icon(Icons.add),
-                        style: IconButton.styleFrom(
-                          backgroundColor: AppTheme.primaryOrange
-                              .withOpacity(0.2), // Orange background
-                          padding: const EdgeInsets.all(8),
-                          minimumSize: const Size(32, 32),
-                        ),
-                      ),
-                      const Spacer(),
-                      // Remove item
-                      IconButton(
-                        onPressed: () => _removeItem(ref, item.productId),
-                        icon:
-                            const Icon(Icons.delete, color: AppTheme.errorRed),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
           ),
         );
       },

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../services/firebase_auth_service.dart';
 import '../../services/navigation_service.dart';
+import '../../utils/logger.dart';
 import '../../../features/auth/services/mock_anonymous_auth_service.dart';
 
 class AuthInterceptor extends Interceptor {
@@ -27,8 +28,8 @@ class AuthInterceptor extends Interceptor {
       options.headers['Authorization'] = 'Bearer $token';
     } else if (!isPublicEndpoint) {
       // Protected endpoint without token - this will result in 401
-      print(
-          '⚠️ AuthInterceptor: No token available for protected endpoint: ${options.path}');
+      AppLogger.warning(
+          'AuthInterceptor: No token available for protected endpoint: ${options.path}');
     }
 
     handler.next(options);
@@ -39,7 +40,7 @@ class AuthInterceptor extends Interceptor {
       // Get fresh ID token from Firebase (auto-refreshes if needed)
       return await FirebaseAuthService.getIdToken();
     } catch (e) {
-      print('Error getting Firebase ID token: $e');
+      AppLogger.error('Error getting Firebase ID token', e);
       return null;
     }
   }
@@ -48,8 +49,8 @@ class AuthInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     // Handle 401 Unauthorized
     if (err.response?.statusCode == 401) {
-      print(
-          '🔐 AuthInterceptor: 401 Unauthorized for ${err.requestOptions.path}');
+      AppLogger.debug(
+          'AuthInterceptor: 401 Unauthorized for ${err.requestOptions.path}');
       await _handleTokenRefresh(err, handler);
     } else {
       handler.next(err);
@@ -64,7 +65,7 @@ class AuthInterceptor extends Interceptor {
 
     // Check if this request has already been retried
     if (originalRequest.extra['_retried'] == true) {
-      print('🔐 AuthInterceptor: Request already retried, giving up');
+      AppLogger.debug('AuthInterceptor: Request already retried, giving up');
       handler.next(err);
       return;
     }
@@ -74,7 +75,8 @@ class AuthInterceptor extends Interceptor {
 
     // If session is revoked, don't retry
     if (errorDetail == 'Session revoked') {
-      print('🔐 AuthInterceptor: Session revoked, redirecting to login');
+      AppLogger.warning(
+          'AuthInterceptor: Session revoked, redirecting to login');
       NavigationService.navigateToLogin();
       handler.next(err);
       return;
@@ -85,8 +87,8 @@ class AuthInterceptor extends Interceptor {
       // Check Firebase Auth first
       final firebaseUser = FirebaseAuthService.currentUser;
       if (firebaseUser?.isAnonymous == true) {
-        print(
-            '🔐 AuthInterceptor: Firebase guest user 401 error, not redirecting to login');
+        AppLogger.debug(
+            'AuthInterceptor: Firebase guest user 401 error, not redirecting to login');
         handler.next(err);
         return;
       }
@@ -94,24 +96,24 @@ class AuthInterceptor extends Interceptor {
       // Check Mock Anonymous Auth Service
       final mockAuthService = MockAnonymousAuthService();
       if (mockAuthService.isAnonymous) {
-        print(
-            '🔐 AuthInterceptor: Mock guest user 401 error, not redirecting to login');
+        AppLogger.debug(
+            'AuthInterceptor: Mock guest user 401 error, not redirecting to login');
         handler.next(err);
         return;
       }
     } catch (e) {
-      print('🔐 AuthInterceptor: Error checking user type: $e');
+      AppLogger.error('AuthInterceptor: Error checking user type', e);
     }
 
     try {
-      print('🔐 AuthInterceptor: Attempting token refresh...');
+      AppLogger.debug('AuthInterceptor: Attempting token refresh...');
       // Force refresh the token
       final freshToken =
           await FirebaseAuthService.getIdToken(forceRefresh: true);
 
       if (freshToken != null) {
-        print(
-            '🔐 AuthInterceptor: Token refreshed successfully, retrying request');
+        AppLogger.success(
+            'AuthInterceptor: Token refreshed successfully, retrying request');
         // Mark request as retried
         originalRequest.extra['_retried'] = true;
         originalRequest.headers['Authorization'] = 'Bearer $freshToken';
@@ -122,8 +124,8 @@ class AuthInterceptor extends Interceptor {
         // Create completely new request to avoid FormData reuse
         // Don't retry FormData requests to avoid the finalized error
         if (originalRequest.data is FormData) {
-          print(
-              '🔐 AuthInterceptor: Skipping FormData retry to avoid finalized error');
+          AppLogger.debug(
+              'AuthInterceptor: Skipping FormData retry to avoid finalized error');
           handler.next(err);
           return;
         }
@@ -153,14 +155,15 @@ class AuthInterceptor extends Interceptor {
         handler.resolve(response);
         return;
       } else {
-        print('🔐 AuthInterceptor: Token refresh returned null');
+        AppLogger.warning('AuthInterceptor: Token refresh returned null');
       }
     } catch (e) {
-      print('🔐 AuthInterceptor: Token refresh failed: $e');
+      AppLogger.error('AuthInterceptor: Token refresh failed', e);
     }
 
     // If we get here, token refresh failed
-    print('🔐 AuthInterceptor: Token refresh failed, redirecting to login');
+    AppLogger.warning(
+        'AuthInterceptor: Token refresh failed, redirecting to login');
     NavigationService.navigateToLogin();
     handler.next(err);
   }

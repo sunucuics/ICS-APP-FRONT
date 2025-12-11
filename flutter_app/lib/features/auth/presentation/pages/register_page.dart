@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import '../../../../core/services/snackbar_service.dart';
+import '../../../../core/utils/logger.dart';
 
 // Custom phone number formatter
 class _PhoneNumberFormatter extends TextInputFormatter {
@@ -396,9 +397,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
 
-    print('📱 RegisterPage: Starting registration process');
-    print('📱 RegisterPage: Email: ${_emailController.text.trim()}');
-    print('📱 RegisterPage: Name: ${_nameController.text.trim()}');
+    final email = _emailController.text.trim();
+    final name = _nameController.text.trim();
+    AppLogger.info('RegisterPage: Starting registration process');
+    AppLogger.debug('RegisterPage: Email: ${AppLogger.maskEmail(email)}');
+    AppLogger.debug(
+        'RegisterPage: Name: ${name.isNotEmpty ? name.substring(0, name.length > 2 ? 2 : name.length) + '***' : '***'}');
 
     setState(() {
       _isLoading = true;
@@ -406,20 +410,21 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     try {
       // Use real auth provider for registration
-      print('📱 RegisterPage: Calling auth provider register...');
+      AppLogger.debug('RegisterPage: Calling auth provider register...');
       final success = await ref.read(authProvider.notifier).register(
-            name: _nameController.text.trim(),
+            name: name,
             phone: _formatPhoneNumber(_phoneController.text.trim()),
-            email: _emailController.text.trim(),
+            email: email,
             password: _passwordController.text,
           );
-      print('📱 RegisterPage: Registration result: $success');
+      AppLogger.debug('RegisterPage: Registration result: $success');
 
       if (mounted) {
         if (success) {
           // Show success message
-          SnackBarService.showSnackBar(context: context, snackBar: 
-            const SnackBar(
+          SnackBarService.showSnackBar(
+            context: context,
+            snackBar: const SnackBar(
               content: Text('Hesabınız başarıyla oluşturuldu!'),
               backgroundColor: Colors.green,
             ),
@@ -432,7 +437,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         } else {
           // Show error message
           final error = ref.read(authErrorProvider);
-          print('📱 RegisterPage: Registration failed, error: $error');
+          AppLogger.warning('RegisterPage: Registration failed', error);
           String userFriendlyError = 'Hesap oluşturulurken bir hata oluştu';
 
           if (error != null) {
@@ -441,8 +446,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 error.contains('Bu kullanıcı zaten kayıtlı')) {
               // Kullanıcı zaten kayıtlı ve giriş yapmış durumda
               // Dialog gösterme, direkt ana sayfaya yönlendir
-              print(
-                  '📱 RegisterPage: User already exists, redirecting to home');
+              AppLogger.info(
+                  'RegisterPage: User already exists, redirecting to home');
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => const HomePage()),
               );
@@ -487,8 +492,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             }
           }
 
-          SnackBarService.showSnackBar(context: context, snackBar: 
-            SnackBar(
+          SnackBarService.showSnackBar(
+            context: context,
+            snackBar: SnackBar(
               content: Text(userFriendlyError),
               backgroundColor: Colors.red,
             ),
@@ -497,8 +503,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       }
     } catch (e) {
       if (mounted) {
-        SnackBarService.showSnackBar(context: context, snackBar: 
-          SnackBar(
+        SnackBarService.showSnackBar(
+          context: context,
+          snackBar: SnackBar(
             content: Text('Kayıt başarısız: $e'),
             backgroundColor: Colors.red,
           ),
@@ -769,8 +776,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       if (mounted) {
         if (success) {
           // Show success message
-          SnackBarService.showSnackBar(context: context, snackBar: 
-            const SnackBar(
+          SnackBarService.showSnackBar(
+            context: context,
+            snackBar: const SnackBar(
               content: Text('Giriş başarılı!'),
               backgroundColor: Colors.green,
             ),
@@ -793,8 +801,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
             }
           }
 
-          SnackBarService.showSnackBar(context: context, snackBar: 
-            SnackBar(
+          SnackBarService.showSnackBar(
+            context: context,
+            snackBar: SnackBar(
               content: Text(userFriendlyError),
               backgroundColor: Colors.red,
             ),
@@ -803,8 +812,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       }
     } catch (e) {
       if (mounted) {
-        SnackBarService.showSnackBar(context: context, snackBar: 
-          SnackBar(
+        SnackBarService.showSnackBar(
+          context: context,
+          snackBar: SnackBar(
             content: Text('Giriş başarısız: $e'),
             backgroundColor: Colors.red,
           ),
@@ -868,8 +878,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
             onPressed: () async {
               final email = emailController.text.trim();
               if (email.isEmpty || !email.contains('@')) {
-                SnackBarService.showSnackBar(context: context, snackBar: 
-                  const SnackBar(
+                SnackBarService.showSnackBar(
+                  context: context,
+                  snackBar: const SnackBar(
                     content: Text('Geçerli bir e-posta adresi girin'),
                     backgroundColor: Colors.red,
                   ),
@@ -882,8 +893,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               try {
                 await ref.read(authProvider.notifier).resetPassword(email);
                 if (mounted) {
-                  SnackBarService.showSnackBar(context: context, snackBar: 
-                    const SnackBar(
+                  SnackBarService.showSnackBar(
+                    context: context,
+                    snackBar: const SnackBar(
                       content: Text(
                           'Şifre sıfırlama e-postası gönderildi. E-posta kutunuzu kontrol edin.'),
                       backgroundColor: Colors.green,
@@ -892,8 +904,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                 }
               } catch (e) {
                 if (mounted) {
-                  SnackBarService.showSnackBar(context: context, snackBar: 
-                    SnackBar(
+                  SnackBarService.showSnackBar(
+                    context: context,
+                    snackBar: SnackBar(
                       content: Text('Hata: $e'),
                       backgroundColor: Colors.red,
                     ),

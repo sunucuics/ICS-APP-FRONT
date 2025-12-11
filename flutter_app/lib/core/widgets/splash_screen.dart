@@ -30,15 +30,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   void initState() {
     super.initState();
 
-    // Logo animation controller
+    // Logo animation controller - optimized for faster startup
     _logoController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
-    // Text animation controller
+    // Text animation controller - optimized for faster startup
     _textController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
 
@@ -82,23 +82,32 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   void _startAnimations() async {
-    // Start logo animation
-    await _logoController.forward();
-
-    // Start text animation after a small delay
-    await Future.delayed(const Duration(milliseconds: 300));
-    await _textController.forward();
-
-    // Wait for animations to complete and then navigate
-    await Future.delayed(const Duration(milliseconds: 1500));
-    _navigateToNextScreen();
-  }
-
-  void _navigateToNextScreen() async {
-    if (!mounted) return;
-
+    // Pre-load SharedPreferences while animations run
     final prefs = await SharedPreferences.getInstance();
     final isFirstTime = prefs.getBool('is_first_time') ?? true;
+
+    // Start logo animation
+    final logoAnimation = _logoController.forward();
+
+    // Start text animation with minimal delay
+    final textAnimation = Future.delayed(
+      const Duration(milliseconds: 200),
+      () => _textController.forward(),
+    );
+
+    // Wait for animations to complete and ensure minimum 1 second splash
+    await Future.wait([
+      logoAnimation,
+      textAnimation,
+      Future.delayed(const Duration(milliseconds: 1000)), // Minimum splash time
+    ]);
+
+    if (!mounted) return;
+    _navigateToNextScreen(isFirstTime);
+  }
+
+  void _navigateToNextScreen(bool isFirstTime) {
+    if (!mounted) return;
 
     if (isFirstTime) {
       // First time user - go to onboarding
@@ -113,12 +122,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     }
   }
 
-  void _checkAuthAndNavigate() async {
-    // Wait a bit for auth providers to initialize
-    await Future.delayed(const Duration(milliseconds: 500));
-
+  void _checkAuthAndNavigate() {
     if (!mounted) return;
 
+    // Check auth state immediately (providers should be ready by now)
     final authState = ref.read(authProvider);
     final anonymousAuthState = ref.read(anonymous.anonymousAuthProvider);
 

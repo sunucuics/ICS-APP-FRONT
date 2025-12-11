@@ -15,19 +15,32 @@ final featuredRepositoryProvider = Provider<FeaturedRepository>((ref) {
 class FeaturedProductsNotifier
     extends StateNotifier<AsyncValue<List<FeaturedProduct>>> {
   final FeaturedRepository _repository;
+  bool _hasLoaded = false;
 
   FeaturedProductsNotifier(this._repository)
       : super(const AsyncValue.loading()) {
-    loadFeaturedProducts();
+    // Don't load immediately - wait until first access (lazy loading)
   }
 
   Future<void> loadFeaturedProducts() async {
+    // Prevent multiple simultaneous loads
+    if (_hasLoaded && state.hasValue) return;
+
     try {
       state = const AsyncValue.loading();
       final products = await _repository.getFeaturedProducts();
       state = AsyncValue.data(products);
+      _hasLoaded = true;
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
+      _hasLoaded = false;
+    }
+  }
+
+  // Lazy load on first access
+  void _ensureLoaded() {
+    if (!_hasLoaded && !state.isLoading) {
+      loadFeaturedProducts();
     }
   }
 
@@ -57,29 +70,45 @@ class FeaturedProductsNotifier
   }
 }
 
-final featuredProductsProvider = StateNotifierProvider<FeaturedProductsNotifier,
-    AsyncValue<List<FeaturedProduct>>>((ref) {
+final featuredProductsProvider = StateNotifierProvider.autoDispose<
+    FeaturedProductsNotifier, AsyncValue<List<FeaturedProduct>>>((ref) {
   final repository = ref.read(featuredRepositoryProvider);
-  return FeaturedProductsNotifier(repository);
+  final notifier = FeaturedProductsNotifier(repository);
+  // Load data when provider is first accessed
+  notifier.loadFeaturedProducts();
+  return notifier;
 });
 
 // Featured Services Provider
 class FeaturedServicesNotifier
     extends StateNotifier<AsyncValue<List<FeaturedService>>> {
   final FeaturedRepository _repository;
+  bool _hasLoaded = false;
 
   FeaturedServicesNotifier(this._repository)
       : super(const AsyncValue.loading()) {
-    loadFeaturedServices();
+    // Don't load immediately - wait until first access (lazy loading)
   }
 
   Future<void> loadFeaturedServices() async {
+    // Prevent multiple simultaneous loads
+    if (_hasLoaded && state.hasValue) return;
+
     try {
       state = const AsyncValue.loading();
       final services = await _repository.getFeaturedServices();
       state = AsyncValue.data(services);
+      _hasLoaded = true;
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
+      _hasLoaded = false;
+    }
+  }
+
+  // Lazy load on first access
+  void _ensureLoaded() {
+    if (!_hasLoaded && !state.isLoading) {
+      loadFeaturedServices();
     }
   }
 
@@ -109,29 +138,45 @@ class FeaturedServicesNotifier
   }
 }
 
-final featuredServicesProvider = StateNotifierProvider<FeaturedServicesNotifier,
-    AsyncValue<List<FeaturedService>>>((ref) {
+final featuredServicesProvider = StateNotifierProvider.autoDispose<
+    FeaturedServicesNotifier, AsyncValue<List<FeaturedService>>>((ref) {
   final repository = ref.read(featuredRepositoryProvider);
-  return FeaturedServicesNotifier(repository);
+  final notifier = FeaturedServicesNotifier(repository);
+  // Load data when provider is first accessed
+  notifier.loadFeaturedServices();
+  return notifier;
 });
 
 // Featured Content Provider (Combined)
 class FeaturedContentNotifier
     extends StateNotifier<AsyncValue<FeaturedListResponse>> {
   final FeaturedRepository _repository;
+  bool _hasLoaded = false;
 
   FeaturedContentNotifier(this._repository)
       : super(const AsyncValue.loading()) {
-    loadFeaturedContent();
+    // Don't load immediately - wait until first access (lazy loading)
   }
 
   Future<void> loadFeaturedContent() async {
+    // Prevent multiple simultaneous loads
+    if (_hasLoaded && state.hasValue) return;
+
     try {
       state = const AsyncValue.loading();
       final content = await _repository.getFeaturedContent();
       state = AsyncValue.data(content);
+      _hasLoaded = true;
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
+      _hasLoaded = false;
+    }
+  }
+
+  // Lazy load on first access
+  void _ensureLoaded() {
+    if (!_hasLoaded && !state.isLoading) {
+      loadFeaturedContent();
     }
   }
 
@@ -140,29 +185,45 @@ class FeaturedContentNotifier
   }
 }
 
-final featuredContentProvider = StateNotifierProvider<FeaturedContentNotifier,
-    AsyncValue<FeaturedListResponse>>((ref) {
+final featuredContentProvider = StateNotifierProvider.autoDispose<
+    FeaturedContentNotifier, AsyncValue<FeaturedListResponse>>((ref) {
   final repository = ref.read(featuredRepositoryProvider);
-  return FeaturedContentNotifier(repository);
+  final notifier = FeaturedContentNotifier(repository);
+  // Load data when provider is first accessed
+  notifier.loadFeaturedContent();
+  return notifier;
 });
 
 // Featured Statistics Provider
 class FeaturedStatisticsNotifier
     extends StateNotifier<AsyncValue<FeaturedStatistics>> {
   final FeaturedRepository _repository;
+  bool _hasLoaded = false;
 
   FeaturedStatisticsNotifier(this._repository)
       : super(const AsyncValue.loading()) {
-    loadStatistics();
+    // Don't load immediately - wait until first access (lazy loading)
   }
 
   Future<void> loadStatistics() async {
+    // Prevent multiple simultaneous loads
+    if (_hasLoaded && state.hasValue) return;
+
     try {
       state = const AsyncValue.loading();
       final statistics = await _repository.getFeaturedStatistics();
       state = AsyncValue.data(statistics);
+      _hasLoaded = true;
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
+      _hasLoaded = false;
+    }
+  }
+
+  // Lazy load on first access
+  void _ensureLoaded() {
+    if (!_hasLoaded && !state.isLoading) {
+      loadStatistics();
     }
   }
 
@@ -171,10 +232,13 @@ class FeaturedStatisticsNotifier
   }
 }
 
-final featuredStatisticsProvider = StateNotifierProvider<
+final featuredStatisticsProvider = StateNotifierProvider.autoDispose<
     FeaturedStatisticsNotifier, AsyncValue<FeaturedStatistics>>((ref) {
   final repository = ref.read(featuredRepositoryProvider);
-  return FeaturedStatisticsNotifier(repository);
+  final notifier = FeaturedStatisticsNotifier(repository);
+  // Load data when provider is first accessed
+  notifier.loadStatistics();
+  return notifier;
 });
 
 // Convenience Providers

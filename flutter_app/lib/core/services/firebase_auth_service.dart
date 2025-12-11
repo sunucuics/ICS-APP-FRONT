@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import '../utils/logger.dart';
 
 class FirebaseAuthService {
   static FirebaseAuth? _auth;
@@ -26,7 +27,7 @@ class FirebaseAuthService {
 
       return await user.getIdToken(forceRefresh);
     } catch (e) {
-      print('Error getting ID token: $e');
+      AppLogger.error('Error getting ID token', e);
       return null;
     }
   }
@@ -42,7 +43,7 @@ class FirebaseAuthService {
         password: password,
       );
     } catch (e) {
-      print('Error signing in: $e');
+      AppLogger.error('Error signing in', e);
       rethrow;
     }
   }
@@ -52,39 +53,40 @@ class FirebaseAuthService {
     required String email,
     required String password,
   }) async {
-    print('🔥 Firebase: Attempting to create user with email: $email');
+    AppLogger.debug(
+        'Firebase: Attempting to create user with email: ${AppLogger.maskEmail(email)}');
     try {
       final result = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      print('🔥 Firebase: User created successfully for email: $email');
+      AppLogger.success('Firebase: User created successfully');
       return result;
     } on FirebaseAuthException catch (e) {
-      print('🔥 Firebase Auth Error: ${e.code} - ${e.message}');
-      print('🔥 Firebase Auth Error Details: email=$email, code=${e.code}');
+      AppLogger.error('Firebase Auth Error: ${e.code}', e);
+      AppLogger.debug(
+          'Firebase Auth Error Details: email=${AppLogger.maskEmail(email)}, code=${e.code}');
 
       // Convert Firebase errors to user-friendly messages
       switch (e.code) {
         case 'email-already-in-use':
-          print('🔥 Firebase: Email already in use: $email');
+          AppLogger.warning('Firebase: Email already in use');
           throw Exception('Bu e-posta zaten kayıtlı');
         case 'weak-password':
-          print('🔥 Firebase: Weak password for email: $email');
+          AppLogger.warning('Firebase: Weak password');
           throw Exception('Şifre çok zayıf');
         case 'invalid-email':
-          print('🔥 Firebase: Invalid email: $email');
+          AppLogger.warning('Firebase: Invalid email');
           throw Exception('Geçersiz e-posta adresi');
         case 'operation-not-allowed':
-          print('🔥 Firebase: Operation not allowed for email: $email');
+          AppLogger.warning('Firebase: Operation not allowed');
           throw Exception('E-posta/şifre girişi devre dışı');
         default:
-          print(
-              '🔥 Firebase: Unknown error for email: $email, error: ${e.message}');
+          AppLogger.error('Firebase: Unknown error', e);
           throw Exception('Hesap oluşturulurken bir hata oluştu: ${e.message}');
       }
     } catch (e) {
-      print('🔥 Firebase: General error creating user: $e');
+      AppLogger.error('Firebase: General error creating user', e);
       rethrow;
     }
   }
@@ -94,7 +96,7 @@ class FirebaseAuthService {
     try {
       await _firebaseAuth.signOut();
     } catch (e) {
-      print('Error signing out: $e');
+      AppLogger.error('Error signing out', e);
       rethrow;
     }
   }
@@ -104,7 +106,7 @@ class FirebaseAuthService {
     try {
       await _firebaseAuth.sendPasswordResetEmail(email: email);
     } catch (e) {
-      print('Error sending password reset email: $e');
+      AppLogger.error('Error sending password reset email', e);
       rethrow;
     }
   }

@@ -19,25 +19,64 @@ class HomePage extends ConsumerStatefulWidget {
 
 class HomePageState extends ConsumerState<HomePage> {
   int _currentIndex = 0;
+  final Map<int, Widget> _tabCache = {};
 
   void switchToTab(int tabIndex) {
     setState(() {
       _currentIndex = tabIndex;
+      // Ensure the tab we're switching to is created
+      _getTab(tabIndex);
     });
   }
 
-  late final List<Widget> _tabs;
+  // Lazy load tabs - only create when accessed
+  Widget _getTab(int index) {
+    if (_tabCache.containsKey(index)) {
+      return _tabCache[index]!;
+    }
+
+    Widget tab;
+    switch (index) {
+      case 0:
+        tab = HomeTab(onNavigateToTab: switchToTab);
+        break;
+      case 1:
+        tab = const ServicesTab();
+        break;
+      case 2:
+        tab = CartTab(onNavigateToTab: switchToTab);
+        break;
+      case 3:
+        tab = const CatalogTabNew();
+        break;
+      case 4:
+        tab = const ProfileTab();
+        break;
+      default:
+        tab = const SizedBox.shrink();
+    }
+
+    _tabCache[index] = tab;
+    return tab;
+  }
+
+  // Get all tabs for IndexedStack
+  // Optimization: Only create tabs when first accessed, then cache them
+  // IndexedStack only builds the visible child, so unvisited tabs won't be built
+  List<Widget> _getTabs() {
+    // Ensure current tab is created (most important for initial load)
+    _getTab(_currentIndex);
+
+    // Return all tabs - create on first access, then use cache
+    // IndexedStack will only build the visible tab, so this is efficient
+    return List.generate(5, (index) => _getTab(index));
+  }
 
   @override
   void initState() {
     super.initState();
-    _tabs = [
-      HomeTab(onNavigateToTab: switchToTab),
-      const ServicesTab(),
-      const CartTab(),
-      const CatalogTabNew(),
-      const ProfileTab(),
-    ];
+    // Create only the initial tab (tab 0) - others will be created lazily
+    _getTab(0);
   }
 
   @override
@@ -52,7 +91,7 @@ class HomePageState extends ConsumerState<HomePage> {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _tabs,
+        children: _getTabs(),
       ),
       bottomNavigationBar: Container(
         margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),

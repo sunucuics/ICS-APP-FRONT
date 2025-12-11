@@ -23,12 +23,14 @@ import 'features/home/presentation/pages/home_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Android performance optimizations
+  // Parallel initialization of Android services for better performance
   if (Platform.isAndroid) {
-    await AndroidPerformanceService.initialize();
-    await ImageCacheService.initialize();
-    await CrashPreventionService.initialize();
-    await MemoryManagementService.initialize();
+    await Future.wait([
+      AndroidPerformanceService.initialize(),
+      ImageCacheService.initialize(),
+      CrashPreventionService.initialize(),
+      MemoryManagementService.initialize(),
+    ]);
   }
 
   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -42,25 +44,38 @@ void main() async {
     }
   });
 
-  // Firebase initialization with error handling
+  // Initialize theme service (non-blocking, SharedPreferences is fast)
+  final themeService = ThemeService();
+  themeService.initialize().catchError((e) {
+    print('⚠️ Theme service initialization failed: $e');
+  });
+
+  // Firebase initialization with error handling (critical, must complete)
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
     print('✅ Firebase initialized successfully');
 
-    // Initialize FCM service with Android-specific timeout
-    await FCMService.initialize();
-    print('✅ FCM service initialized successfully');
+    // Initialize FCM service in background (non-blocking)
+    // Don't wait for it to complete before starting the app
+    FCMService.initialize().then((_) {
+      print('✅ FCM service initialized successfully');
+    }).catchError((e) {
+      print('⚠️ FCM service initialization failed: $e');
+      print('⚠️ Continuing without FCM...');
+    });
   } catch (e) {
     print('❌ Firebase initialization failed: $e');
     print('⚠️ Continuing without Firebase...');
+
+    // Try to initialize FCM even if Firebase failed (might work in some cases)
+    FCMService.initialize().catchError((e) {
+      print('⚠️ FCM service initialization failed: $e');
+    });
   }
 
-  // Initialize theme service
-  final themeService = ThemeService();
-  await themeService.initialize();
-
+  // Start the app immediately without waiting for non-critical services
   runApp(const ProviderScope(child: MyApp()));
 }
 

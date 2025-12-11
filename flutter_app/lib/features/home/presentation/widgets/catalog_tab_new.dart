@@ -335,61 +335,27 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
       data: themed,
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.background, // Gri zemin
-        appBar: AppBar(
-          title: const Text('Mağaza'),
-          backgroundColor:
-              Theme.of(context).colorScheme.primary, // Yeni tema sistemi
-          foregroundColor: Colors.white,
-          elevation: 0,
-          centerTitle: true,
-          automaticallyImplyLeading: false, // Remove back button/icon
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).colorScheme.primary,
-                  Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-          ),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(4),
-            child: Container(
-              height: 4,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.primary.withOpacity(0.7),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          actions: [],
-        ),
-        body: AnimatedBuilder(
-          animation: _fadeAnimation,
-          builder: (context, child) {
-            return FadeTransition(
-              opacity: _fadeAnimation,
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      // Categories horizontal cards
-                      _buildCategoriesSection(
-                          categoriesAsync, selectedCategory),
-                    ],
+        body: SafeArea(
+          child: AnimatedBuilder(
+            animation: _fadeAnimation,
+            builder: (context, child) {
+              return FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        // Categories horizontal cards
+                        _buildCategoriesSection(
+                            categoriesAsync, selectedCategory),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

@@ -5,6 +5,7 @@ import 'api_endpoints.dart';
 import 'interceptors/auth_interceptor.dart';
 import 'interceptors/error_interceptor.dart';
 import 'exceptions/api_exception.dart';
+import '../utils/logger.dart';
 
 class ApiClient {
   late final Dio _dio;
@@ -72,10 +73,11 @@ class ApiClient {
     Options? options,
   }) async {
     try {
-      // Debug: POST data'yı yazdır (sadece debug modda)
-      if (ApiEndpoints.isDebug) {
-        print('🌐 POST $path');
-        print('📦 POST Data: $data');
+      // Log network request with sanitized data (only in debug mode)
+      if (data is Map<String, dynamic>) {
+        AppLogger.network('POST', path, data: data);
+      } else {
+        AppLogger.network('POST', path);
       }
 
       return await _dio.post(

@@ -7,6 +7,7 @@ import '../../../featured/providers/featured_provider.dart';
 import '../../../cart/providers/cart_provider.dart';
 import '../../../services/providers/services_provider.dart';
 import '../../../appointments/presentation/pages/appointment_booking_page.dart';
+import '../../../notifications/presentation/pages/notifications_list_page.dart';
 import '../../../../core/models/featured_model.dart';
 import '../../../../core/models/service_model.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -102,8 +103,12 @@ class HomeTab extends ConsumerWidget {
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               onPressed: () {
-                // Navigate to appointments tab to show user's appointments
-                onNavigateToTab?.call(4); // Appointments tab is index 4
+                // Navigate to notifications page
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const NotificationsListPage(),
+                  ),
+                );
               },
             ),
           ),
@@ -213,19 +218,22 @@ class HomeTab extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(20),
                     color: AppTheme.serviceCardBlue,
                     border: Border.all(
-                      color: AppTheme.serviceCardBlue.withOpacity(0.3),
-                      width: 1,
+                      color: AppTheme.serviceCardBlue,
+                      width: 2.5,
                     ),
                     boxShadow: [
+                      // Neon edge glow - sadece kenarlarda
                       BoxShadow(
-                        color: AppTheme.serviceCardBlue.withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
+                        color: AppTheme.serviceCardBlue.withOpacity(0.7),
+                        blurRadius: 12,
+                        spreadRadius: -3,
+                        offset: const Offset(0, 0),
                       ),
                       BoxShadow(
-                        color: AppTheme.serviceCardBlue.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: AppTheme.serviceCardBlue.withOpacity(0.4),
+                        blurRadius: 20,
+                        spreadRadius: -5,
+                        offset: const Offset(0, 0),
                       ),
                     ],
                   ),
@@ -308,19 +316,22 @@ class HomeTab extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(24),
                     color: AppTheme.primaryOrange,
                     border: Border.all(
-                      color: AppTheme.primaryOrange.withOpacity(0.3),
-                      width: 1,
+                      color: AppTheme.primaryOrange,
+                      width: 2.5,
                     ),
                     boxShadow: [
+                      // Neon edge glow - sadece kenarlarda
                       BoxShadow(
-                        color: AppTheme.primaryOrange.withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
+                        color: AppTheme.primaryOrange.withOpacity(0.7),
+                        blurRadius: 12,
+                        spreadRadius: -3,
+                        offset: const Offset(0, 0),
                       ),
                       BoxShadow(
-                        color: AppTheme.primaryOrange.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: AppTheme.primaryOrange.withOpacity(0.4),
+                        blurRadius: 20,
+                        spreadRadius: -5,
+                        offset: const Offset(0, 0),
                       ),
                     ],
                   ),
@@ -403,19 +414,22 @@ class HomeTab extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(24),
                     color: AppTheme.whatsappGreen,
                     border: Border.all(
-                      color: AppTheme.whatsappGreen.withOpacity(0.3),
-                      width: 1,
+                      color: AppTheme.whatsappGreen,
+                      width: 2.5,
                     ),
                     boxShadow: [
+                      // Neon edge glow - sadece kenarlarda
                       BoxShadow(
-                        color: AppTheme.whatsappGreen.withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
+                        color: AppTheme.whatsappGreen.withOpacity(0.7),
+                        blurRadius: 12,
+                        spreadRadius: -3,
+                        offset: const Offset(0, 0),
                       ),
                       BoxShadow(
-                        color: AppTheme.whatsappGreen.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: AppTheme.whatsappGreen.withOpacity(0.4),
+                        blurRadius: 20,
+                        spreadRadius: -5,
+                        offset: const Offset(0, 0),
                       ),
                     ],
                   ),
@@ -680,8 +694,9 @@ class HomeTab extends ConsumerWidget {
       }
     } catch (e) {
       // Fallback: Show error message
-      SnackBarService.showSnackBar(context: context, snackBar: 
-        SnackBar(
+      SnackBarService.showSnackBar(
+        context: context,
+        snackBar: SnackBar(
           content: Text('WhatsApp açılamadı: $e'),
           backgroundColor: Colors.red,
         ),
@@ -696,8 +711,9 @@ class HomeTab extends ConsumerWidget {
 
     if (!authState.isAuthenticated) {
       // Show login prompt
-      SnackBarService.showSnackBar(context: context, snackBar: 
-        SnackBar(
+      SnackBarService.showSnackBar(
+        context: context,
+        snackBar: SnackBar(
           content: const Text('Randevu almak için giriş yapmalısınız'),
           backgroundColor: Colors.orange,
           action: SnackBarAction(
@@ -738,8 +754,9 @@ class HomeTab extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        SnackBarService.showSnackBar(context: context, snackBar: 
-          SnackBar(
+        SnackBarService.showSnackBar(
+          context: context,
+          snackBar: SnackBar(
             content: Text('Hizmet bilgileri alınamadı: $e'),
             backgroundColor: Colors.red,
           ),
@@ -964,8 +981,7 @@ class _FeaturedProductCard extends ConsumerWidget {
                                       if (context.mounted) {
                                         SnackBarService.showSnackBar(
                                           context: context,
-                                          snackBar:
-                                          SnackBar(
+                                          snackBar: SnackBar(
                                             content: Text(
                                                 '${featuredProduct.title} sepete eklendi'),
                                             backgroundColor:
@@ -977,8 +993,7 @@ class _FeaturedProductCard extends ConsumerWidget {
                                       if (context.mounted) {
                                         SnackBarService.showSnackBar(
                                           context: context,
-                                          snackBar:
-                                          SnackBar(
+                                          snackBar: SnackBar(
                                             content:
                                                 Text('Hata: ${e.toString()}'),
                                             backgroundColor: Colors.red,
