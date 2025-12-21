@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/admin_orders_provider.dart';
-import '../widgets/admin_navigation.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/models/order_model.dart';
 import '../../../../core/services/snackbar_service.dart';
@@ -36,18 +35,17 @@ class AdminOrdersPage extends ConsumerWidget {
         error: (error, stack) =>
             _buildErrorWidget(context, ref, error.toString()),
       ),
-      bottomNavigationBar: const AdminNavigation(),
     );
   }
 
   Widget _buildOrdersQueue(
       BuildContext context, WidgetRef ref, AdminOrdersQueueResponse ordersQueue) {
-    if (ordersQueue.preparing.isEmpty && ordersQueue.shipped.isEmpty) {
+    if (ordersQueue.preparing.isEmpty && ordersQueue.shipped.isEmpty && ordersQueue.delivered.isEmpty) {
       return _buildEmptyState(context, ref);
     }
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Column(
         children: [
           TabBar(
@@ -63,6 +61,10 @@ class AdminOrdersPage extends ConsumerWidget {
                 text: 'Kargoda (${ordersQueue.count.shipped})',
                 icon: const Icon(Icons.local_shipping),
               ),
+              Tab(
+                text: 'Teslim Edilenler (${ordersQueue.count.delivered})',
+                icon: const Icon(Icons.check_circle),
+              ),
             ],
           ),
           Expanded(
@@ -70,6 +72,7 @@ class AdminOrdersPage extends ConsumerWidget {
               children: [
                 _buildOrdersList(context, ref, ordersQueue.preparing, 'Hazırlanan sipariş bulunmuyor'),
                 _buildOrdersList(context, ref, ordersQueue.shipped, 'Kargoda sipariş bulunmuyor'),
+                _buildOrdersList(context, ref, ordersQueue.delivered, 'Teslim edilen sipariş bulunmuyor'),
               ],
             ),
           ),
@@ -264,7 +267,7 @@ class AdminOrdersPage extends ConsumerWidget {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    'Müşteri: ${order.userId ?? 'Bilinmeyen'}',
+                    'Müşteri: ${order.customer.fullName ?? order.userId ?? 'Bilinmeyen'}',
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 12,
@@ -514,7 +517,7 @@ class AdminOrdersPage extends ConsumerWidget {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              ref.read(adminOrdersNotifierProvider.notifier).refresh();
+              ref.read(adminOrdersQueueProvider.notifier).refresh();
             },
             child: const Text('Tekrar Dene'),
           ),
@@ -716,13 +719,15 @@ class AdminOrdersPage extends ConsumerWidget {
       );
       
       if (context.mounted) {
+        // Liste güncellemesini bekle
+        await ref.read(adminOrdersQueueProvider.notifier).refresh();
+        
         SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(
             content: Text('Sipariş kargoya verildi'),
             backgroundColor: Colors.green,
           ),
         );
-        ref.read(adminOrdersQueueProvider.notifier).refresh();
       }
     } on ApiException catch (e) {
       if (context.mounted) {
@@ -756,13 +761,15 @@ class AdminOrdersPage extends ConsumerWidget {
       await ref.read(adminOrdersNotifierProvider.notifier).deliverOrder(order.id);
       
       if (context.mounted) {
+        // Liste güncellemesini bekle
+        await ref.read(adminOrdersQueueProvider.notifier).refresh();
+        
         SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(
             content: Text('Sipariş teslim edildi olarak işaretlendi'),
             backgroundColor: Colors.green,
           ),
         );
-        ref.read(adminOrdersQueueProvider.notifier).refresh();
       }
     } on ApiException catch (e) {
       if (context.mounted) {
@@ -829,6 +836,19 @@ class AdminOrdersPage extends ConsumerWidget {
   }
 
   Future<void> _cancelOrder(BuildContext context, WidgetRef ref, Order order, String reason) async {
+    // Sipariş zaten iptal edilmişse işlem yapma
+    if (order.status == const OrderStatus.canceled()) {
+      if (context.mounted) {
+        SnackBarService.showSnackBar(context: context, snackBar: 
+          const SnackBar(
+            content: Text('Bu sipariş zaten iptal edilmiş'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+
     try {
       await ref.read(adminOrdersNotifierProvider.notifier).cancelOrder(
         order.id,
@@ -836,19 +856,21 @@ class AdminOrdersPage extends ConsumerWidget {
       );
       
       if (context.mounted) {
+        // Liste güncellemesini bekle
+        await ref.read(adminOrdersQueueProvider.notifier).refresh();
+        
         SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(
             content: Text('Sipariş iptal edildi'),
             backgroundColor: Colors.orange,
           ),
         );
-        ref.read(adminOrdersQueueProvider.notifier).refresh();
       }
     } on ApiException catch (e) {
       if (context.mounted) {
         String errorMessage = 'Hata: ${e.message}';
         if (e.statusCode == 409) {
-          errorMessage = 'Geçersiz durum geçişi: Bu sipariş iptal edilemez';
+          errorMessage = 'Bu sipariş zaten iptal edilmiş veya iptal edilemez durumda';
         }
         SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
@@ -898,13 +920,15 @@ class AdminOrdersPage extends ConsumerWidget {
       await ref.read(adminOrdersNotifierProvider.notifier).deleteOrder(order.id);
       
       if (context.mounted) {
+        // Liste güncellemesini bekle
+        await ref.read(adminOrdersQueueProvider.notifier).refresh();
+        
         SnackBarService.showSnackBar(context: context, snackBar: 
           const SnackBar(
             content: Text('Sipariş silindi'),
             backgroundColor: Colors.red,
           ),
         );
-        ref.read(adminOrdersQueueProvider.notifier).refresh();
       }
     } catch (error) {
       if (context.mounted) {

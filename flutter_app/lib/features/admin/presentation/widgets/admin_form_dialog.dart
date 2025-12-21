@@ -10,6 +10,7 @@ class AdminFormDialog extends StatefulWidget {
   final List<AdminFormField> fields;
   final Map<String, String>? initialData;
   final Future<void> Function(Map<String, String>) onSave;
+  final Map<String, List<String> Function(Map<String, String>)>? dynamicDropdowns;
 
   const AdminFormDialog({
     super.key,
@@ -17,6 +18,7 @@ class AdminFormDialog extends StatefulWidget {
     required this.fields,
     required this.onSave,
     this.initialData,
+    this.dynamicDropdowns,
   });
 
   @override
@@ -111,7 +113,7 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.grey[50],
+                color: Theme.of(context).scaffoldBackgroundColor,
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(16),
                   bottomRight: Radius.circular(16),
@@ -204,10 +206,27 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
   }
 
   Widget _buildDropdownField(AdminFormField field) {
+    // Get current field values for dynamic dropdowns
+    final currentValues = <String, String>{};
+    for (final entry in _controllers.entries) {
+      currentValues[entry.key] = entry.value.text;
+    }
+
+    // Get dropdown options (static or dynamic)
+    List<String> options;
+    if (widget.dynamicDropdowns != null &&
+        widget.dynamicDropdowns!.containsKey(field.label)) {
+      options = widget.dynamicDropdowns![field.label]!(currentValues);
+    } else {
+      options = field.dropdownOptions ?? [];
+    }
+
     return DropdownButtonFormField<String>(
-      value: _controllers[field.label]!.text.isNotEmpty
+      value: _controllers[field.label]!.text.isNotEmpty &&
+              options.contains(_controllers[field.label]!.text)
           ? _controllers[field.label]!.text
           : null,
+      isExpanded: true,
       decoration: InputDecoration(
         hintText: field.hint,
         border: OutlineInputBorder(
@@ -218,14 +237,61 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
           borderSide: const BorderSide(color: AppTheme.primaryNavy),
         ),
       ),
-      items: field.dropdownOptions!.map((String option) {
+      items: options.map((String option) {
+        // Extract display name from "ID - Name" format
+        String displayText = option;
+        if (option.contains(' - ')) {
+          displayText = option.split(' - ').skip(1).join(' - ');
+        }
+        
         return DropdownMenuItem<String>(
           value: option,
-          child: Text(option),
+          child: SizedBox(
+            width: double.infinity,
+            child: Text(
+              displayText,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
         );
       }).toList(),
+      selectedItemBuilder: (BuildContext context) {
+        return options.map((String option) {
+          // Extract display name from "ID - Name" format
+          String displayText = option;
+          if (option.contains(' - ')) {
+            displayText = option.split(' - ').skip(1).join(' - ');
+          }
+          
+          return SizedBox(
+            width: double.infinity,
+            child: Text(
+              displayText,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          );
+        }).toList();
+      },
       onChanged: (String? newValue) {
-        _controllers[field.label]!.text = newValue ?? '';
+        setState(() {
+          _controllers[field.label]!.text = newValue ?? '';
+          // Clear dependent fields if needed
+          if (widget.dynamicDropdowns != null) {
+            // If this field affects other dynamic dropdowns, clear them
+            for (final entry in widget.dynamicDropdowns!.entries) {
+              if (entry.key != field.label) {
+                // Check if this field is a dependency
+                final dependentOptions = entry.value(currentValues);
+                final currentValue = _controllers[entry.key]!.text;
+                if (!dependentOptions.contains(currentValue)) {
+                  _controllers[entry.key]!.text = '';
+                }
+              }
+            }
+          }
+        });
       },
       validator: (value) {
         if (field.isRequired && (value == null || value.trim().isEmpty)) {
@@ -247,14 +313,16 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
           locale: const Locale('tr', 'TR'),
         );
         if (picked != null) {
-          _controllers[field.label]!.text =
-              '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+          setState(() {
+            _controllers[field.label]!.text =
+                '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+          });
         }
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
+          border: Border.all(color: Colors.grey[600]!),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -266,12 +334,12 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
                     : _controllers[field.label]!.text,
                 style: TextStyle(
                   color: _controllers[field.label]!.text.isEmpty
-                      ? Colors.grey[600]
-                      : Colors.black,
+                      ? Colors.grey[400]
+                      : Colors.white,
                 ),
               ),
             ),
-            const Icon(Icons.calendar_today, color: AppTheme.primaryNavy),
+            const Icon(Icons.calendar_today, color: Colors.white),
           ],
         ),
       ),
@@ -281,6 +349,23 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
   Future<void> _handleSave() async {
     if (!_formKey.currentState!.validate()) {
       return;
+    }
+
+    // Validate required image fields
+    for (final field in widget.fields) {
+      if (field.isImageField && field.isRequired) {
+        if (_selectedImages[field.label] == null) {
+          if (mounted) {
+            SnackBarService.showSnackBar(context: context, snackBar: 
+              SnackBar(
+                content: Text('${field.label} zorunludur'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
+      }
     }
 
     setState(() {

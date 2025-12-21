@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/admin_services_provider.dart';
-import '../widgets/admin_navigation.dart';
 import '../widgets/admin_form_dialog.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/models/service_model.dart';
@@ -39,7 +38,6 @@ class AdminServicesPage extends ConsumerWidget {
         backgroundColor: AppTheme.primaryOrange,
         child: const Icon(Icons.add, color: Colors.white),
       ),
-      bottomNavigationBar: const AdminNavigation(),
     );
   }
 

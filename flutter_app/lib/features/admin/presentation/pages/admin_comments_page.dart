@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/admin_comments_provider.dart';
-import '../widgets/admin_navigation.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/models/comment_model.dart';
 import '../../../../core/services/snackbar_service.dart';
@@ -33,7 +32,6 @@ class AdminCommentsPage extends ConsumerWidget {
         error: (error, stack) =>
             _buildErrorWidget(context, ref, error.toString()),
       ),
-      bottomNavigationBar: const AdminNavigation(),
     );
   }
 

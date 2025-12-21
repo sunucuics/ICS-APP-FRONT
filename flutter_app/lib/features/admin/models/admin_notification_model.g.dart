@@ -10,10 +10,10 @@ _$NotificationTemplateImpl _$$NotificationTemplateImplFromJson(
         Map<String, dynamic> json) =>
     _$NotificationTemplateImpl(
       id: json['id'] as String,
-      name: json['name'] as String,
-      subject: json['subject'] as String,
-      content: json['content'] as String,
-      type: json['type'] as String,
+      name: json['name'] as String?,
+      subject: json['subject'] as String?,
+      content: json['content'] as String?,
+      type: json['type'] as String?,
       isActive: json['is_active'] as bool? ?? true,
       createdAt: json['created_at'] == null
           ? null

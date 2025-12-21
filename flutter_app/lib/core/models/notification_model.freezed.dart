@@ -20,14 +20,17 @@ UserNotification _$UserNotificationFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UserNotification {
-  String get id => throw _privateConstructorUsedError;
+  String get id =>
+      throw _privateConstructorUsedError; // ignore: invalid_annotation_target
   @JsonKey(name: 'user_id')
   String get userId => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
   String get body => throw _privateConstructorUsedError;
-  String get type => throw _privateConstructorUsedError;
+  String get type =>
+      throw _privateConstructorUsedError; // ignore: invalid_annotation_target
   @JsonKey(name: 'is_read')
-  bool get isRead => throw _privateConstructorUsedError;
+  bool get isRead =>
+      throw _privateConstructorUsedError; // ignore: invalid_annotation_target
   @JsonKey(name: 'created_at')
   DateTime? get createdAt => throw _privateConstructorUsedError;
   Map<String, dynamic>? get data => throw _privateConstructorUsedError;
@@ -217,6 +220,7 @@ class _$UserNotificationImpl implements _UserNotification {
 
   @override
   final String id;
+// ignore: invalid_annotation_target
   @override
   @JsonKey(name: 'user_id')
   final String userId;
@@ -226,9 +230,11 @@ class _$UserNotificationImpl implements _UserNotification {
   final String body;
   @override
   final String type;
+// ignore: invalid_annotation_target
   @override
   @JsonKey(name: 'is_read')
   final bool isRead;
+// ignore: invalid_annotation_target
   @override
   @JsonKey(name: 'created_at')
   final DateTime? createdAt;
@@ -300,7 +306,7 @@ abstract class _UserNotification implements UserNotification {
       _$UserNotificationImpl.fromJson;
 
   @override
-  String get id;
+  String get id; // ignore: invalid_annotation_target
   @override
   @JsonKey(name: 'user_id')
   String get userId;
@@ -309,10 +315,10 @@ abstract class _UserNotification implements UserNotification {
   @override
   String get body;
   @override
-  String get type;
+  String get type; // ignore: invalid_annotation_target
   @override
   @JsonKey(name: 'is_read')
-  bool get isRead;
+  bool get isRead; // ignore: invalid_annotation_target
   @override
   @JsonKey(name: 'created_at')
   DateTime? get createdAt;

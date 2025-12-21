@@ -20,24 +20,15 @@ final adminOrdersNotifierProvider =
 class AdminOrdersNotifier extends StateNotifier<AsyncValue<List<Order>>> {
   final AdminRepository _repository;
 
-  AdminOrdersNotifier(this._repository) : super(const AsyncValue.loading()) {
-    loadOrders();
-  }
-
-  Future<void> loadOrders() async {
-    state = const AsyncValue.loading();
-    try {
-      final orders = await _repository.getOrders();
-      state = AsyncValue.data(orders);
-    } catch (error, stackTrace) {
-      state = AsyncValue.error(error, stackTrace);
-    }
+  AdminOrdersNotifier(this._repository) : super(const AsyncValue.data([])) {
+    // Notifier sadece CRUD işlemleri için kullanılıyor
+    // Listeleme için adminOrdersQueueProvider kullanılıyor
   }
 
   Future<void> updateOrderStatus(String orderId, String status) async {
     try {
       await _repository.updateOrderStatus(orderId, status);
-      await loadOrders(); // Refresh the list
+      // List refresh işlemi adminOrdersQueueProvider üzerinden yapılıyor
     } catch (error) {
       // Don't set the entire state to error, just log the error
       // The UI should handle this gracefully
@@ -50,7 +41,7 @@ class AdminOrdersNotifier extends StateNotifier<AsyncValue<List<Order>>> {
   Future<Order> shipOrder(String orderId, OrderShipRequest request) async {
     try {
       final order = await _repository.shipOrder(orderId, request);
-      await loadOrders(); // Refresh the list
+      // List refresh işlemi adminOrdersQueueProvider üzerinden yapılıyor
       return order;
     } on ApiException catch (e) {
       // Handle 409 Conflict (invalid state transition)
@@ -70,7 +61,7 @@ class AdminOrdersNotifier extends StateNotifier<AsyncValue<List<Order>>> {
   Future<Order> deliverOrder(String orderId) async {
     try {
       final order = await _repository.deliverOrder(orderId);
-      await loadOrders(); // Refresh the list
+      // List refresh işlemi adminOrdersQueueProvider üzerinden yapılıyor
       return order;
     } on ApiException catch (e) {
       // Handle 409 Conflict (invalid state transition)
@@ -90,7 +81,7 @@ class AdminOrdersNotifier extends StateNotifier<AsyncValue<List<Order>>> {
   Future<Order> cancelOrder(String orderId, OrderCancelRequest request) async {
     try {
       final order = await _repository.cancelOrder(orderId, request);
-      await loadOrders(); // Refresh the list
+      // List refresh işlemi adminOrdersQueueProvider üzerinden yapılıyor
       return order;
     } on ApiException catch (e) {
       // Handle 409 Conflict (invalid state transition)
@@ -110,15 +101,11 @@ class AdminOrdersNotifier extends StateNotifier<AsyncValue<List<Order>>> {
   Future<void> deleteOrder(String orderId) async {
     try {
       await _repository.deleteOrder(orderId);
-      await loadOrders(); // Refresh the list
+      // List refresh işlemi adminOrdersQueueProvider üzerinden yapılıyor
     } catch (error) {
       print('Error deleting order: $error');
       rethrow;
     }
-  }
-
-  Future<void> refresh() async {
-    await loadOrders();
   }
 }
 

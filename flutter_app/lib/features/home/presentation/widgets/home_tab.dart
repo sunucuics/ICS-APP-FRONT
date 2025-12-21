@@ -154,9 +154,9 @@ class HomeTab extends ConsumerWidget {
                           height: 64,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
-                            return authState.user?.name.isNotEmpty == true
+                            return (authState.user?.name != null && authState.user!.name!.isNotEmpty)
                                 ? Text(
-                                    _getInitials(authState.user!.name),
+                                    _getInitials(authState.user!.name!),
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 24,
@@ -175,7 +175,7 @@ class HomeTab extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            authState.user?.name.isNotEmpty == true
+                            (authState.user?.name != null && authState.user!.name!.isNotEmpty)
                                 ? 'Hoş geldiniz, ${authState.user!.name}!'
                                 : 'Hoş geldiniz!',
                             style: const TextStyle(
@@ -679,7 +679,7 @@ class HomeTab extends ConsumerWidget {
   }
 
   Future<void> _launchWhatsApp(BuildContext context) async {
-    const phoneNumber = '+905333734218';
+    const phoneNumber = '+905306435579';
     const message =
         'Merhaba! Innova Craft Studio üzerinden iletişime geçmek istiyorum.';
     final url =

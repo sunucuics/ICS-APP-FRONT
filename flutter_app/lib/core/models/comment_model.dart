@@ -10,6 +10,7 @@ class Comment with _$Comment {
     @JsonKey(name: 'target_type')
     required String targetType, // 'product' or 'service'
     @JsonKey(name: 'target_id') required String targetId,
+    @JsonKey(name: 'target_name') String? targetName, // Ürün veya hizmet adı
     @JsonKey(name: 'user_id') required String userId,
     @JsonKey(name: 'user_name') String? userName,
     required String content,

@@ -115,22 +115,21 @@ class _CommentFormState extends ConsumerState<CommentForm> {
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _submitComment,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
+                    backgroundColor: Colors.green.shade600,
                     foregroundColor: Colors.white,
-                    elevation: 3,
-                    shadowColor:
-                        Theme.of(context).primaryColor.withOpacity(0.3),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    elevation: 6,
+                    shadowColor: Colors.green.shade600.withOpacity(0.5),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   child: _isSubmitting
                       ? const SizedBox(
-                          height: 20,
-                          width: 20,
+                          height: 24,
+                          width: 24,
                           child: CircularProgressIndicator(
-                            strokeWidth: 2,
+                            strokeWidth: 2.5,
                             valueColor:
                                 AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
@@ -138,8 +137,9 @@ class _CommentFormState extends ConsumerState<CommentForm> {
                       : const Text(
                           'Yorumu Gönder',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
                           ),
                         ),
                 ),

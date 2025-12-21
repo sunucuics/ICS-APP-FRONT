@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/services/snackbar_service.dart';
@@ -81,51 +82,7 @@ class SettingsPage extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
 
-          // Uygulama Bilgileri
-          Card(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: AppTheme.primaryOrange,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'Uygulama Bilgileri',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Divider(height: 1),
-                _buildInfoItem(
-                  context,
-                  'Sürüm',
-                  '1.0.0',
-                  Icons.info,
-                ),
-                const Divider(height: 1),
-                _buildInfoItem(
-                  context,
-                  'Geliştirici',
-                  'Innova Craft Studio Team',
-                  Icons.person,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Hakkında
+          // Yardım & Destek
           Card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,30 +110,10 @@ class SettingsPage extends ConsumerWidget {
                 const Divider(height: 1),
                 _buildActionItem(
                   context,
-                  'Yardım Merkezi',
-                  'SSS ve kullanım kılavuzu',
-                  Icons.help,
-                  () {
-                    SnackBarService.showSnackBar(context: context, snackBar: 
-                      const SnackBar(
-                        content: Text('Yardım merkezi yakında eklenecek'),
-                      ),
-                    );
-                  },
-                ),
-                const Divider(height: 1),
-                _buildActionItem(
-                  context,
                   'İletişim',
-                  'Bizimle iletişime geçin',
+                  'E-posta veya WhatsApp ile iletişime geçin',
                   Icons.contact_support,
-                  () {
-                    SnackBarService.showSnackBar(context: context, snackBar: 
-                      const SnackBar(
-                        content: Text('İletişim sayfası yakında eklenecek'),
-                      ),
-                    );
-                  },
+                  () => _showContactDialog(context),
                 ),
               ],
             ),
@@ -260,24 +197,6 @@ class SettingsPage extends ConsumerWidget {
       onTap: () {
         ref.read(themeModeProvider.notifier).setThemeMode(mode);
       },
-    );
-  }
-
-  Widget _buildInfoItem(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-  ) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      trailing: Text(
-        value,
-        style: const TextStyle(
-          fontWeight: FontWeight.w500,
-        ),
-      ),
     );
   }
 
@@ -443,5 +362,112 @@ class SettingsPage extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  void _showContactDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('İletişim'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Bizimle iletişime geçmek için bir yöntem seçin:'),
+            const SizedBox(height: 16),
+            InkWell(
+              onTap: () {
+                Navigator.of(dialogContext).pop();
+                _launchEmail(context);
+              },
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.email, color: AppTheme.primaryOrange),
+                title: const Text('E-posta'),
+                subtitle: const Text('innovacraftstudio@hotmail.com'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              ),
+            ),
+            const Divider(),
+            InkWell(
+              onTap: () {
+                Navigator.of(dialogContext).pop();
+                _launchWhatsApp(context);
+              },
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.chat, color: Colors.green),
+                title: const Text('WhatsApp'),
+                subtitle: const Text('+90 530 643 55 79'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('İptal'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _launchEmail(BuildContext context) async {
+    final email = 'innovacraftstudio@hotmail.com';
+    final uri = Uri(
+      scheme: 'mailto',
+      path: email,
+    );
+    
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        if (context.mounted) {
+          SnackBarService.showSnackBar(
+            context: context,
+            snackBar: const SnackBar(
+              content: Text('E-posta uygulaması açılamadı'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        SnackBarService.showSnackBar(
+          context: context,
+          snackBar: SnackBar(content: Text('Hata: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _launchWhatsApp(BuildContext context) async {
+    final phone = '905306435579'; // +90 530 643 55 79 without + and spaces
+    final uri = Uri.parse('https://wa.me/$phone');
+    
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (context.mounted) {
+          SnackBarService.showSnackBar(
+            context: context,
+            snackBar: const SnackBar(
+              content: Text('WhatsApp açılamadı'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        SnackBarService.showSnackBar(
+          context: context,
+          snackBar: SnackBar(content: Text('Hata: $e')),
+        );
+      }
+    }
   }
 }

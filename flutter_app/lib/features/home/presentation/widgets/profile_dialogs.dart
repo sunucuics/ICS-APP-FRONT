@@ -124,14 +124,6 @@ void showProfileAboutDialog(BuildContext context) {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            '1.0.0',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
             'Hayal Et, Tasarla ve Üret',
             style: TextStyle(
               fontSize: 16,

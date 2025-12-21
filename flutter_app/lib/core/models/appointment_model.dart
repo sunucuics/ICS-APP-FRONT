@@ -3,6 +3,39 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'appointment_model.freezed.dart';
 part 'appointment_model.g.dart';
 
+/// Backend'den gelen datetime string'lerini parse eder
+/// Backend timezone bilgisi olmadan Türkiye saatinde (UTC+3) gönderdiği için
+/// bunları Türkiye saati olarak parse edip UTC'ye çeviriyoruz
+DateTime _parseBackendDateTime(dynamic value) {
+  if (value == null) return DateTime.now();
+  
+  final str = value.toString();
+  if (str.isEmpty) return DateTime.now();
+  
+  DateTime? parsed = DateTime.tryParse(str);
+  if (parsed == null) return DateTime.now();
+  
+  // Eğer timezone bilgisi varsa (UTC veya başka), olduğu gibi kullan
+  if (parsed.isUtc) {
+    return parsed;
+  }
+  
+  // Eğer timezone bilgisi yoksa (naive datetime), backend'den gelen datetime'lar
+  // Türkiye saatinde (UTC+3) olduğu için, bunları Türkiye saati olarak parse et
+  // Backend'den gelen format: "2025-12-31T09:00:00" (timezone yok, Türkiye saati)
+  const turkishTimeOffset = Duration(hours: 3);
+  return DateTime.utc(
+    parsed.year,
+    parsed.month,
+    parsed.day,
+    parsed.hour,
+    parsed.minute,
+    parsed.second,
+    parsed.millisecond,
+    parsed.microsecond,
+  ).subtract(turkishTimeOffset); // Türkiye saatini UTC'ye çevir
+}
+
 @freezed
 class Appointment with _$Appointment {
   const factory Appointment({
@@ -20,8 +53,8 @@ class Appointment with _$Appointment {
       id: json['id'] as String? ?? '',
       serviceId: json['service_id'] as String? ?? '',
       userId: json['user_id'] as String?,
-      start: DateTime.tryParse(json['start'].toString()) ?? DateTime.now(),
-      end: DateTime.tryParse(json['end'].toString()) ?? DateTime.now(),
+      start: _parseBackendDateTime(json['start']),
+      end: _parseBackendDateTime(json['end']),
       status: json['status'] as String? ?? 'pending',
       notes: json['notes'] as String?,
     );
@@ -43,19 +76,20 @@ class AppointmentWithDetails with _$AppointmentWithDetails {
   }) = _AppointmentWithDetails;
 
   factory AppointmentWithDetails.fromJson(Map<String, dynamic> json) {
+    final userJson = json['user'] as Map<String, dynamic>?;
     return AppointmentWithDetails(
       id: json['id'] as String? ?? '',
       serviceId: json['service_id'] as String? ?? '',
-      userId: json['user_id'] as String?,
-      start: DateTime.tryParse(json['start'].toString()) ?? DateTime.now(),
-      end: DateTime.tryParse(json['end'].toString()) ?? DateTime.now(),
+      userId: json['user_id'] as String? ?? userJson?['id'] as String?,
+      start: _parseBackendDateTime(json['start']),
+      end: _parseBackendDateTime(json['end']),
       status: json['status'] as String? ?? 'pending',
       notes: json['notes'] as String?,
       service: json['service'] != null
           ? ServiceBrief.fromJson(json['service'] as Map<String, dynamic>)
           : null,
-      user: json['user'] != null
-          ? UserBrief.fromJson(json['user'] as Map<String, dynamic>)
+      user: userJson != null
+          ? UserBrief.fromJson(userJson)
           : null,
     );
   }
@@ -176,8 +210,8 @@ class AppointmentAdminOut with _$AppointmentAdminOut {
   factory AppointmentAdminOut.fromJson(Map<String, dynamic> json) {
     return AppointmentAdminOut(
       id: json['id'] as String? ?? '',
-      start: DateTime.tryParse(json['start'].toString()) ?? DateTime.now(),
-      end: DateTime.tryParse(json['end'].toString()) ?? DateTime.now(),
+      start: _parseBackendDateTime(json['start']),
+      end: _parseBackendDateTime(json['end']),
       status: json['status'] as String? ?? 'pending',
       user: UserBrief.fromJson(json['user'] as Map<String, dynamic>),
       service: ServiceBrief.fromJson(json['service'] as Map<String, dynamic>),

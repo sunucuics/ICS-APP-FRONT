@@ -29,9 +29,9 @@ mixin _$AppSettings {
   @JsonKey(name: 'maintenance_message')
   String? get maintenanceMessage => throw _privateConstructorUsedError;
   @JsonKey(name: 'contact_email')
-  String get contactEmail => throw _privateConstructorUsedError;
+  String? get contactEmail => throw _privateConstructorUsedError;
   @JsonKey(name: 'contact_phone')
-  String get contactPhone => throw _privateConstructorUsedError;
+  String? get contactPhone => throw _privateConstructorUsedError;
   @JsonKey(name: 'address')
   String get address => throw _privateConstructorUsedError;
   @JsonKey(name: 'working_hours')
@@ -39,7 +39,7 @@ mixin _$AppSettings {
   @JsonKey(name: 'social_media')
   SocialMediaSettings get socialMedia => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
-  DateTime get updatedAt => throw _privateConstructorUsedError;
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this AppSettings to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -62,12 +62,12 @@ abstract class $AppSettingsCopyWith<$Res> {
       @JsonKey(name: 'app_version') String appVersion,
       @JsonKey(name: 'maintenance_mode') bool maintenanceMode,
       @JsonKey(name: 'maintenance_message') String? maintenanceMessage,
-      @JsonKey(name: 'contact_email') String contactEmail,
-      @JsonKey(name: 'contact_phone') String contactPhone,
+      @JsonKey(name: 'contact_email') String? contactEmail,
+      @JsonKey(name: 'contact_phone') String? contactPhone,
       @JsonKey(name: 'address') String address,
       @JsonKey(name: 'working_hours') String workingHours,
       @JsonKey(name: 'social_media') SocialMediaSettings socialMedia,
-      @JsonKey(name: 'updated_at') DateTime updatedAt});
+      @JsonKey(name: 'updated_at') DateTime? updatedAt});
 
   $SocialMediaSettingsCopyWith<$Res> get socialMedia;
 }
@@ -91,12 +91,12 @@ class _$AppSettingsCopyWithImpl<$Res, $Val extends AppSettings>
     Object? appVersion = null,
     Object? maintenanceMode = null,
     Object? maintenanceMessage = freezed,
-    Object? contactEmail = null,
-    Object? contactPhone = null,
+    Object? contactEmail = freezed,
+    Object? contactPhone = freezed,
     Object? address = null,
     Object? workingHours = null,
     Object? socialMedia = null,
-    Object? updatedAt = null,
+    Object? updatedAt = freezed,
   }) {
     return _then(_value.copyWith(
       appName: null == appName
@@ -115,14 +115,14 @@ class _$AppSettingsCopyWithImpl<$Res, $Val extends AppSettings>
           ? _value.maintenanceMessage
           : maintenanceMessage // ignore: cast_nullable_to_non_nullable
               as String?,
-      contactEmail: null == contactEmail
+      contactEmail: freezed == contactEmail
           ? _value.contactEmail
           : contactEmail // ignore: cast_nullable_to_non_nullable
-              as String,
-      contactPhone: null == contactPhone
+              as String?,
+      contactPhone: freezed == contactPhone
           ? _value.contactPhone
           : contactPhone // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       address: null == address
           ? _value.address
           : address // ignore: cast_nullable_to_non_nullable
@@ -135,10 +135,10 @@ class _$AppSettingsCopyWithImpl<$Res, $Val extends AppSettings>
           ? _value.socialMedia
           : socialMedia // ignore: cast_nullable_to_non_nullable
               as SocialMediaSettings,
-      updatedAt: null == updatedAt
+      updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
     ) as $Val);
   }
 
@@ -166,12 +166,12 @@ abstract class _$$AppSettingsImplCopyWith<$Res>
       @JsonKey(name: 'app_version') String appVersion,
       @JsonKey(name: 'maintenance_mode') bool maintenanceMode,
       @JsonKey(name: 'maintenance_message') String? maintenanceMessage,
-      @JsonKey(name: 'contact_email') String contactEmail,
-      @JsonKey(name: 'contact_phone') String contactPhone,
+      @JsonKey(name: 'contact_email') String? contactEmail,
+      @JsonKey(name: 'contact_phone') String? contactPhone,
       @JsonKey(name: 'address') String address,
       @JsonKey(name: 'working_hours') String workingHours,
       @JsonKey(name: 'social_media') SocialMediaSettings socialMedia,
-      @JsonKey(name: 'updated_at') DateTime updatedAt});
+      @JsonKey(name: 'updated_at') DateTime? updatedAt});
 
   @override
   $SocialMediaSettingsCopyWith<$Res> get socialMedia;
@@ -194,12 +194,12 @@ class __$$AppSettingsImplCopyWithImpl<$Res>
     Object? appVersion = null,
     Object? maintenanceMode = null,
     Object? maintenanceMessage = freezed,
-    Object? contactEmail = null,
-    Object? contactPhone = null,
+    Object? contactEmail = freezed,
+    Object? contactPhone = freezed,
     Object? address = null,
     Object? workingHours = null,
     Object? socialMedia = null,
-    Object? updatedAt = null,
+    Object? updatedAt = freezed,
   }) {
     return _then(_$AppSettingsImpl(
       appName: null == appName
@@ -218,14 +218,14 @@ class __$$AppSettingsImplCopyWithImpl<$Res>
           ? _value.maintenanceMessage
           : maintenanceMessage // ignore: cast_nullable_to_non_nullable
               as String?,
-      contactEmail: null == contactEmail
+      contactEmail: freezed == contactEmail
           ? _value.contactEmail
           : contactEmail // ignore: cast_nullable_to_non_nullable
-              as String,
-      contactPhone: null == contactPhone
+              as String?,
+      contactPhone: freezed == contactPhone
           ? _value.contactPhone
           : contactPhone // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       address: null == address
           ? _value.address
           : address // ignore: cast_nullable_to_non_nullable
@@ -238,10 +238,10 @@ class __$$AppSettingsImplCopyWithImpl<$Res>
           ? _value.socialMedia
           : socialMedia // ignore: cast_nullable_to_non_nullable
               as SocialMediaSettings,
-      updatedAt: null == updatedAt
+      updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
     ));
   }
 }
@@ -250,16 +250,17 @@ class __$$AppSettingsImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$AppSettingsImpl implements _AppSettings {
   const _$AppSettingsImpl(
-      {@JsonKey(name: 'app_name') required this.appName,
-      @JsonKey(name: 'app_version') required this.appVersion,
+      {@JsonKey(name: 'app_name') this.appName = 'ICS App',
+      @JsonKey(name: 'app_version') this.appVersion = '1.0.0',
       @JsonKey(name: 'maintenance_mode') this.maintenanceMode = false,
       @JsonKey(name: 'maintenance_message') this.maintenanceMessage,
-      @JsonKey(name: 'contact_email') required this.contactEmail,
-      @JsonKey(name: 'contact_phone') required this.contactPhone,
-      @JsonKey(name: 'address') required this.address,
-      @JsonKey(name: 'working_hours') required this.workingHours,
-      @JsonKey(name: 'social_media') required this.socialMedia,
-      @JsonKey(name: 'updated_at') required this.updatedAt});
+      @JsonKey(name: 'contact_email') this.contactEmail,
+      @JsonKey(name: 'contact_phone') this.contactPhone,
+      @JsonKey(name: 'address') this.address = 'Istanbul, Turkey',
+      @JsonKey(name: 'working_hours') this.workingHours = '09:00 - 18:00',
+      @JsonKey(name: 'social_media')
+      this.socialMedia = const SocialMediaSettings(),
+      @JsonKey(name: 'updated_at') this.updatedAt});
 
   factory _$AppSettingsImpl.fromJson(Map<String, dynamic> json) =>
       _$$AppSettingsImplFromJson(json);
@@ -278,10 +279,10 @@ class _$AppSettingsImpl implements _AppSettings {
   final String? maintenanceMessage;
   @override
   @JsonKey(name: 'contact_email')
-  final String contactEmail;
+  final String? contactEmail;
   @override
   @JsonKey(name: 'contact_phone')
-  final String contactPhone;
+  final String? contactPhone;
   @override
   @JsonKey(name: 'address')
   final String address;
@@ -293,7 +294,7 @@ class _$AppSettingsImpl implements _AppSettings {
   final SocialMediaSettings socialMedia;
   @override
   @JsonKey(name: 'updated_at')
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
   @override
   String toString() {
@@ -358,18 +359,17 @@ class _$AppSettingsImpl implements _AppSettings {
 
 abstract class _AppSettings implements AppSettings {
   const factory _AppSettings(
-      {@JsonKey(name: 'app_name') required final String appName,
-      @JsonKey(name: 'app_version') required final String appVersion,
+      {@JsonKey(name: 'app_name') final String appName,
+      @JsonKey(name: 'app_version') final String appVersion,
       @JsonKey(name: 'maintenance_mode') final bool maintenanceMode,
       @JsonKey(name: 'maintenance_message') final String? maintenanceMessage,
-      @JsonKey(name: 'contact_email') required final String contactEmail,
-      @JsonKey(name: 'contact_phone') required final String contactPhone,
-      @JsonKey(name: 'address') required final String address,
-      @JsonKey(name: 'working_hours') required final String workingHours,
-      @JsonKey(name: 'social_media')
-      required final SocialMediaSettings socialMedia,
+      @JsonKey(name: 'contact_email') final String? contactEmail,
+      @JsonKey(name: 'contact_phone') final String? contactPhone,
+      @JsonKey(name: 'address') final String address,
+      @JsonKey(name: 'working_hours') final String workingHours,
+      @JsonKey(name: 'social_media') final SocialMediaSettings socialMedia,
       @JsonKey(name: 'updated_at')
-      required final DateTime updatedAt}) = _$AppSettingsImpl;
+      final DateTime? updatedAt}) = _$AppSettingsImpl;
 
   factory _AppSettings.fromJson(Map<String, dynamic> json) =
       _$AppSettingsImpl.fromJson;
@@ -388,10 +388,10 @@ abstract class _AppSettings implements AppSettings {
   String? get maintenanceMessage;
   @override
   @JsonKey(name: 'contact_email')
-  String get contactEmail;
+  String? get contactEmail;
   @override
   @JsonKey(name: 'contact_phone')
-  String get contactPhone;
+  String? get contactPhone;
   @override
   @JsonKey(name: 'address')
   String get address;
@@ -403,7 +403,7 @@ abstract class _AppSettings implements AppSettings {
   SocialMediaSettings get socialMedia;
   @override
   @JsonKey(name: 'updated_at')
-  DateTime get updatedAt;
+  DateTime? get updatedAt;
 
   /// Create a copy of AppSettings
   /// with the given fields replaced by the non-null parameter values.
@@ -672,7 +672,7 @@ mixin _$PaymentSettings {
   @JsonKey(name: 'max_order_amount')
   double? get maxOrderAmount => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
-  DateTime get updatedAt => throw _privateConstructorUsedError;
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this PaymentSettings to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -698,7 +698,7 @@ abstract class $PaymentSettingsCopyWith<$Res> {
       @JsonKey(name: 'currency') String currency,
       @JsonKey(name: 'min_order_amount') double minOrderAmount,
       @JsonKey(name: 'max_order_amount') double? maxOrderAmount,
-      @JsonKey(name: 'updated_at') DateTime updatedAt});
+      @JsonKey(name: 'updated_at') DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -723,7 +723,7 @@ class _$PaymentSettingsCopyWithImpl<$Res, $Val extends PaymentSettings>
     Object? currency = null,
     Object? minOrderAmount = null,
     Object? maxOrderAmount = freezed,
-    Object? updatedAt = null,
+    Object? updatedAt = freezed,
   }) {
     return _then(_value.copyWith(
       iyzicoApiKey: null == iyzicoApiKey
@@ -754,10 +754,10 @@ class _$PaymentSettingsCopyWithImpl<$Res, $Val extends PaymentSettings>
           ? _value.maxOrderAmount
           : maxOrderAmount // ignore: cast_nullable_to_non_nullable
               as double?,
-      updatedAt: null == updatedAt
+      updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
     ) as $Val);
   }
 }
@@ -778,7 +778,7 @@ abstract class _$$PaymentSettingsImplCopyWith<$Res>
       @JsonKey(name: 'currency') String currency,
       @JsonKey(name: 'min_order_amount') double minOrderAmount,
       @JsonKey(name: 'max_order_amount') double? maxOrderAmount,
-      @JsonKey(name: 'updated_at') DateTime updatedAt});
+      @JsonKey(name: 'updated_at') DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -801,7 +801,7 @@ class __$$PaymentSettingsImplCopyWithImpl<$Res>
     Object? currency = null,
     Object? minOrderAmount = null,
     Object? maxOrderAmount = freezed,
-    Object? updatedAt = null,
+    Object? updatedAt = freezed,
   }) {
     return _then(_$PaymentSettingsImpl(
       iyzicoApiKey: null == iyzicoApiKey
@@ -832,10 +832,10 @@ class __$$PaymentSettingsImplCopyWithImpl<$Res>
           ? _value.maxOrderAmount
           : maxOrderAmount // ignore: cast_nullable_to_non_nullable
               as double?,
-      updatedAt: null == updatedAt
+      updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
     ));
   }
 }
@@ -844,14 +844,15 @@ class __$$PaymentSettingsImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$PaymentSettingsImpl implements _PaymentSettings {
   const _$PaymentSettingsImpl(
-      {@JsonKey(name: 'iyzico_api_key') required this.iyzicoApiKey,
-      @JsonKey(name: 'iyzico_secret_key') required this.iyzicoSecretKey,
-      @JsonKey(name: 'iyzico_base_url') required this.iyzicoBaseUrl,
+      {@JsonKey(name: 'iyzico_api_key') this.iyzicoApiKey = '',
+      @JsonKey(name: 'iyzico_secret_key') this.iyzicoSecretKey = '',
+      @JsonKey(name: 'iyzico_base_url')
+      this.iyzicoBaseUrl = 'https://sandbox-api.iyzipay.com',
       @JsonKey(name: 'test_mode') this.testMode = true,
       @JsonKey(name: 'currency') this.currency = 'TRY',
       @JsonKey(name: 'min_order_amount') this.minOrderAmount = 0.0,
       @JsonKey(name: 'max_order_amount') this.maxOrderAmount,
-      @JsonKey(name: 'updated_at') required this.updatedAt});
+      @JsonKey(name: 'updated_at') this.updatedAt});
 
   factory _$PaymentSettingsImpl.fromJson(Map<String, dynamic> json) =>
       _$$PaymentSettingsImplFromJson(json);
@@ -879,7 +880,7 @@ class _$PaymentSettingsImpl implements _PaymentSettings {
   final double? maxOrderAmount;
   @override
   @JsonKey(name: 'updated_at')
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
   @override
   String toString() {
@@ -941,15 +942,15 @@ class _$PaymentSettingsImpl implements _PaymentSettings {
 
 abstract class _PaymentSettings implements PaymentSettings {
   const factory _PaymentSettings(
-      {@JsonKey(name: 'iyzico_api_key') required final String iyzicoApiKey,
-      @JsonKey(name: 'iyzico_secret_key') required final String iyzicoSecretKey,
-      @JsonKey(name: 'iyzico_base_url') required final String iyzicoBaseUrl,
-      @JsonKey(name: 'test_mode') final bool testMode,
-      @JsonKey(name: 'currency') final String currency,
-      @JsonKey(name: 'min_order_amount') final double minOrderAmount,
-      @JsonKey(name: 'max_order_amount') final double? maxOrderAmount,
-      @JsonKey(name: 'updated_at')
-      required final DateTime updatedAt}) = _$PaymentSettingsImpl;
+          {@JsonKey(name: 'iyzico_api_key') final String iyzicoApiKey,
+          @JsonKey(name: 'iyzico_secret_key') final String iyzicoSecretKey,
+          @JsonKey(name: 'iyzico_base_url') final String iyzicoBaseUrl,
+          @JsonKey(name: 'test_mode') final bool testMode,
+          @JsonKey(name: 'currency') final String currency,
+          @JsonKey(name: 'min_order_amount') final double minOrderAmount,
+          @JsonKey(name: 'max_order_amount') final double? maxOrderAmount,
+          @JsonKey(name: 'updated_at') final DateTime? updatedAt}) =
+      _$PaymentSettingsImpl;
 
   factory _PaymentSettings.fromJson(Map<String, dynamic> json) =
       _$PaymentSettingsImpl.fromJson;
@@ -977,7 +978,7 @@ abstract class _PaymentSettings implements PaymentSettings {
   double? get maxOrderAmount;
   @override
   @JsonKey(name: 'updated_at')
-  DateTime get updatedAt;
+  DateTime? get updatedAt;
 
   /// Create a copy of PaymentSettings
   /// with the given fields replaced by the non-null parameter values.
@@ -1004,9 +1005,9 @@ mixin _$EmailTemplate {
   @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
-  DateTime get createdAt => throw _privateConstructorUsedError;
+  DateTime? get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
-  DateTime get updatedAt => throw _privateConstructorUsedError;
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this EmailTemplate to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -1032,8 +1033,8 @@ abstract class $EmailTemplateCopyWith<$Res> {
       @JsonKey(name: 'template_type') String templateType,
       @JsonKey(name: 'variables') List<String> variables,
       @JsonKey(name: 'is_active') bool isActive,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt});
+      @JsonKey(name: 'created_at') DateTime? createdAt,
+      @JsonKey(name: 'updated_at') DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -1058,8 +1059,8 @@ class _$EmailTemplateCopyWithImpl<$Res, $Val extends EmailTemplate>
     Object? templateType = null,
     Object? variables = null,
     Object? isActive = null,
-    Object? createdAt = null,
-    Object? updatedAt = null,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -1090,14 +1091,14 @@ class _$EmailTemplateCopyWithImpl<$Res, $Val extends EmailTemplate>
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
               as bool,
-      createdAt: null == createdAt
+      createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      updatedAt: null == updatedAt
+              as DateTime?,
+      updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
     ) as $Val);
   }
 }
@@ -1118,8 +1119,8 @@ abstract class _$$EmailTemplateImplCopyWith<$Res>
       @JsonKey(name: 'template_type') String templateType,
       @JsonKey(name: 'variables') List<String> variables,
       @JsonKey(name: 'is_active') bool isActive,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt});
+      @JsonKey(name: 'created_at') DateTime? createdAt,
+      @JsonKey(name: 'updated_at') DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -1142,8 +1143,8 @@ class __$$EmailTemplateImplCopyWithImpl<$Res>
     Object? templateType = null,
     Object? variables = null,
     Object? isActive = null,
-    Object? createdAt = null,
-    Object? updatedAt = null,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(_$EmailTemplateImpl(
       id: null == id
@@ -1174,14 +1175,14 @@ class __$$EmailTemplateImplCopyWithImpl<$Res>
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
               as bool,
-      createdAt: null == createdAt
+      createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      updatedAt: null == updatedAt
+              as DateTime?,
+      updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
     ));
   }
 }
@@ -1191,14 +1192,14 @@ class __$$EmailTemplateImplCopyWithImpl<$Res>
 class _$EmailTemplateImpl implements _EmailTemplate {
   const _$EmailTemplateImpl(
       {required this.id,
-      required this.name,
-      required this.subject,
-      required this.body,
-      @JsonKey(name: 'template_type') required this.templateType,
-      @JsonKey(name: 'variables') required final List<String> variables,
+      this.name = '',
+      this.subject = '',
+      this.body = '',
+      @JsonKey(name: 'template_type') this.templateType = 'email',
+      @JsonKey(name: 'variables') final List<String> variables = const [],
       @JsonKey(name: 'is_active') this.isActive = true,
-      @JsonKey(name: 'created_at') required this.createdAt,
-      @JsonKey(name: 'updated_at') required this.updatedAt})
+      @JsonKey(name: 'created_at') this.createdAt,
+      @JsonKey(name: 'updated_at') this.updatedAt})
       : _variables = variables;
 
   factory _$EmailTemplateImpl.fromJson(Map<String, dynamic> json) =>
@@ -1207,10 +1208,13 @@ class _$EmailTemplateImpl implements _EmailTemplate {
   @override
   final String id;
   @override
+  @JsonKey()
   final String name;
   @override
+  @JsonKey()
   final String subject;
   @override
+  @JsonKey()
   final String body;
   @override
   @JsonKey(name: 'template_type')
@@ -1229,10 +1233,10 @@ class _$EmailTemplateImpl implements _EmailTemplate {
   final bool isActive;
   @override
   @JsonKey(name: 'created_at')
-  final DateTime createdAt;
+  final DateTime? createdAt;
   @override
   @JsonKey(name: 'updated_at')
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
   @override
   String toString() {
@@ -1293,14 +1297,14 @@ class _$EmailTemplateImpl implements _EmailTemplate {
 abstract class _EmailTemplate implements EmailTemplate {
   const factory _EmailTemplate(
           {required final String id,
-          required final String name,
-          required final String subject,
-          required final String body,
-          @JsonKey(name: 'template_type') required final String templateType,
-          @JsonKey(name: 'variables') required final List<String> variables,
+          final String name,
+          final String subject,
+          final String body,
+          @JsonKey(name: 'template_type') final String templateType,
+          @JsonKey(name: 'variables') final List<String> variables,
           @JsonKey(name: 'is_active') final bool isActive,
-          @JsonKey(name: 'created_at') required final DateTime createdAt,
-          @JsonKey(name: 'updated_at') required final DateTime updatedAt}) =
+          @JsonKey(name: 'created_at') final DateTime? createdAt,
+          @JsonKey(name: 'updated_at') final DateTime? updatedAt}) =
       _$EmailTemplateImpl;
 
   factory _EmailTemplate.fromJson(Map<String, dynamic> json) =
@@ -1325,10 +1329,10 @@ abstract class _EmailTemplate implements EmailTemplate {
   bool get isActive;
   @override
   @JsonKey(name: 'created_at')
-  DateTime get createdAt;
+  DateTime? get createdAt;
   @override
   @JsonKey(name: 'updated_at')
-  DateTime get updatedAt;
+  DateTime? get updatedAt;
 
   /// Create a copy of EmailTemplate
   /// with the given fields replaced by the non-null parameter values.
@@ -1346,7 +1350,7 @@ SystemSettings _$SystemSettingsFromJson(Map<String, dynamic> json) {
 mixin _$SystemSettings {
   AppSettings get appSettings => throw _privateConstructorUsedError;
   PaymentSettings get paymentSettings => throw _privateConstructorUsedError;
-  @JsonKey(name: 'email_templates')
+  @JsonKey(name: 'emailTemplates')
   List<EmailTemplate> get emailTemplates => throw _privateConstructorUsedError;
 
   /// Serializes this SystemSettings to a JSON map.
@@ -1368,7 +1372,7 @@ abstract class $SystemSettingsCopyWith<$Res> {
   $Res call(
       {AppSettings appSettings,
       PaymentSettings paymentSettings,
-      @JsonKey(name: 'email_templates') List<EmailTemplate> emailTemplates});
+      @JsonKey(name: 'emailTemplates') List<EmailTemplate> emailTemplates});
 
   $AppSettingsCopyWith<$Res> get appSettings;
   $PaymentSettingsCopyWith<$Res> get paymentSettings;
@@ -1441,7 +1445,7 @@ abstract class _$$SystemSettingsImplCopyWith<$Res>
   $Res call(
       {AppSettings appSettings,
       PaymentSettings paymentSettings,
-      @JsonKey(name: 'email_templates') List<EmailTemplate> emailTemplates});
+      @JsonKey(name: 'emailTemplates') List<EmailTemplate> emailTemplates});
 
   @override
   $AppSettingsCopyWith<$Res> get appSettings;
@@ -1489,8 +1493,8 @@ class _$SystemSettingsImpl implements _SystemSettings {
   const _$SystemSettingsImpl(
       {required this.appSettings,
       required this.paymentSettings,
-      @JsonKey(name: 'email_templates')
-      required final List<EmailTemplate> emailTemplates})
+      @JsonKey(name: 'emailTemplates')
+      final List<EmailTemplate> emailTemplates = const []})
       : _emailTemplates = emailTemplates;
 
   factory _$SystemSettingsImpl.fromJson(Map<String, dynamic> json) =>
@@ -1502,7 +1506,7 @@ class _$SystemSettingsImpl implements _SystemSettings {
   final PaymentSettings paymentSettings;
   final List<EmailTemplate> _emailTemplates;
   @override
-  @JsonKey(name: 'email_templates')
+  @JsonKey(name: 'emailTemplates')
   List<EmailTemplate> get emailTemplates {
     if (_emailTemplates is EqualUnmodifiableListView) return _emailTemplates;
     // ignore: implicit_dynamic_type
@@ -1551,11 +1555,10 @@ class _$SystemSettingsImpl implements _SystemSettings {
 
 abstract class _SystemSettings implements SystemSettings {
   const factory _SystemSettings(
-          {required final AppSettings appSettings,
-          required final PaymentSettings paymentSettings,
-          @JsonKey(name: 'email_templates')
-          required final List<EmailTemplate> emailTemplates}) =
-      _$SystemSettingsImpl;
+      {required final AppSettings appSettings,
+      required final PaymentSettings paymentSettings,
+      @JsonKey(name: 'emailTemplates')
+      final List<EmailTemplate> emailTemplates}) = _$SystemSettingsImpl;
 
   factory _SystemSettings.fromJson(Map<String, dynamic> json) =
       _$SystemSettingsImpl.fromJson;
@@ -1565,7 +1568,7 @@ abstract class _SystemSettings implements SystemSettings {
   @override
   PaymentSettings get paymentSettings;
   @override
-  @JsonKey(name: 'email_templates')
+  @JsonKey(name: 'emailTemplates')
   List<EmailTemplate> get emailTemplates;
 
   /// Create a copy of SystemSettings

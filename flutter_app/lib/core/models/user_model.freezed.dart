@@ -21,9 +21,9 @@ UserProfile _$UserProfileFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$UserProfile {
   String get id => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
+  String? get name => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
-  String get phone => throw _privateConstructorUsedError;
+  String? get phone => throw _privateConstructorUsedError;
   String get role => throw _privateConstructorUsedError;
   List<Address> get addresses => throw _privateConstructorUsedError;
   bool get isGuest => throw _privateConstructorUsedError;
@@ -46,9 +46,9 @@ abstract class $UserProfileCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
-      String name,
+      String? name,
       String email,
-      String phone,
+      String? phone,
       String role,
       List<Address> addresses,
       bool isGuest});
@@ -70,9 +70,9 @@ class _$UserProfileCopyWithImpl<$Res, $Val extends UserProfile>
   @override
   $Res call({
     Object? id = null,
-    Object? name = null,
+    Object? name = freezed,
     Object? email = null,
-    Object? phone = null,
+    Object? phone = freezed,
     Object? role = null,
     Object? addresses = null,
     Object? isGuest = null,
@@ -82,18 +82,18 @@ class _$UserProfileCopyWithImpl<$Res, $Val extends UserProfile>
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      name: null == name
+      name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       email: null == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
               as String,
-      phone: null == phone
+      phone: freezed == phone
           ? _value.phone
           : phone // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       role: null == role
           ? _value.role
           : role // ignore: cast_nullable_to_non_nullable
@@ -120,9 +120,9 @@ abstract class _$$UserProfileImplCopyWith<$Res>
   @useResult
   $Res call(
       {String id,
-      String name,
+      String? name,
       String email,
-      String phone,
+      String? phone,
       String role,
       List<Address> addresses,
       bool isGuest});
@@ -142,9 +142,9 @@ class __$$UserProfileImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? name = null,
+    Object? name = freezed,
     Object? email = null,
-    Object? phone = null,
+    Object? phone = freezed,
     Object? role = null,
     Object? addresses = null,
     Object? isGuest = null,
@@ -154,18 +154,18 @@ class __$$UserProfileImplCopyWithImpl<$Res>
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      name: null == name
+      name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       email: null == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
               as String,
-      phone: null == phone
+      phone: freezed == phone
           ? _value.phone
           : phone // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       role: null == role
           ? _value.role
           : role // ignore: cast_nullable_to_non_nullable
@@ -187,9 +187,9 @@ class __$$UserProfileImplCopyWithImpl<$Res>
 class _$UserProfileImpl implements _UserProfile {
   const _$UserProfileImpl(
       {required this.id,
-      required this.name,
+      this.name,
       required this.email,
-      required this.phone,
+      this.phone,
       this.role = 'customer',
       final List<Address> addresses = const [],
       this.isGuest = false})
@@ -201,11 +201,11 @@ class _$UserProfileImpl implements _UserProfile {
   @override
   final String id;
   @override
-  final String name;
+  final String? name;
   @override
   final String email;
   @override
-  final String phone;
+  final String? phone;
   @override
   @JsonKey()
   final String role;
@@ -266,9 +266,9 @@ class _$UserProfileImpl implements _UserProfile {
 abstract class _UserProfile implements UserProfile {
   const factory _UserProfile(
       {required final String id,
-      required final String name,
+      final String? name,
       required final String email,
-      required final String phone,
+      final String? phone,
       final String role,
       final List<Address> addresses,
       final bool isGuest}) = _$UserProfileImpl;
@@ -279,11 +279,11 @@ abstract class _UserProfile implements UserProfile {
   @override
   String get id;
   @override
-  String get name;
+  String? get name;
   @override
   String get email;
   @override
-  String get phone;
+  String? get phone;
   @override
   String get role;
   @override

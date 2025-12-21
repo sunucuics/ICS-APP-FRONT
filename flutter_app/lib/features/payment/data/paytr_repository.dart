@@ -204,9 +204,9 @@ class PayTRRepository {
       final request = PayTRTokenRequest(
         merchantOid: orderId,
         email: userProfile.email,
-        userName: userProfile.name,
+        userName: userProfile.name ?? 'Kullanıcı',
         userAddress: addressString,
-        userPhone: userProfile.phone,
+        userPhone: userProfile.phone ?? '',
         paymentAmount: normalizedAmount,
         currency: 'TL',
         basket: basket,

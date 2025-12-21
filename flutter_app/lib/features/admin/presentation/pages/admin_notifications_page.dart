@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/admin_notifications_provider.dart';
-import '../widgets/admin_navigation.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/services/snackbar_service.dart';
 
@@ -48,7 +47,6 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
           _buildSendTab(),
         ],
       ),
-      bottomNavigationBar: const AdminNavigation(),
     );
   }
 
@@ -343,8 +341,8 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
                   value: null, child: Text('Şablon kullanma')),
               ...templates.map((template) => DropdownMenuItem(
                     value: template.id,
-                    child: Text(template.name.isNotEmpty
-                        ? template.name
+                    child: Text((template.name?.isNotEmpty == true)
+                        ? template.name!
                         : (template.title?.isNotEmpty == true
                             ? template.title!
                             : 'Başlıksız')),
@@ -355,15 +353,15 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
               if (value != null) {
                 // Şablon seçildiğinde form alanlarını doldur
                 final template = templates.firstWhere((t) => t.id == value);
-                titleController.text = template.subject.isNotEmpty
-                    ? template.subject
-                    : (template.name.isNotEmpty
-                        ? template.name
+                titleController.text = (template.subject?.isNotEmpty == true)
+                    ? template.subject!
+                    : ((template.name?.isNotEmpty == true)
+                        ? template.name!
                         : (template.title?.isNotEmpty == true
                             ? template.title!
                             : ''));
-                bodyController.text = template.content.isNotEmpty
-                    ? template.content
+                bodyController.text = (template.content?.isNotEmpty == true)
+                    ? template.content!
                     : (template.body?.isNotEmpty == true ? template.body! : '');
               } else {
                 // Şablon seçimi kaldırıldığında alanları temizle
@@ -698,10 +696,9 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
 
                 try {
                   final templateData = {
-                    'id': '', // Backend will generate this
                     'name': titleController.text,
                     'subject': titleController.text,
-                    'content': bodyController.text,
+                    'body': bodyController.text,
                     'type': selectedTemplateType,
                     'is_active': isActive,
                   };
@@ -863,10 +860,9 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
 
                 try {
                   final templateData = {
-                    'id': template.id,
                     'name': titleController.text,
                     'subject': titleController.text,
-                    'content': bodyController.text,
+                    'body': bodyController.text,
                     'type': selectedTemplateType,
                     'is_active': isActive,
                   };

@@ -1,12 +1,34 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 class ApiEndpoints {
-  // Base URL - Google Cloud deployed backend
-  static const String baseUrl =
+  // Production URL - Google Cloud deployed backend
+  static const String _productionUrl =
       'https://ics-api-443215445942.europe-west1.run.app';
+
+  // Local development URL
+  // Android Emulator: 10.0.2.2 (localhost'un emulator karşılığı)
+  // iOS Simulator: localhost
+  // Fiziksel cihaz: Mac'in IP adresini kullan (örnek: http://192.168.1.100:8000)
+  static const String _localUrl = 'http://10.0.2.2:8000'; // Android emulator için
+  // iOS simulator için: 'http://localhost:8000'
+  // Fiziksel cihaz için Mac IP: 'http://YOUR_MAC_IP:8000'
 
   // Debug mode flag - automatically detects debug/release mode
   static bool get isDebug => kDebugMode;
+
+  // Base URL - Debug modda local, release modda production
+  static String get baseUrl {
+    if (isDebug) {
+      // iOS Simulator için localhost kullan
+      if (Platform.isIOS) {
+        return 'http://localhost:8000';
+      }
+      // Android Emulator için 10.0.2.2 kullan
+      return _localUrl;
+    }
+    return _productionUrl;
+  }
 
   // Auth endpoints
   static const String authRegister = '/auth/register';
@@ -50,12 +72,13 @@ class ApiEndpoints {
   static const String orders = '/orders';
   static String order(String orderId) => '/orders/$orderId';
   static String orderTracking(String orderId) => '/orders/$orderId/tracking';
-  static const String ordersQueue = '/orders/queue';
-  static String orderShip(String orderId) => '/orders/$orderId/ship';
-  static String orderDeliver(String orderId) => '/orders/$orderId/deliver';
-  static String orderCancel(String orderId) => '/orders/$orderId/cancel';
-  static const String ordersDev = '/orders/dev';
-  static const String ordersEmailTest = '/orders/_email-test';
+  static const String ordersQueue = '/admin/orders/queue';
+  static String orderShip(String orderId) => '/admin/orders/$orderId/ship';
+  static String orderDeliver(String orderId) => '/admin/orders/$orderId/deliver';
+  static String orderCancel(String orderId) => '/admin/orders/$orderId/cancel';
+  static String adminOrderDelete(String orderId) => '/admin/orders/$orderId';
+  static const String ordersDev = '/admin/orders/dev';
+  static const String ordersEmailTest = '/admin/orders/_email-test';
 
   // PayTR endpoints - Direct API (new backend integration)
   static const String paytrDirectInit = '/paytr/direct/init';

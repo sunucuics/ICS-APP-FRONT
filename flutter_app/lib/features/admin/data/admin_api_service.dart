@@ -271,10 +271,10 @@ class AdminApiService {
     }
   }
 
-  /// Delete order (soft delete) - DELETE /orders/{id}
+  /// Delete order (soft delete) - DELETE /admin/orders/{id}
   Future<void> deleteOrder(String orderId) async {
     try {
-      await _apiClient.delete(ApiEndpoints.order(orderId));
+      await _apiClient.delete(ApiEndpoints.adminOrderDelete(orderId));
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
@@ -431,11 +431,36 @@ class AdminApiService {
 
   Future<Service> createService(Map<String, dynamic> serviceData) async {
     try {
-      final response = await _apiClient.post(
-        '/admin/services',
-        data: serviceData,
-      );
-      return Service.fromJson(response.data as Map<String, dynamic>);
+      // Check if there's an image file to upload
+      final imageFile = serviceData['image'];
+      
+      if (imageFile != null && imageFile is String && imageFile.isNotEmpty) {
+        // Use multipart/form-data for image upload
+        final formData = FormData();
+
+        // Add service fields
+        formData.fields.addAll([
+          MapEntry('title', serviceData['title'] ?? ''),
+          MapEntry('description', serviceData['description'] ?? ''),
+          MapEntry('is_upcoming', serviceData['is_upcoming']?.toString() ?? 'false'),
+        ]);
+
+        // Add image file
+        formData.files.add(MapEntry(
+          'image',
+          await MultipartFile.fromFile(imageFile),
+        ));
+
+        final response = await _apiClient.post(
+          '/admin/services',
+          data: formData,
+        );
+        return Service.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        // Backend requires image for create, so throw error if missing
+        throw ApiException(
+            message: 'Hizmet oluşturmak için görsel gereklidir');
+      }
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
@@ -444,9 +469,32 @@ class AdminApiService {
   Future<Service> updateService(
       String serviceId, Map<String, dynamic> serviceData) async {
     try {
+      // Backend expects form data for update
+      final formData = FormData();
+
+      // Add service fields (all optional for update)
+      if (serviceData['title'] != null) {
+        formData.fields.add(MapEntry('title', serviceData['title']));
+      }
+      if (serviceData['description'] != null) {
+        formData.fields.add(MapEntry('description', serviceData['description']));
+      }
+      if (serviceData['is_upcoming'] != null) {
+        formData.fields.add(MapEntry('is_upcoming', serviceData['is_upcoming'].toString()));
+      }
+
+      // Add image file only if provided
+      final imageFile = serviceData['image'];
+      if (imageFile != null && imageFile is String && imageFile.isNotEmpty) {
+        formData.files.add(MapEntry(
+          'image',
+          await MultipartFile.fromFile(imageFile),
+        ));
+      }
+
       final response = await _apiClient.put(
         '/admin/services/$serviceId',
-        data: serviceData,
+        data: formData,
       );
       return Service.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {

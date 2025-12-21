@@ -8,7 +8,7 @@ import '../widgets/profile_tab.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../cart/providers/cart_provider.dart';
 import '../../../admin/providers/admin_provider.dart';
-import '../../../admin/presentation/pages/admin_dashboard_page.dart';
+import '../../../admin/presentation/pages/admin_main_page.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -83,9 +83,9 @@ class HomePageState extends ConsumerState<HomePage> {
   Widget build(BuildContext context) {
     final isAdmin = ref.watch(isAdminProvider);
 
-    // If user is admin, show admin dashboard
+    // If user is admin, show admin main page
     if (isAdmin) {
-      return const AdminDashboardPage();
+      return AdminMainPage();
     }
 
     return Scaffold(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/admin_appointments_provider.dart';
-import '../widgets/admin_navigation.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/models/appointment_model.dart';
 
@@ -34,7 +33,6 @@ class AdminAppointmentsPage extends ConsumerWidget {
         error: (error, stack) =>
             _buildErrorWidget(context, ref, error.toString()),
       ),
-      bottomNavigationBar: const AdminNavigation(),
     );
   }
 

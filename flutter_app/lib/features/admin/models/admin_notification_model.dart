@@ -7,10 +7,10 @@ part 'admin_notification_model.g.dart';
 class NotificationTemplate with _$NotificationTemplate {
   const factory NotificationTemplate({
     required String id,
-    required String name,
-    required String subject,
-    required String content,
-    required String type,
+    String? name,
+    String? subject,
+    String? content,
+    String? type,
     @JsonKey(name: 'is_active') @Default(true) bool isActive,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,

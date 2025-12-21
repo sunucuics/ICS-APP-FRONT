@@ -5793,6 +5793,7 @@ AdminOrdersQueueResponse _$AdminOrdersQueueResponseFromJson(
 mixin _$AdminOrdersQueueResponse {
   List<Order> get preparing => throw _privateConstructorUsedError;
   List<Order> get shipped => throw _privateConstructorUsedError;
+  List<Order> get delivered => throw _privateConstructorUsedError;
   AdminOrdersCount get count => throw _privateConstructorUsedError;
 
   /// Serializes this AdminOrdersQueueResponse to a JSON map.
@@ -5812,7 +5813,10 @@ abstract class $AdminOrdersQueueResponseCopyWith<$Res> {
       _$AdminOrdersQueueResponseCopyWithImpl<$Res, AdminOrdersQueueResponse>;
   @useResult
   $Res call(
-      {List<Order> preparing, List<Order> shipped, AdminOrdersCount count});
+      {List<Order> preparing,
+      List<Order> shipped,
+      List<Order> delivered,
+      AdminOrdersCount count});
 
   $AdminOrdersCountCopyWith<$Res> get count;
 }
@@ -5835,6 +5839,7 @@ class _$AdminOrdersQueueResponseCopyWithImpl<$Res,
   $Res call({
     Object? preparing = null,
     Object? shipped = null,
+    Object? delivered = null,
     Object? count = null,
   }) {
     return _then(_value.copyWith(
@@ -5845,6 +5850,10 @@ class _$AdminOrdersQueueResponseCopyWithImpl<$Res,
       shipped: null == shipped
           ? _value.shipped
           : shipped // ignore: cast_nullable_to_non_nullable
+              as List<Order>,
+      delivered: null == delivered
+          ? _value.delivered
+          : delivered // ignore: cast_nullable_to_non_nullable
               as List<Order>,
       count: null == count
           ? _value.count
@@ -5874,7 +5883,10 @@ abstract class _$$AdminOrdersQueueResponseImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {List<Order> preparing, List<Order> shipped, AdminOrdersCount count});
+      {List<Order> preparing,
+      List<Order> shipped,
+      List<Order> delivered,
+      AdminOrdersCount count});
 
   @override
   $AdminOrdersCountCopyWith<$Res> get count;
@@ -5897,6 +5909,7 @@ class __$$AdminOrdersQueueResponseImplCopyWithImpl<$Res>
   $Res call({
     Object? preparing = null,
     Object? shipped = null,
+    Object? delivered = null,
     Object? count = null,
   }) {
     return _then(_$AdminOrdersQueueResponseImpl(
@@ -5907,6 +5920,10 @@ class __$$AdminOrdersQueueResponseImplCopyWithImpl<$Res>
       shipped: null == shipped
           ? _value._shipped
           : shipped // ignore: cast_nullable_to_non_nullable
+              as List<Order>,
+      delivered: null == delivered
+          ? _value._delivered
+          : delivered // ignore: cast_nullable_to_non_nullable
               as List<Order>,
       count: null == count
           ? _value.count
@@ -5922,9 +5939,11 @@ class _$AdminOrdersQueueResponseImpl implements _AdminOrdersQueueResponse {
   const _$AdminOrdersQueueResponseImpl(
       {required final List<Order> preparing,
       required final List<Order> shipped,
+      required final List<Order> delivered,
       required this.count})
       : _preparing = preparing,
-        _shipped = shipped;
+        _shipped = shipped,
+        _delivered = delivered;
 
   factory _$AdminOrdersQueueResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$AdminOrdersQueueResponseImplFromJson(json);
@@ -5945,12 +5964,20 @@ class _$AdminOrdersQueueResponseImpl implements _AdminOrdersQueueResponse {
     return EqualUnmodifiableListView(_shipped);
   }
 
+  final List<Order> _delivered;
+  @override
+  List<Order> get delivered {
+    if (_delivered is EqualUnmodifiableListView) return _delivered;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_delivered);
+  }
+
   @override
   final AdminOrdersCount count;
 
   @override
   String toString() {
-    return 'AdminOrdersQueueResponse(preparing: $preparing, shipped: $shipped, count: $count)';
+    return 'AdminOrdersQueueResponse(preparing: $preparing, shipped: $shipped, delivered: $delivered, count: $count)';
   }
 
   @override
@@ -5961,6 +5988,8 @@ class _$AdminOrdersQueueResponseImpl implements _AdminOrdersQueueResponse {
             const DeepCollectionEquality()
                 .equals(other._preparing, _preparing) &&
             const DeepCollectionEquality().equals(other._shipped, _shipped) &&
+            const DeepCollectionEquality()
+                .equals(other._delivered, _delivered) &&
             (identical(other.count, count) || other.count == count));
   }
 
@@ -5970,6 +5999,7 @@ class _$AdminOrdersQueueResponseImpl implements _AdminOrdersQueueResponse {
       runtimeType,
       const DeepCollectionEquality().hash(_preparing),
       const DeepCollectionEquality().hash(_shipped),
+      const DeepCollectionEquality().hash(_delivered),
       count);
 
   /// Create a copy of AdminOrdersQueueResponse
@@ -5993,6 +6023,7 @@ abstract class _AdminOrdersQueueResponse implements AdminOrdersQueueResponse {
   const factory _AdminOrdersQueueResponse(
       {required final List<Order> preparing,
       required final List<Order> shipped,
+      required final List<Order> delivered,
       required final AdminOrdersCount count}) = _$AdminOrdersQueueResponseImpl;
 
   factory _AdminOrdersQueueResponse.fromJson(Map<String, dynamic> json) =
@@ -6002,6 +6033,8 @@ abstract class _AdminOrdersQueueResponse implements AdminOrdersQueueResponse {
   List<Order> get preparing;
   @override
   List<Order> get shipped;
+  @override
+  List<Order> get delivered;
   @override
   AdminOrdersCount get count;
 
@@ -6021,6 +6054,7 @@ AdminOrdersCount _$AdminOrdersCountFromJson(Map<String, dynamic> json) {
 mixin _$AdminOrdersCount {
   int get preparing => throw _privateConstructorUsedError;
   int get shipped => throw _privateConstructorUsedError;
+  int get delivered => throw _privateConstructorUsedError;
 
   /// Serializes this AdminOrdersCount to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -6038,7 +6072,7 @@ abstract class $AdminOrdersCountCopyWith<$Res> {
           AdminOrdersCount value, $Res Function(AdminOrdersCount) then) =
       _$AdminOrdersCountCopyWithImpl<$Res, AdminOrdersCount>;
   @useResult
-  $Res call({int preparing, int shipped});
+  $Res call({int preparing, int shipped, int delivered});
 }
 
 /// @nodoc
@@ -6058,6 +6092,7 @@ class _$AdminOrdersCountCopyWithImpl<$Res, $Val extends AdminOrdersCount>
   $Res call({
     Object? preparing = null,
     Object? shipped = null,
+    Object? delivered = null,
   }) {
     return _then(_value.copyWith(
       preparing: null == preparing
@@ -6067,6 +6102,10 @@ class _$AdminOrdersCountCopyWithImpl<$Res, $Val extends AdminOrdersCount>
       shipped: null == shipped
           ? _value.shipped
           : shipped // ignore: cast_nullable_to_non_nullable
+              as int,
+      delivered: null == delivered
+          ? _value.delivered
+          : delivered // ignore: cast_nullable_to_non_nullable
               as int,
     ) as $Val);
   }
@@ -6080,7 +6119,7 @@ abstract class _$$AdminOrdersCountImplCopyWith<$Res>
       __$$AdminOrdersCountImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int preparing, int shipped});
+  $Res call({int preparing, int shipped, int delivered});
 }
 
 /// @nodoc
@@ -6098,6 +6137,7 @@ class __$$AdminOrdersCountImplCopyWithImpl<$Res>
   $Res call({
     Object? preparing = null,
     Object? shipped = null,
+    Object? delivered = null,
   }) {
     return _then(_$AdminOrdersCountImpl(
       preparing: null == preparing
@@ -6108,6 +6148,10 @@ class __$$AdminOrdersCountImplCopyWithImpl<$Res>
           ? _value.shipped
           : shipped // ignore: cast_nullable_to_non_nullable
               as int,
+      delivered: null == delivered
+          ? _value.delivered
+          : delivered // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -6116,7 +6160,9 @@ class __$$AdminOrdersCountImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$AdminOrdersCountImpl implements _AdminOrdersCount {
   const _$AdminOrdersCountImpl(
-      {required this.preparing, required this.shipped});
+      {required this.preparing,
+      required this.shipped,
+      required this.delivered});
 
   factory _$AdminOrdersCountImpl.fromJson(Map<String, dynamic> json) =>
       _$$AdminOrdersCountImplFromJson(json);
@@ -6125,10 +6171,12 @@ class _$AdminOrdersCountImpl implements _AdminOrdersCount {
   final int preparing;
   @override
   final int shipped;
+  @override
+  final int delivered;
 
   @override
   String toString() {
-    return 'AdminOrdersCount(preparing: $preparing, shipped: $shipped)';
+    return 'AdminOrdersCount(preparing: $preparing, shipped: $shipped, delivered: $delivered)';
   }
 
   @override
@@ -6138,12 +6186,14 @@ class _$AdminOrdersCountImpl implements _AdminOrdersCount {
             other is _$AdminOrdersCountImpl &&
             (identical(other.preparing, preparing) ||
                 other.preparing == preparing) &&
-            (identical(other.shipped, shipped) || other.shipped == shipped));
+            (identical(other.shipped, shipped) || other.shipped == shipped) &&
+            (identical(other.delivered, delivered) ||
+                other.delivered == delivered));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, preparing, shipped);
+  int get hashCode => Object.hash(runtimeType, preparing, shipped, delivered);
 
   /// Create a copy of AdminOrdersCount
   /// with the given fields replaced by the non-null parameter values.
@@ -6165,7 +6215,8 @@ class _$AdminOrdersCountImpl implements _AdminOrdersCount {
 abstract class _AdminOrdersCount implements AdminOrdersCount {
   const factory _AdminOrdersCount(
       {required final int preparing,
-      required final int shipped}) = _$AdminOrdersCountImpl;
+      required final int shipped,
+      required final int delivered}) = _$AdminOrdersCountImpl;
 
   factory _AdminOrdersCount.fromJson(Map<String, dynamic> json) =
       _$AdminOrdersCountImpl.fromJson;
@@ -6174,6 +6225,8 @@ abstract class _AdminOrdersCount implements AdminOrdersCount {
   int get preparing;
   @override
   int get shipped;
+  @override
+  int get delivered;
 
   /// Create a copy of AdminOrdersCount
   /// with the given fields replaced by the non-null parameter values.

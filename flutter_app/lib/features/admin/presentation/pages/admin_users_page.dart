@@ -60,7 +60,7 @@ class AdminUsersPage extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user.name.isEmpty ? 'İsimsiz Kullanıcı' : user.name,
+                        (user.name == null || user.name!.isEmpty) ? 'İsimsiz Kullanıcı' : user.name!,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -68,16 +68,16 @@ class AdminUsersPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        user.email.isEmpty ? 'Email yok' : user.email,
+                        user.email,
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 14,
                         ),
                       ),
-                      if (user.phone.isNotEmpty) ...[
+                      if (user.phone != null && user.phone!.isNotEmpty) ...[
                         const SizedBox(height: 4),
                         Text(
-                          user.phone,
+                          user.phone!,
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 14,
@@ -186,7 +186,7 @@ class AdminUsersPage extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                      '${user.name.isEmpty ? 'Kullanıcı' : user.name} için rol seçin:'),
+                      '${(user.name == null || user.name!.isEmpty) ? 'Kullanıcı' : user.name} için rol seçin:'),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     value: selectedRole,
@@ -244,7 +244,7 @@ class AdminUsersPage extends ConsumerWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(
-              '${user.name.isEmpty ? 'Kullanıcı' : user.name} - Adres Detayları'),
+              '${(user.name == null || user.name!.isEmpty) ? 'Kullanıcı' : user.name} - Adres Detayları'),
           content: SizedBox(
             width: double.maxFinite,
             child: ListView.builder(
@@ -333,7 +333,7 @@ class AdminUsersPage extends ConsumerWidget {
         return AlertDialog(
           title: const Text('Kullanıcıyı Sil'),
           content: Text(
-            '${user.name.isEmpty ? 'Bu kullanıcıyı' : user.name} silmek istediğinizden emin misiniz?\n\n'
+            '${(user.name == null || user.name!.isEmpty) ? 'Bu kullanıcıyı' : user.name} silmek istediğinizden emin misiniz?\n\n'
             'Bu işlem geri alınamaz.',
           ),
           actions: [
@@ -368,7 +368,7 @@ class AdminUsersPage extends ConsumerWidget {
         SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text(
-                '${user.name.isEmpty ? 'Kullanıcı' : user.name} rolü ${newRole == 'admin' ? 'Admin' : 'Müşteri'} olarak güncellendi'),
+                '${(user.name == null || user.name!.isEmpty) ? 'Kullanıcı' : user.name} rolü ${newRole == 'admin' ? 'Admin' : 'Müşteri'} olarak güncellendi'),
             backgroundColor: Colors.green,
           ),
         );
@@ -393,7 +393,7 @@ class AdminUsersPage extends ConsumerWidget {
         SnackBarService.showSnackBar(context: context, snackBar: 
           SnackBar(
             content: Text(
-                '${user.name.isEmpty ? 'Kullanıcı' : user.name} başarıyla silindi'),
+                '${(user.name == null || user.name!.isEmpty) ? 'Kullanıcı' : user.name} başarıyla silindi'),
             backgroundColor: Colors.green,
           ),
         );

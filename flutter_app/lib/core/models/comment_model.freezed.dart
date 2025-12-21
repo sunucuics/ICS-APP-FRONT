@@ -26,6 +26,9 @@ mixin _$Comment {
       throw _privateConstructorUsedError; // 'product' or 'service'
   @JsonKey(name: 'target_id')
   String get targetId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'target_name')
+  String? get targetName =>
+      throw _privateConstructorUsedError; // Ürün veya hizmet adı
   @JsonKey(name: 'user_id')
   String get userId => throw _privateConstructorUsedError;
   @JsonKey(name: 'user_name')
@@ -57,6 +60,7 @@ abstract class $CommentCopyWith<$Res> {
       {String id,
       @JsonKey(name: 'target_type') String targetType,
       @JsonKey(name: 'target_id') String targetId,
+      @JsonKey(name: 'target_name') String? targetName,
       @JsonKey(name: 'user_id') String userId,
       @JsonKey(name: 'user_name') String? userName,
       String content,
@@ -84,6 +88,7 @@ class _$CommentCopyWithImpl<$Res, $Val extends Comment>
     Object? id = null,
     Object? targetType = null,
     Object? targetId = null,
+    Object? targetName = freezed,
     Object? userId = null,
     Object? userName = freezed,
     Object? content = null,
@@ -105,6 +110,10 @@ class _$CommentCopyWithImpl<$Res, $Val extends Comment>
           ? _value.targetId
           : targetId // ignore: cast_nullable_to_non_nullable
               as String,
+      targetName: freezed == targetName
+          ? _value.targetName
+          : targetName // ignore: cast_nullable_to_non_nullable
+              as String?,
       userId: null == userId
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
@@ -148,6 +157,7 @@ abstract class _$$CommentImplCopyWith<$Res> implements $CommentCopyWith<$Res> {
       {String id,
       @JsonKey(name: 'target_type') String targetType,
       @JsonKey(name: 'target_id') String targetId,
+      @JsonKey(name: 'target_name') String? targetName,
       @JsonKey(name: 'user_id') String userId,
       @JsonKey(name: 'user_name') String? userName,
       String content,
@@ -173,6 +183,7 @@ class __$$CommentImplCopyWithImpl<$Res>
     Object? id = null,
     Object? targetType = null,
     Object? targetId = null,
+    Object? targetName = freezed,
     Object? userId = null,
     Object? userName = freezed,
     Object? content = null,
@@ -194,6 +205,10 @@ class __$$CommentImplCopyWithImpl<$Res>
           ? _value.targetId
           : targetId // ignore: cast_nullable_to_non_nullable
               as String,
+      targetName: freezed == targetName
+          ? _value.targetName
+          : targetName // ignore: cast_nullable_to_non_nullable
+              as String?,
       userId: null == userId
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
@@ -233,6 +248,7 @@ class _$CommentImpl implements _Comment {
       {required this.id,
       @JsonKey(name: 'target_type') required this.targetType,
       @JsonKey(name: 'target_id') required this.targetId,
+      @JsonKey(name: 'target_name') this.targetName,
       @JsonKey(name: 'user_id') required this.userId,
       @JsonKey(name: 'user_name') this.userName,
       required this.content,
@@ -253,6 +269,10 @@ class _$CommentImpl implements _Comment {
   @override
   @JsonKey(name: 'target_id')
   final String targetId;
+  @override
+  @JsonKey(name: 'target_name')
+  final String? targetName;
+// Ürün veya hizmet adı
   @override
   @JsonKey(name: 'user_id')
   final String userId;
@@ -276,7 +296,7 @@ class _$CommentImpl implements _Comment {
 
   @override
   String toString() {
-    return 'Comment(id: $id, targetType: $targetType, targetId: $targetId, userId: $userId, userName: $userName, content: $content, rating: $rating, isDeleted: $isDeleted, isHidden: $isHidden, createdAt: $createdAt)';
+    return 'Comment(id: $id, targetType: $targetType, targetId: $targetId, targetName: $targetName, userId: $userId, userName: $userName, content: $content, rating: $rating, isDeleted: $isDeleted, isHidden: $isHidden, createdAt: $createdAt)';
   }
 
   @override
@@ -289,6 +309,8 @@ class _$CommentImpl implements _Comment {
                 other.targetType == targetType) &&
             (identical(other.targetId, targetId) ||
                 other.targetId == targetId) &&
+            (identical(other.targetName, targetName) ||
+                other.targetName == targetName) &&
             (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.userName, userName) ||
                 other.userName == userName) &&
@@ -304,8 +326,19 @@ class _$CommentImpl implements _Comment {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, targetType, targetId, userId,
-      userName, content, rating, isDeleted, isHidden, createdAt);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      targetType,
+      targetId,
+      targetName,
+      userId,
+      userName,
+      content,
+      rating,
+      isDeleted,
+      isHidden,
+      createdAt);
 
   /// Create a copy of Comment
   /// with the given fields replaced by the non-null parameter values.
@@ -328,6 +361,7 @@ abstract class _Comment implements Comment {
           {required final String id,
           @JsonKey(name: 'target_type') required final String targetType,
           @JsonKey(name: 'target_id') required final String targetId,
+          @JsonKey(name: 'target_name') final String? targetName,
           @JsonKey(name: 'user_id') required final String userId,
           @JsonKey(name: 'user_name') final String? userName,
           required final String content,
@@ -347,6 +381,9 @@ abstract class _Comment implements Comment {
   @override
   @JsonKey(name: 'target_id')
   String get targetId;
+  @override
+  @JsonKey(name: 'target_name')
+  String? get targetName; // Ürün veya hizmet adı
   @override
   @JsonKey(name: 'user_id')
   String get userId;

@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'local_notification_service.dart';
 
 class FCMService {
   static final FirebaseMessaging _firebaseMessaging =
@@ -58,13 +59,16 @@ class FCMService {
           _firebaseMessagingBackgroundHandler);
 
       // Handle foreground messages
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
         debugPrint('Got a message whilst in the foreground!');
         debugPrint('Message data: ${message.data}');
 
         if (message.notification != null) {
           debugPrint(
               'Message also contained a notification: ${message.notification}');
+
+          // Show local notification for foreground messages
+          await LocalNotificationService.showNotification(message);
 
           // Refresh notifications list when a notification is received
           if (onNotificationReceived != null) {
@@ -145,7 +149,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint('Message data: ${message.data}');
   debugPrint('Message notification: ${message.notification?.title}');
 
-  // Note: In background handler, we can't directly refresh the UI
-  // The notification will be shown by the system, and when user opens the app,
-  // the notifications list will be refreshed automatically
+  // Initialize local notifications in background handler
+  // Note: We need to import and initialize here for background messages
+  // The notification will be shown by the system automatically
 }

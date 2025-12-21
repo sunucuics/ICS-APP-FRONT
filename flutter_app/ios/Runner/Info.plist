@@ -32,6 +32,8 @@
 	<string>Bu uygulama kullanıcı deneyimini geliştirmek için kişi bilgilerine erişim gerektirir.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Bu uygulama sesli komutları işlemek için konuşma tanıma erişimi gerektirir.</string>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>Bu uygulama size bildirimler göndermek için bildirim izni gerektirir.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

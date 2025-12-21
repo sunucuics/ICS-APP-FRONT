@@ -508,6 +508,7 @@ class AdminOrdersQueueResponse with _$AdminOrdersQueueResponse {
   const factory AdminOrdersQueueResponse({
     required List<Order> preparing,
     required List<Order> shipped,
+    required List<Order> delivered,
     required AdminOrdersCount count,
   }) = _AdminOrdersQueueResponse;
 
@@ -521,6 +522,7 @@ class AdminOrdersCount with _$AdminOrdersCount {
   const factory AdminOrdersCount({
     required int preparing,
     required int shipped,
+    required int delivered,
   }) = _AdminOrdersCount;
 
   factory AdminOrdersCount.fromJson(Map<String, dynamic> json) =>

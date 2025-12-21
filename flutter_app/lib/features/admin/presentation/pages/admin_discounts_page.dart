@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/admin_discounts_provider.dart';
 import '../../providers/admin_products_provider.dart';
 import '../../providers/admin_categories_provider.dart';
-import '../widgets/admin_navigation.dart';
 import '../widgets/admin_form_dialog.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../models/admin_discount_model.dart';
@@ -63,7 +62,6 @@ class AdminDiscountsPage extends ConsumerWidget {
           );
         },
       ),
-      bottomNavigationBar: const AdminNavigation(),
     );
   }
 
@@ -370,9 +368,47 @@ class AdminDiscountsPage extends ConsumerWidget {
     );
   }
 
+  String _getTargetDisplayValue(
+      String targetId, String targetType, List<Product> products, List<Category> categories) {
+    if (targetType == 'product') {
+      final product = products.firstWhere(
+        (p) => p.id == targetId,
+        orElse: () => products.first,
+      );
+      return '${product.id} - ${product.title}';
+    } else if (targetType == 'category') {
+      final category = categories.firstWhere(
+        (c) => c.id == targetId,
+        orElse: () => categories.first,
+      );
+      return '${category.id} - ${category.name}';
+    }
+    return targetId;
+  }
+
   void _showEditDiscountDialog(
       BuildContext context, WidgetRef ref, AdminDiscount discount) {
-    _showDiscountFormDialog(context, ref, discount);
+    final productsAsync = ref.read(adminProductsNotifierProvider);
+    final categoriesAsync = ref.read(adminCategoriesProvider);
+
+    productsAsync.when(
+      data: (products) => categoriesAsync.when(
+        data: (categories) =>
+            _showDiscountFormDialog(context, ref, discount, products, categories),
+        loading: () => SnackBarService.showSnackBar(context: context, snackBar: 
+          const SnackBar(content: Text('Kategoriler yükleniyor...')),
+        ),
+        error: (error, stack) => SnackBarService.showSnackBar(context: context, snackBar: 
+          SnackBar(content: Text('Kategori hatası: $error')),
+        ),
+      ),
+      loading: () => SnackBarService.showSnackBar(context: context, snackBar: 
+        const SnackBar(content: Text('Ürünler yükleniyor...')),
+      ),
+      error: (error, stack) => SnackBarService.showSnackBar(context: context, snackBar: 
+        SnackBar(content: Text('Ürün hatası: $error')),
+      ),
+    );
   }
 
   void _showDiscountFormDialog(
@@ -382,15 +418,30 @@ class AdminDiscountsPage extends ConsumerWidget {
       context: context,
       builder: (context) => AdminFormDialog(
         title: discount == null ? 'Yeni İndirim Ekle' : 'İndirim Düzenle',
-        initialData: discount != null
+        initialData: discount != null && products != null && categories != null
             ? {
                 'İndirim Adı': 'İndirim #${discount.id.substring(0, 8)}',
                 'İndirim Oranı': discount.percentage.toString(),
                 'Hedef Tip': discount.targetType,
-                'Hedef ID': discount.targetId ?? '',
+                'Hedef ID': discount.targetId != null
+                    ? _getTargetDisplayValue(
+                        discount.targetId!,
+                        discount.targetType,
+                        products!,
+                        categories!,
+                      )
+                    : '',
                 'Açıklama': discount.description ?? '',
               }
-            : null,
+            : discount != null
+                ? {
+                    'İndirim Adı': 'İndirim #${discount.id.substring(0, 8)}',
+                    'İndirim Oranı': discount.percentage.toString(),
+                    'Hedef Tip': discount.targetType,
+                    'Hedef ID': discount.targetId ?? '',
+                    'Açıklama': discount.description ?? '',
+                  }
+                : null,
         fields: [
           AdminFormField(
             label: 'İndirim Adı',
@@ -415,8 +466,9 @@ class AdminDiscountsPage extends ConsumerWidget {
           AdminFormField(
             label: 'Hedef ID',
             hint: products != null && categories != null
-                ? 'Ürünler sayfasından ID kopyalayın (opsiyonel)'
-                : 'Hedef ürün/kategori ID (opsiyonel)',
+                ? 'Hedef seçin (opsiyonel)'
+                : 'Hedef ürün/kategori seçin (opsiyonel)',
+            dropdownOptions: const [], // Will be populated dynamically
           ),
           AdminFormField(
             label: 'Başlangıç Tarihi',
@@ -434,6 +486,23 @@ class AdminDiscountsPage extends ConsumerWidget {
             maxLines: 3,
           ),
         ],
+        dynamicDropdowns: products != null && categories != null
+            ? {
+                'Hedef ID': (Map<String, String> currentValues) {
+                  final targetType = currentValues['Hedef Tip'] ?? '';
+                  if (targetType == 'product') {
+                    return products!
+                        .map((p) => '${p.id} - ${p.title}')
+                        .toList();
+                  } else if (targetType == 'category') {
+                    return categories!
+                        .map((c) => '${c.id} - ${c.name}')
+                        .toList();
+                  }
+                  return <String>[];
+                },
+              }
+            : null,
         onSave: (data) async {
           // Tarih parsing
           DateTime? startDate;
@@ -461,12 +530,22 @@ class AdminDiscountsPage extends ConsumerWidget {
             }
           }
 
+          // Extract ID from "ID - Name" format if present
+          String? targetId;
+          if (data['Hedef ID']?.isNotEmpty == true) {
+            final targetIdValue = data['Hedef ID']!;
+            if (targetIdValue.contains(' - ')) {
+              targetId = targetIdValue.split(' - ').first;
+            } else {
+              targetId = targetIdValue;
+            }
+          }
+
           final discountData = DiscountCreateRequest(
             name: data['İndirim Adı']!,
             percentage: double.parse(data['İndirim Oranı (%)']!),
             targetType: data['Hedef Tip']!,
-            targetId:
-                data['Hedef ID']?.isNotEmpty == true ? data['Hedef ID'] : null,
+            targetId: targetId,
             startDate: startDate ?? DateTime.now(),
             endDate: endDate ?? DateTime.now().add(const Duration(days: 30)),
             isActive: true,
@@ -475,24 +554,49 @@ class AdminDiscountsPage extends ConsumerWidget {
           );
 
           if (discount == null) {
-            await ref
-                .read(adminDiscountsNotifierProvider.notifier)
-                .createDiscount(discountData);
+            try {
+              await ref
+                  .read(adminDiscountsNotifierProvider.notifier)
+                  .createDiscount(discountData);
+              // Ensure refresh after creation
+              await ref
+                  .read(adminDiscountsNotifierProvider.notifier)
+                  .refresh();
+            } catch (e) {
+              rethrow;
+            }
           } else {
+            // Extract ID from "ID - Name" format if present
+            String? targetId;
+            if (data['Hedef ID']?.isNotEmpty == true) {
+              final targetIdValue = data['Hedef ID']!;
+              if (targetIdValue.contains(' - ')) {
+                targetId = targetIdValue.split(' - ').first;
+              } else {
+                targetId = targetIdValue;
+              }
+            }
+
             final updateData = DiscountUpdateRequest(
               name: data['İndirim Adı'],
               percentage: double.parse(data['İndirim Oranı (%)']!),
               targetType: data['Hedef Tip'],
-              targetId: data['Hedef ID']?.isNotEmpty == true
-                  ? data['Hedef ID']
-                  : null,
+              targetId: targetId,
               description: data['Açıklama']?.isNotEmpty == true
                   ? data['Açıklama']
                   : null,
             );
-            await ref
-                .read(adminDiscountsNotifierProvider.notifier)
-                .updateDiscount(discount.id, updateData);
+            try {
+              await ref
+                  .read(adminDiscountsNotifierProvider.notifier)
+                  .updateDiscount(discount.id, updateData);
+              // Ensure refresh after update
+              await ref
+                  .read(adminDiscountsNotifierProvider.notifier)
+                  .refresh();
+            } catch (e) {
+              rethrow;
+            }
           }
         },
       ),

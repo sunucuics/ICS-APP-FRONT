@@ -9,9 +9,9 @@ part of 'user_model.dart';
 _$UserProfileImpl _$$UserProfileImplFromJson(Map<String, dynamic> json) =>
     _$UserProfileImpl(
       id: json['id'] as String,
-      name: json['name'] as String,
+      name: json['name'] as String?,
       email: json['email'] as String,
-      phone: json['phone'] as String,
+      phone: json['phone'] as String?,
       role: json['role'] as String? ?? 'customer',
       addresses: (json['addresses'] as List<dynamic>?)
               ?.map((e) => Address.fromJson(e as Map<String, dynamic>))

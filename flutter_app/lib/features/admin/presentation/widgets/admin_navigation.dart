@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
-import '../pages/admin_dashboard_page.dart';
-import '../pages/admin_categories_page.dart';
-import '../pages/admin_products_page.dart';
-import '../pages/admin_orders_page.dart';
-import '../pages/admin_appointments_page.dart';
-import '../pages/admin_discounts_page.dart';
-import '../pages/admin_services_page.dart';
-import '../pages/admin_users_page.dart';
-import '../pages/admin_comments_page.dart';
-import '../pages/admin_notifications_page.dart';
-import '../pages/admin_settings_page.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class AdminNavigation extends StatelessWidget {
-  const AdminNavigation({super.key});
+  final int currentIndex;
+  final Function(int) onItemTapped;
+
+  const AdminNavigation({
+    super.key,
+    required this.currentIndex,
+    required this.onItemTapped,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -43,77 +40,60 @@ class AdminNavigation extends StatelessWidget {
                 Icons.dashboard,
                 'Dashboard',
                 0,
-                () => _navigateToTab(context, 0),
               ),
               _buildNavItem(
                 context,
                 Icons.category,
                 'Kategoriler',
                 1,
-                () => _navigateToTab(context, 1),
               ),
               _buildNavItem(
                 context,
                 Icons.inventory,
                 'Ürünler',
                 2,
-                () => _navigateToTab(context, 2),
               ),
               _buildNavItem(
                 context,
                 Icons.shopping_cart,
                 'Siparişler',
                 3,
-                () => _navigateToTab(context, 3),
               ),
               _buildNavItem(
                 context,
                 Icons.event,
                 'Randevular',
                 4,
-                () => _navigateToTab(context, 4),
               ),
               _buildNavItem(
                 context,
                 Icons.local_offer,
                 'İndirimler',
                 5,
-                () => _navigateToTab(context, 5),
               ),
               _buildNavItem(
                 context,
                 Icons.work,
                 'Hizmetler',
                 6,
-                () => _navigateToTab(context, 6),
               ),
               _buildNavItem(
                 context,
                 Icons.people,
                 'Kullanıcılar',
                 7,
-                () => _navigateToTab(context, 7),
               ),
               _buildNavItem(
                 context,
                 Icons.comment,
                 'Yorumlar',
                 8,
-                () => _navigateToTab(context, 8),
               ),
               _buildNavItem(
                 context,
                 Icons.notifications,
                 'Bildirimler',
                 9,
-                () => _navigateToTab(context, 9),
-              ),
-              _buildNavItem(
-                context,
-                Icons.settings,
-                'Ayarlar',
-                10,
-                () => _navigateToTab(context, 10),
               ),
             ],
           ),
@@ -127,10 +107,13 @@ class AdminNavigation extends StatelessWidget {
     IconData icon,
     String label,
     int index,
-    VoidCallback onTap,
   ) {
+    final isSelected = currentIndex == index;
+    final activeColor = AppTheme.primaryOrange; // Vurgu rengi
+    final inactiveColor = Colors.grey; // Pasif renk
+
     return GestureDetector(
-      onTap: onTap,
+      onTap: () => onItemTapped(index),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: Column(
@@ -138,16 +121,16 @@ class AdminNavigation extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: isSelected ? activeColor : inactiveColor,
               size: 20,
             ),
             const SizedBox(height: 2),
             Text(
               label,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: isSelected ? activeColor : inactiveColor,
                 fontSize: 9,
-                fontWeight: FontWeight.normal,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
               textAlign: TextAlign.center,
             ),
@@ -155,87 +138,5 @@ class AdminNavigation extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void _navigateToTab(BuildContext context, int tabIndex) {
-    switch (tabIndex) {
-      case 0:
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const AdminDashboardPage(),
-          ),
-        );
-        break;
-      case 1:
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const AdminCategoriesPage(),
-          ),
-        );
-        break;
-      case 2:
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const AdminProductsPage(),
-          ),
-        );
-        break;
-      case 3:
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const AdminOrdersPage(),
-          ),
-        );
-        break;
-      case 4:
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const AdminAppointmentsPage(),
-          ),
-        );
-        break;
-      case 5:
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const AdminDiscountsPage(),
-          ),
-        );
-        break;
-      case 6:
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const AdminServicesPage(),
-          ),
-        );
-        break;
-      case 7:
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const AdminUsersPage(),
-          ),
-        );
-        break;
-      case 8:
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const AdminCommentsPage(),
-          ),
-        );
-        break;
-      case 9:
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const AdminNotificationsPage(),
-          ),
-        );
-        break;
-      case 10:
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const AdminSettingsPage(),
-          ),
-        );
-        break;
-    }
   }
 }

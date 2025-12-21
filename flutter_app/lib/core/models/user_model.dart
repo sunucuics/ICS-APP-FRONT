@@ -7,9 +7,9 @@ part 'user_model.g.dart';
 class UserProfile with _$UserProfile {
   const factory UserProfile({
     required String id,
-    required String name,
+    String? name,
     required String email,
-    required String phone,
+    String? phone,
     @Default('customer') String role,
     @Default([]) List<Address> addresses,
     @Default(false) bool isGuest,

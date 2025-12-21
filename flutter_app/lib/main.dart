@@ -12,6 +12,8 @@ import 'core/services/snackbar_service.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/services/theme_service.dart';
 import 'core/services/fcm_service.dart';
+import 'core/services/local_notification_service.dart';
+import 'core/services/badge_service.dart';
 import 'core/services/android_performance_service.dart';
 import 'core/services/image_cache_service.dart';
 import 'core/services/crash_prevention_service.dart';
@@ -57,6 +59,20 @@ void main() async {
     );
     print('✅ Firebase initialized successfully');
 
+    // Initialize Local Notification Service (required for foreground notifications)
+    LocalNotificationService.initialize().then((_) {
+      print('✅ Local Notification Service initialized successfully');
+    }).catchError((e) {
+      print('⚠️ Local Notification Service initialization failed: $e');
+    });
+
+    // Initialize Badge Service
+    BadgeService.initialize().then((_) {
+      print('✅ Badge Service initialized successfully');
+    }).catchError((e) {
+      print('⚠️ Badge Service initialization failed: $e');
+    });
+
     // Initialize FCM service in background (non-blocking)
     // Don't wait for it to complete before starting the app
     FCMService.initialize().then((_) {
@@ -79,11 +95,25 @@ void main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends ConsumerState<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize BadgeService with ref after widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      BadgeService.initializeWithRef(ref);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp(

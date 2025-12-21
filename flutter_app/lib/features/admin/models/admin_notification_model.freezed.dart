@@ -21,10 +21,10 @@ NotificationTemplate _$NotificationTemplateFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$NotificationTemplate {
   String get id => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
-  String get subject => throw _privateConstructorUsedError;
-  String get content => throw _privateConstructorUsedError;
-  String get type => throw _privateConstructorUsedError;
+  String? get name => throw _privateConstructorUsedError;
+  String? get subject => throw _privateConstructorUsedError;
+  String? get content => throw _privateConstructorUsedError;
+  String? get type => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
@@ -55,10 +55,10 @@ abstract class $NotificationTemplateCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
-      String name,
-      String subject,
-      String content,
-      String type,
+      String? name,
+      String? subject,
+      String? content,
+      String? type,
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'updated_at') DateTime? updatedAt,
@@ -84,10 +84,10 @@ class _$NotificationTemplateCopyWithImpl<$Res,
   @override
   $Res call({
     Object? id = null,
-    Object? name = null,
-    Object? subject = null,
-    Object? content = null,
-    Object? type = null,
+    Object? name = freezed,
+    Object? subject = freezed,
+    Object? content = freezed,
+    Object? type = freezed,
     Object? isActive = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
@@ -100,22 +100,22 @@ class _$NotificationTemplateCopyWithImpl<$Res,
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      name: null == name
+      name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      subject: null == subject
+              as String?,
+      subject: freezed == subject
           ? _value.subject
           : subject // ignore: cast_nullable_to_non_nullable
-              as String,
-      content: null == content
+              as String?,
+      content: freezed == content
           ? _value.content
           : content // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
+              as String?,
+      type: freezed == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       isActive: null == isActive
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
@@ -154,10 +154,10 @@ abstract class _$$NotificationTemplateImplCopyWith<$Res>
   @useResult
   $Res call(
       {String id,
-      String name,
-      String subject,
-      String content,
-      String type,
+      String? name,
+      String? subject,
+      String? content,
+      String? type,
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'updated_at') DateTime? updatedAt,
@@ -180,10 +180,10 @@ class __$$NotificationTemplateImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? name = null,
-    Object? subject = null,
-    Object? content = null,
-    Object? type = null,
+    Object? name = freezed,
+    Object? subject = freezed,
+    Object? content = freezed,
+    Object? type = freezed,
     Object? isActive = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
@@ -196,22 +196,22 @@ class __$$NotificationTemplateImplCopyWithImpl<$Res>
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      name: null == name
+      name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      subject: null == subject
+              as String?,
+      subject: freezed == subject
           ? _value.subject
           : subject // ignore: cast_nullable_to_non_nullable
-              as String,
-      content: null == content
+              as String?,
+      content: freezed == content
           ? _value.content
           : content // ignore: cast_nullable_to_non_nullable
-              as String,
-      type: null == type
+              as String?,
+      type: freezed == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       isActive: null == isActive
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
@@ -245,10 +245,10 @@ class __$$NotificationTemplateImplCopyWithImpl<$Res>
 class _$NotificationTemplateImpl implements _NotificationTemplate {
   const _$NotificationTemplateImpl(
       {required this.id,
-      required this.name,
-      required this.subject,
-      required this.content,
-      required this.type,
+      this.name,
+      this.subject,
+      this.content,
+      this.type,
       @JsonKey(name: 'is_active') this.isActive = true,
       @JsonKey(name: 'created_at') this.createdAt,
       @JsonKey(name: 'updated_at') this.updatedAt,
@@ -262,13 +262,13 @@ class _$NotificationTemplateImpl implements _NotificationTemplate {
   @override
   final String id;
   @override
-  final String name;
+  final String? name;
   @override
-  final String subject;
+  final String? subject;
   @override
-  final String content;
+  final String? content;
   @override
-  final String type;
+  final String? type;
   @override
   @JsonKey(name: 'is_active')
   final bool isActive;
@@ -340,10 +340,10 @@ class _$NotificationTemplateImpl implements _NotificationTemplate {
 abstract class _NotificationTemplate implements NotificationTemplate {
   const factory _NotificationTemplate(
           {required final String id,
-          required final String name,
-          required final String subject,
-          required final String content,
-          required final String type,
+          final String? name,
+          final String? subject,
+          final String? content,
+          final String? type,
           @JsonKey(name: 'is_active') final bool isActive,
           @JsonKey(name: 'created_at') final DateTime? createdAt,
           @JsonKey(name: 'updated_at') final DateTime? updatedAt,
@@ -358,13 +358,13 @@ abstract class _NotificationTemplate implements NotificationTemplate {
   @override
   String get id;
   @override
-  String get name;
+  String? get name;
   @override
-  String get subject;
+  String? get subject;
   @override
-  String get content;
+  String? get content;
   @override
-  String get type;
+  String? get type;
   @override
   @JsonKey(name: 'is_active')
   bool get isActive;
