@@ -6,6 +6,44 @@ part of 'order_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+AdminOrdersQueueResponse _$AdminOrdersQueueResponseFromJson(
+        Map<String, dynamic> json) =>
+    AdminOrdersQueueResponse(
+      preparing: (json['preparing'] as List<dynamic>)
+          .map((e) => Order.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      shipped: (json['shipped'] as List<dynamic>)
+          .map((e) => Order.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      delivered: (json['delivered'] as List<dynamic>)
+          .map((e) => Order.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      count: AdminOrdersCount.fromJson(json['count'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$AdminOrdersQueueResponseToJson(
+        AdminOrdersQueueResponse instance) =>
+    <String, dynamic>{
+      'preparing': instance.preparing,
+      'shipped': instance.shipped,
+      'delivered': instance.delivered,
+      'count': instance.count,
+    };
+
+AdminOrdersCount _$AdminOrdersCountFromJson(Map<String, dynamic> json) =>
+    AdminOrdersCount(
+      preparing: (json['preparing'] as num).toInt(),
+      shipped: (json['shipped'] as num).toInt(),
+      delivered: (json['delivered'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$AdminOrdersCountToJson(AdminOrdersCount instance) =>
+    <String, dynamic>{
+      'preparing': instance.preparing,
+      'shipped': instance.shipped,
+      'delivered': instance.delivered,
+    };
+
 _$AddressImpl _$$AddressImplFromJson(Map<String, dynamic> json) =>
     _$AddressImpl(
       id: json['id'] as String?,
@@ -386,46 +424,6 @@ Map<String, dynamic> _$$OrdersListResponseImplToJson(
       'items': instance.items,
       'next_cursor': instance.nextCursor,
       'count': instance.count,
-    };
-
-_$AdminOrdersQueueResponseImpl _$$AdminOrdersQueueResponseImplFromJson(
-        Map<String, dynamic> json) =>
-    _$AdminOrdersQueueResponseImpl(
-      preparing: (json['preparing'] as List<dynamic>)
-          .map((e) => Order.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      shipped: (json['shipped'] as List<dynamic>)
-          .map((e) => Order.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      delivered: (json['delivered'] as List<dynamic>)
-          .map((e) => Order.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      count: AdminOrdersCount.fromJson(json['count'] as Map<String, dynamic>),
-    );
-
-Map<String, dynamic> _$$AdminOrdersQueueResponseImplToJson(
-        _$AdminOrdersQueueResponseImpl instance) =>
-    <String, dynamic>{
-      'preparing': instance.preparing,
-      'shipped': instance.shipped,
-      'delivered': instance.delivered,
-      'count': instance.count,
-    };
-
-_$AdminOrdersCountImpl _$$AdminOrdersCountImplFromJson(
-        Map<String, dynamic> json) =>
-    _$AdminOrdersCountImpl(
-      preparing: (json['preparing'] as num).toInt(),
-      shipped: (json['shipped'] as num).toInt(),
-      delivered: (json['delivered'] as num).toInt(),
-    );
-
-Map<String, dynamic> _$$AdminOrdersCountImplToJson(
-        _$AdminOrdersCountImpl instance) =>
-    <String, dynamic>{
-      'preparing': instance.preparing,
-      'shipped': instance.shipped,
-      'delivered': instance.delivered,
     };
 
 _$OrderShipRequestImpl _$$OrderShipRequestImplFromJson(

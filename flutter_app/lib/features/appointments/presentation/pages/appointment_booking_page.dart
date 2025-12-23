@@ -619,6 +619,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
     ref.read(appointmentBookingProvider.notifier).bookAppointmentForm(
           serviceId: widget.service.id,
           start: startDateTime,
+          notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
         );
   }
 

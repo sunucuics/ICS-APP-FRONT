@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'local_notification_service.dart';
 
 class FCMService {
@@ -19,6 +20,9 @@ class FCMService {
 
   // Callback for refreshing notifications when a message is received
   static VoidCallback? onNotificationReceived;
+  
+  // Callback for updating FCM token to backend
+  static Future<void> Function(String)? onTokenUpdate;
 
   /// Initialize FCM service
   static Future<void> initialize() async {
@@ -48,10 +52,20 @@ class FCMService {
       await _getFCMToken();
 
       // Listen for token refresh
-      _firebaseMessaging.onTokenRefresh.listen((token) {
+      _firebaseMessaging.onTokenRefresh.listen((token) async {
         _fcmToken = token;
-        _saveTokenToStorage(token);
+        await _saveTokenToStorage(token);
         debugPrint('FCM Token refreshed: $token');
+        
+        // Update token to backend if user is authenticated
+        if (onTokenUpdate != null) {
+          try {
+            await onTokenUpdate!(token);
+            debugPrint('FCM Token updated to backend');
+          } catch (e) {
+            debugPrint('Error updating FCM token to backend: $e');
+          }
+        }
       });
 
       // Handle background messages
@@ -96,9 +110,33 @@ class FCMService {
       if (_fcmToken != null) {
         await _saveTokenToStorage(_fcmToken!);
         debugPrint('FCM Token: $_fcmToken');
+        
+        // Update token to backend if user is authenticated
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null && onTokenUpdate != null) {
+          try {
+            await onTokenUpdate!(_fcmToken!);
+            debugPrint('FCM Token sent to backend on initialization');
+          } catch (e) {
+            debugPrint('Error updating FCM token to backend: $e');
+          }
+        }
       }
     } catch (e) {
       debugPrint('Error getting FCM token: $e');
+    }
+  }
+  
+  /// Update FCM token to backend (call this when user logs in)
+  static Future<void> updateTokenToBackend() async {
+    final token = await getFCMToken();
+    if (token != null && onTokenUpdate != null) {
+      try {
+        await onTokenUpdate!(token);
+        debugPrint('FCM Token manually updated to backend');
+      } catch (e) {
+        debugPrint('Error manually updating FCM token to backend: $e');
+      }
     }
   }
 

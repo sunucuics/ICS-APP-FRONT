@@ -5784,20 +5784,12 @@ abstract class _OrdersListResponse implements OrdersListResponse {
       throw _privateConstructorUsedError;
 }
 
-AdminOrdersQueueResponse _$AdminOrdersQueueResponseFromJson(
-    Map<String, dynamic> json) {
-  return _AdminOrdersQueueResponse.fromJson(json);
-}
-
 /// @nodoc
 mixin _$AdminOrdersQueueResponse {
   List<Order> get preparing => throw _privateConstructorUsedError;
   List<Order> get shipped => throw _privateConstructorUsedError;
   List<Order> get delivered => throw _privateConstructorUsedError;
   AdminOrdersCount get count => throw _privateConstructorUsedError;
-
-  /// Serializes this AdminOrdersQueueResponse to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of AdminOrdersQueueResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -5934,7 +5926,7 @@ class __$$AdminOrdersQueueResponseImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$AdminOrdersQueueResponseImpl implements _AdminOrdersQueueResponse {
   const _$AdminOrdersQueueResponseImpl(
       {required final List<Order> preparing,
@@ -5944,9 +5936,6 @@ class _$AdminOrdersQueueResponseImpl implements _AdminOrdersQueueResponse {
       : _preparing = preparing,
         _shipped = shipped,
         _delivered = delivered;
-
-  factory _$AdminOrdersQueueResponseImpl.fromJson(Map<String, dynamic> json) =>
-      _$$AdminOrdersQueueResponseImplFromJson(json);
 
   final List<Order> _preparing;
   @override
@@ -5993,7 +5982,6 @@ class _$AdminOrdersQueueResponseImpl implements _AdminOrdersQueueResponse {
             (identical(other.count, count) || other.count == count));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -6010,13 +5998,6 @@ class _$AdminOrdersQueueResponseImpl implements _AdminOrdersQueueResponse {
   _$$AdminOrdersQueueResponseImplCopyWith<_$AdminOrdersQueueResponseImpl>
       get copyWith => __$$AdminOrdersQueueResponseImplCopyWithImpl<
           _$AdminOrdersQueueResponseImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$AdminOrdersQueueResponseImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _AdminOrdersQueueResponse implements AdminOrdersQueueResponse {
@@ -6025,9 +6006,6 @@ abstract class _AdminOrdersQueueResponse implements AdminOrdersQueueResponse {
       required final List<Order> shipped,
       required final List<Order> delivered,
       required final AdminOrdersCount count}) = _$AdminOrdersQueueResponseImpl;
-
-  factory _AdminOrdersQueueResponse.fromJson(Map<String, dynamic> json) =
-      _$AdminOrdersQueueResponseImpl.fromJson;
 
   @override
   List<Order> get preparing;
@@ -6046,18 +6024,11 @@ abstract class _AdminOrdersQueueResponse implements AdminOrdersQueueResponse {
       get copyWith => throw _privateConstructorUsedError;
 }
 
-AdminOrdersCount _$AdminOrdersCountFromJson(Map<String, dynamic> json) {
-  return _AdminOrdersCount.fromJson(json);
-}
-
 /// @nodoc
 mixin _$AdminOrdersCount {
   int get preparing => throw _privateConstructorUsedError;
   int get shipped => throw _privateConstructorUsedError;
   int get delivered => throw _privateConstructorUsedError;
-
-  /// Serializes this AdminOrdersCount to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of AdminOrdersCount
   /// with the given fields replaced by the non-null parameter values.
@@ -6157,15 +6128,12 @@ class __$$AdminOrdersCountImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$AdminOrdersCountImpl implements _AdminOrdersCount {
   const _$AdminOrdersCountImpl(
       {required this.preparing,
       required this.shipped,
       required this.delivered});
-
-  factory _$AdminOrdersCountImpl.fromJson(Map<String, dynamic> json) =>
-      _$$AdminOrdersCountImplFromJson(json);
 
   @override
   final int preparing;
@@ -6191,7 +6159,6 @@ class _$AdminOrdersCountImpl implements _AdminOrdersCount {
                 other.delivered == delivered));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, preparing, shipped, delivered);
 
@@ -6203,13 +6170,6 @@ class _$AdminOrdersCountImpl implements _AdminOrdersCount {
   _$$AdminOrdersCountImplCopyWith<_$AdminOrdersCountImpl> get copyWith =>
       __$$AdminOrdersCountImplCopyWithImpl<_$AdminOrdersCountImpl>(
           this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$AdminOrdersCountImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _AdminOrdersCount implements AdminOrdersCount {
@@ -6217,9 +6177,6 @@ abstract class _AdminOrdersCount implements AdminOrdersCount {
       {required final int preparing,
       required final int shipped,
       required final int delivered}) = _$AdminOrdersCountImpl;
-
-  factory _AdminOrdersCount.fromJson(Map<String, dynamic> json) =
-      _$AdminOrdersCountImpl.fromJson;
 
   @override
   int get preparing;

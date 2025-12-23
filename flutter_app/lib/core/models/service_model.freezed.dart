@@ -19,7 +19,10 @@ mixin _$Service {
   String get id => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
-  String? get image => throw _privateConstructorUsedError;
+  String? get image =>
+      throw _privateConstructorUsedError; // Backward compatibility
+  List<String>? get images =>
+      throw _privateConstructorUsedError; // List of image URLs (1-3 images)
   bool get isUpcoming => throw _privateConstructorUsedError;
   bool get isDeleted => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
@@ -41,6 +44,7 @@ abstract class $ServiceCopyWith<$Res> {
       String title,
       String description,
       String? image,
+      List<String>? images,
       bool isUpcoming,
       bool isDeleted,
       DateTime? createdAt,
@@ -66,6 +70,7 @@ class _$ServiceCopyWithImpl<$Res, $Val extends Service>
     Object? title = null,
     Object? description = null,
     Object? image = freezed,
+    Object? images = freezed,
     Object? isUpcoming = null,
     Object? isDeleted = null,
     Object? createdAt = freezed,
@@ -88,6 +93,10 @@ class _$ServiceCopyWithImpl<$Res, $Val extends Service>
           ? _value.image
           : image // ignore: cast_nullable_to_non_nullable
               as String?,
+      images: freezed == images
+          ? _value.images
+          : images // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
       isUpcoming: null == isUpcoming
           ? _value.isUpcoming
           : isUpcoming // ignore: cast_nullable_to_non_nullable
@@ -120,6 +129,7 @@ abstract class _$$ServiceImplCopyWith<$Res> implements $ServiceCopyWith<$Res> {
       String title,
       String description,
       String? image,
+      List<String>? images,
       bool isUpcoming,
       bool isDeleted,
       DateTime? createdAt,
@@ -143,6 +153,7 @@ class __$$ServiceImplCopyWithImpl<$Res>
     Object? title = null,
     Object? description = null,
     Object? image = freezed,
+    Object? images = freezed,
     Object? isUpcoming = null,
     Object? isDeleted = null,
     Object? createdAt = freezed,
@@ -165,6 +176,10 @@ class __$$ServiceImplCopyWithImpl<$Res>
           ? _value.image
           : image // ignore: cast_nullable_to_non_nullable
               as String?,
+      images: freezed == images
+          ? _value._images
+          : images // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
       isUpcoming: null == isUpcoming
           ? _value.isUpcoming
           : isUpcoming // ignore: cast_nullable_to_non_nullable
@@ -193,10 +208,12 @@ class _$ServiceImpl implements _Service {
       required this.title,
       required this.description,
       this.image,
+      final List<String>? images,
       this.isUpcoming = false,
       this.isDeleted = false,
       this.createdAt,
-      this.kind = 'service'});
+      this.kind = 'service'})
+      : _images = images;
 
   @override
   final String id;
@@ -206,6 +223,19 @@ class _$ServiceImpl implements _Service {
   final String description;
   @override
   final String? image;
+// Backward compatibility
+  final List<String>? _images;
+// Backward compatibility
+  @override
+  List<String>? get images {
+    final value = _images;
+    if (value == null) return null;
+    if (_images is EqualUnmodifiableListView) return _images;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
+// List of image URLs (1-3 images)
   @override
   @JsonKey()
   final bool isUpcoming;
@@ -220,7 +250,7 @@ class _$ServiceImpl implements _Service {
 
   @override
   String toString() {
-    return 'Service(id: $id, title: $title, description: $description, image: $image, isUpcoming: $isUpcoming, isDeleted: $isDeleted, createdAt: $createdAt, kind: $kind)';
+    return 'Service(id: $id, title: $title, description: $description, image: $image, images: $images, isUpcoming: $isUpcoming, isDeleted: $isDeleted, createdAt: $createdAt, kind: $kind)';
   }
 
   @override
@@ -233,6 +263,7 @@ class _$ServiceImpl implements _Service {
             (identical(other.description, description) ||
                 other.description == description) &&
             (identical(other.image, image) || other.image == image) &&
+            const DeepCollectionEquality().equals(other._images, _images) &&
             (identical(other.isUpcoming, isUpcoming) ||
                 other.isUpcoming == isUpcoming) &&
             (identical(other.isDeleted, isDeleted) ||
@@ -243,8 +274,17 @@ class _$ServiceImpl implements _Service {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, title, description, image,
-      isUpcoming, isDeleted, createdAt, kind);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      title,
+      description,
+      image,
+      const DeepCollectionEquality().hash(_images),
+      isUpcoming,
+      isDeleted,
+      createdAt,
+      kind);
 
   /// Create a copy of Service
   /// with the given fields replaced by the non-null parameter values.
@@ -261,6 +301,7 @@ abstract class _Service implements Service {
       required final String title,
       required final String description,
       final String? image,
+      final List<String>? images,
       final bool isUpcoming,
       final bool isDeleted,
       final DateTime? createdAt,
@@ -273,7 +314,9 @@ abstract class _Service implements Service {
   @override
   String get description;
   @override
-  String? get image;
+  String? get image; // Backward compatibility
+  @override
+  List<String>? get images; // List of image URLs (1-3 images)
   @override
   bool get isUpcoming;
   @override

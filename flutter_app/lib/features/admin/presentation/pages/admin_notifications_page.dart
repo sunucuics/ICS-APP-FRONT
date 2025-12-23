@@ -26,24 +26,22 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
         elevation: 0,
         bottom: TabBar(
           controller:
-              TabController(length: 3, vsync: this, initialIndex: _selectedTab),
+              TabController(length: 2, vsync: this, initialIndex: _selectedTab),
           onTap: (index) => setState(() => _selectedTab = index),
           indicatorColor: Colors.white,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           tabs: const [
             Tab(text: 'Şablonlar', icon: Icon(Icons.description)),
-            Tab(text: 'Kampanyalar', icon: Icon(Icons.campaign)),
             Tab(text: 'Gönder', icon: Icon(Icons.send)),
           ],
         ),
       ),
       body: TabBarView(
         controller:
-            TabController(length: 3, vsync: this, initialIndex: _selectedTab),
+            TabController(length: 2, vsync: this, initialIndex: _selectedTab),
         children: [
           _buildTemplatesTab(),
-          _buildCampaignsTab(),
           _buildSendTab(),
         ],
       ),
@@ -53,16 +51,29 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
   Widget _buildTemplatesTab() {
     final templatesAsync = ref.watch(adminNotificationTemplatesProvider);
 
-    return templatesAsync.when(
-      data: (templates) => _buildTemplatesList(templates),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => _buildErrorWidget(error.toString()),
+    return Stack(
+      children: [
+        templatesAsync.when(
+          data: (templates) => _buildTemplatesList(templates),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => _buildErrorWidget(error.toString()),
+        ),
+        Positioned(
+          bottom: 16,
+          right: 16,
+          child: FloatingActionButton(
+            onPressed: () => _showAddTemplateDialog(),
+            backgroundColor: AppTheme.primaryOrange,
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildTemplatesList(templates) {
     if (templates.isEmpty) {
-      return _buildEmptyState(
+      return _buildEmptyStateWithoutButton(
           'Henüz bildirim şablonu bulunmuyor.', Icons.description);
     }
 
@@ -165,7 +176,7 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
 
   Widget _buildCampaignsList(campaigns) {
     if (campaigns.isEmpty) {
-      return _buildEmptyState(
+      return _buildEmptyStateWithoutButton(
           'Henüz bildirim kampanyası bulunmuyor.', Icons.campaign);
     }
 
@@ -535,6 +546,22 @@ class _AdminNotificationsPageState extends ConsumerState<AdminNotificationsPage>
               backgroundColor: AppTheme.primaryOrange,
               foregroundColor: Colors.white,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyStateWithoutButton(String message, IconData icon) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 60, color: Colors.grey),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
         ],
       ),

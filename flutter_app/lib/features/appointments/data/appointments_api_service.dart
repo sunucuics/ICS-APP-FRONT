@@ -35,6 +35,7 @@ class AppointmentsApiService {
   Future<Appointment> bookAppointmentForm({
     required String serviceId,
     required DateTime start,
+    String? notes,
   }) async {
     // Send the DateTime as-is, backend will handle timezone conversion
     final isoString = start.toIso8601String();
@@ -42,6 +43,7 @@ class AppointmentsApiService {
     final formData = FormData.fromMap({
       'service_id': serviceId,
       'start': isoString,
+      if (notes != null && notes.isNotEmpty) 'notes': notes,
     });
 
     final response = await _apiClient.post(

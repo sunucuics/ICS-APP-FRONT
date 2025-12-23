@@ -23,10 +23,12 @@ class AppointmentsRepository {
   Future<Appointment> bookAppointmentForm({
     required String serviceId,
     required DateTime start,
+    String? notes,
   }) async {
     return await _apiService.bookAppointmentForm(
       serviceId: serviceId,
       start: start,
+      notes: notes,
     );
   }
 

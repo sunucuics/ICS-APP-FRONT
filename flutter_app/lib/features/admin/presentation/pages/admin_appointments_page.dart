@@ -70,20 +70,8 @@ class AdminAppointmentsPage extends ConsumerWidget {
           children: [
             // Appointment Header
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Expanded(
-                  child: Text(
-                    'Randevu #${appointment.id}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: 8),
                 _buildStatusChip(
                     appointment.status, _getStatusColor(appointment.status)),
               ],
@@ -400,7 +388,7 @@ class AdminAppointmentsPage extends ConsumerWidget {
 
   void _showStatusUpdateDialog(
       BuildContext context, WidgetRef ref, AppointmentWithDetails appointment) {
-    final statuses = ['pending', 'confirmed', 'completed', 'cancelled'];
+    final statuses = ['pending', 'approved', 'completed', 'cancelled'];
 
     showDialog(
       context: context,
@@ -440,7 +428,7 @@ class AdminAppointmentsPage extends ConsumerWidget {
     switch (status.toLowerCase()) {
       case 'pending':
         return 'Beklemede';
-      case 'confirmed':
+      case 'approved':
         return 'Onaylandı';
       case 'completed':
         return 'Tamamlandı';

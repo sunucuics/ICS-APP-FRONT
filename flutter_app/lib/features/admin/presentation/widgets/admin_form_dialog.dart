@@ -28,7 +28,7 @@ class AdminFormDialog extends StatefulWidget {
 class _AdminFormDialogState extends State<AdminFormDialog> {
   final _formKey = GlobalKey<FormState>();
   final Map<String, TextEditingController> _controllers = {};
-  final Map<String, File?> _selectedImages = {};
+  final Map<String, List<File>> _selectedImages = {};
   bool _isLoading = false;
 
   @override
@@ -39,7 +39,7 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
         text: widget.initialData?[field.label] ?? '',
       );
       if (field.isImageField) {
-        _selectedImages[field.label] = null;
+        _selectedImages[field.label] = [];
       }
     }
   }
@@ -354,7 +354,7 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
     // Validate required image fields
     for (final field in widget.fields) {
       if (field.isImageField && field.isRequired) {
-        if (_selectedImages[field.label] == null) {
+        if (_selectedImages[field.label] == null || _selectedImages[field.label]!.isEmpty) {
           if (mounted) {
             SnackBarService.showSnackBar(context: context, snackBar: 
               SnackBar(
@@ -380,8 +380,18 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
 
       // Add selected images to data
       for (final entry in _selectedImages.entries) {
-        if (entry.value != null) {
-          data['${entry.key}_file'] = entry.value!.path;
+        if (entry.value.isNotEmpty) {
+          // For multiple images, store as comma-separated paths
+          // For single image, store as single path
+          final field = widget.fields.firstWhere(
+            (f) => f.label == entry.key && f.isImageField,
+            orElse: () => widget.fields.firstWhere((f) => f.label == entry.key),
+          );
+          if (field.allowMultipleImages) {
+            data['${entry.key}_files'] = entry.value.map((f) => f.path).join(',');
+          } else {
+            data['${entry.key}_file'] = entry.value.first.path;
+          }
         }
       }
 
@@ -415,54 +425,127 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
   }
 
   Widget _buildImageField(AdminFormField field) {
-    final selectedImage = _selectedImages[field.label];
+    final selectedImages = _selectedImages[field.label] ?? [];
+    final allowMultiple = field.allowMultipleImages;
+    final maxImages = allowMultiple ? 5 : 1;
 
     return Column(
       children: [
-        Container(
-          width: double.infinity,
-          height: 120,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: selectedImage != null
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.file(
-                    selectedImage,
-                    fit: BoxFit.cover,
-                  ),
-                )
-              : Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.image,
-                        size: 40,
-                        color: Colors.grey.shade400,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Görsel seçmek için tıklayın',
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 12,
+        // Selected images grid
+        if (selectedImages.isNotEmpty)
+          Container(
+            width: double.infinity,
+            constraints: const BoxConstraints(maxHeight: 200),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: selectedImages.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final image = entry.value;
+                  return Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                            image,
+                            fit: BoxFit.cover,
+                            width: 120,
+                            height: 120,
+                          ),
                         ),
-                      ),
-                    ],
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              icon: const Icon(Icons.close, size: 16, color: Colors.white),
+                              onPressed: () => _removeImage(field.label, index),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          ),
+                        ),
+                        if (allowMultiple && index == 0)
+                          Positioned(
+                            bottom: 4,
+                            left: 4,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryNavy,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'Ana',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          )
+        else
+          Container(
+            width: double.infinity,
+            height: 120,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.image,
+                    size: 40,
+                    color: Colors.grey.shade400,
                   ),
-                ),
-        ),
+                  const SizedBox(height: 8),
+                  Text(
+                    allowMultiple 
+                        ? 'Görsel seçmek için tıklayın (Maks: $maxImages)'
+                        : 'Görsel seçmek için tıklayın',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 12,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
         const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: () => _pickImage(field.label, ImageSource.gallery),
+                onPressed: selectedImages.length >= maxImages
+                    ? null
+                    : () => _pickImage(field.label, ImageSource.gallery, allowMultiple),
                 icon: const Icon(Icons.photo_library, size: 18),
-                label: const Text('Galeri'),
+                label: Text(allowMultiple ? 'Galeri (${selectedImages.length}/$maxImages)' : 'Galeri'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryNavy,
                   foregroundColor: Colors.white,
@@ -473,7 +556,9 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
             const SizedBox(width: 8),
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: () => _pickImage(field.label, ImageSource.camera),
+                onPressed: selectedImages.length >= maxImages
+                    ? null
+                    : () => _pickImage(field.label, ImageSource.camera, allowMultiple),
                 icon: const Icon(Icons.camera_alt, size: 18),
                 label: const Text('Kamera'),
                 style: ElevatedButton.styleFrom(
@@ -483,34 +568,106 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
                 ),
               ),
             ),
-            if (selectedImage != null) ...[
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: () => _removeImage(field.label),
-                icon: const Icon(Icons.delete, color: Colors.red),
-                tooltip: 'Görseli kaldır',
-              ),
-            ],
           ],
         ),
+        if (allowMultiple && selectedImages.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              'İlk görsel ana görsel olarak kullanılacaktır',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 11,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
       ],
     );
   }
 
-  Future<void> _pickImage(String fieldLabel, ImageSource source) async {
+  Future<void> _pickImage(String fieldLabel, ImageSource source, bool allowMultiple) async {
     try {
       final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
-        source: source,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 80,
-      );
+      
+      if (allowMultiple && source == ImageSource.gallery) {
+        // Pick multiple images (only from gallery)
+        final List<XFile> images = await picker.pickMultiImage(
+          maxWidth: 1024,
+          maxHeight: 1024,
+          imageQuality: 80,
+        );
 
-      if (image != null) {
-        setState(() {
-          _selectedImages[fieldLabel] = File(image.path);
-        });
+        if (images.isNotEmpty) {
+          setState(() {
+            final currentImages = _selectedImages[fieldLabel] ?? [];
+            final newImages = images.map((x) => File(x.path)).toList();
+            final totalImages = currentImages.length + newImages.length;
+            final maxImages = 5;
+            
+            if (totalImages > maxImages) {
+              // Limit to maxImages
+              final remainingSlots = maxImages - currentImages.length;
+              if (remainingSlots > 0) {
+                _selectedImages[fieldLabel] = [
+                  ...currentImages,
+                  ...newImages.take(remainingSlots),
+                ];
+                if (mounted) {
+                  SnackBarService.showSnackBar(context: context, snackBar: 
+                    SnackBar(
+                      content: Text('Maksimum $maxImages görsel seçebilirsiniz. İlk $remainingSlots görsel eklendi.'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                }
+              } else {
+                if (mounted) {
+                  SnackBarService.showSnackBar(context: context, snackBar: 
+                    SnackBar(
+                      content: Text('Maksimum $maxImages görsel seçebilirsiniz.'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                }
+              }
+            } else {
+              _selectedImages[fieldLabel] = [...currentImages, ...newImages];
+            }
+          });
+        }
+      } else {
+        // Pick single image (camera or single image mode)
+        final XFile? image = await picker.pickImage(
+          source: source,
+          maxWidth: 1024,
+          maxHeight: 1024,
+          imageQuality: 80,
+        );
+
+        if (image != null) {
+          setState(() {
+            if (allowMultiple) {
+              // Add to existing images if multiple mode
+              final currentImages = _selectedImages[fieldLabel] ?? [];
+              if (currentImages.length < 5) {
+                _selectedImages[fieldLabel] = [...currentImages, File(image.path)];
+              } else {
+                if (mounted) {
+                  SnackBarService.showSnackBar(context: context, snackBar: 
+                    const SnackBar(
+                      content: Text('Maksimum 5 görsel seçebilirsiniz.'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                }
+              }
+            } else {
+              // Replace existing image if single mode
+              _selectedImages[fieldLabel] = [File(image.path)];
+            }
+          });
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -524,9 +681,13 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
     }
   }
 
-  void _removeImage(String fieldLabel) {
+  void _removeImage(String fieldLabel, int index) {
     setState(() {
-      _selectedImages[fieldLabel] = null;
+      final images = _selectedImages[fieldLabel] ?? [];
+      if (index >= 0 && index < images.length) {
+        images.removeAt(index);
+        _selectedImages[fieldLabel] = images;
+      }
     });
   }
 }
@@ -541,6 +702,7 @@ class AdminFormField {
   final List<String>? dropdownOptions;
   final bool isDateField;
   final bool isImageField;
+  final bool allowMultipleImages;
 
   const AdminFormField({
     required this.label,
@@ -552,5 +714,6 @@ class AdminFormField {
     this.dropdownOptions,
     this.isDateField = false,
     this.isImageField = false,
+    this.allowMultipleImages = false,
   });
 }

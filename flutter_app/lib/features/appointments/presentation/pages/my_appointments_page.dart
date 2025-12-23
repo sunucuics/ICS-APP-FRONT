@@ -35,6 +35,8 @@ class MyAppointmentsPage extends ConsumerWidget {
               appointments.where((apt) => apt.status == 'pending').toList();
           final approvedAppointments =
               appointments.where((apt) => apt.status == 'approved').toList();
+          final completedAppointments =
+              appointments.where((apt) => apt.status == 'completed').toList();
           final cancelledAppointments =
               appointments.where((apt) => apt.status == 'cancelled').toList();
 
@@ -50,7 +52,7 @@ class MyAppointmentsPage extends ConsumerWidget {
                       pendingAppointments.length),
                   const SizedBox(height: 8),
                   ...pendingAppointments
-                      .map((apt) => _buildAppointmentCard(context, apt)),
+                      .map((apt) => _buildAppointmentCard(context, ref, apt)),
                   const SizedBox(height: 24),
                 ],
                 if (approvedAppointments.isNotEmpty) ...[
@@ -58,7 +60,15 @@ class MyAppointmentsPage extends ConsumerWidget {
                       approvedAppointments.length),
                   const SizedBox(height: 8),
                   ...approvedAppointments
-                      .map((apt) => _buildAppointmentCard(context, apt)),
+                      .map((apt) => _buildAppointmentCard(context, ref, apt)),
+                  const SizedBox(height: 24),
+                ],
+                if (completedAppointments.isNotEmpty) ...[
+                  _buildSectionHeader(context, 'Tamamlanan Randevular',
+                      completedAppointments.length),
+                  const SizedBox(height: 8),
+                  ...completedAppointments
+                      .map((apt) => _buildAppointmentCard(context, ref, apt)),
                   const SizedBox(height: 24),
                 ],
                 if (cancelledAppointments.isNotEmpty) ...[
@@ -66,7 +76,7 @@ class MyAppointmentsPage extends ConsumerWidget {
                       cancelledAppointments.length),
                   const SizedBox(height: 8),
                   ...cancelledAppointments
-                      .map((apt) => _buildAppointmentCard(context, apt)),
+                      .map((apt) => _buildAppointmentCard(context, ref, apt)),
                 ],
               ],
             ),
@@ -183,7 +193,7 @@ class MyAppointmentsPage extends ConsumerWidget {
   }
 
   Widget _buildAppointmentCard(
-      BuildContext context, AppointmentWithDetails appointment) {
+      BuildContext context, WidgetRef ref, AppointmentWithDetails appointment) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
@@ -299,8 +309,79 @@ class MyAppointmentsPage extends ConsumerWidget {
             // Durum açıklaması
             const SizedBox(height: 12),
             _buildStatusDescription(appointment.status),
+            
+            // Durum güncelleme butonu (sadece approved durumundaki randevular için)
+            if (appointment.status == 'approved') ...[
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                onPressed: () => _showCompleteAppointmentDialog(context, ref, appointment),
+                icon: const Icon(Icons.check_circle),
+                label: const Text('Randevuyu Tamamlandı Olarak İşaretle'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+              ),
+            ],
           ],
         ),
+      ),
+    );
+  }
+  
+  void _showCompleteAppointmentDialog(
+      BuildContext context, WidgetRef ref, AppointmentWithDetails appointment) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Randevuyu Tamamlandı Olarak İşaretle'),
+        content: const Text(
+          'Bu randevuyu tamamlandı olarak işaretlemek istediğinizden emin misiniz?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('İptal'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              try {
+                await ref
+                    .read(appointmentStatusUpdateProvider.notifier)
+                    .updateAppointmentStatus(
+                      appointmentId: appointment.id,
+                      status: 'completed',
+                    );
+                // Randevu listesini yenile
+                ref.invalidate(myAppointmentsProvider);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Randevu tamamlandı olarak işaretlendi'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              } catch (error) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Hata: ${error.toString()}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Tamamlandı Olarak İşaretle'),
+          ),
+        ],
       ),
     );
   }
@@ -317,9 +398,14 @@ class MyAppointmentsPage extends ConsumerWidget {
         text = 'Beklemede';
         break;
       case 'approved':
+        backgroundColor = Colors.blue.withOpacity(0.1);
+        textColor = Colors.blue;
+        text = 'Onaylandı';
+        break;
+      case 'completed':
         backgroundColor = Colors.green.withOpacity(0.1);
         textColor = Colors.green;
-        text = 'Onaylandı';
+        text = 'Tamamlandı';
         break;
       case 'cancelled':
         backgroundColor = Colors.red.withOpacity(0.1);
@@ -364,6 +450,12 @@ class MyAppointmentsPage extends ConsumerWidget {
       case 'approved':
         description =
             'Randevunuz onaylandı. Belirtilen tarih ve saatte hazır olun.';
+        icon = Icons.check_circle;
+        color = Colors.blue;
+        break;
+      case 'completed':
+        description =
+            'Bu randevu tamamlanmıştır. Hizmetiniz başarıyla gerçekleştirilmiştir.';
         icon = Icons.check_circle;
         color = Colors.green;
         break;

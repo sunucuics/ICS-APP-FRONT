@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/services/firebase_auth_service.dart';
+import '../../../core/services/fcm_service.dart';
 import '../../../core/utils/logger.dart';
 import '../data/auth_repository.dart';
 import 'anonymous_auth_provider.dart' as anonymous;
@@ -147,6 +148,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
           isAuthenticated: true,
           isLoading: false,
         );
+        
+        // Update FCM token to backend when user profile is loaded
+        // This ensures token is updated even if login didn't trigger it
+        FCMService.updateTokenToBackend().catchError((e) {
+          AppLogger.warning('Failed to update FCM token after profile load', e);
+        });
       } else {
         // Firebase user exists but backend user fetch failed
         // This means the user was created in Firebase but not in backend
@@ -202,6 +209,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       } catch (e) {
         AppLogger.warning('AuthProvider - Error clearing anonymous auth', e);
       }
+
+      // Update FCM token to backend after successful login
+      // (Login already updates it, but this ensures it's updated)
+      FCMService.updateTokenToBackend().catchError((e) {
+        AppLogger.warning('Failed to update FCM token after login', e);
+      });
 
       AppLogger.success('AuthProvider - Login completed successfully');
       return true;

@@ -512,8 +512,31 @@ class AdminOrdersQueueResponse with _$AdminOrdersQueueResponse {
     required AdminOrdersCount count,
   }) = _AdminOrdersQueueResponse;
 
-  factory AdminOrdersQueueResponse.fromJson(Map<String, dynamic> json) =>
-      _$AdminOrdersQueueResponseFromJson(json);
+  factory AdminOrdersQueueResponse.fromJson(Map<String, dynamic> json) {
+    // Handle null values for lists - ensure they default to empty lists
+    final safeJson = Map<String, dynamic>.from(json);
+    
+    // Safely extract lists, defaulting to empty list if null
+    final preparingData = json['preparing'];
+    safeJson['preparing'] = preparingData is List ? preparingData : <dynamic>[];
+    
+    final shippedData = json['shipped'];
+    safeJson['shipped'] = shippedData is List ? shippedData : <dynamic>[];
+    
+    final deliveredData = json['delivered'];
+    safeJson['delivered'] = deliveredData is List ? deliveredData : <dynamic>[];
+    
+    // Handle null count - create default if missing
+    if (safeJson['count'] == null || safeJson['count'] is! Map) {
+      safeJson['count'] = {
+        'preparing': (safeJson['preparing'] as List).length,
+        'shipped': (safeJson['shipped'] as List).length,
+        'delivered': (safeJson['delivered'] as List).length,
+      };
+    }
+    
+    return _$AdminOrdersQueueResponseFromJson(safeJson);
+  }
 }
 
 // Admin Orders Count Model
@@ -525,8 +548,22 @@ class AdminOrdersCount with _$AdminOrdersCount {
     required int delivered,
   }) = _AdminOrdersCount;
 
-  factory AdminOrdersCount.fromJson(Map<String, dynamic> json) =>
-      _$AdminOrdersCountFromJson(json);
+  factory AdminOrdersCount.fromJson(Map<String, dynamic> json) {
+    // Handle null values - ensure they default to 0
+    final safeJson = Map<String, dynamic>.from(json);
+    
+    // Safely extract integers, defaulting to 0 if null or not a number
+    final preparingValue = json['preparing'];
+    safeJson['preparing'] = preparingValue is num ? preparingValue.toInt() : 0;
+    
+    final shippedValue = json['shipped'];
+    safeJson['shipped'] = shippedValue is num ? shippedValue.toInt() : 0;
+    
+    final deliveredValue = json['delivered'];
+    safeJson['delivered'] = deliveredValue is num ? deliveredValue.toInt() : 0;
+    
+    return _$AdminOrdersCountFromJson(safeJson);
+  }
 }
 
 // Order Ship Request Model - Updated for backend integration

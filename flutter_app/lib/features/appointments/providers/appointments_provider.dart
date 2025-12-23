@@ -70,12 +70,14 @@ class AppointmentBookingNotifier
   Future<void> bookAppointmentForm({
     required String serviceId,
     required DateTime start,
+    String? notes,
   }) async {
     state = const AsyncValue.loading();
     try {
       final appointment = await _repository.bookAppointmentForm(
         serviceId: serviceId,
         start: start,
+        notes: notes,
       );
       state = AsyncValue.data(appointment);
     } catch (error, stackTrace) {

@@ -214,7 +214,15 @@ class AdminApiService {
   Future<List<Order>> getOrders() async {
     try {
       final response = await _apiClient.get('/admin/orders');
-      final orderList = (response.data as List)
+      // Handle null or non-list responses
+      if (response.data == null) {
+        return [];
+      }
+      final data = response.data;
+      if (data is! List) {
+        return [];
+      }
+      final orderList = (data as List)
           .map((item) => Order.fromJson(item as Map<String, dynamic>))
           .toList();
       return orderList;
@@ -226,6 +234,15 @@ class AdminApiService {
   Future<AdminOrdersQueueResponse> getOrdersQueue() async {
     try {
       final response = await _apiClient.get(ApiEndpoints.ordersQueue);
+      // Handle null response
+      if (response.data == null) {
+        return AdminOrdersQueueResponse.fromJson({
+          'preparing': [],
+          'shipped': [],
+          'delivered': [],
+          'count': {'preparing': 0, 'shipped': 0, 'delivered': 0},
+        });
+      }
       return AdminOrdersQueueResponse.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);

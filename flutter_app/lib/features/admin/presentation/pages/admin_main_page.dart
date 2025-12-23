@@ -51,6 +51,13 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
     });
   }
 
+  // Helper methods for theme-aware colors
+  bool get _isDarkTheme => Theme.of(context).brightness == Brightness.dark;
+  Color get _textColor => _isDarkTheme ? Colors.white : Colors.black87;
+  Color get _secondaryTextColor => _isDarkTheme ? Colors.white70 : Colors.grey[600]!;
+  Color get _iconColor => _isDarkTheme ? Colors.white70 : Colors.grey[600]!;
+  Color get _emptyIconColor => _isDarkTheme ? Colors.white38 : Colors.grey[400]!;
+
   Widget _buildContent() {
     switch (_selectedIndex) {
       case 0:
@@ -64,7 +71,7 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
       case 3:
         return _buildOrdersContent();
       case 4:
-        return const AdminAppointmentsPageContent();
+        return AdminAppointmentsPageContent();
       case 5:
         return const AdminDiscountsPageContent();
       case 6:
@@ -105,7 +112,7 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
         children: [
           TabBar(
             labelColor: AppTheme.primaryNavy,
-            unselectedLabelColor: Colors.grey[600],
+            unselectedLabelColor: _secondaryTextColor,
             indicatorColor: AppTheme.primaryOrange,
             tabs: [
               Tab(
@@ -145,13 +152,13 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
             Icon(
               Icons.shopping_cart_outlined,
               size: 80,
-              color: Colors.grey[400],
+              color: _emptyIconColor,
             ),
             const SizedBox(height: 16),
             Text(
               emptyMessage,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Colors.grey[600],
+                    color: _secondaryTextColor,
                   ),
             ),
           ],
@@ -190,9 +197,10 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
                 Expanded(
                   child: Text(
                     'Sipariş #${order.id ?? 'Bilinmeyen'}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      color: _textColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -250,8 +258,9 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
                           children: [
                             Text(
                               item.name ?? 'Ürün Adı Yok',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w500,
+                                color: _textColor,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -259,7 +268,7 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
                             Text(
                               'Adet: ${item.qty ?? 0}',
                               style: TextStyle(
-                                color: Colors.grey[600],
+                                color: _secondaryTextColor,
                                 fontSize: 12,
                               ),
                             ),
@@ -286,10 +295,11 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Toplam:',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
+                      color: _textColor,
                     ),
                   ),
                   Text(
@@ -306,13 +316,13 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
             const SizedBox(height: 12),
             Row(
               children: [
-                Icon(Icons.person, size: 16, color: Colors.grey[600]),
+                Icon(Icons.person, size: 16, color: _iconColor),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     'Müşteri: ${order.customer.fullName ?? order.userId ?? 'Bilinmeyen'}',
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: _secondaryTextColor,
                       fontSize: 12,
                     ),
                     maxLines: 1,
@@ -320,14 +330,14 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                Icon(Icons.access_time, size: 16, color: _iconColor),
                 const SizedBox(width: 4),
                 Text(
                   order.createdAt != null
                       ? '${order.createdAt!.day}/${order.createdAt!.month}/${order.createdAt!.year}'
                       : 'Tarih yok',
                   style: TextStyle(
-                    color: Colors.grey[600],
+                    color: _secondaryTextColor,
                     fontSize: 12,
                   ),
                 ),
@@ -504,13 +514,13 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
           Icon(
             Icons.shopping_cart_outlined,
             size: 80,
-            color: Colors.grey[400],
+            color: _emptyIconColor,
           ),
           const SizedBox(height: 16),
           Text(
             'Henüz sipariş yok',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.grey[600],
+                  color: _secondaryTextColor,
                 ),
           ),
         ],
@@ -531,13 +541,17 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
           const SizedBox(height: 16),
           Text(
             'Hata Oluştu',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: _textColor,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
             error,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: _secondaryTextColor,
+                ),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
@@ -561,24 +575,24 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Müşteri ID: ${order.userId}'),
+              Text('Müşteri ID: ${order.userId}', style: TextStyle(color: _textColor)),
               if (order.customer.fullName != null)
-                Text('Müşteri: ${order.customer.fullName}'),
+                Text('Müşteri: ${order.customer.fullName}', style: TextStyle(color: _textColor)),
               if (order.customer.phone != null)
-                Text('Telefon: ${order.customer.phone}'),
+                Text('Telefon: ${order.customer.phone}', style: TextStyle(color: _textColor)),
               if (order.customer.email != null)
-                Text('Email: ${order.customer.email}'),
+                Text('Email: ${order.customer.email}', style: TextStyle(color: _textColor)),
               const SizedBox(height: 16),
-              Text('Durum: ${order.status.displayName}'),
+              Text('Durum: ${order.status.displayName}', style: TextStyle(color: _textColor)),
               const SizedBox(height: 16),
-              const Text('Ürünler:', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('Ürünler:', style: TextStyle(fontWeight: FontWeight.bold, color: _textColor)),
               ...order.items.map((item) => Padding(
                     padding: const EdgeInsets.only(top: 4),
-                    child: Text('• ${item.name} x${item.qty}'),
+                    child: Text('• ${item.name} x${item.qty}', style: TextStyle(color: _textColor)),
                   )),
               const SizedBox(height: 16),
               Text('Toplam: ${formatMoney(order.totals.grandTotal)}',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontWeight: FontWeight.bold, color: _textColor)),
             ],
           ),
         ),
@@ -987,7 +1001,7 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           border: Border.all(
-            color: isSelected ? AppTheme.primaryOrange : Colors.grey.shade300,
+            color: isSelected ? AppTheme.primaryOrange : _iconColor,
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(8),
@@ -1017,7 +1031,7 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
                     subtitle,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey.shade600,
+                      color: _secondaryTextColor,
                     ),
                   ),
                 ],
@@ -1179,19 +1193,116 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
 }
 
 // Placeholder widgets for pages that don't have Content widgets yet
-class AdminAppointmentsPageContent extends ConsumerWidget {
+class AdminAppointmentsPageContent extends ConsumerStatefulWidget {
   const AdminAppointmentsPageContent({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AdminAppointmentsPageContent> createState() =>
+      _AdminAppointmentsPageContentState();
+}
+
+class _AdminAppointmentsPageContentState
+    extends ConsumerState<AdminAppointmentsPageContent>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  // Helper methods for theme-aware colors
+  bool get _isDarkTheme => Theme.of(context).brightness == Brightness.dark;
+  Color get _textColor => _isDarkTheme ? Colors.white : Colors.black87;
+  Color get _secondaryTextColor => _isDarkTheme ? Colors.white70 : Colors.grey[600]!;
+  Color get _iconColor => _isDarkTheme ? Colors.white70 : Colors.grey[600]!;
+  Color get _emptyIconColor => _isDarkTheme ? Colors.white38 : Colors.grey[400]!;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 4, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final appointmentsAsync = ref.watch(adminAppointmentsNotifierProvider);
 
-    return appointmentsAsync.when(
-      data: (appointments) =>
-          _buildAppointmentsList(context, ref, appointments),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) =>
-          _buildErrorWidget(context, ref, error.toString()),
+    return Column(
+      children: [
+        // Tab Bar
+        Container(
+          color: _isDarkTheme ? Colors.grey[900] : Colors.white,
+          child: TabBar(
+            controller: _tabController,
+            labelColor: AppTheme.primaryOrange,
+            unselectedLabelColor: _isDarkTheme ? Colors.white70 : Colors.grey[600]!,
+            indicatorColor: AppTheme.primaryOrange,
+            indicatorWeight: 3,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            labelPadding: const EdgeInsets.symmetric(horizontal: 16),
+            tabs: const [
+              Tab(text: 'Onay Bekleyen'),
+              Tab(text: 'Aktif'),
+              Tab(text: 'Tamamlananlar'),
+              Tab(text: 'İptal Edilenler'),
+            ],
+          ),
+        ),
+        // Tab Bar View
+        Expanded(
+          child: appointmentsAsync.when(
+            data: (appointments) => TabBarView(
+              controller: _tabController,
+              children: [
+                _buildFilteredAppointmentsList(
+                    context, ref, appointments, 'pending'),
+                _buildFilteredAppointmentsList(
+                    context, ref, appointments, 'approved'),
+                _buildFilteredAppointmentsList(
+                    context, ref, appointments, 'completed'),
+                _buildFilteredAppointmentsList(
+                    context, ref, appointments, 'cancelled'),
+              ],
+            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) =>
+                _buildErrorWidget(context, ref, error.toString()),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilteredAppointmentsList(
+    BuildContext context,
+    WidgetRef ref,
+    List<AppointmentWithDetails> appointments,
+    String status,
+  ) {
+    final filteredAppointments = appointments
+        .where((apt) => apt.status.toLowerCase() == status.toLowerCase())
+        .toList();
+
+    if (filteredAppointments.isEmpty) {
+      return _buildEmptyStateForCategory(context, ref, status);
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        await ref.read(adminAppointmentsNotifierProvider.notifier).refresh();
+      },
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: filteredAppointments.length,
+        itemBuilder: (context, index) {
+          final appointment = filteredAppointments[index];
+          return _buildAppointmentCard(context, ref, appointment);
+        },
+      ),
     );
   }
 
@@ -1229,20 +1340,8 @@ class AdminAppointmentsPageContent extends ConsumerWidget {
           children: [
             // Appointment Header
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Expanded(
-                  child: Text(
-                    'Randevu #${appointment.id}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: 8),
                 _buildStatusChip(
                     appointment.status, _getStatusColor(appointment.status)),
               ],
@@ -1273,16 +1372,17 @@ class AdminAppointmentsPageContent extends ConsumerWidget {
                     children: [
                       Text(
                         appointment.service?.title ?? 'Hizmet bilgisi yok',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
+                          color: _textColor,
                         ),
                       ),
                       if (appointment.service?.price != null)
                         Text(
                           'Fiyat: ₺${appointment.service!.price!.toStringAsFixed(2)}',
                           style: TextStyle(
-                            color: Colors.grey[600],
+                            color: _secondaryTextColor,
                             fontSize: 12,
                           ),
                         ),
@@ -1311,14 +1411,15 @@ class AdminAppointmentsPageContent extends ConsumerWidget {
                     children: [
                       Text(
                         'Tarih: ${_formatDate(appointment.start)}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w500,
+                          color: _textColor,
                         ),
                       ),
                       Text(
                         'Saat: ${_formatTime(appointment.start)}',
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: _secondaryTextColor,
                           fontSize: 12,
                         ),
                       ),
@@ -1333,13 +1434,13 @@ class AdminAppointmentsPageContent extends ConsumerWidget {
             // Customer Info
             Row(
               children: [
-                Icon(Icons.person, size: 16, color: Colors.grey[600]),
+                Icon(Icons.person, size: 16, color: _iconColor),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     'Müşteri: ${appointment.user?.name ?? appointment.user?.email ?? appointment.user?.phone ?? appointment.userId ?? 'Bilinmiyor'}',
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: _secondaryTextColor,
                       fontSize: 12,
                     ),
                     maxLines: 1,
@@ -1348,7 +1449,7 @@ class AdminAppointmentsPageContent extends ConsumerWidget {
                 ),
                 const SizedBox(width: 8),
                 if (appointment.notes != null && appointment.notes!.isNotEmpty)
-                  Icon(Icons.note, size: 16, color: Colors.grey[600]),
+                  Icon(Icons.note, size: 16, color: _iconColor),
               ],
             ),
 
@@ -1357,13 +1458,13 @@ class AdminAppointmentsPageContent extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: _isDarkTheme ? Colors.white.withOpacity(0.1) : Colors.grey[100],
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   appointment.notes!,
                   style: TextStyle(
-                    color: Colors.grey[700],
+                    color: _secondaryTextColor,
                     fontSize: 12,
                   ),
                 ),
@@ -1411,7 +1512,7 @@ class AdminAppointmentsPageContent extends ConsumerWidget {
         border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Text(
-        status,
+        _getStatusDisplayName(status),
         style: TextStyle(
           color: color,
           fontSize: 12,
@@ -1455,22 +1556,87 @@ class AdminAppointmentsPageContent extends ConsumerWidget {
           Icon(
             Icons.event_outlined,
             size: 80,
-            color: Colors.grey[400],
+            color: _emptyIconColor,
           ),
           const SizedBox(height: 16),
           Text(
             'Henüz randevu yok',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.grey[600],
+                  color: _secondaryTextColor,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
             'Müşteriler randevu aldığında burada görünecek',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[500],
+                  color: _secondaryTextColor,
                 ),
             textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyStateForCategory(
+      BuildContext context, WidgetRef ref, String status) {
+    String title;
+    String message;
+    IconData icon;
+
+    switch (status.toLowerCase()) {
+      case 'pending':
+        title = 'Onay Bekleyen Randevu Yok';
+        message = 'Onay bekleyen randevu bulunmamaktadır.';
+        icon = Icons.pending_outlined;
+        break;
+      case 'approved':
+        title = 'Aktif Randevu Yok';
+        message = 'Şu anda aktif randevu bulunmamaktadır.';
+        icon = Icons.event_available_outlined;
+        break;
+      case 'completed':
+        title = 'Tamamlanan Randevu Yok';
+        message = 'Henüz tamamlanan randevu bulunmamaktadır.';
+        icon = Icons.check_circle_outline;
+        break;
+      case 'cancelled':
+        title = 'İptal Edilen Randevu Yok';
+        message = 'İptal edilen randevu bulunmamaktadır.';
+        icon = Icons.cancel_outlined;
+        break;
+      default:
+        title = 'Randevu Yok';
+        message = 'Bu kategoride randevu bulunmamaktadır.';
+        icon = Icons.event_outlined;
+    }
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 80,
+            color: _emptyIconColor,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: _secondaryTextColor,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              message,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: _secondaryTextColor,
+                  ),
+              textAlign: TextAlign.center,
+            ),
           ),
         ],
       ),
@@ -1490,13 +1656,17 @@ class AdminAppointmentsPageContent extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             'Hata Oluştu',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: _textColor,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
             error,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: _secondaryTextColor,
+                ),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
@@ -1564,7 +1734,7 @@ class AdminAppointmentsPageContent extends ConsumerWidget {
 
   void _showStatusUpdateDialog(
       BuildContext context, WidgetRef ref, AppointmentWithDetails appointment) {
-    final statuses = ['pending', 'approved', 'cancelled'];
+    final statuses = ['pending', 'approved', 'completed', 'cancelled'];
 
     showDialog(
       context: context,
@@ -1606,6 +1776,8 @@ class AdminAppointmentsPageContent extends ConsumerWidget {
         return 'Beklemede';
       case 'approved':
         return 'Onaylandı';
+      case 'completed':
+        return 'Tamamlandı';
       case 'cancelled':
         return 'İptal Edildi';
       default:
@@ -1616,6 +1788,13 @@ class AdminAppointmentsPageContent extends ConsumerWidget {
 
 class AdminDiscountsPageContent extends ConsumerWidget {
   const AdminDiscountsPageContent({super.key});
+
+  // Helper methods for theme-aware colors
+  static bool _isDarkTheme(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
+  static Color _textColor(BuildContext context) => _isDarkTheme(context) ? Colors.white : Colors.black87;
+  static Color _secondaryTextColor(BuildContext context) => _isDarkTheme(context) ? Colors.white70 : Colors.grey[600]!;
+  static Color _iconColor(BuildContext context) => _isDarkTheme(context) ? Colors.white70 : Colors.grey[600]!;
+  static Color _emptyIconColor(BuildContext context) => _isDarkTheme(context) ? Colors.white38 : Colors.grey[400]!;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1635,7 +1814,7 @@ class AdminDiscountsPageContent extends ConsumerWidget {
           child: Consumer(
             builder: (context, ref, child) {
               final productsAsync = ref.watch(adminProductsNotifierProvider);
-              final categoriesAsync = ref.watch(adminCategoriesProvider);
+              final categoriesAsync = ref.watch(adminCategoriesNotifierProvider);
               final isLoading =
                   productsAsync.isLoading || categoriesAsync.isLoading;
 
@@ -1707,9 +1886,10 @@ class AdminDiscountsPageContent extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     'İndirim #${discount.id.substring(0, 8)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: _textColor(context),
                     ),
                   ),
                 ),
@@ -1737,7 +1917,7 @@ class AdminDiscountsPageContent extends ConsumerWidget {
                       Text(
                         'İndirim Oranı:',
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: _secondaryTextColor(context),
                           fontSize: 14,
                         ),
                       ),
@@ -1752,23 +1932,39 @@ class AdminDiscountsPageContent extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Hedef:',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 14,
-                        ),
-                      ),
-                      Text(
-                        '${discount.targetType == 'product' ? 'Ürün' : 'Kategori'}: ${discount.targetId ?? 'Tümü'}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final productsAsync = ref.watch(adminProductsNotifierProvider);
+                      final categoriesAsync = ref.watch(adminCategoriesNotifierProvider);
+                      
+                      final products = productsAsync.valueOrNull;
+                      final categories = categoriesAsync.valueOrNull;
+                      
+                      final targetName = _getTargetName(discount, products, categories);
+                      
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Hedef:',
+                            style: TextStyle(
+                              color: _secondaryTextColor(context),
+                              fontSize: 14,
+                            ),
+                          ),
+                          Flexible(
+                            child: Text(
+                              '${discount.targetType == 'product' ? 'Ürün' : 'Kategori'}: $targetName',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: _textColor(context),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -1780,22 +1976,22 @@ class AdminDiscountsPageContent extends ConsumerWidget {
             if (discount.startAt != null || discount.endAt != null)
               Row(
                 children: [
-                  Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                  Icon(Icons.calendar_today, size: 16, color: _iconColor(context)),
                   const SizedBox(width: 4),
                   Text(
                     'Başlangıç: ${discount.startAt != null ? _formatDate(discount.startAt!) : 'Sınırsız'}',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
+            style: TextStyle(
+              color: _secondaryTextColor(context),
+              fontSize: 12,
+            ),
                   ),
                   const Spacer(),
                   Text(
                     'Bitiş: ${discount.endAt != null ? _formatDate(discount.endAt!) : 'Sınırsız'}',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
+            style: TextStyle(
+              color: _secondaryTextColor(context),
+              fontSize: 12,
+            ),
                   ),
                 ],
               ),
@@ -1806,13 +2002,13 @@ class AdminDiscountsPageContent extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: _isDarkTheme(context) ? Colors.white.withOpacity(0.1) : Colors.grey[100],
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   discount.description!,
                   style: TextStyle(
-                    color: Colors.grey[700],
+                    color: _secondaryTextColor(context),
                     fontSize: 12,
                   ),
                 ),
@@ -1826,7 +2022,7 @@ class AdminDiscountsPageContent extends ConsumerWidget {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => _showDiscountDetails(context, discount),
+                    onPressed: () => _showDiscountDetails(context, ref, discount),
                     child: const Text('Detaylar'),
                   ),
                 ),
@@ -1887,20 +2083,20 @@ class AdminDiscountsPageContent extends ConsumerWidget {
           Icon(
             Icons.local_offer_outlined,
             size: 80,
-            color: Colors.grey[400],
+            color: _emptyIconColor(context),
           ),
           const SizedBox(height: 16),
           Text(
             'Henüz indirim eklenmemiş',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.grey[600],
+                  color: _secondaryTextColor(context),
                 ),
           ),
           const SizedBox(height: 8),
           Text(
             'İlk indiriminizi eklemek için + butonuna tıklayın',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[500],
+                  color: _secondaryTextColor(context),
                 ),
             textAlign: TextAlign.center,
           ),
@@ -1922,13 +2118,17 @@ class AdminDiscountsPageContent extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             'Hata Oluştu',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: _textColor(context),
+                ),
           ),
           const SizedBox(height: 8),
           Text(
             error,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: _secondaryTextColor(context),
+                ),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
@@ -1944,7 +2144,7 @@ class AdminDiscountsPageContent extends ConsumerWidget {
 
   void _showAddDiscountDialog(BuildContext context, WidgetRef ref) {
     final productsAsync = ref.read(adminProductsNotifierProvider);
-    final categoriesAsync = ref.read(adminCategoriesProvider);
+    final categoriesAsync = ref.read(adminCategoriesNotifierProvider);
 
     productsAsync.when(
       data: (products) => categoriesAsync.when(
@@ -1984,10 +2184,49 @@ class AdminDiscountsPageContent extends ConsumerWidget {
     return targetId;
   }
 
+  String _getTargetName(
+      AdminDiscount discount, List<Product>? products, List<Category>? categories) {
+    // First check if targetName is already available from backend
+    if (discount.targetName != null && discount.targetName!.isNotEmpty) {
+      return discount.targetName!;
+    }
+
+    // If targetId is null, it means "Tümü" (All)
+    if (discount.targetId == null) {
+      return 'Tümü';
+    }
+
+    // Try to look up from products/categories
+    if (discount.targetType == 'product' && products != null && products.isNotEmpty) {
+      try {
+        final product = products.firstWhere(
+          (p) => p.id == discount.targetId,
+        );
+        return product.title;
+      } catch (e) {
+        // Product not found, return ID
+        return discount.targetId!;
+      }
+    } else if (discount.targetType == 'category' && categories != null && categories.isNotEmpty) {
+      try {
+        final category = categories.firstWhere(
+          (c) => c.id == discount.targetId,
+        );
+        return category.name;
+      } catch (e) {
+        // Category not found, return ID
+        return discount.targetId!;
+      }
+    }
+
+    // Fallback to ID if nothing found
+    return discount.targetId ?? 'Tümü';
+  }
+
   void _showEditDiscountDialog(
       BuildContext context, WidgetRef ref, AdminDiscount discount) {
     final productsAsync = ref.read(adminProductsNotifierProvider);
-    final categoriesAsync = ref.read(adminCategoriesProvider);
+    final categoriesAsync = ref.read(adminCategoriesNotifierProvider);
 
     productsAsync.when(
       data: (products) => categoriesAsync.when(
@@ -2201,38 +2440,49 @@ class AdminDiscountsPageContent extends ConsumerWidget {
     );
   }
 
-  void _showDiscountDetails(BuildContext context, AdminDiscount discount) {
+  void _showDiscountDetails(BuildContext context, WidgetRef ref, AdminDiscount discount) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('İndirim Detayları: #${discount.id.substring(0, 8)}'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('İndirim Oranı: %${discount.percentage.toStringAsFixed(0)}'),
-              Text('Hedef Tip: ${discount.targetType}'),
-              if (discount.targetId != null)
-                Text('Hedef ID: ${discount.targetId}'),
-              Text(
-                  'Başlangıç: ${discount.startAt != null ? _formatDate(discount.startAt!) : 'Sınırsız'}'),
-              Text(
-                  'Bitiş: ${discount.endAt != null ? _formatDate(discount.endAt!) : 'Sınırsız'}'),
-              Text('Durum: ${discount.active ? 'Aktif' : 'Pasif'}'),
-              if (discount.description != null)
-                Text('Açıklama: ${discount.description}'),
-              if (discount.createdAt != null)
-                Text('Oluşturulma: ${_formatDate(discount.createdAt!)}'),
+      builder: (context) => Consumer(
+        builder: (context, ref, child) {
+          final productsAsync = ref.watch(adminProductsNotifierProvider);
+          final categoriesAsync = ref.watch(adminCategoriesNotifierProvider);
+          
+          final products = productsAsync.valueOrNull;
+          final categories = categoriesAsync.valueOrNull;
+          
+          final targetName = _getTargetName(discount, products, categories);
+          
+          return AlertDialog(
+            title: Text('İndirim Detayları: #${discount.id.substring(0, 8)}'),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('İndirim Oranı: %${discount.percentage.toStringAsFixed(0)}'),
+                  Text('Hedef Tip: ${discount.targetType == 'product' ? 'Ürün' : 'Kategori'}'),
+                  Text('Hedef: $targetName'),
+                  Text(
+                      'Başlangıç: ${discount.startAt != null ? _formatDate(discount.startAt!) : 'Sınırsız'}'),
+                  Text(
+                      'Bitiş: ${discount.endAt != null ? _formatDate(discount.endAt!) : 'Sınırsız'}'),
+                  Text('Durum: ${discount.active ? 'Aktif' : 'Pasif'}'),
+                  if (discount.description != null)
+                    Text('Açıklama: ${discount.description}'),
+                  if (discount.createdAt != null)
+                    Text('Oluşturulma: ${_formatDate(discount.createdAt!)}'),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Kapat'),
+              ),
             ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Kapat'),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -2268,6 +2518,13 @@ class AdminDiscountsPageContent extends ConsumerWidget {
 
 class AdminServicesPageContent extends ConsumerWidget {
   const AdminServicesPageContent({super.key});
+
+  // Helper methods for theme-aware colors
+  static bool _isDarkTheme(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
+  static Color _textColor(BuildContext context) => _isDarkTheme(context) ? Colors.white : Colors.black87;
+  static Color _secondaryTextColor(BuildContext context) => _isDarkTheme(context) ? Colors.white70 : Colors.grey[600]!;
+  static Color _iconColor(BuildContext context) => _isDarkTheme(context) ? Colors.white70 : Colors.grey[600]!;
+  static Color _emptyIconColor(BuildContext context) => _isDarkTheme(context) ? Colors.white38 : Colors.grey[400]!;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -2363,9 +2620,10 @@ class AdminServicesPageContent extends ConsumerWidget {
                 children: [
                   Text(
                     service.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      color: _textColor(context),
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -2374,10 +2632,10 @@ class AdminServicesPageContent extends ConsumerWidget {
                     const SizedBox(height: 4),
                     Text(
                       service.description,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
+            style: TextStyle(
+              color: _secondaryTextColor(context),
+              fontSize: 12,
+            ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -2396,7 +2654,7 @@ class AdminServicesPageContent extends ConsumerWidget {
                       Text(
                         'Tür: ${service.kind}',
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: _secondaryTextColor(context),
                           fontSize: 11,
                         ),
                       ),
@@ -2474,20 +2732,20 @@ class AdminServicesPageContent extends ConsumerWidget {
           Icon(
             Icons.work_outlined,
             size: 80,
-            color: Colors.grey[400],
+            color: _emptyIconColor(context),
           ),
           const SizedBox(height: 16),
           Text(
             'Henüz hizmet eklenmemiş',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.grey[600],
+                  color: _secondaryTextColor(context),
                 ),
           ),
           const SizedBox(height: 8),
           Text(
             'İlk hizmetinizi eklemek için + butonuna tıklayın',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[500],
+                  color: _secondaryTextColor(context),
                 ),
             textAlign: TextAlign.center,
           ),
@@ -2636,6 +2894,13 @@ class AdminServicesPageContent extends ConsumerWidget {
 class AdminCommentsPageContent extends ConsumerWidget {
   const AdminCommentsPageContent({super.key});
 
+  // Helper methods for theme-aware colors
+  static bool _isDarkTheme(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
+  static Color _textColor(BuildContext context) => _isDarkTheme(context) ? Colors.white : Colors.black87;
+  static Color _secondaryTextColor(BuildContext context) => _isDarkTheme(context) ? Colors.white70 : Colors.grey[600]!;
+  static Color _iconColor(BuildContext context) => _isDarkTheme(context) ? Colors.white70 : Colors.grey[600]!;
+  static Color _emptyIconColor(BuildContext context) => _isDarkTheme(context) ? Colors.white38 : Colors.grey[400]!;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final commentsAsync = ref.watch(adminCommentsProvider);
@@ -2717,7 +2982,7 @@ class AdminCommentsPageContent extends ConsumerWidget {
                 const SizedBox(width: 16),
                 Icon(
                   Icons.person,
-                  color: Colors.grey[600],
+                  color: _secondaryTextColor(context),
                   size: 16,
                 ),
                 const SizedBox(width: 4),
@@ -2728,7 +2993,7 @@ class AdminCommentsPageContent extends ConsumerWidget {
                         : 'Kullanıcı: ${comment.userId}',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[600],
+                      color: _secondaryTextColor(context),
                       fontWeight: comment.userName != null && comment.userName!.isNotEmpty
                           ? FontWeight.w500
                           : FontWeight.normal,
@@ -2743,7 +3008,7 @@ class AdminCommentsPageContent extends ConsumerWidget {
               children: [
                 Icon(
                   comment.targetType == 'product' ? Icons.shopping_bag : Icons.work,
-                  color: Colors.grey[500],
+                  color: _secondaryTextColor(context),
                   size: 14,
                 ),
                 const SizedBox(width: 4),
@@ -2754,7 +3019,7 @@ class AdminCommentsPageContent extends ConsumerWidget {
                         : '${comment.targetType == 'product' ? 'Ürün' : 'Hizmet'}: ${comment.targetId}',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[500],
+                      color: _secondaryTextColor(context),
                       fontWeight: comment.targetName != null && comment.targetName!.isNotEmpty
                           ? FontWeight.w500
                           : FontWeight.normal,
@@ -2770,7 +3035,7 @@ class AdminCommentsPageContent extends ConsumerWidget {
                 children: [
                   Icon(
                     Icons.access_time,
-                    color: Colors.grey[500],
+                    color: _secondaryTextColor(context),
                     size: 14,
                   ),
                   const SizedBox(width: 4),
@@ -2778,7 +3043,7 @@ class AdminCommentsPageContent extends ConsumerWidget {
                     _formatDate(comment.createdAt!),
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[500],
+                      color: _secondaryTextColor(context),
                     ),
                   ),
                 ],
@@ -2901,20 +3166,20 @@ class AdminCommentsPageContent extends ConsumerWidget {
           Icon(
             Icons.comment_outlined,
             size: 80,
-            color: Colors.grey[400],
+            color: _emptyIconColor(context),
           ),
           const SizedBox(height: 16),
           Text(
             'Henüz yorum yok',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.grey[600],
+                  color: _secondaryTextColor(context),
                 ),
           ),
           const SizedBox(height: 8),
           Text(
             'Kullanıcılar ürünlere yorum yaptığında burada görünecek',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[500],
+                  color: _secondaryTextColor(context),
                 ),
             textAlign: TextAlign.center,
           ),
@@ -2936,13 +3201,17 @@ class AdminCommentsPageContent extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             'Hata Oluştu',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: _textColor(context),
+                ),
           ),
           const SizedBox(height: 8),
           Text(
             error,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: _secondaryTextColor(context),
+                ),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
@@ -3045,12 +3314,18 @@ class AdminNotificationsPageContent extends ConsumerStatefulWidget {
 class _AdminNotificationsPageContentState
     extends ConsumerState<AdminNotificationsPageContent>
     with SingleTickerProviderStateMixin {
+  // Helper methods for theme-aware colors
+  bool get _isDarkTheme => Theme.of(context).brightness == Brightness.dark;
+  Color get _textColor => _isDarkTheme ? Colors.white : Colors.black87;
+  Color get _secondaryTextColor => _isDarkTheme ? Colors.white70 : Colors.grey[600]!;
+  Color get _iconColor => _isDarkTheme ? Colors.white70 : Colors.grey[600]!;
+  Color get _emptyIconColor => _isDarkTheme ? Colors.white38 : Colors.grey[400]!;
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -3066,11 +3341,10 @@ class _AdminNotificationsPageContentState
         TabBar(
           controller: _tabController,
           labelColor: AppTheme.primaryNavy,
-          unselectedLabelColor: Colors.grey[600],
+          unselectedLabelColor: _secondaryTextColor,
           indicatorColor: AppTheme.primaryOrange,
           tabs: const [
             Tab(text: 'Şablonlar', icon: Icon(Icons.description)),
-            Tab(text: 'Kampanyalar', icon: Icon(Icons.campaign)),
             Tab(text: 'Gönder', icon: Icon(Icons.send)),
           ],
         ),
@@ -3079,7 +3353,6 @@ class _AdminNotificationsPageContentState
             controller: _tabController,
             children: [
               _buildTemplatesTab(),
-              _buildCampaignsTab(),
               _buildSendTab(),
             ],
           ),
@@ -3091,16 +3364,29 @@ class _AdminNotificationsPageContentState
   Widget _buildTemplatesTab() {
     final templatesAsync = ref.watch(adminNotificationTemplatesProvider);
 
-    return templatesAsync.when(
-      data: (templates) => _buildTemplatesList(templates),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => _buildErrorWidget(error.toString()),
+    return Stack(
+      children: [
+        templatesAsync.when(
+          data: (templates) => _buildTemplatesList(templates),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => _buildErrorWidget(error.toString()),
+        ),
+        Positioned(
+          bottom: 16,
+          right: 16,
+          child: FloatingActionButton(
+            onPressed: () => _showAddTemplateDialog(),
+            backgroundColor: AppTheme.primaryOrange,
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildTemplatesList(templates) {
     if (templates.isEmpty) {
-      return _buildEmptyState(
+      return _buildEmptyStateWithoutButton(
           'Henüz bildirim şablonu bulunmuyor.', Icons.description);
     }
 
@@ -3128,7 +3414,7 @@ class _AdminNotificationsPageContentState
               ),
               title: Text(
                 template.name ?? template.title ?? 'Başlıksız',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(fontWeight: FontWeight.bold, color: _textColor),
               ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -3203,7 +3489,7 @@ class _AdminNotificationsPageContentState
 
   Widget _buildCampaignsList(campaigns) {
     if (campaigns.isEmpty) {
-      return _buildEmptyState(
+      return _buildEmptyStateWithoutButton(
           'Henüz bildirim kampanyası bulunmuyor.', Icons.campaign);
     }
 
@@ -3242,15 +3528,16 @@ class _AdminNotificationsPageContentState
                           children: [
                             Text(
                               campaign.title,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
+                                color: _textColor,
                               ),
                             ),
                             Text(
                               campaign.body,
                               style: TextStyle(
-                                color: Colors.grey.shade600,
+                                color: _secondaryTextColor,
                                 fontSize: 14,
                               ),
                             ),
@@ -3331,7 +3618,7 @@ class _AdminNotificationsPageContentState
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.grey.shade600,
+            color: _secondaryTextColor,
           ),
         ),
       ],
@@ -3376,6 +3663,24 @@ class _AdminNotificationsPageContentState
     );
   }
 
+  Widget _buildEmptyStateWithoutButton(String message, IconData icon) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 60, color: Colors.grey),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: _secondaryTextColor,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildErrorWidget(String error) {
     return Center(
       child: Column(
@@ -3386,7 +3691,9 @@ class _AdminNotificationsPageContentState
           Text(
             'Hata oluştu: $error',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: _secondaryTextColor,
+                ),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
@@ -4012,6 +4319,13 @@ class _SendNotificationFormState extends ConsumerState<_SendNotificationForm> {
 class AdminUsersPageContent extends ConsumerWidget {
   const AdminUsersPageContent({super.key});
 
+  // Helper methods for theme-aware colors
+  static bool _isDarkTheme(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
+  static Color _textColor(BuildContext context) => _isDarkTheme(context) ? Colors.white : Colors.black87;
+  static Color _secondaryTextColor(BuildContext context) => _isDarkTheme(context) ? Colors.white70 : Colors.grey[600]!;
+  static Color _iconColor(BuildContext context) => _isDarkTheme(context) ? Colors.white70 : Colors.grey[600]!;
+  static Color _emptyIconColor(BuildContext context) => _isDarkTheme(context) ? Colors.white38 : Colors.grey[400]!;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final usersAsync = ref.watch(adminUsersProvider);
@@ -4063,16 +4377,17 @@ class AdminUsersPageContent extends ConsumerWidget {
                     children: [
                       Text(
                         (user.name == null || user.name!.isEmpty) ? 'İsimsiz Kullanıcı' : user.name!,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
+                          color: _textColor(context),
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         user.email,
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: _secondaryTextColor(context),
                           fontSize: 14,
                         ),
                       ),
@@ -4081,7 +4396,7 @@ class AdminUsersPageContent extends ConsumerWidget {
                         Text(
                           user.phone!,
                           style: TextStyle(
-                            color: Colors.grey[600],
+                            color: _secondaryTextColor(context),
                             fontSize: 14,
                           ),
                         ),
@@ -4151,17 +4466,17 @@ class AdminUsersPageContent extends ConsumerWidget {
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Text(
                       '${address.label ?? 'Adres'}: ${address.name ?? ''}, ${address.city ?? ''}',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
+            style: TextStyle(
+              color: _secondaryTextColor(context),
+              fontSize: 12,
+            ),
                     ),
                   )),
               if (user.addresses.length > 2)
                 Text(
                   '... ve ${user.addresses.length - 2} adres daha',
                   style: TextStyle(
-                    color: Colors.grey[500],
+                    color: _secondaryTextColor(context),
                     fontSize: 12,
                     fontStyle: FontStyle.italic,
                   ),
@@ -4181,13 +4496,13 @@ class AdminUsersPageContent extends ConsumerWidget {
           Icon(
             Icons.people_outline,
             size: 80,
-            color: Colors.grey[400],
+            color: _emptyIconColor(context),
           ),
           const SizedBox(height: 16),
           Text(
             'Henüz kullanıcı bulunmamaktadır',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.grey[600],
+                  color: _secondaryTextColor(context),
                 ),
           ),
         ],

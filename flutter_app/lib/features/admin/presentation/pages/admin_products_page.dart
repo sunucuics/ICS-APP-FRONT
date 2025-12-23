@@ -15,7 +15,7 @@ class AdminProductsPageContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final productsAsync = ref.watch(adminProductsNotifierProvider);
-    final categoriesAsync = ref.watch(adminCategoriesProvider);
+    final categoriesAsync = ref.watch(adminCategoriesNotifierProvider);
 
     return Stack(
       children: [
@@ -417,8 +417,12 @@ class AdminProductsPageContent extends ConsumerWidget {
   }
 
   void _showAddProductDialog(BuildContext context, WidgetRef ref,
-      AsyncValue<List<Category>> categoriesAsync) {
-    categoriesAsync.when(
+      AsyncValue<List<Category>> categoriesAsync) async {
+    // Kategorileri yeniden yükle (yeni eklenen kategorileri görmek için)
+    await ref.read(adminCategoriesNotifierProvider.notifier).refresh();
+    // Güncel kategorileri al
+    final updatedCategoriesAsync = ref.read(adminCategoriesNotifierProvider);
+    updatedCategoriesAsync.when(
       data: (categories) =>
           _showProductFormDialog(context, ref, null, categories),
       loading: () => SnackBarService.showSnackBar(context: context, snackBar: 
@@ -431,8 +435,12 @@ class AdminProductsPageContent extends ConsumerWidget {
   }
 
   void _showEditProductDialog(BuildContext context, WidgetRef ref,
-      Product product, AsyncValue<List<Category>> categoriesAsync) {
-    categoriesAsync.when(
+      Product product, AsyncValue<List<Category>> categoriesAsync) async {
+    // Kategorileri yeniden yükle (yeni eklenen kategorileri görmek için)
+    await ref.read(adminCategoriesNotifierProvider.notifier).refresh();
+    // Güncel kategorileri al
+    final updatedCategoriesAsync = ref.read(adminCategoriesNotifierProvider);
+    updatedCategoriesAsync.when(
       data: (categories) =>
           _showProductFormDialog(context, ref, product, categories),
       loading: () => SnackBarService.showSnackBar(context: context, snackBar: 
@@ -498,8 +506,10 @@ class AdminProductsPageContent extends ConsumerWidget {
           ),
           AdminFormField(
             label: 'Görsel',
-            hint: 'Ürün görseli seçin (opsiyonel)',
+            hint: 'Ürün görseli seçin (opsiyonel, maks: 5)',
             isImageField: true,
+            allowMultipleImages: true,
+            isRequired: true,
           ),
           AdminFormField(
             label: 'Durum',
@@ -522,9 +532,11 @@ class AdminProductsPageContent extends ConsumerWidget {
             'final_price': double.parse(data['Fiyat']!),
             'stock': int.parse(data['Stok']!),
             'category_name': selectedCategory.name,
-            'images': data['Görsel_file']?.isNotEmpty == true
-                ? [data['Görsel_file']]
-                : [],
+            'images': data['Görsel_files']?.isNotEmpty == true
+                ? data['Görsel_files']!.split(',').where((path) => path.isNotEmpty).toList()
+                : data['Görsel_file']?.isNotEmpty == true
+                    ? [data['Görsel_file']!]
+                    : [],
             'is_upcoming': data['Durum'] == 'Yakında',
           };
 
@@ -580,7 +592,7 @@ class AdminProductsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final productsAsync = ref.watch(adminProductsNotifierProvider);
-    final categoriesAsync = ref.watch(adminCategoriesProvider);
+    final categoriesAsync = ref.watch(adminCategoriesNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -990,8 +1002,12 @@ class AdminProductsPage extends ConsumerWidget {
   }
 
   void _showAddProductDialog(BuildContext context, WidgetRef ref,
-      AsyncValue<List<Category>> categoriesAsync) {
-    categoriesAsync.when(
+      AsyncValue<List<Category>> categoriesAsync) async {
+    // Kategorileri yeniden yükle (yeni eklenen kategorileri görmek için)
+    await ref.read(adminCategoriesNotifierProvider.notifier).refresh();
+    // Güncel kategorileri al
+    final updatedCategoriesAsync = ref.read(adminCategoriesNotifierProvider);
+    updatedCategoriesAsync.when(
       data: (categories) =>
           _showProductFormDialog(context, ref, null, categories),
       loading: () => SnackBarService.showSnackBar(context: context, snackBar: 
@@ -1004,8 +1020,12 @@ class AdminProductsPage extends ConsumerWidget {
   }
 
   void _showEditProductDialog(BuildContext context, WidgetRef ref,
-      Product product, AsyncValue<List<Category>> categoriesAsync) {
-    categoriesAsync.when(
+      Product product, AsyncValue<List<Category>> categoriesAsync) async {
+    // Kategorileri yeniden yükle (yeni eklenen kategorileri görmek için)
+    await ref.read(adminCategoriesNotifierProvider.notifier).refresh();
+    // Güncel kategorileri al
+    final updatedCategoriesAsync = ref.read(adminCategoriesNotifierProvider);
+    updatedCategoriesAsync.when(
       data: (categories) =>
           _showProductFormDialog(context, ref, product, categories),
       loading: () => SnackBarService.showSnackBar(context: context, snackBar: 
@@ -1071,8 +1091,10 @@ class AdminProductsPage extends ConsumerWidget {
           ),
           AdminFormField(
             label: 'Görsel',
-            hint: 'Ürün görseli seçin (opsiyonel)',
+            hint: 'Ürün görseli seçin (opsiyonel, maks: 5)',
             isImageField: true,
+            allowMultipleImages: true,
+            isRequired: true,
           ),
           AdminFormField(
             label: 'Durum',
@@ -1098,11 +1120,11 @@ class AdminProductsPage extends ConsumerWidget {
             'stock': int.parse(data['Stok']!),
             'category_name': selectedCategory
                 .name, // Backend 'category_name' bekliyor, 'category_id' değil
-            'images': data['Görsel_file']?.isNotEmpty == true
-                ? [
-                    data['Görsel_file']
-                  ] // For now, we'll use the file path as URL
-                : [],
+            'images': data['Görsel_files']?.isNotEmpty == true
+                ? data['Görsel_files']!.split(',').where((path) => path.isNotEmpty).toList()
+                : data['Görsel_file']?.isNotEmpty == true
+                    ? [data['Görsel_file']!]
+                    : [],
             'is_upcoming': data['Durum'] == 'Yakında',
           };
 

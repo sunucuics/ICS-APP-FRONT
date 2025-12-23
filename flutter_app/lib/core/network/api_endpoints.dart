@@ -42,6 +42,7 @@ class ApiEndpoints {
   // User endpoints
   static const String userProfile = '/users/me';
   static const String userAddresses = '/users/me/addresses';
+  static const String userFcmToken = '/users/me/fcm-token';
   static String userAddress(String addressId) =>
       '/users/me/addresses/$addressId';
 

@@ -18,6 +18,7 @@ import 'core/services/android_performance_service.dart';
 import 'core/services/image_cache_service.dart';
 import 'core/services/crash_prevention_service.dart';
 import 'core/services/memory_management_service.dart';
+import 'features/auth/data/auth_api_service.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
@@ -77,6 +78,17 @@ void main() async {
     // Don't wait for it to complete before starting the app
     FCMService.initialize().then((_) {
       print('✅ FCM service initialized successfully');
+      
+      // Set up FCM token update callback to backend
+      final authApiService = AuthApiService();
+      FCMService.onTokenUpdate = (String token) async {
+        try {
+          await authApiService.updateFcmToken(token);
+          print('✅ FCM token updated to backend');
+        } catch (e) {
+          print('⚠️ Failed to update FCM token to backend: $e');
+        }
+      };
     }).catchError((e) {
       print('⚠️ FCM service initialization failed: $e');
       print('⚠️ Continuing without FCM...');

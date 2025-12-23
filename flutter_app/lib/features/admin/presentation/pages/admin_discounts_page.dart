@@ -41,7 +41,7 @@ class AdminDiscountsPage extends ConsumerWidget {
       floatingActionButton: Consumer(
         builder: (context, ref, child) {
           final productsAsync = ref.watch(adminProductsNotifierProvider);
-          final categoriesAsync = ref.watch(adminCategoriesProvider);
+          final categoriesAsync = ref.watch(adminCategoriesNotifierProvider);
           final isLoading =
               productsAsync.isLoading || categoriesAsync.isLoading;
 
@@ -154,23 +154,38 @@ class AdminDiscountsPage extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Hedef:',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 14,
-                        ),
-                      ),
-                      Text(
-                        '${discount.targetType == 'product' ? 'Ürün' : 'Kategori'}: ${discount.targetId ?? 'Tümü'}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final productsAsync = ref.watch(adminProductsNotifierProvider);
+                      final categoriesAsync = ref.watch(adminCategoriesNotifierProvider);
+                      
+                      final products = productsAsync.valueOrNull;
+                      final categories = categoriesAsync.valueOrNull;
+                      
+                      final targetName = _getTargetName(discount, products, categories);
+                      
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Hedef:',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                          Flexible(
+                            child: Text(
+                              '${discount.targetType == 'product' ? 'Ürün' : 'Kategori'}: $targetName',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -228,7 +243,7 @@ class AdminDiscountsPage extends ConsumerWidget {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => _showDiscountDetails(context, discount),
+                    onPressed: () => _showDiscountDetails(context, ref, discount),
                     child: const Text('Detaylar'),
                   ),
                 ),
@@ -346,7 +361,7 @@ class AdminDiscountsPage extends ConsumerWidget {
 
   void _showAddDiscountDialog(BuildContext context, WidgetRef ref) {
     final productsAsync = ref.read(adminProductsNotifierProvider);
-    final categoriesAsync = ref.read(adminCategoriesProvider);
+    final categoriesAsync = ref.read(adminCategoriesNotifierProvider);
 
     productsAsync.when(
       data: (products) => categoriesAsync.when(
@@ -386,10 +401,49 @@ class AdminDiscountsPage extends ConsumerWidget {
     return targetId;
   }
 
+  String _getTargetName(
+      AdminDiscount discount, List<Product>? products, List<Category>? categories) {
+    // First check if targetName is already available from backend
+    if (discount.targetName != null && discount.targetName!.isNotEmpty) {
+      return discount.targetName!;
+    }
+
+    // If targetId is null, it means "Tümü" (All)
+    if (discount.targetId == null) {
+      return 'Tümü';
+    }
+
+    // Try to look up from products/categories
+    if (discount.targetType == 'product' && products != null && products.isNotEmpty) {
+      try {
+        final product = products.firstWhere(
+          (p) => p.id == discount.targetId,
+        );
+        return product.title;
+      } catch (e) {
+        // Product not found, return ID
+        return discount.targetId!;
+      }
+    } else if (discount.targetType == 'category' && categories != null && categories.isNotEmpty) {
+      try {
+        final category = categories.firstWhere(
+          (c) => c.id == discount.targetId,
+        );
+        return category.name;
+      } catch (e) {
+        // Category not found, return ID
+        return discount.targetId!;
+      }
+    }
+
+    // Fallback to ID if nothing found
+    return discount.targetId ?? 'Tümü';
+  }
+
   void _showEditDiscountDialog(
       BuildContext context, WidgetRef ref, AdminDiscount discount) {
     final productsAsync = ref.read(adminProductsNotifierProvider);
-    final categoriesAsync = ref.read(adminCategoriesProvider);
+    final categoriesAsync = ref.read(adminCategoriesNotifierProvider);
 
     productsAsync.when(
       data: (products) => categoriesAsync.when(
@@ -603,38 +657,49 @@ class AdminDiscountsPage extends ConsumerWidget {
     );
   }
 
-  void _showDiscountDetails(BuildContext context, AdminDiscount discount) {
+  void _showDiscountDetails(BuildContext context, WidgetRef ref, AdminDiscount discount) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('İndirim Detayları: #${discount.id.substring(0, 8)}'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('İndirim Oranı: %${discount.percentage.toStringAsFixed(0)}'),
-              Text('Hedef Tip: ${discount.targetType}'),
-              if (discount.targetId != null)
-                Text('Hedef ID: ${discount.targetId}'),
-              Text(
-                  'Başlangıç: ${discount.startAt != null ? _formatDate(discount.startAt!) : 'Sınırsız'}'),
-              Text(
-                  'Bitiş: ${discount.endAt != null ? _formatDate(discount.endAt!) : 'Sınırsız'}'),
-              Text('Durum: ${discount.active ? 'Aktif' : 'Pasif'}'),
-              if (discount.description != null)
-                Text('Açıklama: ${discount.description}'),
-              if (discount.createdAt != null)
-                Text('Oluşturulma: ${_formatDate(discount.createdAt!)}'),
+      builder: (context) => Consumer(
+        builder: (context, ref, child) {
+          final productsAsync = ref.watch(adminProductsNotifierProvider);
+          final categoriesAsync = ref.watch(adminCategoriesNotifierProvider);
+          
+          final products = productsAsync.valueOrNull;
+          final categories = categoriesAsync.valueOrNull;
+          
+          final targetName = _getTargetName(discount, products, categories);
+          
+          return AlertDialog(
+            title: Text('İndirim Detayları: #${discount.id.substring(0, 8)}'),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('İndirim Oranı: %${discount.percentage.toStringAsFixed(0)}'),
+                  Text('Hedef Tip: ${discount.targetType == 'product' ? 'Ürün' : 'Kategori'}'),
+                  Text('Hedef: $targetName'),
+                  Text(
+                      'Başlangıç: ${discount.startAt != null ? _formatDate(discount.startAt!) : 'Sınırsız'}'),
+                  Text(
+                      'Bitiş: ${discount.endAt != null ? _formatDate(discount.endAt!) : 'Sınırsız'}'),
+                  Text('Durum: ${discount.active ? 'Aktif' : 'Pasif'}'),
+                  if (discount.description != null)
+                    Text('Açıklama: ${discount.description}'),
+                  if (discount.createdAt != null)
+                    Text('Oluşturulma: ${_formatDate(discount.createdAt!)}'),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Kapat'),
+              ),
             ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Kapat'),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

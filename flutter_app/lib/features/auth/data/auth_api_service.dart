@@ -248,4 +248,18 @@ class AuthApiService {
     final response = await _apiClient.get(ApiEndpoints.userProfile);
     return UserProfile.fromJson(response.data);
   }
+
+  // Update FCM token
+  Future<void> updateFcmToken(String fcmToken) async {
+    try {
+      await _apiClient.put(
+        ApiEndpoints.userFcmToken,
+        data: {'fcm_token': fcmToken},
+      );
+      AppLogger.debug('AuthApiService: FCM token updated successfully');
+    } catch (e) {
+      AppLogger.warning('AuthApiService: Failed to update FCM token', e);
+      // Don't throw - FCM token update failure shouldn't break the app
+    }
+  }
 }
