@@ -53,6 +53,15 @@ class AdminServicesNotifier extends StateNotifier<AsyncValue<List<Service>>> {
     }
   }
 
+  Future<void> deleteServiceImage(String serviceId, int index) async {
+    try {
+      await _repository.deleteServiceImage(serviceId, index);
+      await loadServices(); // Refresh the list
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
+
   Future<void> deleteService(String serviceId) async {
     try {
       await _repository.deleteService(serviceId);

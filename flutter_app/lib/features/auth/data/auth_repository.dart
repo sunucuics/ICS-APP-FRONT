@@ -73,4 +73,18 @@ class AuthRepository {
   Future<String?> getCurrentUserId() async {
     return FirebaseAuthService.userUid;
   }
+
+  // Update user profile
+  Future<UserProfile> updateProfile({
+    String? name,
+    String? phone,
+    String? email,
+  }) async {
+    final request = ProfileUpdateRequest(
+      name: name,
+      phone: phone,
+      email: email,
+    );
+    return await _authApiService.updateProfile(request);
+  }
 }

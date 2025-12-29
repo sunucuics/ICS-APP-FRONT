@@ -2,7 +2,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'local_notification_service.dart';
+import '../../firebase_options.dart';
 
 class FCMService {
   static final FirebaseMessaging _firebaseMessaging =
@@ -181,13 +183,39 @@ class FCMService {
 }
 
 /// Background message handler
+/// This handler runs in a separate isolate when the app is in the background or terminated
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  debugPrint('Handling a background message: ${message.messageId}');
-  debugPrint('Message data: ${message.data}');
-  debugPrint('Message notification: ${message.notification?.title}');
+  try {
+    debugPrint('Handling a background message: ${message.messageId}');
+    debugPrint('Message data: ${message.data}');
+    debugPrint('Message notification: ${message.notification?.title}');
 
-  // Initialize local notifications in background handler
-  // Note: We need to import and initialize here for background messages
-  // The notification will be shown by the system automatically
+    // Initialize Firebase in background isolate
+    // Check if Firebase is already initialized to avoid re-initialization errors
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      debugPrint('✅ Firebase initialized in background handler');
+    } catch (e) {
+      // Firebase might already be initialized, which is fine
+      debugPrint('Firebase initialization in background handler: $e');
+    }
+
+    // Initialize LocalNotificationService in background isolate
+    await LocalNotificationService.initialize();
+    debugPrint('✅ LocalNotificationService initialized in background handler');
+
+    // Show notification if notification payload exists
+    if (message.notification != null) {
+      await LocalNotificationService.showNotification(message);
+      debugPrint('✅ Background notification shown: ${message.notification?.title}');
+    } else {
+      debugPrint('⚠️ Background message has no notification payload');
+    }
+  } catch (e, stackTrace) {
+    debugPrint('❌ Error in background message handler: $e');
+    debugPrint('Stack trace: $stackTrace');
+  }
 }

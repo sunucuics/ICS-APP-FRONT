@@ -345,13 +345,12 @@ class AdminAppointmentsPage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Randevu Detayları #${appointment.id}'),
+        title: Text('Randevu Detayları'),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Müşteri ID: ${appointment.userId}'),
               Text('Durum: ${appointment.status}'),
               Text(
                   'Başlangıç: ${_formatDate(appointment.start)} ${_formatTime(appointment.start)}'),

@@ -118,18 +118,44 @@ class AdminRepository {
   }
 
   // Discounts
-  Future<List<AdminDiscount>> getDiscounts() async {
-    return await _apiService.getDiscounts();
+  /// Get list of discounts with optional filters
+  Future<List<AdminDiscount>> getDiscounts({
+    String? productId,
+    bool? active,
+  }) async {
+    return await _apiService.getDiscounts(
+      productId: productId,
+      active: active,
+    );
   }
 
+  /// Get single discount by ID
+  Future<AdminDiscount> getDiscount(String discountId) async {
+    return await _apiService.getDiscount(discountId);
+  }
+
+  /// Create discount using JSON (for category discounts or full control)
   Future<AdminDiscount> createDiscount(
       DiscountCreateRequest discountData) async {
     return await _apiService.createDiscount(discountData);
   }
 
+  /// Create product discount using form-data (recommended for product discounts)
+  Future<AdminDiscount> createDiscountForm(
+      DiscountCreateFormRequest discountData) async {
+    return await _apiService.createDiscountForm(discountData);
+  }
+
+  /// Update discount using JSON (for category discounts or full control)
   Future<AdminDiscount> updateDiscount(
       String discountId, DiscountUpdateRequest discountData) async {
     return await _apiService.updateDiscount(discountId, discountData);
+  }
+
+  /// Update product discount using form-data (recommended for product discounts)
+  Future<AdminDiscount> updateDiscountForm(
+      String discountId, DiscountUpdateFormRequest discountData) async {
+    return await _apiService.updateDiscountForm(discountId, discountData);
   }
 
   Future<void> deleteDiscount(String discountId) async {
@@ -148,6 +174,10 @@ class AdminRepository {
   Future<Service> updateService(
       String serviceId, Map<String, dynamic> serviceData) async {
     return await _apiService.updateService(serviceId, serviceData);
+  }
+
+  Future<Service> deleteServiceImage(String serviceId, int index) async {
+    return await _apiService.deleteServiceImage(serviceId, index);
   }
 
   Future<void> deleteService(String serviceId) async {

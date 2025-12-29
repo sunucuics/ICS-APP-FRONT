@@ -518,24 +518,38 @@ class AdminOrdersQueueResponse with _$AdminOrdersQueueResponse {
     
     // Safely extract lists, defaulting to empty list if null
     final preparingData = json['preparing'];
-    safeJson['preparing'] = preparingData is List ? preparingData : <dynamic>[];
+    final preparingList = preparingData is List 
+        ? preparingData.map((e) => Order.fromJson(e as Map<String, dynamic>)).toList()
+        : <Order>[];
     
     final shippedData = json['shipped'];
-    safeJson['shipped'] = shippedData is List ? shippedData : <dynamic>[];
+    final shippedList = shippedData is List 
+        ? shippedData.map((e) => Order.fromJson(e as Map<String, dynamic>)).toList()
+        : <Order>[];
     
     final deliveredData = json['delivered'];
-    safeJson['delivered'] = deliveredData is List ? deliveredData : <dynamic>[];
+    final deliveredList = deliveredData is List 
+        ? deliveredData.map((e) => Order.fromJson(e as Map<String, dynamic>)).toList()
+        : <Order>[];
     
     // Handle null count - create default if missing
+    AdminOrdersCount count;
     if (safeJson['count'] == null || safeJson['count'] is! Map) {
-      safeJson['count'] = {
-        'preparing': (safeJson['preparing'] as List).length,
-        'shipped': (safeJson['shipped'] as List).length,
-        'delivered': (safeJson['delivered'] as List).length,
-      };
+      count = AdminOrdersCount(
+        preparing: preparingList.length,
+        shipped: shippedList.length,
+        delivered: deliveredList.length,
+      );
+    } else {
+      count = AdminOrdersCount.fromJson(safeJson['count'] as Map<String, dynamic>);
     }
     
-    return _$AdminOrdersQueueResponseFromJson(safeJson);
+    return AdminOrdersQueueResponse(
+      preparing: preparingList,
+      shipped: shippedList,
+      delivered: deliveredList,
+      count: count,
+    );
   }
 }
 
@@ -550,19 +564,20 @@ class AdminOrdersCount with _$AdminOrdersCount {
 
   factory AdminOrdersCount.fromJson(Map<String, dynamic> json) {
     // Handle null values - ensure they default to 0
-    final safeJson = Map<String, dynamic>.from(json);
-    
-    // Safely extract integers, defaulting to 0 if null or not a number
     final preparingValue = json['preparing'];
-    safeJson['preparing'] = preparingValue is num ? preparingValue.toInt() : 0;
+    final preparing = preparingValue is num ? preparingValue.toInt() : 0;
     
     final shippedValue = json['shipped'];
-    safeJson['shipped'] = shippedValue is num ? shippedValue.toInt() : 0;
+    final shipped = shippedValue is num ? shippedValue.toInt() : 0;
     
     final deliveredValue = json['delivered'];
-    safeJson['delivered'] = deliveredValue is num ? deliveredValue.toInt() : 0;
+    final delivered = deliveredValue is num ? deliveredValue.toInt() : 0;
     
-    return _$AdminOrdersCountFromJson(safeJson);
+    return AdminOrdersCount(
+      preparing: preparing,
+      shipped: shipped,
+      delivered: delivered,
+    );
   }
 }
 

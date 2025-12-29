@@ -35,6 +35,7 @@ class ApiEndpoints {
   static const String authLogin = '/auth/login';
   static const String authLogout = '/auth/logout';
   static const String authResetPassword = '/auth/reset-password';
+  static const String authUpdateProfile = '/auth/me';
   static const String authCheckEmail = '/auth/check-email';
   static const String authDeleteInitiate = '/auth/delete-account/initiate';
   static const String authDeleteVerify = '/auth/delete-account/verify';
@@ -146,7 +147,12 @@ class ApiEndpoints {
       '/admin/appointments/$appointmentId';
   static String adminServiceAvailability(String serviceId) =>
       '/admin/appointments/service-availability/$serviceId';
-  static const String adminDiscounts = '/admin/discounts';
+  // Discounts endpoints (mounted at /admin/discounts in backend)
+  static const String discounts = '/admin/discounts';
+  static const String discountsList = '/admin/discounts/';
+  static String discount(String discountId) => '/admin/discounts/$discountId';
+  static String discountUpdateForm(String discountId) => '/admin/discounts/$discountId/form';
+  
   static const String adminComments = '/admin/comments';
   static const String adminFeatured = '/admin/featured';
 }

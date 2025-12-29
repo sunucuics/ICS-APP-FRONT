@@ -10,7 +10,7 @@ class AdminDiscount with _$AdminDiscount {
     @JsonKey(name: 'target_type')
     required String targetType, // 'product' or 'category'
     @JsonKey(name: 'target_id') String? targetId,
-    @JsonKey(name: 'percent') required double percentage,
+    @JsonKey(name: 'percent') required double percent, // Changed from percentage to match backend
     @Default(true) bool active,
     @JsonKey(name: 'start_at') DateTime? startAt,
     @JsonKey(name: 'end_at') DateTime? endAt,
@@ -45,7 +45,7 @@ class DiscountCreateRequest with _$DiscountCreateRequest {
 class DiscountUpdateRequest with _$DiscountUpdateRequest {
   const factory DiscountUpdateRequest({
     String? name,
-    double? percentage,
+    double? percentage, // JSON endpoint uses percentage
     String? targetType,
     String? targetId,
     DateTime? startDate,
@@ -56,4 +56,32 @@ class DiscountUpdateRequest with _$DiscountUpdateRequest {
 
   factory DiscountUpdateRequest.fromJson(Map<String, dynamic> json) =>
       _$DiscountUpdateRequestFromJson(json);
+}
+
+// Form-based request models for product discounts (date-only format)
+@freezed
+class DiscountCreateFormRequest with _$DiscountCreateFormRequest {
+  const factory DiscountCreateFormRequest({
+    required String productId, // Form field: product_id
+    required double percent, // Form field: percent (0-100)
+    String? startDate, // Form field: start_date (YYYY-MM-DD format)
+    String? endDate, // Form field: end_date (YYYY-MM-DD format)
+    @Default(true) bool active, // Form field: active
+  }) = _DiscountCreateFormRequest;
+
+  factory DiscountCreateFormRequest.fromJson(Map<String, dynamic> json) =>
+      _$DiscountCreateFormRequestFromJson(json);
+}
+
+@freezed
+class DiscountUpdateFormRequest with _$DiscountUpdateFormRequest {
+  const factory DiscountUpdateFormRequest({
+    double? percent, // Form field: percent (0-100)
+    String? startDate, // Form field: start_date (YYYY-MM-DD format, nullable)
+    String? endDate, // Form field: end_date (YYYY-MM-DD format, nullable)
+    bool? active, // Form field: active (nullable)
+  }) = _DiscountUpdateFormRequest;
+
+  factory DiscountUpdateFormRequest.fromJson(Map<String, dynamic> json) =>
+      _$DiscountUpdateFormRequestFromJson(json);
 }

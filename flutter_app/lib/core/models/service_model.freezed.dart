@@ -20,9 +20,9 @@ mixin _$Service {
   String get title => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
   String? get image =>
-      throw _privateConstructorUsedError; // Backward compatibility
-  List<String>? get images =>
-      throw _privateConstructorUsedError; // List of image URLs (1-3 images)
+      throw _privateConstructorUsedError; // Geri uyumluluk için
+  List<String> get images =>
+      throw _privateConstructorUsedError; // YENİ: 0-3 görsel array
   bool get isUpcoming => throw _privateConstructorUsedError;
   bool get isDeleted => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
@@ -44,7 +44,7 @@ abstract class $ServiceCopyWith<$Res> {
       String title,
       String description,
       String? image,
-      List<String>? images,
+      List<String> images,
       bool isUpcoming,
       bool isDeleted,
       DateTime? createdAt,
@@ -70,7 +70,7 @@ class _$ServiceCopyWithImpl<$Res, $Val extends Service>
     Object? title = null,
     Object? description = null,
     Object? image = freezed,
-    Object? images = freezed,
+    Object? images = null,
     Object? isUpcoming = null,
     Object? isDeleted = null,
     Object? createdAt = freezed,
@@ -93,10 +93,10 @@ class _$ServiceCopyWithImpl<$Res, $Val extends Service>
           ? _value.image
           : image // ignore: cast_nullable_to_non_nullable
               as String?,
-      images: freezed == images
+      images: null == images
           ? _value.images
           : images // ignore: cast_nullable_to_non_nullable
-              as List<String>?,
+              as List<String>,
       isUpcoming: null == isUpcoming
           ? _value.isUpcoming
           : isUpcoming // ignore: cast_nullable_to_non_nullable
@@ -129,7 +129,7 @@ abstract class _$$ServiceImplCopyWith<$Res> implements $ServiceCopyWith<$Res> {
       String title,
       String description,
       String? image,
-      List<String>? images,
+      List<String> images,
       bool isUpcoming,
       bool isDeleted,
       DateTime? createdAt,
@@ -153,7 +153,7 @@ class __$$ServiceImplCopyWithImpl<$Res>
     Object? title = null,
     Object? description = null,
     Object? image = freezed,
-    Object? images = freezed,
+    Object? images = null,
     Object? isUpcoming = null,
     Object? isDeleted = null,
     Object? createdAt = freezed,
@@ -176,10 +176,10 @@ class __$$ServiceImplCopyWithImpl<$Res>
           ? _value.image
           : image // ignore: cast_nullable_to_non_nullable
               as String?,
-      images: freezed == images
+      images: null == images
           ? _value._images
           : images // ignore: cast_nullable_to_non_nullable
-              as List<String>?,
+              as List<String>,
       isUpcoming: null == isUpcoming
           ? _value.isUpcoming
           : isUpcoming // ignore: cast_nullable_to_non_nullable
@@ -208,7 +208,7 @@ class _$ServiceImpl implements _Service {
       required this.title,
       required this.description,
       this.image,
-      final List<String>? images,
+      final List<String> images = const [],
       this.isUpcoming = false,
       this.isDeleted = false,
       this.createdAt,
@@ -223,19 +223,18 @@ class _$ServiceImpl implements _Service {
   final String description;
   @override
   final String? image;
-// Backward compatibility
-  final List<String>? _images;
-// Backward compatibility
+// Geri uyumluluk için
+  final List<String> _images;
+// Geri uyumluluk için
   @override
-  List<String>? get images {
-    final value = _images;
-    if (value == null) return null;
+  @JsonKey()
+  List<String> get images {
     if (_images is EqualUnmodifiableListView) return _images;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(value);
+    return EqualUnmodifiableListView(_images);
   }
 
-// List of image URLs (1-3 images)
+// YENİ: 0-3 görsel array
   @override
   @JsonKey()
   final bool isUpcoming;
@@ -301,7 +300,7 @@ abstract class _Service implements Service {
       required final String title,
       required final String description,
       final String? image,
-      final List<String>? images,
+      final List<String> images,
       final bool isUpcoming,
       final bool isDeleted,
       final DateTime? createdAt,
@@ -314,9 +313,9 @@ abstract class _Service implements Service {
   @override
   String get description;
   @override
-  String? get image; // Backward compatibility
+  String? get image; // Geri uyumluluk için
   @override
-  List<String>? get images; // List of image URLs (1-3 images)
+  List<String> get images; // YENİ: 0-3 görsel array
   @override
   bool get isUpcoming;
   @override

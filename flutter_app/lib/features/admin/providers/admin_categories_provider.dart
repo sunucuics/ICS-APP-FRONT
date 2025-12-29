@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/admin_repository.dart';
 import '../providers/admin_dashboard_provider.dart';
 import '../../../core/models/product_model.dart';
+import '../../../features/products/providers/products_provider.dart';
 
 // Categories Provider
 final adminCategoriesProvider = FutureProvider<List<Category>>((ref) async {
@@ -14,14 +15,15 @@ final adminCategoriesNotifierProvider =
     StateNotifierProvider<AdminCategoriesNotifier, AsyncValue<List<Category>>>(
         (ref) {
   final repository = ref.watch(adminRepositoryProvider);
-  return AdminCategoriesNotifier(repository);
+  return AdminCategoriesNotifier(repository, ref);
 });
 
 class AdminCategoriesNotifier
     extends StateNotifier<AsyncValue<List<Category>>> {
   final AdminRepository _repository;
+  final Ref _ref;
 
-  AdminCategoriesNotifier(this._repository)
+  AdminCategoriesNotifier(this._repository, this._ref)
       : super(const AsyncValue.loading()) {
     loadCategories();
   }
@@ -40,6 +42,9 @@ class AdminCategoriesNotifier
     try {
       await _repository.createCategory(categoryData);
       await loadCategories(); // Refresh the list
+      // Immediately refresh main app's categories provider (pre-fetch for instant update)
+      _ref.invalidate(categoriesProvider);
+      _ref.read(categoriesProvider); // Trigger immediate fetch in background
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }
@@ -50,6 +55,9 @@ class AdminCategoriesNotifier
     try {
       await _repository.updateCategory(categoryId, categoryData);
       await loadCategories(); // Refresh the list
+      // Immediately refresh main app's categories provider (pre-fetch for instant update)
+      _ref.invalidate(categoriesProvider);
+      _ref.read(categoriesProvider); // Trigger immediate fetch in background
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }
@@ -59,6 +67,9 @@ class AdminCategoriesNotifier
     try {
       await _repository.deleteCategory(categoryId);
       await loadCategories(); // Refresh the list
+      // Immediately refresh main app's categories provider (pre-fetch for instant update)
+      _ref.invalidate(categoriesProvider);
+      _ref.read(categoriesProvider); // Trigger immediate fetch in background
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }

@@ -6,6 +6,7 @@ import '../../../cart/providers/cart_provider.dart';
 import '../../../auth/providers/anonymous_auth_provider.dart';
 import '../../../../core/models/product_model.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/route_aware_refresh_mixin.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import 'product_detail_page.dart';
 import '../../../../core/services/snackbar_service.dart';
@@ -24,7 +25,14 @@ class CategoryProductsPage extends ConsumerStatefulWidget {
 }
 
 class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, RouteAware, RouteAwareRefreshMixin {
+  @override
+  void onRouteVisible() {
+    // Refresh products when page becomes visible
+    final categoryName =
+        widget.category.name.isEmpty ? null : widget.category.name;
+    ref.invalidate(productsProvider(categoryName));
+  }
   late AnimationController _fadeAnimationController;
   late AnimationController _slideAnimationController;
   late Animation<double> _fadeAnimation;

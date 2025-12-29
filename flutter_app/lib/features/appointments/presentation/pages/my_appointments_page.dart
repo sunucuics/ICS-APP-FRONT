@@ -1,13 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/models/appointment_model.dart';
+import '../../../../core/utils/route_aware_refresh_mixin.dart';
 import '../../providers/appointments_provider.dart';
 
-class MyAppointmentsPage extends ConsumerWidget {
+class MyAppointmentsPage extends ConsumerStatefulWidget {
   const MyAppointmentsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyAppointmentsPage> createState() => _MyAppointmentsPageState();
+}
+
+class _MyAppointmentsPageState extends ConsumerState<MyAppointmentsPage>
+    with RouteAware, RouteAwareRefreshMixin {
+  @override
+  void onRouteVisible() {
+    // Refresh appointments when page becomes visible
+    ref.invalidate(myAppointmentsProvider);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final appointmentsAsync = ref.watch(myAppointmentsProvider);
 
     return Scaffold(

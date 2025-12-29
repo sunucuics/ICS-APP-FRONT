@@ -31,6 +31,30 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
   final Map<String, List<File>> _selectedImages = {};
   bool _isLoading = false;
 
+  bool _isFormValid() {
+    // Check all required text fields
+    for (final field in widget.fields) {
+      if (field.isRequired && !field.isImageField) {
+        final controller = _controllers[field.label];
+        if (controller == null || controller.text.trim().isEmpty) {
+          return false;
+        }
+      }
+    }
+
+    // Check all required image fields
+    for (final field in widget.fields) {
+      if (field.isImageField && field.isRequired) {
+        final images = _selectedImages[field.label];
+        if (images == null || images.isEmpty) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -129,10 +153,12 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton(
-                    onPressed: _isLoading ? null : _handleSave,
+                    onPressed: (_isLoading || !_isFormValid()) ? null : _handleSave,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primaryOrange,
                       foregroundColor: Colors.white,
+                      disabledBackgroundColor: Colors.grey,
+                      disabledForegroundColor: Colors.grey[300],
                     ),
                     child: _isLoading
                         ? const SizedBox(
@@ -199,6 +225,10 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
                 return '${field.label} zorunludur';
               }
               return null;
+            },
+            onChanged: (value) {
+              // Trigger rebuild to update save button state
+              setState(() {});
             },
           ),
       ],
@@ -292,6 +322,8 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
             }
           }
         });
+        // Trigger rebuild to update save button state
+        setState(() {});
       },
       validator: (value) {
         if (field.isRequired && (value == null || value.trim().isEmpty)) {
@@ -689,6 +721,8 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
         _selectedImages[fieldLabel] = images;
       }
     });
+    // Trigger rebuild to update save button state
+    setState(() {});
   }
 }
 

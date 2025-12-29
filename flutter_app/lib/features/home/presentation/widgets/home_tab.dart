@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../auth/providers/auth_provider.dart';
-import '../../../featured/providers/featured_provider.dart';
+import '../../../featured/providers/featured_provider.dart' show featuredServicesProvider, featuredProductsProvider, featuredServicesListProvider, featuredProductsListProvider, FeaturedService;
 import '../../../cart/providers/cart_provider.dart';
-import '../../../services/providers/services_provider.dart';
+import '../../../services/providers/services_provider.dart' show servicesProvider;
 import '../../../appointments/presentation/pages/appointment_booking_page.dart';
 import '../../../notifications/presentation/pages/notifications_list_page.dart';
 import '../../../../core/models/featured_model.dart';
@@ -13,13 +13,47 @@ import '../../../../core/models/service_model.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/services/snackbar_service.dart';
 
-class HomeTab extends ConsumerWidget {
+class HomeTab extends ConsumerStatefulWidget {
   final void Function(int tabIndex)? onNavigateToTab;
 
   const HomeTab({super.key, this.onNavigateToTab});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends ConsumerState<HomeTab> {
+  int _lastBuildTime = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Refresh featured content when HomeTab is first created
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshFeaturedContent();
+    });
+  }
+
+  void _refreshFeaturedContent() {
+    if (!mounted) return;
+    // Refresh featured services and products
+    ref.read(featuredServicesProvider.notifier).refresh();
+    ref.read(featuredProductsProvider.notifier).refresh();
+    // Also refresh base services provider since featured services depend on it
+    ref.invalidate(servicesProvider);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Refresh featured content periodically when tab is visible (every 5 seconds)
+    // This ensures data stays fresh even when user stays on Home tab
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (now - _lastBuildTime > 5000) {
+      _lastBuildTime = now;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _refreshFeaturedContent();
+      });
+    }
     final authState = ref.watch(authProvider);
     final featuredServices = ref.watch(featuredServicesListProvider);
     final featuredProducts = ref.watch(featuredProductsListProvider);
@@ -243,7 +277,7 @@ class HomeTab extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(24),
                       onTap: () {
                         // Navigate to services tab (index 1)
-                        onNavigateToTab?.call(1);
+                        widget.onNavigateToTab?.call(1);
                       },
                       child: Container(
                         width: double.infinity,
@@ -341,7 +375,7 @@ class HomeTab extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(24),
                       onTap: () {
                         // Navigate to catalog tab (index 3)
-                        onNavigateToTab?.call(3);
+                        widget.onNavigateToTab?.call(3);
                       },
                       child: Container(
                         width: double.infinity,
@@ -577,7 +611,7 @@ class HomeTab extends ConsumerWidget {
                         final service = featuredServices[index];
                         return _FeaturedServiceCard(
                           featuredService: service,
-                          onNavigateToServices: () => onNavigateToTab?.call(1),
+                          onNavigateToServices: () => widget.onNavigateToTab?.call(1),
                           onBookAppointment: () =>
                               _bookAppointmentFromFeaturedService(
                                   context, ref, service),
@@ -657,7 +691,7 @@ class HomeTab extends ConsumerWidget {
                         final featuredProduct = featuredProducts[index];
                         return _FeaturedProductCard(
                           featuredProduct: featuredProduct,
-                          onNavigateToCatalog: () => onNavigateToTab?.call(3),
+                          onNavigateToCatalog: () => widget.onNavigateToTab?.call(3),
                         );
                       },
                     ),

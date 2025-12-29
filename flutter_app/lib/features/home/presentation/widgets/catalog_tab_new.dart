@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../products/providers/products_provider.dart';
 import '../../../products/presentation/pages/category_products_page.dart';
 import '../../../../core/models/product_model.dart';
@@ -135,43 +136,8 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
             ? _buildInnovaCard(category)
             : Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white
-                          .withOpacity(0.2), // White background for black card
-                      shape: BoxShape.circle,
-                    ),
-                    child: Stack(
-                      children: [
-                        Icon(
-                          category.name == 'Tümü'
-                              ? Icons.grid_view_rounded
-                              : _getCategoryIcon(category.name),
-                          color:
-                              Colors.white, // White icons for black background
-                          size: 24,
-                        ),
-                        if (isFixed)
-                          Positioned(
-                            right: -2,
-                            top: -2,
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.push_pin,
-                                color: Colors.white,
-                                size: 12,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+                  // Category Image or Icon
+                  _buildCategoryImageOrIcon(category, isFixed),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -236,6 +202,88 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
                   ),
                 ],
               ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryImageOrIcon(Category category, bool isFixed) {
+    final hasImage = category.coverImage != null && 
+                     category.coverImage!.isNotEmpty;
+
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        color: hasImage 
+            ? Colors.transparent 
+            : Colors.white.withOpacity(0.2),
+        shape: hasImage ? BoxShape.rectangle : BoxShape.circle,
+        borderRadius: hasImage ? BorderRadius.circular(12) : null,
+      ),
+      child: Stack(
+        children: [
+          if (hasImage)
+            // Show category image
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: CachedNetworkImage(
+                imageUrl: category.coverImage!,
+                fit: BoxFit.cover,
+                width: 60,
+                height: 60,
+                placeholder: (context, url) => Container(
+                  color: Colors.white.withOpacity(0.1),
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppTheme.primaryOrange,
+                      ),
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.white.withOpacity(0.2),
+                  child: Icon(
+                    category.name == 'Tümü'
+                        ? Icons.grid_view_rounded
+                        : _getCategoryIcon(category.name),
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
+            )
+          else
+            // Show fallback icon
+            Center(
+              child: Icon(
+                category.name == 'Tümü'
+                    ? Icons.grid_view_rounded
+                    : _getCategoryIcon(category.name),
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          // Fixed category pin indicator
+          if (isFixed)
+            Positioned(
+              right: -2,
+              top: -2,
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.push_pin,
+                  color: Colors.white,
+                  size: 12,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

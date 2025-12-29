@@ -9,6 +9,9 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../cart/providers/cart_provider.dart';
 import '../../../admin/providers/admin_provider.dart';
 import '../../../admin/presentation/pages/admin_main_page.dart';
+import '../../../services/providers/services_provider.dart' show servicesProvider;
+import '../../../products/providers/products_provider.dart';
+import '../../../featured/providers/featured_provider.dart' show featuredServicesProvider, featuredProductsProvider;
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -22,11 +25,35 @@ class HomePageState extends ConsumerState<HomePage> {
   final Map<int, Widget> _tabCache = {};
 
   void switchToTab(int tabIndex) {
+    // Refresh providers when switching tabs
+    if (tabIndex != _currentIndex) {
+      _refreshTabProviders(tabIndex);
+    }
+    
     setState(() {
       _currentIndex = tabIndex;
       // Ensure the tab we're switching to is created
       _getTab(tabIndex);
     });
+  }
+  
+  /// Refresh providers based on the tab being switched to
+  void _refreshTabProviders(int tabIndex) {
+    switch (tabIndex) {
+      case 0: // Home tab - refresh featured content
+        // Refresh will be handled by HomeTab widget itself
+        // No need to refresh here to avoid double refresh
+        break;
+      case 1: // Services tab
+        ref.invalidate(servicesProvider);
+        break;
+      case 3: // Catalog/Market tab
+        ref.invalidate(categoriesProvider);
+        // Also invalidate products provider (all categories)
+        ref.invalidate(productsProvider(null));
+        break;
+      // Tab 2 (Cart) and Tab 4 (Profile) don't need refresh on switch
+    }
   }
 
   // Lazy load tabs - only create when accessed

@@ -32,16 +32,19 @@ class BadgeService {
   }
 
   /// Initialize with Riverpod ref to listen to notifications
+  /// This method should be called from within a build method
   static Future<void> initializeWithRef(WidgetRef ref) async {
     await initialize();
     if (_initialized) {
       _ref = ref;
-      _listenToNotifications(ref);
+      // Note: ref.listen should be called from within build method
+      // This method just stores the ref for later use
     }
   }
 
   /// Listen to unread notifications count and update badge
-  static void _listenToNotifications(WidgetRef ref) {
+  /// This should be called from within a build method
+  static void listenToNotifications(WidgetRef ref) {
     ref.listen<int>(
       unreadNotificationsCountProvider,
       (previous, next) {

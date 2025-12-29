@@ -27,7 +27,8 @@ mixin _$AdminDiscount {
   @JsonKey(name: 'target_id')
   String? get targetId => throw _privateConstructorUsedError;
   @JsonKey(name: 'percent')
-  double get percentage => throw _privateConstructorUsedError;
+  double get percent =>
+      throw _privateConstructorUsedError; // Changed from percentage to match backend
   bool get active => throw _privateConstructorUsedError;
   @JsonKey(name: 'start_at')
   DateTime? get startAt => throw _privateConstructorUsedError;
@@ -58,7 +59,7 @@ abstract class $AdminDiscountCopyWith<$Res> {
       {String id,
       @JsonKey(name: 'target_type') String targetType,
       @JsonKey(name: 'target_id') String? targetId,
-      @JsonKey(name: 'percent') double percentage,
+      @JsonKey(name: 'percent') double percent,
       bool active,
       @JsonKey(name: 'start_at') DateTime? startAt,
       @JsonKey(name: 'end_at') DateTime? endAt,
@@ -86,7 +87,7 @@ class _$AdminDiscountCopyWithImpl<$Res, $Val extends AdminDiscount>
     Object? id = null,
     Object? targetType = null,
     Object? targetId = freezed,
-    Object? percentage = null,
+    Object? percent = null,
     Object? active = null,
     Object? startAt = freezed,
     Object? endAt = freezed,
@@ -108,9 +109,9 @@ class _$AdminDiscountCopyWithImpl<$Res, $Val extends AdminDiscount>
           ? _value.targetId
           : targetId // ignore: cast_nullable_to_non_nullable
               as String?,
-      percentage: null == percentage
-          ? _value.percentage
-          : percentage // ignore: cast_nullable_to_non_nullable
+      percent: null == percent
+          ? _value.percent
+          : percent // ignore: cast_nullable_to_non_nullable
               as double,
       active: null == active
           ? _value.active
@@ -156,7 +157,7 @@ abstract class _$$AdminDiscountImplCopyWith<$Res>
       {String id,
       @JsonKey(name: 'target_type') String targetType,
       @JsonKey(name: 'target_id') String? targetId,
-      @JsonKey(name: 'percent') double percentage,
+      @JsonKey(name: 'percent') double percent,
       bool active,
       @JsonKey(name: 'start_at') DateTime? startAt,
       @JsonKey(name: 'end_at') DateTime? endAt,
@@ -182,7 +183,7 @@ class __$$AdminDiscountImplCopyWithImpl<$Res>
     Object? id = null,
     Object? targetType = null,
     Object? targetId = freezed,
-    Object? percentage = null,
+    Object? percent = null,
     Object? active = null,
     Object? startAt = freezed,
     Object? endAt = freezed,
@@ -204,9 +205,9 @@ class __$$AdminDiscountImplCopyWithImpl<$Res>
           ? _value.targetId
           : targetId // ignore: cast_nullable_to_non_nullable
               as String?,
-      percentage: null == percentage
-          ? _value.percentage
-          : percentage // ignore: cast_nullable_to_non_nullable
+      percent: null == percent
+          ? _value.percent
+          : percent // ignore: cast_nullable_to_non_nullable
               as double,
       active: null == active
           ? _value.active
@@ -247,7 +248,7 @@ class _$AdminDiscountImpl implements _AdminDiscount {
       {required this.id,
       @JsonKey(name: 'target_type') required this.targetType,
       @JsonKey(name: 'target_id') this.targetId,
-      @JsonKey(name: 'percent') required this.percentage,
+      @JsonKey(name: 'percent') required this.percent,
       this.active = true,
       @JsonKey(name: 'start_at') this.startAt,
       @JsonKey(name: 'end_at') this.endAt,
@@ -270,7 +271,8 @@ class _$AdminDiscountImpl implements _AdminDiscount {
   final String? targetId;
   @override
   @JsonKey(name: 'percent')
-  final double percentage;
+  final double percent;
+// Changed from percentage to match backend
   @override
   @JsonKey()
   final bool active;
@@ -291,7 +293,7 @@ class _$AdminDiscountImpl implements _AdminDiscount {
 
   @override
   String toString() {
-    return 'AdminDiscount(id: $id, targetType: $targetType, targetId: $targetId, percentage: $percentage, active: $active, startAt: $startAt, endAt: $endAt, targetName: $targetName, description: $description, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'AdminDiscount(id: $id, targetType: $targetType, targetId: $targetId, percent: $percent, active: $active, startAt: $startAt, endAt: $endAt, targetName: $targetName, description: $description, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -304,8 +306,7 @@ class _$AdminDiscountImpl implements _AdminDiscount {
                 other.targetType == targetType) &&
             (identical(other.targetId, targetId) ||
                 other.targetId == targetId) &&
-            (identical(other.percentage, percentage) ||
-                other.percentage == percentage) &&
+            (identical(other.percent, percent) || other.percent == percent) &&
             (identical(other.active, active) || other.active == active) &&
             (identical(other.startAt, startAt) || other.startAt == startAt) &&
             (identical(other.endAt, endAt) || other.endAt == endAt) &&
@@ -326,7 +327,7 @@ class _$AdminDiscountImpl implements _AdminDiscount {
       id,
       targetType,
       targetId,
-      percentage,
+      percent,
       active,
       startAt,
       endAt,
@@ -356,7 +357,7 @@ abstract class _AdminDiscount implements AdminDiscount {
       {required final String id,
       @JsonKey(name: 'target_type') required final String targetType,
       @JsonKey(name: 'target_id') final String? targetId,
-      @JsonKey(name: 'percent') required final double percentage,
+      @JsonKey(name: 'percent') required final double percent,
       final bool active,
       @JsonKey(name: 'start_at') final DateTime? startAt,
       @JsonKey(name: 'end_at') final DateTime? endAt,
@@ -378,7 +379,7 @@ abstract class _AdminDiscount implements AdminDiscount {
   String? get targetId;
   @override
   @JsonKey(name: 'percent')
-  double get percentage;
+  double get percent; // Changed from percentage to match backend
   @override
   bool get active;
   @override
@@ -718,7 +719,8 @@ DiscountUpdateRequest _$DiscountUpdateRequestFromJson(
 /// @nodoc
 mixin _$DiscountUpdateRequest {
   String? get name => throw _privateConstructorUsedError;
-  double? get percentage => throw _privateConstructorUsedError;
+  double? get percentage =>
+      throw _privateConstructorUsedError; // JSON endpoint uses percentage
   String? get targetType => throw _privateConstructorUsedError;
   String? get targetId => throw _privateConstructorUsedError;
   DateTime? get startDate => throw _privateConstructorUsedError;
@@ -915,6 +917,7 @@ class _$DiscountUpdateRequestImpl implements _DiscountUpdateRequest {
   final String? name;
   @override
   final double? percentage;
+// JSON endpoint uses percentage
   @override
   final String? targetType;
   @override
@@ -993,7 +996,7 @@ abstract class _DiscountUpdateRequest implements DiscountUpdateRequest {
   @override
   String? get name;
   @override
-  double? get percentage;
+  double? get percentage; // JSON endpoint uses percentage
   @override
   String? get targetType;
   @override
@@ -1012,5 +1015,474 @@ abstract class _DiscountUpdateRequest implements DiscountUpdateRequest {
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$DiscountUpdateRequestImplCopyWith<_$DiscountUpdateRequestImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+DiscountCreateFormRequest _$DiscountCreateFormRequestFromJson(
+    Map<String, dynamic> json) {
+  return _DiscountCreateFormRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$DiscountCreateFormRequest {
+  String get productId =>
+      throw _privateConstructorUsedError; // Form field: product_id
+  double get percent =>
+      throw _privateConstructorUsedError; // Form field: percent (0-100)
+  String? get startDate =>
+      throw _privateConstructorUsedError; // Form field: start_date (YYYY-MM-DD format)
+  String? get endDate =>
+      throw _privateConstructorUsedError; // Form field: end_date (YYYY-MM-DD format)
+  bool get active => throw _privateConstructorUsedError;
+
+  /// Serializes this DiscountCreateFormRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of DiscountCreateFormRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $DiscountCreateFormRequestCopyWith<DiscountCreateFormRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $DiscountCreateFormRequestCopyWith<$Res> {
+  factory $DiscountCreateFormRequestCopyWith(DiscountCreateFormRequest value,
+          $Res Function(DiscountCreateFormRequest) then) =
+      _$DiscountCreateFormRequestCopyWithImpl<$Res, DiscountCreateFormRequest>;
+  @useResult
+  $Res call(
+      {String productId,
+      double percent,
+      String? startDate,
+      String? endDate,
+      bool active});
+}
+
+/// @nodoc
+class _$DiscountCreateFormRequestCopyWithImpl<$Res,
+        $Val extends DiscountCreateFormRequest>
+    implements $DiscountCreateFormRequestCopyWith<$Res> {
+  _$DiscountCreateFormRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of DiscountCreateFormRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? productId = null,
+    Object? percent = null,
+    Object? startDate = freezed,
+    Object? endDate = freezed,
+    Object? active = null,
+  }) {
+    return _then(_value.copyWith(
+      productId: null == productId
+          ? _value.productId
+          : productId // ignore: cast_nullable_to_non_nullable
+              as String,
+      percent: null == percent
+          ? _value.percent
+          : percent // ignore: cast_nullable_to_non_nullable
+              as double,
+      startDate: freezed == startDate
+          ? _value.startDate
+          : startDate // ignore: cast_nullable_to_non_nullable
+              as String?,
+      endDate: freezed == endDate
+          ? _value.endDate
+          : endDate // ignore: cast_nullable_to_non_nullable
+              as String?,
+      active: null == active
+          ? _value.active
+          : active // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$DiscountCreateFormRequestImplCopyWith<$Res>
+    implements $DiscountCreateFormRequestCopyWith<$Res> {
+  factory _$$DiscountCreateFormRequestImplCopyWith(
+          _$DiscountCreateFormRequestImpl value,
+          $Res Function(_$DiscountCreateFormRequestImpl) then) =
+      __$$DiscountCreateFormRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String productId,
+      double percent,
+      String? startDate,
+      String? endDate,
+      bool active});
+}
+
+/// @nodoc
+class __$$DiscountCreateFormRequestImplCopyWithImpl<$Res>
+    extends _$DiscountCreateFormRequestCopyWithImpl<$Res,
+        _$DiscountCreateFormRequestImpl>
+    implements _$$DiscountCreateFormRequestImplCopyWith<$Res> {
+  __$$DiscountCreateFormRequestImplCopyWithImpl(
+      _$DiscountCreateFormRequestImpl _value,
+      $Res Function(_$DiscountCreateFormRequestImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of DiscountCreateFormRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? productId = null,
+    Object? percent = null,
+    Object? startDate = freezed,
+    Object? endDate = freezed,
+    Object? active = null,
+  }) {
+    return _then(_$DiscountCreateFormRequestImpl(
+      productId: null == productId
+          ? _value.productId
+          : productId // ignore: cast_nullable_to_non_nullable
+              as String,
+      percent: null == percent
+          ? _value.percent
+          : percent // ignore: cast_nullable_to_non_nullable
+              as double,
+      startDate: freezed == startDate
+          ? _value.startDate
+          : startDate // ignore: cast_nullable_to_non_nullable
+              as String?,
+      endDate: freezed == endDate
+          ? _value.endDate
+          : endDate // ignore: cast_nullable_to_non_nullable
+              as String?,
+      active: null == active
+          ? _value.active
+          : active // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$DiscountCreateFormRequestImpl implements _DiscountCreateFormRequest {
+  const _$DiscountCreateFormRequestImpl(
+      {required this.productId,
+      required this.percent,
+      this.startDate,
+      this.endDate,
+      this.active = true});
+
+  factory _$DiscountCreateFormRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$DiscountCreateFormRequestImplFromJson(json);
+
+  @override
+  final String productId;
+// Form field: product_id
+  @override
+  final double percent;
+// Form field: percent (0-100)
+  @override
+  final String? startDate;
+// Form field: start_date (YYYY-MM-DD format)
+  @override
+  final String? endDate;
+// Form field: end_date (YYYY-MM-DD format)
+  @override
+  @JsonKey()
+  final bool active;
+
+  @override
+  String toString() {
+    return 'DiscountCreateFormRequest(productId: $productId, percent: $percent, startDate: $startDate, endDate: $endDate, active: $active)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$DiscountCreateFormRequestImpl &&
+            (identical(other.productId, productId) ||
+                other.productId == productId) &&
+            (identical(other.percent, percent) || other.percent == percent) &&
+            (identical(other.startDate, startDate) ||
+                other.startDate == startDate) &&
+            (identical(other.endDate, endDate) || other.endDate == endDate) &&
+            (identical(other.active, active) || other.active == active));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, productId, percent, startDate, endDate, active);
+
+  /// Create a copy of DiscountCreateFormRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$DiscountCreateFormRequestImplCopyWith<_$DiscountCreateFormRequestImpl>
+      get copyWith => __$$DiscountCreateFormRequestImplCopyWithImpl<
+          _$DiscountCreateFormRequestImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$DiscountCreateFormRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _DiscountCreateFormRequest implements DiscountCreateFormRequest {
+  const factory _DiscountCreateFormRequest(
+      {required final String productId,
+      required final double percent,
+      final String? startDate,
+      final String? endDate,
+      final bool active}) = _$DiscountCreateFormRequestImpl;
+
+  factory _DiscountCreateFormRequest.fromJson(Map<String, dynamic> json) =
+      _$DiscountCreateFormRequestImpl.fromJson;
+
+  @override
+  String get productId; // Form field: product_id
+  @override
+  double get percent; // Form field: percent (0-100)
+  @override
+  String? get startDate; // Form field: start_date (YYYY-MM-DD format)
+  @override
+  String? get endDate; // Form field: end_date (YYYY-MM-DD format)
+  @override
+  bool get active;
+
+  /// Create a copy of DiscountCreateFormRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$DiscountCreateFormRequestImplCopyWith<_$DiscountCreateFormRequestImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+DiscountUpdateFormRequest _$DiscountUpdateFormRequestFromJson(
+    Map<String, dynamic> json) {
+  return _DiscountUpdateFormRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$DiscountUpdateFormRequest {
+  double? get percent =>
+      throw _privateConstructorUsedError; // Form field: percent (0-100)
+  String? get startDate =>
+      throw _privateConstructorUsedError; // Form field: start_date (YYYY-MM-DD format, nullable)
+  String? get endDate =>
+      throw _privateConstructorUsedError; // Form field: end_date (YYYY-MM-DD format, nullable)
+  bool? get active => throw _privateConstructorUsedError;
+
+  /// Serializes this DiscountUpdateFormRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of DiscountUpdateFormRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $DiscountUpdateFormRequestCopyWith<DiscountUpdateFormRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $DiscountUpdateFormRequestCopyWith<$Res> {
+  factory $DiscountUpdateFormRequestCopyWith(DiscountUpdateFormRequest value,
+          $Res Function(DiscountUpdateFormRequest) then) =
+      _$DiscountUpdateFormRequestCopyWithImpl<$Res, DiscountUpdateFormRequest>;
+  @useResult
+  $Res call(
+      {double? percent, String? startDate, String? endDate, bool? active});
+}
+
+/// @nodoc
+class _$DiscountUpdateFormRequestCopyWithImpl<$Res,
+        $Val extends DiscountUpdateFormRequest>
+    implements $DiscountUpdateFormRequestCopyWith<$Res> {
+  _$DiscountUpdateFormRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of DiscountUpdateFormRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? percent = freezed,
+    Object? startDate = freezed,
+    Object? endDate = freezed,
+    Object? active = freezed,
+  }) {
+    return _then(_value.copyWith(
+      percent: freezed == percent
+          ? _value.percent
+          : percent // ignore: cast_nullable_to_non_nullable
+              as double?,
+      startDate: freezed == startDate
+          ? _value.startDate
+          : startDate // ignore: cast_nullable_to_non_nullable
+              as String?,
+      endDate: freezed == endDate
+          ? _value.endDate
+          : endDate // ignore: cast_nullable_to_non_nullable
+              as String?,
+      active: freezed == active
+          ? _value.active
+          : active // ignore: cast_nullable_to_non_nullable
+              as bool?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$DiscountUpdateFormRequestImplCopyWith<$Res>
+    implements $DiscountUpdateFormRequestCopyWith<$Res> {
+  factory _$$DiscountUpdateFormRequestImplCopyWith(
+          _$DiscountUpdateFormRequestImpl value,
+          $Res Function(_$DiscountUpdateFormRequestImpl) then) =
+      __$$DiscountUpdateFormRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {double? percent, String? startDate, String? endDate, bool? active});
+}
+
+/// @nodoc
+class __$$DiscountUpdateFormRequestImplCopyWithImpl<$Res>
+    extends _$DiscountUpdateFormRequestCopyWithImpl<$Res,
+        _$DiscountUpdateFormRequestImpl>
+    implements _$$DiscountUpdateFormRequestImplCopyWith<$Res> {
+  __$$DiscountUpdateFormRequestImplCopyWithImpl(
+      _$DiscountUpdateFormRequestImpl _value,
+      $Res Function(_$DiscountUpdateFormRequestImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of DiscountUpdateFormRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? percent = freezed,
+    Object? startDate = freezed,
+    Object? endDate = freezed,
+    Object? active = freezed,
+  }) {
+    return _then(_$DiscountUpdateFormRequestImpl(
+      percent: freezed == percent
+          ? _value.percent
+          : percent // ignore: cast_nullable_to_non_nullable
+              as double?,
+      startDate: freezed == startDate
+          ? _value.startDate
+          : startDate // ignore: cast_nullable_to_non_nullable
+              as String?,
+      endDate: freezed == endDate
+          ? _value.endDate
+          : endDate // ignore: cast_nullable_to_non_nullable
+              as String?,
+      active: freezed == active
+          ? _value.active
+          : active // ignore: cast_nullable_to_non_nullable
+              as bool?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$DiscountUpdateFormRequestImpl implements _DiscountUpdateFormRequest {
+  const _$DiscountUpdateFormRequestImpl(
+      {this.percent, this.startDate, this.endDate, this.active});
+
+  factory _$DiscountUpdateFormRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$DiscountUpdateFormRequestImplFromJson(json);
+
+  @override
+  final double? percent;
+// Form field: percent (0-100)
+  @override
+  final String? startDate;
+// Form field: start_date (YYYY-MM-DD format, nullable)
+  @override
+  final String? endDate;
+// Form field: end_date (YYYY-MM-DD format, nullable)
+  @override
+  final bool? active;
+
+  @override
+  String toString() {
+    return 'DiscountUpdateFormRequest(percent: $percent, startDate: $startDate, endDate: $endDate, active: $active)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$DiscountUpdateFormRequestImpl &&
+            (identical(other.percent, percent) || other.percent == percent) &&
+            (identical(other.startDate, startDate) ||
+                other.startDate == startDate) &&
+            (identical(other.endDate, endDate) || other.endDate == endDate) &&
+            (identical(other.active, active) || other.active == active));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, percent, startDate, endDate, active);
+
+  /// Create a copy of DiscountUpdateFormRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$DiscountUpdateFormRequestImplCopyWith<_$DiscountUpdateFormRequestImpl>
+      get copyWith => __$$DiscountUpdateFormRequestImplCopyWithImpl<
+          _$DiscountUpdateFormRequestImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$DiscountUpdateFormRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _DiscountUpdateFormRequest implements DiscountUpdateFormRequest {
+  const factory _DiscountUpdateFormRequest(
+      {final double? percent,
+      final String? startDate,
+      final String? endDate,
+      final bool? active}) = _$DiscountUpdateFormRequestImpl;
+
+  factory _DiscountUpdateFormRequest.fromJson(Map<String, dynamic> json) =
+      _$DiscountUpdateFormRequestImpl.fromJson;
+
+  @override
+  double? get percent; // Form field: percent (0-100)
+  @override
+  String? get startDate; // Form field: start_date (YYYY-MM-DD format, nullable)
+  @override
+  String? get endDate; // Form field: end_date (YYYY-MM-DD format, nullable)
+  @override
+  bool? get active;
+
+  /// Create a copy of DiscountUpdateFormRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$DiscountUpdateFormRequestImplCopyWith<_$DiscountUpdateFormRequestImpl>
       get copyWith => throw _privateConstructorUsedError;
 }

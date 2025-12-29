@@ -387,9 +387,26 @@ class AdminApiService {
   }
 
   // Discounts Management
-  Future<List<AdminDiscount>> getDiscounts() async {
+  /// Get list of discounts with optional filters
+  /// [productId] - Filter by product ID
+  /// [active] - Filter by active status
+  Future<List<AdminDiscount>> getDiscounts({
+    String? productId,
+    bool? active,
+  }) async {
     try {
-      final response = await _apiClient.get('/admin/discounts');
+      final queryParams = <String, dynamic>{};
+      if (productId != null) {
+        queryParams['product_id'] = productId;
+      }
+      if (active != null) {
+        queryParams['active'] = active.toString();
+      }
+
+      final response = await _apiClient.get(
+        ApiEndpoints.discountsList,
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
       final discountList = (response.data as List)
           .map((item) => AdminDiscount.fromJson(item as Map<String, dynamic>))
           .toList();
@@ -399,11 +416,23 @@ class AdminApiService {
     }
   }
 
+  /// Get single discount by ID
+  Future<AdminDiscount> getDiscount(String discountId) async {
+    try {
+      final response = await _apiClient.get(ApiEndpoints.discount(discountId));
+      return AdminDiscount.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Create discount using JSON (for product or category discounts)
+  /// Use this for category discounts or when you need full control
   Future<AdminDiscount> createDiscount(
       DiscountCreateRequest discountData) async {
     try {
       final response = await _apiClient.post(
-        '/admin/discounts',
+        ApiEndpoints.discounts, // POST /discounts (no slash) for JSON
         data: discountData.toJson(),
       );
       return AdminDiscount.fromJson(response.data as Map<String, dynamic>);
@@ -412,12 +441,69 @@ class AdminApiService {
     }
   }
 
+  /// Create product discount using form-data (recommended for product discounts)
+  /// Uses date-only format (YYYY-MM-DD) for start_date and end_date
+  Future<AdminDiscount> createDiscountForm(
+      DiscountCreateFormRequest discountData) async {
+    try {
+      final formData = FormData.fromMap({
+        'product_id': discountData.productId,
+        'percent': discountData.percent.toString(),
+        if (discountData.startDate != null && discountData.startDate!.isNotEmpty)
+          'start_date': discountData.startDate,
+        if (discountData.endDate != null && discountData.endDate!.isNotEmpty)
+          'end_date': discountData.endDate,
+        'active': discountData.active.toString(),
+      });
+
+      final response = await _apiClient.post(
+        ApiEndpoints.discountsList, // POST /discounts/ (with slash) for form
+        data: formData,
+      );
+      return AdminDiscount.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Update discount using JSON (for product or category discounts)
   Future<AdminDiscount> updateDiscount(
       String discountId, DiscountUpdateRequest discountData) async {
     try {
       final response = await _apiClient.put(
-        '/admin/discounts/$discountId',
+        ApiEndpoints.discount(discountId), // PUT /discounts/{id} for JSON
         data: discountData.toJson(),
+      );
+      return AdminDiscount.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Update product discount using form-data (recommended for product discounts)
+  /// Uses date-only format (YYYY-MM-DD) for start_date and end_date
+  Future<AdminDiscount> updateDiscountForm(
+      String discountId, DiscountUpdateFormRequest discountData) async {
+    try {
+      final formDataMap = <String, dynamic>{};
+      if (discountData.percent != null) {
+        formDataMap['percent'] = discountData.percent.toString();
+      }
+      if (discountData.startDate != null) {
+        formDataMap['start_date'] = discountData.startDate;
+      }
+      if (discountData.endDate != null) {
+        formDataMap['end_date'] = discountData.endDate;
+      }
+      if (discountData.active != null) {
+        formDataMap['active'] = discountData.active.toString();
+      }
+
+      final formData = FormData.fromMap(formDataMap);
+
+      final response = await _apiClient.put(
+        ApiEndpoints.discountUpdateForm(discountId), // PUT /discounts/{id}/form
+        data: formData,
       );
       return AdminDiscount.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
@@ -427,7 +513,7 @@ class AdminApiService {
 
   Future<void> deleteDiscount(String discountId) async {
     try {
-      await _apiClient.delete('/admin/discounts/$discountId');
+      await _apiClient.delete(ApiEndpoints.discount(discountId));
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
@@ -448,36 +534,45 @@ class AdminApiService {
 
   Future<Service> createService(Map<String, dynamic> serviceData) async {
     try {
-      // Check if there's an image file to upload
-      final imageFile = serviceData['image'];
-      
-      if (imageFile != null && imageFile is String && imageFile.isNotEmpty) {
-        // Use multipart/form-data for image upload
-        final formData = FormData();
+      // Use multipart/form-data for image upload
+      final formData = FormData();
 
-        // Add service fields
-        formData.fields.addAll([
-          MapEntry('title', serviceData['title'] ?? ''),
-          MapEntry('description', serviceData['description'] ?? ''),
-          MapEntry('is_upcoming', serviceData['is_upcoming']?.toString() ?? 'false'),
-        ]);
+      // Add service fields
+      formData.fields.addAll([
+        MapEntry('title', serviceData['title'] ?? ''),
+        MapEntry('description', serviceData['description'] ?? ''),
+        MapEntry('is_upcoming', serviceData['is_upcoming']?.toString() ?? 'false'),
+      ]);
 
-        // Add image file
+      // Add 3 image slots (image1, image2, image3) - optional
+      final image1 = serviceData['image1'] as String?;
+      final image2 = serviceData['image2'] as String?;
+      final image3 = serviceData['image3'] as String?;
+
+      if (image1 != null && image1.isNotEmpty) {
         formData.files.add(MapEntry(
-          'image',
-          await MultipartFile.fromFile(imageFile),
+          'image1',
+          await MultipartFile.fromFile(image1),
         ));
-
-        final response = await _apiClient.post(
-          '/admin/services',
-          data: formData,
-        );
-        return Service.fromJson(response.data as Map<String, dynamic>);
-      } else {
-        // Backend requires image for create, so throw error if missing
-        throw ApiException(
-            message: 'Hizmet oluşturmak için görsel gereklidir');
       }
+      if (image2 != null && image2.isNotEmpty) {
+        formData.files.add(MapEntry(
+          'image2',
+          await MultipartFile.fromFile(image2),
+        ));
+      }
+      if (image3 != null && image3.isNotEmpty) {
+        formData.files.add(MapEntry(
+          'image3',
+          await MultipartFile.fromFile(image3),
+        ));
+      }
+
+      final response = await _apiClient.post(
+        '/admin/services/',
+        data: formData,
+      );
+      return Service.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
@@ -496,22 +591,60 @@ class AdminApiService {
       if (serviceData['description'] != null) {
         formData.fields.add(MapEntry('description', serviceData['description']));
       }
+
+      // is_upcoming: keep/yes/no enum
       if (serviceData['is_upcoming'] != null) {
-        formData.fields.add(MapEntry('is_upcoming', serviceData['is_upcoming'].toString()));
+        final upcomingValue = serviceData['is_upcoming'] as String;
+        formData.fields.add(MapEntry('is_upcoming', upcomingValue)); // 'keep', 'yes', 'no'
       }
 
-      // Add image file only if provided
-      final imageFile = serviceData['image'];
-      if (imageFile != null && imageFile is String && imageFile.isNotEmpty) {
+      // Görsel slot'ları: image1/2/3 (replace) veya remove_image1/2/3 (sil)
+      final image1 = serviceData['image1'] as String?;
+      final image2 = serviceData['image2'] as String?;
+      final image3 = serviceData['image3'] as String?;
+
+      if (image1 != null && image1.isNotEmpty) {
         formData.files.add(MapEntry(
-          'image',
-          await MultipartFile.fromFile(imageFile),
+          'image1',
+          await MultipartFile.fromFile(image1),
         ));
+      } else if (serviceData['remove_image1'] == true) {
+        formData.fields.add(MapEntry('remove_image1', 'true'));
+      }
+
+      if (image2 != null && image2.isNotEmpty) {
+        formData.files.add(MapEntry(
+          'image2',
+          await MultipartFile.fromFile(image2),
+        ));
+      } else if (serviceData['remove_image2'] == true) {
+        formData.fields.add(MapEntry('remove_image2', 'true'));
+      }
+
+      if (image3 != null && image3.isNotEmpty) {
+        formData.files.add(MapEntry(
+          'image3',
+          await MultipartFile.fromFile(image3),
+        ));
+      } else if (serviceData['remove_image3'] == true) {
+        formData.fields.add(MapEntry('remove_image3', 'true'));
       }
 
       final response = await _apiClient.put(
         '/admin/services/$serviceId',
         data: formData,
+      );
+      return Service.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<Service> deleteServiceImage(String serviceId, int index) async {
+    try {
+      final response = await _apiClient.delete(
+        '/admin/services/$serviceId/images',
+        queryParameters: {'index': index},
       );
       return Service.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {

@@ -123,6 +123,22 @@ Map<String, dynamic> _$$RegisterRequestImplToJson(
       'password': instance.password,
     };
 
+_$ProfileUpdateRequestImpl _$$ProfileUpdateRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$ProfileUpdateRequestImpl(
+      name: json['name'] as String?,
+      phone: json['phone'] as String?,
+      email: json['email'] as String?,
+    );
+
+Map<String, dynamic> _$$ProfileUpdateRequestImplToJson(
+        _$ProfileUpdateRequestImpl instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'phone': instance.phone,
+      'email': instance.email,
+    };
+
 _$AuthResponseImpl _$$AuthResponseImplFromJson(Map<String, dynamic> json) =>
     _$AuthResponseImpl(
       userId: json['userId'] as String,

@@ -86,6 +86,18 @@ class RegisterRequest with _$RegisterRequest {
 }
 
 @freezed
+class ProfileUpdateRequest with _$ProfileUpdateRequest {
+  const factory ProfileUpdateRequest({
+    String? name,
+    String? phone,
+    String? email,
+  }) = _ProfileUpdateRequest;
+
+  factory ProfileUpdateRequest.fromJson(Map<String, dynamic> json) =>
+      _$ProfileUpdateRequestFromJson(json);
+}
+
+@freezed
 class AuthResponse with _$AuthResponse {
   const factory AuthResponse({
     required String userId,

@@ -1408,6 +1408,193 @@ abstract class _RegisterRequest implements RegisterRequest {
       throw _privateConstructorUsedError;
 }
 
+ProfileUpdateRequest _$ProfileUpdateRequestFromJson(Map<String, dynamic> json) {
+  return _ProfileUpdateRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$ProfileUpdateRequest {
+  String? get name => throw _privateConstructorUsedError;
+  String? get phone => throw _privateConstructorUsedError;
+  String? get email => throw _privateConstructorUsedError;
+
+  /// Serializes this ProfileUpdateRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of ProfileUpdateRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $ProfileUpdateRequestCopyWith<ProfileUpdateRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $ProfileUpdateRequestCopyWith<$Res> {
+  factory $ProfileUpdateRequestCopyWith(ProfileUpdateRequest value,
+          $Res Function(ProfileUpdateRequest) then) =
+      _$ProfileUpdateRequestCopyWithImpl<$Res, ProfileUpdateRequest>;
+  @useResult
+  $Res call({String? name, String? phone, String? email});
+}
+
+/// @nodoc
+class _$ProfileUpdateRequestCopyWithImpl<$Res,
+        $Val extends ProfileUpdateRequest>
+    implements $ProfileUpdateRequestCopyWith<$Res> {
+  _$ProfileUpdateRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of ProfileUpdateRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? name = freezed,
+    Object? phone = freezed,
+    Object? email = freezed,
+  }) {
+    return _then(_value.copyWith(
+      name: freezed == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String?,
+      phone: freezed == phone
+          ? _value.phone
+          : phone // ignore: cast_nullable_to_non_nullable
+              as String?,
+      email: freezed == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$ProfileUpdateRequestImplCopyWith<$Res>
+    implements $ProfileUpdateRequestCopyWith<$Res> {
+  factory _$$ProfileUpdateRequestImplCopyWith(_$ProfileUpdateRequestImpl value,
+          $Res Function(_$ProfileUpdateRequestImpl) then) =
+      __$$ProfileUpdateRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String? name, String? phone, String? email});
+}
+
+/// @nodoc
+class __$$ProfileUpdateRequestImplCopyWithImpl<$Res>
+    extends _$ProfileUpdateRequestCopyWithImpl<$Res, _$ProfileUpdateRequestImpl>
+    implements _$$ProfileUpdateRequestImplCopyWith<$Res> {
+  __$$ProfileUpdateRequestImplCopyWithImpl(_$ProfileUpdateRequestImpl _value,
+      $Res Function(_$ProfileUpdateRequestImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of ProfileUpdateRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? name = freezed,
+    Object? phone = freezed,
+    Object? email = freezed,
+  }) {
+    return _then(_$ProfileUpdateRequestImpl(
+      name: freezed == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String?,
+      phone: freezed == phone
+          ? _value.phone
+          : phone // ignore: cast_nullable_to_non_nullable
+              as String?,
+      email: freezed == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$ProfileUpdateRequestImpl implements _ProfileUpdateRequest {
+  const _$ProfileUpdateRequestImpl({this.name, this.phone, this.email});
+
+  factory _$ProfileUpdateRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ProfileUpdateRequestImplFromJson(json);
+
+  @override
+  final String? name;
+  @override
+  final String? phone;
+  @override
+  final String? email;
+
+  @override
+  String toString() {
+    return 'ProfileUpdateRequest(name: $name, phone: $phone, email: $email)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ProfileUpdateRequestImpl &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.phone, phone) || other.phone == phone) &&
+            (identical(other.email, email) || other.email == email));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, name, phone, email);
+
+  /// Create a copy of ProfileUpdateRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ProfileUpdateRequestImplCopyWith<_$ProfileUpdateRequestImpl>
+      get copyWith =>
+          __$$ProfileUpdateRequestImplCopyWithImpl<_$ProfileUpdateRequestImpl>(
+              this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$ProfileUpdateRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _ProfileUpdateRequest implements ProfileUpdateRequest {
+  const factory _ProfileUpdateRequest(
+      {final String? name,
+      final String? phone,
+      final String? email}) = _$ProfileUpdateRequestImpl;
+
+  factory _ProfileUpdateRequest.fromJson(Map<String, dynamic> json) =
+      _$ProfileUpdateRequestImpl.fromJson;
+
+  @override
+  String? get name;
+  @override
+  String? get phone;
+  @override
+  String? get email;
+
+  /// Create a copy of ProfileUpdateRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$ProfileUpdateRequestImplCopyWith<_$ProfileUpdateRequestImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
 AuthResponse _$AuthResponseFromJson(Map<String, dynamic> json) {
   return _AuthResponse.fromJson(json);
 }

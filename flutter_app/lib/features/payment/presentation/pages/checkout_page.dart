@@ -9,6 +9,8 @@ import '../../../addresses/presentation/pages/add_address_page.dart';
 import '../../../addresses/providers/addresses_provider.dart';
 import '../../../cart/providers/cart_provider.dart';
 import '../../providers/payment_provider.dart';
+import '../../providers/installment_provider.dart';
+import '../widgets/installment_selection_widget.dart';
 import 'paytr_direct_form_page.dart';
 
 class CheckoutPage extends ConsumerStatefulWidget {
@@ -356,6 +358,12 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     final currentAddress = ref.watch(currentAddressDataProvider);
     final cartItems = ref.watch(cartItemsProvider);
 
+    // Calculate total amount for installment widget
+    final totalAmount = cartItems.fold<double>(
+      0.0,
+      (sum, item) => sum + ((item.finalPrice ?? item.price) * item.qty),
+    );
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -365,6 +373,14 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           const SizedBox(height: 24),
           _buildPaymentMethodSection(context),
           const SizedBox(height: 24),
+          // Installment selection widget (only for card payments)
+          if (widget.paymentMethod == const PaymentMethod.creditCard() ||
+              widget.paymentMethod == const PaymentMethod.debitCard()) ...[
+            InstallmentSelectionWidget(
+              baseAmount: totalAmount,
+            ),
+            const SizedBox(height: 24),
+          ],
           _buildCartItemsSection(context, cartItems),
           const SizedBox(height: 24),
           _buildOrderNoteSection(),
@@ -941,10 +957,15 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         ? null
         : _noteController.text.trim();
 
+    // Get selected installment count (defaults to 0 = single payment)
+    final selectedInstallmentCount =
+        ref.read(selectedInstallmentCountProvider);
+
     try {
       await ref.read(checkoutProvider.notifier).startCheckout(
             paymentMethod: widget.paymentMethod,
             orderNote: note,
+            installmentCount: selectedInstallmentCount,
           );
     } catch (e) {
       if (!mounted) return;

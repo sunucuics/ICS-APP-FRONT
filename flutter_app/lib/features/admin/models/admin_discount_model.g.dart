@@ -11,7 +11,7 @@ _$AdminDiscountImpl _$$AdminDiscountImplFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       targetType: json['target_type'] as String,
       targetId: json['target_id'] as String?,
-      percentage: (json['percent'] as num).toDouble(),
+      percent: (json['percent'] as num).toDouble(),
       active: json['active'] as bool? ?? true,
       startAt: json['start_at'] == null
           ? null
@@ -34,7 +34,7 @@ Map<String, dynamic> _$$AdminDiscountImplToJson(_$AdminDiscountImpl instance) =>
       'id': instance.id,
       'target_type': instance.targetType,
       'target_id': instance.targetId,
-      'percent': instance.percentage,
+      'percent': instance.percent,
       'active': instance.active,
       'start_at': instance.startAt?.toIso8601String(),
       'end_at': instance.endAt?.toIso8601String(),
@@ -98,4 +98,42 @@ Map<String, dynamic> _$$DiscountUpdateRequestImplToJson(
       'endDate': instance.endDate?.toIso8601String(),
       'isActive': instance.isActive,
       'description': instance.description,
+    };
+
+_$DiscountCreateFormRequestImpl _$$DiscountCreateFormRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$DiscountCreateFormRequestImpl(
+      productId: json['productId'] as String,
+      percent: (json['percent'] as num).toDouble(),
+      startDate: json['startDate'] as String?,
+      endDate: json['endDate'] as String?,
+      active: json['active'] as bool? ?? true,
+    );
+
+Map<String, dynamic> _$$DiscountCreateFormRequestImplToJson(
+        _$DiscountCreateFormRequestImpl instance) =>
+    <String, dynamic>{
+      'productId': instance.productId,
+      'percent': instance.percent,
+      'startDate': instance.startDate,
+      'endDate': instance.endDate,
+      'active': instance.active,
+    };
+
+_$DiscountUpdateFormRequestImpl _$$DiscountUpdateFormRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$DiscountUpdateFormRequestImpl(
+      percent: (json['percent'] as num?)?.toDouble(),
+      startDate: json['startDate'] as String?,
+      endDate: json['endDate'] as String?,
+      active: json['active'] as bool?,
+    );
+
+Map<String, dynamic> _$$DiscountUpdateFormRequestImplToJson(
+        _$DiscountUpdateFormRequestImpl instance) =>
+    <String, dynamic>{
+      'percent': instance.percent,
+      'startDate': instance.startDate,
+      'endDate': instance.endDate,
+      'active': instance.active,
     };

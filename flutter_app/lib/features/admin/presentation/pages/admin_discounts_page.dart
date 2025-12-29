@@ -144,7 +144,7 @@ class AdminDiscountsPage extends ConsumerWidget {
                         ),
                       ),
                       Text(
-                        '%${discount.percentage.toStringAsFixed(0)}',
+                        '%${discount.percent.toStringAsFixed(0)}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -475,7 +475,7 @@ class AdminDiscountsPage extends ConsumerWidget {
         initialData: discount != null && products != null && categories != null
             ? {
                 'İndirim Adı': 'İndirim #${discount.id.substring(0, 8)}',
-                'İndirim Oranı': discount.percentage.toString(),
+                'İndirim Oranı (%)': discount.percent.toString(),
                 'Hedef Tip': discount.targetType,
                 'Hedef ID': discount.targetId != null
                     ? _getTargetDisplayValue(
@@ -485,14 +485,26 @@ class AdminDiscountsPage extends ConsumerWidget {
                         categories!,
                       )
                     : '',
+                'Başlangıç Tarihi': discount.startAt != null
+                    ? '${discount.startAt!.day.toString().padLeft(2, '0')}/${discount.startAt!.month.toString().padLeft(2, '0')}/${discount.startAt!.year}'
+                    : '',
+                'Bitiş Tarihi': discount.endAt != null
+                    ? '${discount.endAt!.day.toString().padLeft(2, '0')}/${discount.endAt!.month.toString().padLeft(2, '0')}/${discount.endAt!.year}'
+                    : '',
                 'Açıklama': discount.description ?? '',
               }
             : discount != null
                 ? {
                     'İndirim Adı': 'İndirim #${discount.id.substring(0, 8)}',
-                    'İndirim Oranı': discount.percentage.toString(),
+                    'İndirim Oranı (%)': discount.percent.toString(),
                     'Hedef Tip': discount.targetType,
                     'Hedef ID': discount.targetId ?? '',
+                    'Başlangıç Tarihi': discount.startAt != null
+                        ? '${discount.startAt!.day.toString().padLeft(2, '0')}/${discount.startAt!.month.toString().padLeft(2, '0')}/${discount.startAt!.year}'
+                        : '',
+                    'Bitiş Tarihi': discount.endAt != null
+                        ? '${discount.endAt!.day.toString().padLeft(2, '0')}/${discount.endAt!.month.toString().padLeft(2, '0')}/${discount.endAt!.year}'
+                        : '',
                     'Açıklama': discount.description ?? '',
                   }
                 : null,
@@ -558,31 +570,8 @@ class AdminDiscountsPage extends ConsumerWidget {
               }
             : null,
         onSave: (data) async {
-          // Tarih parsing
-          DateTime? startDate;
-          DateTime? endDate;
-
-          if (data['Başlangıç Tarihi']?.isNotEmpty == true) {
-            final startParts = data['Başlangıç Tarihi']!.split('/');
-            if (startParts.length == 3) {
-              startDate = DateTime(
-                int.parse(startParts[2]), // year
-                int.parse(startParts[1]), // month
-                int.parse(startParts[0]), // day
-              );
-            }
-          }
-
-          if (data['Bitiş Tarihi']?.isNotEmpty == true) {
-            final endParts = data['Bitiş Tarihi']!.split('/');
-            if (endParts.length == 3) {
-              endDate = DateTime(
-                int.parse(endParts[2]), // year
-                int.parse(endParts[1]), // month
-                int.parse(endParts[0]), // day
-              );
-            }
-          }
+          final targetType = data['Hedef Tip'] ?? 'product';
+          final percent = double.parse(data['İndirim Oranı (%)']!);
 
           // Extract ID from "ID - Name" format if present
           String? targetId;
@@ -595,61 +584,163 @@ class AdminDiscountsPage extends ConsumerWidget {
             }
           }
 
-          final discountData = DiscountCreateRequest(
-            name: data['İndirim Adı']!,
-            percentage: double.parse(data['İndirim Oranı (%)']!),
-            targetType: data['Hedef Tip']!,
-            targetId: targetId,
-            startDate: startDate ?? DateTime.now(),
-            endDate: endDate ?? DateTime.now().add(const Duration(days: 30)),
-            isActive: true,
-            description:
-                data['Açıklama']?.isNotEmpty == true ? data['Açıklama'] : null,
-          );
+          // Helper function to format date to YYYY-MM-DD
+          String? formatDateToYYYYMMDD(String? dateStr) {
+            if (dateStr == null || dateStr.isEmpty) return null;
+            // Handle DD/MM/YYYY format
+            final parts = dateStr.split('/');
+            if (parts.length == 3) {
+              final day = parts[0].padLeft(2, '0');
+              final month = parts[1].padLeft(2, '0');
+              final year = parts[2];
+              return '$year-$month-$day';
+            }
+            // If already in YYYY-MM-DD format, return as is
+            if (dateStr.contains('-') && dateStr.length == 10) {
+              return dateStr;
+            }
+            return null;
+          }
 
           if (discount == null) {
-            try {
-              await ref
-                  .read(adminDiscountsNotifierProvider.notifier)
-                  .createDiscount(discountData);
-              // Ensure refresh after creation
-              await ref
-                  .read(adminDiscountsNotifierProvider.notifier)
-                  .refresh();
-            } catch (e) {
-              rethrow;
-            }
-          } else {
-            // Extract ID from "ID - Name" format if present
-            String? targetId;
-            if (data['Hedef ID']?.isNotEmpty == true) {
-              final targetIdValue = data['Hedef ID']!;
-              if (targetIdValue.contains(' - ')) {
-                targetId = targetIdValue.split(' - ').first;
-              } else {
-                targetId = targetIdValue;
+            // Create new discount
+            if (targetType == 'product' && targetId != null) {
+              // Use form-based endpoint for product discounts
+              final formData = DiscountCreateFormRequest(
+                productId: targetId,
+                percent: percent,
+                startDate: formatDateToYYYYMMDD(data['Başlangıç Tarihi']),
+                endDate: formatDateToYYYYMMDD(data['Bitiş Tarihi']),
+                active: true,
+              );
+              try {
+                await ref
+                    .read(adminDiscountsNotifierProvider.notifier)
+                    .createDiscountForm(formData);
+                await ref
+                    .read(adminDiscountsNotifierProvider.notifier)
+                    .refresh();
+              } catch (e) {
+                rethrow;
+              }
+            } else {
+              // Use JSON endpoint for category discounts or when targetId is null
+              DateTime? startDate;
+              DateTime? endDate;
+
+              if (data['Başlangıç Tarihi']?.isNotEmpty == true) {
+                final startParts = data['Başlangıç Tarihi']!.split('/');
+                if (startParts.length == 3) {
+                  startDate = DateTime(
+                    int.parse(startParts[2]), // year
+                    int.parse(startParts[1]), // month
+                    int.parse(startParts[0]), // day
+                  );
+                }
+              }
+
+              if (data['Bitiş Tarihi']?.isNotEmpty == true) {
+                final endParts = data['Bitiş Tarihi']!.split('/');
+                if (endParts.length == 3) {
+                  endDate = DateTime(
+                    int.parse(endParts[2]), // year
+                    int.parse(endParts[1]), // month
+                    int.parse(endParts[0]), // day
+                  );
+                }
+              }
+
+              final discountData = DiscountCreateRequest(
+                name: data['İndirim Adı'] ?? 'İndirim',
+                percentage: percent,
+                targetType: targetType,
+                targetId: targetId,
+                startDate: startDate ?? DateTime.now(),
+                endDate: endDate ?? DateTime.now().add(const Duration(days: 30)),
+                isActive: true,
+                description:
+                    data['Açıklama']?.isNotEmpty == true ? data['Açıklama'] : null,
+              );
+              try {
+                await ref
+                    .read(adminDiscountsNotifierProvider.notifier)
+                    .createDiscount(discountData);
+                await ref
+                    .read(adminDiscountsNotifierProvider.notifier)
+                    .refresh();
+              } catch (e) {
+                rethrow;
               }
             }
+          } else {
+            // Update existing discount
+            if (discount.targetType == 'product' && discount.targetId != null) {
+              // Use form-based endpoint for product discounts
+              final formData = DiscountUpdateFormRequest(
+                percent: percent,
+                startDate: formatDateToYYYYMMDD(data['Başlangıç Tarihi']),
+                endDate: formatDateToYYYYMMDD(data['Bitiş Tarihi']),
+                active: true,
+              );
+              try {
+                await ref
+                    .read(adminDiscountsNotifierProvider.notifier)
+                    .updateDiscountForm(discount.id, formData);
+                await ref
+                    .read(adminDiscountsNotifierProvider.notifier)
+                    .refresh();
+              } catch (e) {
+                rethrow;
+              }
+            } else {
+              // Use JSON endpoint for category discounts
+              DateTime? startDate;
+              DateTime? endDate;
 
-            final updateData = DiscountUpdateRequest(
-              name: data['İndirim Adı'],
-              percentage: double.parse(data['İndirim Oranı (%)']!),
-              targetType: data['Hedef Tip'],
-              targetId: targetId,
-              description: data['Açıklama']?.isNotEmpty == true
-                  ? data['Açıklama']
-                  : null,
-            );
-            try {
-              await ref
-                  .read(adminDiscountsNotifierProvider.notifier)
-                  .updateDiscount(discount.id, updateData);
-              // Ensure refresh after update
-              await ref
-                  .read(adminDiscountsNotifierProvider.notifier)
-                  .refresh();
-            } catch (e) {
-              rethrow;
+              if (data['Başlangıç Tarihi']?.isNotEmpty == true) {
+                final startParts = data['Başlangıç Tarihi']!.split('/');
+                if (startParts.length == 3) {
+                  startDate = DateTime(
+                    int.parse(startParts[2]), // year
+                    int.parse(startParts[1]), // month
+                    int.parse(startParts[0]), // day
+                  );
+                }
+              }
+
+              if (data['Bitiş Tarihi']?.isNotEmpty == true) {
+                final endParts = data['Bitiş Tarihi']!.split('/');
+                if (endParts.length == 3) {
+                  endDate = DateTime(
+                    int.parse(endParts[2]), // year
+                    int.parse(endParts[1]), // month
+                    int.parse(endParts[0]), // day
+                  );
+                }
+              }
+
+              final updateData = DiscountUpdateRequest(
+                name: data['İndirim Adı'],
+                percentage: percent,
+                targetType: data['Hedef Tip'],
+                targetId: targetId,
+                startDate: startDate,
+                endDate: endDate,
+                isActive: true,
+                description: data['Açıklama']?.isNotEmpty == true
+                    ? data['Açıklama']
+                    : null,
+              );
+              try {
+                await ref
+                    .read(adminDiscountsNotifierProvider.notifier)
+                    .updateDiscount(discount.id, updateData);
+                await ref
+                    .read(adminDiscountsNotifierProvider.notifier)
+                    .refresh();
+              } catch (e) {
+                rethrow;
+              }
             }
           }
         },
@@ -677,7 +768,7 @@ class AdminDiscountsPage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('İndirim Oranı: %${discount.percentage.toStringAsFixed(0)}'),
+                  Text('İndirim Oranı: %${discount.percent.toStringAsFixed(0)}'),
                   Text('Hedef Tip: ${discount.targetType == 'product' ? 'Ürün' : 'Kategori'}'),
                   Text('Hedef: $targetName'),
                   Text(

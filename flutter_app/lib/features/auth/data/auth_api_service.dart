@@ -149,29 +149,9 @@ class AuthApiService {
       final idToken = await userCredential!.user!.getIdToken(true);
       AppLogger.debug('AuthApiService: Got fresh ID token');
 
-      // 3. FCM token'ı backend'e gönder (opsiyonel) - Android için timeout artırıldı
-      final fcmToken = await FCMService.getFCMToken();
-      if (fcmToken != null) {
-        try {
-          // JSON formatında gönder, FormData kullanma
-          await _apiClient.post(
-            ApiEndpoints.authLogin,
-            data: {
-              'email': request.email,
-              'password': request.password,
-              'fcm_token': fcmToken,
-            },
-            options: Options(
-              sendTimeout: const Duration(seconds: 30),
-              receiveTimeout: const Duration(seconds: 30),
-            ),
-          );
-          AppLogger.debug('AuthApiService: FCM token updated on login');
-        } catch (e) {
-          AppLogger.warning('AuthApiService: Failed to update FCM token', e);
-          // FCM token güncelleme hatası login'i engellemez
-        }
-      }
+      // 3. FCM token'ı backend'e gönder (opsiyonel)
+      // FCM token güncellemesi FCMService.updateTokenToBackend() ile yapılıyor
+      // Burada tekrar çağırmaya gerek yok
 
       // 4. User profile'ını çek
       final userProfile = await getCurrentUser();
@@ -247,6 +227,48 @@ class AuthApiService {
   Future<UserProfile> getCurrentUser() async {
     final response = await _apiClient.get(ApiEndpoints.userProfile);
     return UserProfile.fromJson(response.data);
+  }
+
+  // Update user profile
+  Future<UserProfile> updateProfile(ProfileUpdateRequest request) async {
+    AppLogger.info('AuthApiService: Updating user profile');
+    
+    try {
+      // Get ID token for authorization
+      final idToken = await FirebaseAuthService.getIdToken();
+      if (idToken == null) {
+        throw Exception('No ID token available. Please login again.');
+      }
+
+      // Prepare request data - only include non-null fields
+      final data = <String, dynamic>{};
+      if (request.name != null) {
+        data['name'] = request.name;
+      }
+      if (request.phone != null) {
+        data['phone'] = request.phone;
+      }
+      if (request.email != null) {
+        data['email'] = request.email;
+      }
+
+      // Make PUT request to update profile
+      final response = await _apiClient.put(
+        ApiEndpoints.authUpdateProfile,
+        data: data,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $idToken',
+          },
+        ),
+      );
+
+      AppLogger.success('AuthApiService: Profile updated successfully');
+      return UserProfile.fromJson(response.data);
+    } catch (e, stackTrace) {
+      AppLogger.error('AuthApiService: Profile update failed', e, stackTrace);
+      rethrow;
+    }
   }
 
   // Update FCM token

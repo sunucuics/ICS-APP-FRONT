@@ -18,6 +18,7 @@ import 'core/services/android_performance_service.dart';
 import 'core/services/image_cache_service.dart';
 import 'core/services/crash_prevention_service.dart';
 import 'core/services/memory_management_service.dart';
+import 'core/utils/route_aware_refresh_mixin.dart';
 import 'features/auth/data/auth_api_service.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
@@ -118,15 +119,22 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   void initState() {
     super.initState();
-    // Initialize BadgeService with ref after widget is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      BadgeService.initializeWithRef(ref);
+    // Initialize BadgeService
+    BadgeService.initialize().then((_) {
+      // Initialize with ref after widget is built
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        BadgeService.initializeWithRef(ref);
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
+    
+    // Listen to notifications count changes and update badge
+    // This must be called within build method
+    BadgeService.listenToNotifications(ref);
 
     return MaterialApp(
       title: 'Innova Craft Studio',
@@ -137,6 +145,7 @@ class _MyAppState extends ConsumerState<MyApp> {
       debugShowCheckedModeBanner: false,
       navigatorKey: NavigationService.navigatorKey,
       scaffoldMessengerKey: SnackBarService.scaffoldMessengerKey,
+      navigatorObservers: [routeObserver],
       // Performance optimizations
       builder: (context, child) {
         return MediaQuery(

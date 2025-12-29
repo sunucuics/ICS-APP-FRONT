@@ -272,12 +272,14 @@ class AdminCategoriesPageContent extends ConsumerWidget {
           ),
           AdminFormField(
             label: 'Açıklama',
-            hint: 'Kategori açıklaması (opsiyonel)',
+            hint: 'Kategori açıklaması',
+            isRequired: true,
             maxLines: 3,
           ),
           AdminFormField(
             label: 'Görsel',
-            hint: 'Kategori görseli seçin (opsiyonel)',
+            hint: 'Kategori görseli seçin',
+            isRequired: true,
             isImageField: true,
           ),
         ],
