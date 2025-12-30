@@ -85,6 +85,7 @@ class ApiEndpoints {
   // PayTR endpoints - Direct API (new backend integration)
   static const String paytrDirectInit = '/paytr/direct/init';
   static const String paytrDirectVerify = '/paytr/direct/verify';
+  static const String paytrRefreshToken = '/paytr/direct/refresh-token';
   static const String paytrCallback = '/paytr/callback';
   static const String paytrInstallments = '/paytr/installments';
 

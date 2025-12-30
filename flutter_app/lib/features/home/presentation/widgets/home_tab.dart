@@ -12,6 +12,7 @@ import '../../../../core/models/featured_model.dart';
 import '../../../../core/models/service_model.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/services/snackbar_service.dart';
+import '../../../../core/utils/price_utils.dart';
 
 class HomeTab extends ConsumerStatefulWidget {
   final void Function(int tabIndex)? onNavigateToTab;
@@ -814,6 +815,7 @@ class _FeaturedProductCard extends ConsumerWidget {
     final displayPrice = featuredProduct.finalPrice ?? featuredProduct.price;
     final hasDiscount = featuredProduct.finalPrice != null &&
         featuredProduct.finalPrice! < featuredProduct.price!;
+    final originalPrice = featuredProduct.price;
 
     return Container(
       width: 160,
@@ -937,10 +939,10 @@ class _FeaturedProductCard extends ConsumerWidget {
                                 14, // Larger font size for better readability
                           ),
                         ),
-                        if (hasDiscount) ...[
+                        if (hasDiscount && originalPrice != null) ...[
                           const SizedBox(width: 4),
                           Text(
-                            '₺${featuredProduct.price?.toStringAsFixed(0) ?? '0'}',
+                            '₺${originalPrice.toStringAsFixed(0)}',
                             style: TextStyle(
                               decoration: TextDecoration.lineThrough,
                               color: Theme.of(context)

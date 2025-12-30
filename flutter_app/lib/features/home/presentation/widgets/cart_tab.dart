@@ -6,8 +6,9 @@ import '../../../auth/providers/anonymous_auth_provider.dart' as anonymous;
 import '../../../auth/providers/auth_provider.dart';
 import '../../../auth/presentation/pages/guest_upgrade_page.dart';
 import '../../../../core/models/cart_model.dart';
-import '../../../payment/presentation/pages/payment_method_page.dart';
+import '../../../payment/presentation/pages/checkout_page.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/price_utils.dart';
 
 class CartTab extends ConsumerWidget {
   final void Function(int tabIndex)? onNavigateToTab;
@@ -99,6 +100,7 @@ class CartTab extends ConsumerWidget {
     final displayPrice = item.finalPrice ?? item.price;
     final hasDiscount =
         item.finalPrice != null && item.finalPrice! < item.price;
+    final originalPrice = item.price;
 
     return TweenAnimationBuilder<double>(
       duration: Duration(milliseconds: 1000 + (index * 200)),
@@ -234,7 +236,7 @@ class CartTab extends ConsumerWidget {
                             if (hasDiscount) ...[
                               const SizedBox(width: 8),
                               Text(
-                                '₺${item.price.toStringAsFixed(2)}',
+                                '₺${originalPrice.toStringAsFixed(2)}',
                                 style: const TextStyle(
                                   decoration: TextDecoration.lineThrough,
                                   color: Colors
@@ -454,21 +456,31 @@ class CartTab extends ConsumerWidget {
       final currentQty = currentItem.qty;
 
       if (newQuantity > currentQty) {
-        // Artırma: 1 adet ekle
+        // Increase: add 1 item
         ref.read(cartProvider.notifier).addToCart(productId, quantity: 1);
       } else if (newQuantity < currentQty && newQuantity > 0) {
-        // Azaltma: mevcut ürünü sil ve yeni miktarla tekrar ekle
-        // Bu geçici bir çözüm - ideal olarak backend'de quantity update olmalı
-        _removeItem(ref, productId);
-        if (newQuantity > 0) {
-          Future.delayed(const Duration(milliseconds: 500), () {
-            ref
-                .read(cartProvider.notifier)
-                .addToCart(productId, quantity: newQuantity);
-          });
-        }
+        // Decrease: remove and re-add with new quantity
+        // Note: Backend doesn't support quantity update, so we use remove + add
+        _decreaseQuantity(ref, productId, newQuantity, currentItem.title, currentItem.price);
       }
     });
+  }
+
+  Future<void> _decreaseQuantity(
+    WidgetRef ref, 
+    String productId, 
+    int newQuantity,
+    String title,
+    double price,
+  ) async {
+    await ref.read(cartProvider.notifier).removeFromCart(productId);
+    // Re-add with new quantity after removal completes
+    await ref.read(cartProvider.notifier).addToCart(
+      productId, 
+      quantity: newQuantity,
+      productTitle: title,
+      productPrice: price,
+    );
   }
 
   void _removeItem(WidgetRef ref, String productId) {
@@ -517,10 +529,10 @@ class CartTab extends ConsumerWidget {
       return;
     }
 
-    // Navigate to payment method selection
+    // Navigate to checkout page
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => const PaymentMethodPage(),
+        builder: (context) => const CheckoutPage(),
       ),
     );
   }

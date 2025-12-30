@@ -166,28 +166,66 @@ class _ServiceDetailPageState extends ConsumerState<ServiceDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Service Image
+                  // Service Images Gallery
                   Container(
                     height: 300,
                     width: double.infinity,
                     color: Theme.of(context).colorScheme.surfaceVariant,
-                    child: service.image != null && service.image!.isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: service.image!,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              color:
-                                  Theme.of(context).colorScheme.surfaceVariant,
-                              child: const Center(
-                                child: CircularProgressIndicator(),
+                    child: service.images.isNotEmpty
+                        ? Stack(
+                            children: [
+                              PageView.builder(
+                                itemCount: service.images.length,
+                                itemBuilder: (context, index) {
+                                  return CachedNetworkImage(
+                                    imageUrl: service.images[index],
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => Container(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceVariant,
+                                      child: const Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        Container(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceVariant,
+                                      child: const Icon(
+                                        Icons.image_not_supported,
+                                        size: 64,
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              color:
-                                  Theme.of(context).colorScheme.surfaceVariant,
-                              child: const Icon(Icons.image_not_supported,
-                                  size: 64),
-                            ),
+                              // Page indicator for multiple images
+                              if (service.images.length > 1)
+                                Positioned(
+                                  bottom: 16,
+                                  left: 0,
+                                  right: 0,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: List.generate(
+                                      service.images.length,
+                                      (index) => Container(
+                                        width: 8,
+                                        height: 8,
+                                        margin:
+                                            const EdgeInsets.symmetric(
+                                                horizontal: 4),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white.withOpacity(0.7),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           )
                         : Container(
                             color: Theme.of(context).colorScheme.surfaceVariant,

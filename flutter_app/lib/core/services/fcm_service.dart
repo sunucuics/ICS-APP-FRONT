@@ -1,10 +1,13 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'local_notification_service.dart';
+import 'navigation_service.dart';
 import '../../firebase_options.dart';
+import '../../features/notifications/presentation/pages/notifications_list_page.dart';
 
 class FCMService {
   static final FirebaseMessaging _firebaseMessaging =
@@ -92,6 +95,21 @@ class FCMService {
           }
         }
       });
+
+      // Handle app opened from terminated state via notification tap
+      // This is called when the app is completely closed and user taps on a notification
+      RemoteMessage? initialMessage = await _firebaseMessaging.getInitialMessage();
+      if (initialMessage != null) {
+        debugPrint('✅ App opened from terminated state via notification');
+        _handleNotificationTap(initialMessage);
+      }
+
+      // Handle app opened from background state via notification tap
+      // This is called when the app is in the background and user taps on a notification
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        debugPrint('✅ App opened from background state via notification');
+        _handleNotificationTap(message);
+      });
     } catch (e) {
       debugPrint('FCM initialization error: $e');
     }
@@ -178,6 +196,33 @@ class FCMService {
       debugPrint('Unsubscribed from topic: $topic');
     } catch (e) {
       debugPrint('Error unsubscribing from topic: $e');
+    }
+  }
+
+  /// Handle notification tap - navigates to notifications page
+  /// Called when user taps on a notification (from terminated or background state)
+  static void _handleNotificationTap(RemoteMessage message) {
+    debugPrint('Notification tapped: ${message.notification?.title}');
+    debugPrint('Notification data: ${message.data}');
+
+    // Use a slight delay to ensure the app is fully initialized before navigating
+    Future.delayed(const Duration(milliseconds: 500), () {
+      final navigator = NavigationService.navigatorKey.currentState;
+      if (navigator != null) {
+        navigator.push(
+          MaterialPageRoute(
+            builder: (context) => const NotificationsListPage(),
+          ),
+        );
+        debugPrint('✅ Navigating to notifications page from notification tap');
+      } else {
+        debugPrint('⚠️ Navigator not available for notification tap navigation');
+      }
+    });
+
+    // Refresh notifications list
+    if (onNotificationReceived != null) {
+      onNotificationReceived!();
     }
   }
 }

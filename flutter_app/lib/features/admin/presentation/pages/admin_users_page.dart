@@ -93,7 +93,7 @@ class AdminUsersPage extends ConsumerWidget {
                       children: [
                         Chip(
                           label: Text(
-                            user.role,
+                            user.role == 'admin' ? 'Admin' : 'Müşteri',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,

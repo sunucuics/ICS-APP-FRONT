@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/models/order_model.dart';
+import '../../../../core/utils/price_utils.dart';
 import '../../providers/orders_provider.dart';
 import 'order_detail_page.dart';
 
@@ -231,10 +232,10 @@ class OrdersListPage extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Total amount
+                  // Total amount - convert from kuruş to TL
                   if (order.totals != null)
                     Text(
-                      '₺${order.totals?.grandTotal?.toStringAsFixed(2) ?? '0.00'}',
+                      '₺${(order.totals?.grandTotal ?? 0.0).toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).primaryColor,
@@ -242,7 +243,7 @@ class OrdersListPage extends ConsumerWidget {
                     )
                   else
                     Text(
-                      '₺${(order.items?.fold(0.0, (sum, item) => sum + (item.total ?? (item.price ?? 0) * (item.quantity ?? 0))) ?? 0.0).toStringAsFixed(2)}',
+                      '₺${_calculateOrderTotal(order.items).toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).primaryColor,
@@ -334,19 +335,34 @@ class OrdersListPage extends ConsumerWidget {
 
     switch (paymentStatus.toLowerCase()) {
       case 'paid':
+      case 'succeeded':
+      case 'success':
         chipColor = Colors.green;
         displayText = 'Ödendi';
         icon = Icons.check_circle;
         break;
       case 'failed':
+      case 'failure':
         chipColor = Colors.red;
         displayText = 'Başarısız';
         icon = Icons.cancel;
         break;
       case 'pending':
+      case 'processing':
         chipColor = Colors.orange;
-        displayText = 'Beklemede';
+        displayText = 'İşleniyor';
         icon = Icons.schedule;
+        break;
+      case 'awaiting':
+        chipColor = Colors.amber;
+        displayText = 'Ödeme Bekliyor';
+        icon = Icons.payment;
+        break;
+      case 'canceled':
+      case 'cancelled':
+        chipColor = Colors.grey;
+        displayText = 'İptal';
+        icon = Icons.block;
         break;
       default:
         chipColor = Colors.grey;
@@ -464,6 +480,17 @@ class OrdersListPage extends ConsumerWidget {
     }
 
     return null;
+  }
+
+  /// Calculate total amount from order items (handles nullable values safely)
+  double _calculateOrderTotal(List<OrderItem>? items) {
+    if (items == null || items.isEmpty) return 0.0;
+    
+    return items.fold<double>(0.0, (sum, item) {
+      final itemTotal = item.total ?? 
+          ((item.price ?? 0.0) * (item.quantity ?? 0));
+      return sum + itemTotal;
+    });
   }
 
   String _formatDate(DateTime? date) {

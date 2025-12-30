@@ -21,8 +21,27 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class HomePageState extends ConsumerState<HomePage> {
+  static HomePageState? _instance;
+  static HomePageState? get instance => _instance;
+  
   int _currentIndex = 0;
   final Map<int, Widget> _tabCache = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _instance = this;
+    // Create only the initial tab (tab 0) - others will be created lazily
+    _getTab(0);
+  }
+
+  @override
+  void dispose() {
+    if (_instance == this) {
+      _instance = null;
+    }
+    super.dispose();
+  }
 
   void switchToTab(int tabIndex) {
     // Refresh providers when switching tabs
@@ -97,13 +116,6 @@ class HomePageState extends ConsumerState<HomePage> {
     // Return all tabs - create on first access, then use cache
     // IndexedStack will only build the visible tab, so this is efficient
     return List.generate(5, (index) => _getTab(index));
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // Create only the initial tab (tab 0) - others will be created lazily
-    _getTab(0);
   }
 
   @override

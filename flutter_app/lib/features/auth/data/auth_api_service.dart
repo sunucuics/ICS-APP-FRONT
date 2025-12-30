@@ -145,8 +145,8 @@ class AuthApiService {
 
       AppLogger.success('AuthApiService: Firebase login successful');
 
-      // 2. Android için token refresh timeout'u artır
-      final idToken = await userCredential!.user!.getIdToken(true);
+      // 2. Token refresh timeout optimizasyonu - force refresh yapma
+      final idToken = await userCredential!.user!.getIdToken(false);
       AppLogger.debug('AuthApiService: Got fresh ID token');
 
       // 3. FCM token'ı backend'e gönder (opsiyonel)

@@ -446,8 +446,18 @@ class _AdminServiceFormDialogState extends State<AdminServiceFormDialog> {
       final data = <String, dynamic>{
         'title': _titleController.text.trim(),
         'description': _descriptionController.text.trim(),
-        'is_upcoming': _isUpcoming,
       };
+
+      // is_upcoming logic
+      if (widget.service == null) {
+        // Create mode: Backend expects boolean (true/false)
+        // 'keep' or 'no' -> false, 'yes' -> true
+        final bool isUpcomingBool = _isUpcoming == 'yes';
+        data['is_upcoming'] = isUpcomingBool;
+      } else {
+        // Update mode: Backend accepts 'keep', 'yes', 'no'
+        data['is_upcoming'] = _isUpcoming;
+      }
 
       // Add image slots (image1, image2, image3)
       for (int i = 0; i < 3; i++) {

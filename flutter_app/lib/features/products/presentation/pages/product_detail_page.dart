@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 import '../../../cart/providers/cart_provider.dart';
 import '../../../comments/presentation/widgets/rating_summary.dart';
 import '../../../comments/presentation/widgets/comments_list.dart';
@@ -9,6 +11,131 @@ import '../../../comments/presentation/pages/comments_page.dart';
 import '../../../../core/models/product_model.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/services/snackbar_service.dart';
+import '../../../../core/utils/price_utils.dart';
+
+class _ImageGalleryViewer extends StatefulWidget {
+  final List<String> images;
+  final int initialIndex;
+
+  const _ImageGalleryViewer({
+    required this.images,
+    required this.initialIndex,
+  });
+
+  @override
+  State<_ImageGalleryViewer> createState() => _ImageGalleryViewerState();
+}
+
+class _ImageGalleryViewerState extends State<_ImageGalleryViewer> {
+  late PageController _pageController;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: widget.images.length > 1
+            ? Text(
+                '${_currentIndex + 1} / ${widget.images.length}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              )
+            : null,
+        centerTitle: true,
+      ),
+      body: Stack(
+        children: [
+          PhotoViewGallery.builder(
+            scrollPhysics: const ClampingScrollPhysics(),
+            builder: (BuildContext context, int index) {
+              return PhotoViewGalleryPageOptions(
+                imageProvider: NetworkImage(widget.images[index]),
+                initialScale: PhotoViewComputedScale.contained,
+                minScale: PhotoViewComputedScale.contained,
+                maxScale: PhotoViewComputedScale.covered * 2,
+                heroAttributes: PhotoViewHeroAttributes(
+                  tag: widget.images[index],
+                ),
+              );
+            },
+            itemCount: widget.images.length,
+            loadingBuilder: (context, event) => Center(
+              child: Container(
+                width: 20.0,
+                height: 20.0,
+                child: CircularProgressIndicator(
+                  value: event == null
+                      ? 0
+                      : event.cumulativeBytesLoaded /
+                          event.expectedTotalBytes!,
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    AppTheme.primaryOrange,
+                  ),
+                ),
+              ),
+            ),
+            backgroundDecoration: const BoxDecoration(
+              color: Colors.black,
+            ),
+            pageController: _pageController,
+            onPageChanged: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+          ),
+          // Görsel indicator (sadece birden fazla görsel varsa)
+          if (widget.images.length > 1)
+            Positioned(
+              bottom: 20,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  widget.images.length,
+                  (index) => Container(
+                    width: 8,
+                    height: 8,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _currentIndex == index
+                          ? AppTheme.primaryOrange
+                          : Colors.white.withOpacity(0.4),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
 
 class ProductDetailPage extends ConsumerStatefulWidget {
   final Product product;
@@ -34,6 +161,17 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  void _showImageGallery(BuildContext context, int initialIndex) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => _ImageGalleryViewer(
+          images: widget.product.images,
+          initialIndex: initialIndex,
+        ),
+      ),
+    );
   }
 
   void _showCommentForm() {
@@ -108,6 +246,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
     final displayPrice = product.finalPrice ?? product.price;
     final hasDiscount =
         product.finalPrice != null && product.finalPrice! < product.price;
+    final originalPrice = product.price;
 
     return Scaffold(
       appBar: AppBar(
@@ -170,41 +309,66 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
                       child: product.images.isNotEmpty
-                          ? PageView.builder(
-                              controller: _pageController,
-                              onPageChanged: (index) {
-                                setState(() {
-                                  selectedImageIndex = index;
-                                });
-                              },
-                              itemCount: product.images.length,
-                              itemBuilder: (context, index) {
-                                return CachedNetworkImage(
-                                  imageUrl: product.images[index],
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => Container(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .surfaceVariant,
-                                    child: const Center(
-                                      child: CircularProgressIndicator(
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                            AppTheme.primaryOrange),
+                          ? GestureDetector(
+                              onTap: () => _showImageGallery(context, selectedImageIndex),
+                              child: PageView.builder(
+                                controller: _pageController,
+                                onPageChanged: (index) {
+                                  setState(() {
+                                    selectedImageIndex = index;
+                                  });
+                                },
+                                itemCount: product.images.length,
+                                itemBuilder: (context, index) {
+                                  return Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      CachedNetworkImage(
+                                        imageUrl: product.images[index],
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) => Container(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .surfaceVariant,
+                                          child: const Center(
+                                            child: CircularProgressIndicator(
+                                              valueColor: AlwaysStoppedAnimation<Color>(
+                                                  AppTheme.primaryOrange),
+                                            ),
+                                          ),
+                                        ),
+                                        errorWidget: (context, url, error) => Container(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .surfaceVariant,
+                                          child: const Icon(
+                                            Icons.image_not_supported,
+                                            size: 64,
+                                            color: AppTheme.primaryOrange,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                  errorWidget: (context, url, error) => Container(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .surfaceVariant,
-                                    child: const Icon(
-                                      Icons.image_not_supported,
-                                      size: 64,
-                                      color: AppTheme.primaryOrange,
-                                    ),
-                                  ),
-                                );
-                              },
+                                      // Zoom icon overlay
+                                      Positioned(
+                                        top: 12,
+                                        right: 12,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withOpacity(0.5),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.zoom_in,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
                             )
                           : Container(
                               color:
@@ -339,7 +503,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
-                                      '₺${product.price.toStringAsFixed(2)}',
+                                      '₺${originalPrice.toStringAsFixed(2)}',
                                       style: TextStyle(
                                         decoration: TextDecoration.lineThrough,
                                         color: Theme.of(context)

@@ -6,6 +6,7 @@ import '../../../../core/models/order_model.dart';
 import '../../providers/orders_provider.dart';
 import '../../../../core/services/snackbar_service.dart';
 import '../../../../core/utils/order_utils.dart';
+import '../../../../core/utils/price_utils.dart';
 
 class OrderDetailPage extends ConsumerStatefulWidget {
   final String orderId;
@@ -403,7 +404,7 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
               ],
             ),
           ),
-          // Price
+          // Price - convert from kuruş to TL
           Text(
             formatMoney((item.finalPrice ?? item.price ?? 0) * item.qty),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -613,7 +614,7 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
             const Divider(),
             _buildTotalRow(
               'Toplam',
-              totals.grandTotal,
+              totals.grandTotal ?? 0.0,
               isTotal: true,
             ),
           ],

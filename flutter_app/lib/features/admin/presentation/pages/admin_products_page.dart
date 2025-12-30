@@ -7,6 +7,7 @@ import '../widgets/admin_form_dialog.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/models/product_model.dart';
 import '../../../../core/services/snackbar_service.dart';
+import '../../../../core/utils/price_utils.dart';
 
 // Content widget for use in AdminMainPage
 class AdminProductsPageContent extends ConsumerWidget {
@@ -462,7 +463,7 @@ class AdminProductsPageContent extends ConsumerWidget {
             ? {
                 'Ürün Adı': product.title,
                 'Açıklama': product.description ?? '',
-                'Fiyat': product.price.toString(),
+                'Fiyat': product.price.toStringAsFixed(2), // Price in TL
                 'Stok': product.stock.toString(),
                 'Kategori': product.categoryName ?? '',
                 'Görsel': product.images.isNotEmpty ? product.images.first : '',
@@ -1047,7 +1048,7 @@ class AdminProductsPage extends ConsumerWidget {
             ? {
                 'Ürün Adı': product.title,
                 'Açıklama': product.description ?? '',
-                'Fiyat': product.price.toString(),
+                'Fiyat': product.price.toStringAsFixed(2), // Price in TL
                 'Stok': product.stock.toString(),
                 'Kategori': product.categoryName ?? '',
                 'Görsel': product.images.isNotEmpty ? product.images.first : '',

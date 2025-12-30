@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/admin_navigation.dart';
 import '../widgets/admin_form_dialog.dart';
+import '../widgets/admin_service_form_dialog.dart';
 import '../../../../core/theme/app_theme.dart';
 import 'admin_dashboard_page.dart';
 import 'admin_categories_page.dart';
@@ -31,6 +32,7 @@ import '../../../../core/models/comment_model.dart';
 import '../../../../core/services/snackbar_service.dart';
 import '../../../../core/network/exceptions/api_exception.dart';
 import '../../../../core/utils/order_utils.dart';
+import '../../../../core/utils/price_utils.dart';
 import '../../providers/admin_users_provider.dart';
 import '../../../../features/auth/providers/auth_provider.dart';
 import '../../../../core/providers/theme_provider.dart';
@@ -276,7 +278,7 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
                         ),
                       ),
                       Text(
-                        '₺${item.total?.toStringAsFixed(2) ?? ((item.price ?? 0) * (item.qty ?? 0)).toStringAsFixed(2)}',
+                        '₺${(item.total ?? ((item.price ?? 0) * (item.qty ?? 0))).toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: AppTheme.primaryOrange,
@@ -2671,7 +2673,7 @@ class AdminServicesPageContent extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // Service Image
+            // Service Images
             Container(
               width: 80,
               height: 80,
@@ -2679,20 +2681,67 @@ class AdminServicesPageContent extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(8),
                 color: AppTheme.primaryNavy.withOpacity(0.1),
               ),
-              child: service.image != null && service.image!.isNotEmpty
+              child: service.images.isNotEmpty
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        service.image!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
-                            Icons.work,
-                            color: AppTheme.primaryNavy,
-                            size: 30,
-                          );
-                        },
-                      ),
+                      child: service.images.length == 1
+                          ? Image.network(
+                              service.images[0],
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(
+                                  Icons.work,
+                                  color: AppTheme.primaryNavy,
+                                  size: 30,
+                                );
+                              },
+                            )
+                          : Stack(
+                              children: [
+                                PageView.builder(
+                                  itemCount: service.images.length,
+                                  itemBuilder: (context, index) {
+                                    return Image.network(
+                                      service.images[index],
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Icon(
+                                          Icons.work,
+                                          color: AppTheme.primaryNavy,
+                                          size: 30,
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                                // Page indicator for multiple images
+                                if (service.images.length > 1)
+                                  Positioned(
+                                    bottom: 4,
+                                    left: 0,
+                                    right: 0,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: List.generate(
+                                        service.images.length,
+                                        (index) => Container(
+                                          width: 4,
+                                          height: 4,
+                                          margin: const EdgeInsets.symmetric(
+                                              horizontal: 2),
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: AppTheme.primaryNavy
+                                                .withOpacity(0.7),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
                     )
                   : Icon(
                       Icons.work,
@@ -2889,62 +2938,17 @@ class AdminServicesPageContent extends ConsumerWidget {
       BuildContext context, WidgetRef ref, Service? service) {
     showDialog(
       context: context,
-      builder: (context) => AdminFormDialog(
-        title: service == null ? 'Yeni Hizmet Ekle' : 'Hizmet Düzenle',
-        initialData: service != null
-            ? {
-                'Hizmet Adı': service.title,
-                'Açıklama': service.description,
-                'Görsel': service.image ?? '',
-                'Tür': service.kind,
-              }
-            : null,
-        fields: [
-          AdminFormField(
-            label: 'Hizmet Adı',
-            hint: 'Hizmet adını girin',
-            isRequired: true,
-          ),
-          AdminFormField(
-            label: 'Açıklama',
-            hint: 'Hizmet açıklaması',
-            isRequired: true,
-            maxLines: 3,
-          ),
-          AdminFormField(
-            label: 'Görsel',
-            hint: service == null 
-                ? 'Hizmet görseli seçin (zorunlu)' 
-                : 'Yeni görsel seçin (opsiyonel)',
-            isImageField: true,
-            isRequired: service == null, // Required only for create
-          ),
-          AdminFormField(
-            label: 'Tür',
-            hint: 'Hizmet türü (service)',
-            isRequired: true,
-          ),
-        ],
+      builder: (context) => AdminServiceFormDialog(
+        service: service,
         onSave: (data) async {
-          final serviceData = {
-            'title': data['Hizmet Adı']!,
-            'description': data['Açıklama']!,
-            'image': data['Görsel_file']?.isNotEmpty == true
-                ? data['Görsel_file']
-                : null,
-            'kind': data['Tür']!,
-            'isUpcoming': service?.isUpcoming ?? false,
-            'isDeleted': service?.isDeleted ?? false,
-          };
-
           if (service == null) {
             await ref
                 .read(adminServicesNotifierProvider.notifier)
-                .createService(serviceData);
+                .createService(data);
           } else {
             await ref
                 .read(adminServicesNotifierProvider.notifier)
-                .updateService(service.id, serviceData);
+                .updateService(service.id, data);
           }
         },
       ),

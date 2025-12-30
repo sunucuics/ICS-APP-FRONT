@@ -7,9 +7,11 @@ import '../../../auth/providers/anonymous_auth_provider.dart';
 import '../../../../core/models/product_model.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/route_aware_refresh_mixin.dart';
+import '../../../../core/utils/price_utils.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import 'product_detail_page.dart';
 import '../../../../core/services/snackbar_service.dart';
+import '../../../../core/services/navigation_service.dart';
 
 class CategoryProductsPage extends ConsumerStatefulWidget {
   final Category category;
@@ -155,14 +157,7 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
             children: [
               // Anasayfa (Home)
               GestureDetector(
-                onTap: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                  final homePageState =
-                      context.findAncestorStateOfType<HomePageState>();
-                  if (homePageState != null) {
-                    homePageState.switchToTab(0);
-                  }
-                },
+                onTap: () => NavigationService.navigateToHomeTab(0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -176,14 +171,7 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
               ),
               // Hizmetler (Services)
               GestureDetector(
-                onTap: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                  final homePageState =
-                      context.findAncestorStateOfType<HomePageState>();
-                  if (homePageState != null) {
-                    homePageState.switchToTab(1);
-                  }
-                },
+                onTap: () => NavigationService.navigateToHomeTab(1),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -197,14 +185,7 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
               ),
               // Sepet (Cart) - Central Button
               GestureDetector(
-                onTap: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                  final homePageState =
-                      context.findAncestorStateOfType<HomePageState>();
-                  if (homePageState != null) {
-                    homePageState.switchToTab(2);
-                  }
-                },
+                onTap: () => NavigationService.navigateToHomeTab(2),
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
@@ -259,14 +240,7 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
               ),
               // Mağaza (Store) - Current tab
               GestureDetector(
-                onTap: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                  final homePageState =
-                      context.findAncestorStateOfType<HomePageState>();
-                  if (homePageState != null) {
-                    homePageState.switchToTab(3);
-                  }
-                },
+                onTap: () => NavigationService.navigateToHomeTab(3),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -289,14 +263,7 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
               ),
               // Profil (Profile)
               GestureDetector(
-                onTap: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                  final homePageState =
-                      context.findAncestorStateOfType<HomePageState>();
-                  if (homePageState != null) {
-                    homePageState.switchToTab(4);
-                  }
-                },
+                onTap: () => NavigationService.navigateToHomeTab(4),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -475,6 +442,7 @@ class _ProductCard extends ConsumerWidget {
     final displayPrice = product.finalPrice ?? product.price;
     final hasDiscount =
         product.finalPrice != null && product.finalPrice! < product.price;
+    final originalPrice = product.price;
 
     return Container(
       decoration: BoxDecoration(
@@ -599,7 +567,7 @@ class _ProductCard extends ConsumerWidget {
                         ),
                         if (hasDiscount)
                           Text(
-                            '₺${product.price.toStringAsFixed(2)}',
+                            '₺${originalPrice.toStringAsFixed(2)}',
                             style: TextStyle(
                               decoration: TextDecoration.lineThrough,
                               color: Theme.of(context)

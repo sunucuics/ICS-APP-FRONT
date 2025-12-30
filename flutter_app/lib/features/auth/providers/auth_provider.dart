@@ -48,6 +48,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _authRepository;
   final Ref _ref;
   bool _isInitialized = false;
+  bool _isLoggingIn = false;
 
   AuthNotifier(this._authRepository, this._ref) : super(const AuthState()) {
     _listenToAuthStateChanges();
@@ -61,7 +62,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
             'AuthProvider: Firebase auth state changed - User: ${firebaseUser?.uid ?? 'null'}');
         if (firebaseUser != null) {
           // User is signed in
-          await _loadUserProfile();
+          if (!_isLoggingIn) {
+            await _loadUserProfile();
+          }
         } else {
           // User is signed out
           AppLogger.debug('AuthProvider: User signed out, updating state');
@@ -184,6 +187,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     AppLogger.info(
         'AuthProvider - Starting login for: ${AppLogger.maskEmail(email)}');
     state = state.copyWith(isLoading: true, error: null);
+    _isLoggingIn = true;
 
     try {
       AppLogger.debug('AuthProvider - Calling auth repository login...');
@@ -225,6 +229,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isLoading: false,
       );
       return false;
+    } finally {
+      _isLoggingIn = false;
     }
   }
 

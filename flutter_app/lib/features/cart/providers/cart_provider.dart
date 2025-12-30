@@ -11,6 +11,7 @@ final cartRepositoryProvider = Provider<CartRepository>((ref) {
 // Cart Provider - State Notifier for better cart management
 class CartNotifier extends StateNotifier<AsyncValue<Cart>> {
   final CartRepository _repository;
+  final MockAnonymousAuthService _authService = MockAnonymousAuthService();
   bool _isAddingToCart = false;
 
   CartNotifier(this._repository) : super(const AsyncValue.loading()) {
@@ -23,11 +24,10 @@ class CartNotifier extends StateNotifier<AsyncValue<Cart>> {
   Future<void> loadCart() async {
     try {
       // Check if user is guest/anonymous - don't load cart for guest users
-      final mockAuthService = MockAnonymousAuthService();
-      if (mockAuthService.isAnonymous) {
+      if (_authService.isAnonymous) {
         // Return empty cart for guest users
         state = AsyncValue.data(Cart(
-          userId: mockAuthService.currentUser?.uid ?? 'guest',
+          userId: _authService.currentUser?.uid ?? 'guest',
           items: [],
           totalBase: 0.0,
           totalQuantity: 0,
@@ -49,8 +49,7 @@ class CartNotifier extends StateNotifier<AsyncValue<Cart>> {
     if (_isAddingToCart) return; // Prevent multiple simultaneous requests
 
     // Check if user is guest/anonymous - don't allow adding to cart for guest users
-    final mockAuthService = MockAnonymousAuthService();
-    if (mockAuthService.isAnonymous) {
+    if (_authService.isAnonymous) {
       throw Exception(
           'Misafir kullanıcılar sepete ürün ekleyemez. Lütfen hesap oluşturun.');
     }
@@ -120,8 +119,7 @@ class CartNotifier extends StateNotifier<AsyncValue<Cart>> {
   // Remove item from cart with optimistic UI
   Future<void> removeFromCart(String productId) async {
     // Check if user is guest/anonymous - don't allow removing from cart for guest users
-    final mockAuthService = MockAnonymousAuthService();
-    if (mockAuthService.isAnonymous) {
+    if (_authService.isAnonymous) {
       throw Exception(
           'Misafir kullanıcılar sepetten ürün çıkaramaz. Lütfen hesap oluşturun.');
     }
@@ -163,8 +161,7 @@ class CartNotifier extends StateNotifier<AsyncValue<Cart>> {
   // Clear entire cart with optimistic UI
   Future<void> clearCart() async {
     // Check if user is guest/anonymous - don't allow clearing cart for guest users
-    final mockAuthService = MockAnonymousAuthService();
-    if (mockAuthService.isAnonymous) {
+    if (_authService.isAnonymous) {
       throw Exception(
           'Misafir kullanıcılar sepeti temizleyemez. Lütfen hesap oluşturun.');
     }

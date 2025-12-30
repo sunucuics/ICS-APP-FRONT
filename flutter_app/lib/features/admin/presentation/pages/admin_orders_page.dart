@@ -6,6 +6,7 @@ import '../../../../core/models/order_model.dart';
 import '../../../../core/services/snackbar_service.dart';
 import '../../../../core/network/exceptions/api_exception.dart';
 import '../../../../core/utils/order_utils.dart';
+import '../../../../core/utils/price_utils.dart';
 
 class AdminOrdersPage extends ConsumerWidget {
   const AdminOrdersPage({super.key});
@@ -218,7 +219,7 @@ class AdminOrdersPage extends ConsumerWidget {
                         ),
                       ),
                       Text(
-                        '₺${item.total?.toStringAsFixed(2) ?? ((item.price ?? 0) * (item.quantity ?? 0)).toStringAsFixed(2)}',
+                        '₺${(item.total ?? ((item.price ?? 0) * (item.quantity ?? 0))).toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: AppTheme.primaryOrange,
@@ -247,7 +248,7 @@ class AdminOrdersPage extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    '₺${order.totals?.grandTotal?.toStringAsFixed(2) ?? '0.00'}',
+                    '₺${(order.totals?.grandTotal ?? 0.0).toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,

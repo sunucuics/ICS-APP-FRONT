@@ -146,7 +146,7 @@ class _ServiceCard extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                // Service image or icon
+                // Service images gallery or icon
                 Container(
                   width: 60,
                   height: 60,
@@ -154,29 +154,90 @@ class _ServiceCard extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(12),
                     color: Colors.white.withOpacity(0.1),
                   ),
-                  child: service.image != null
+                  child: service.images.isNotEmpty
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: CachedNetworkImage(
-                            imageUrl: service.image!,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              color: Colors.white.withOpacity(0.1),
-                              child: const Center(
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
+                          child: service.images.length == 1
+                              ? CachedNetworkImage(
+                                  imageUrl: service.images[0],
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Container(
+                                    color: Colors.white.withOpacity(0.1),
+                                    child: const Center(
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      Container(
+                                    color: Colors.white.withOpacity(0.1),
+                                    child: const Icon(
+                                      Icons.work,
+                                      color: Colors.white,
+                                      size: 32,
+                                    ),
+                                  ),
+                                )
+                              : Stack(
+                                  children: [
+                                    PageView.builder(
+                                      itemCount: service.images.length,
+                                      itemBuilder: (context, index) {
+                                        return CachedNetworkImage(
+                                          imageUrl: service.images[index],
+                                          fit: BoxFit.cover,
+                                          placeholder: (context, url) =>
+                                              Container(
+                                            color:
+                                                Colors.white.withOpacity(0.1),
+                                            child: const Center(
+                                              child: CircularProgressIndicator(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                          errorWidget: (context, url, error) =>
+                                              Container(
+                                            color:
+                                                Colors.white.withOpacity(0.1),
+                                            child: const Icon(
+                                              Icons.work,
+                                              color: Colors.white,
+                                              size: 32,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    // Page indicator for multiple images
+                                    if (service.images.length > 1)
+                                      Positioned(
+                                        bottom: 4,
+                                        left: 0,
+                                        right: 0,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: List.generate(
+                                            service.images.length,
+                                            (index) => Container(
+                                              width: 4,
+                                              height: 4,
+                                              margin:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 2),
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.white
+                                                    .withOpacity(0.7),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              color: Colors.white.withOpacity(0.1),
-                              child: const Icon(
-                                Icons.work,
-                                color: Colors.white,
-                                size: 32,
-                              ),
-                            ),
-                          ),
                         )
                       : const Icon(
                           Icons.work,
