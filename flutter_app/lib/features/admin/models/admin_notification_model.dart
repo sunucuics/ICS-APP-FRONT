@@ -76,3 +76,21 @@ class UserSegment with _$UserSegment {
   factory UserSegment.fromJson(Map<String, dynamic> json) =>
       _$UserSegmentFromJson(json);
 }
+
+/// Admin panele gelen bildirimler (randevu, sipariş vb.)
+@freezed
+class AdminPanelNotification with _$AdminPanelNotification {
+  const factory AdminPanelNotification({
+    required String id,
+    required String title,
+    required String body,
+    @Default('system') String type, // appointment, order, comment, system
+    @JsonKey(name: 'is_read') @Default(false) bool isRead,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'read_at') DateTime? readAt,
+    Map<String, dynamic>? data, // Ekstra veriler (appointment_id, user_id, vb.)
+  }) = _AdminPanelNotification;
+
+  factory AdminPanelNotification.fromJson(Map<String, dynamic> json) =>
+      _$AdminPanelNotificationFromJson(json);
+}

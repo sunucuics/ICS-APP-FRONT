@@ -1439,3 +1439,324 @@ abstract class _UserSegment implements UserSegment {
   _$$UserSegmentImplCopyWith<_$UserSegmentImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
+
+AdminPanelNotification _$AdminPanelNotificationFromJson(
+    Map<String, dynamic> json) {
+  return _AdminPanelNotification.fromJson(json);
+}
+
+/// @nodoc
+mixin _$AdminPanelNotification {
+  String get id => throw _privateConstructorUsedError;
+  String get title => throw _privateConstructorUsedError;
+  String get body => throw _privateConstructorUsedError;
+  String get type =>
+      throw _privateConstructorUsedError; // appointment, order, comment, system
+  @JsonKey(name: 'is_read')
+  bool get isRead => throw _privateConstructorUsedError;
+  @JsonKey(name: 'created_at')
+  DateTime? get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'read_at')
+  DateTime? get readAt => throw _privateConstructorUsedError;
+  Map<String, dynamic>? get data => throw _privateConstructorUsedError;
+
+  /// Serializes this AdminPanelNotification to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of AdminPanelNotification
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $AdminPanelNotificationCopyWith<AdminPanelNotification> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $AdminPanelNotificationCopyWith<$Res> {
+  factory $AdminPanelNotificationCopyWith(AdminPanelNotification value,
+          $Res Function(AdminPanelNotification) then) =
+      _$AdminPanelNotificationCopyWithImpl<$Res, AdminPanelNotification>;
+  @useResult
+  $Res call(
+      {String id,
+      String title,
+      String body,
+      String type,
+      @JsonKey(name: 'is_read') bool isRead,
+      @JsonKey(name: 'created_at') DateTime? createdAt,
+      @JsonKey(name: 'read_at') DateTime? readAt,
+      Map<String, dynamic>? data});
+}
+
+/// @nodoc
+class _$AdminPanelNotificationCopyWithImpl<$Res,
+        $Val extends AdminPanelNotification>
+    implements $AdminPanelNotificationCopyWith<$Res> {
+  _$AdminPanelNotificationCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of AdminPanelNotification
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? title = null,
+    Object? body = null,
+    Object? type = null,
+    Object? isRead = null,
+    Object? createdAt = freezed,
+    Object? readAt = freezed,
+    Object? data = freezed,
+  }) {
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      title: null == title
+          ? _value.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      body: null == body
+          ? _value.body
+          : body // ignore: cast_nullable_to_non_nullable
+              as String,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as String,
+      isRead: null == isRead
+          ? _value.isRead
+          : isRead // ignore: cast_nullable_to_non_nullable
+              as bool,
+      createdAt: freezed == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      readAt: freezed == readAt
+          ? _value.readAt
+          : readAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      data: freezed == data
+          ? _value.data
+          : data // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$AdminPanelNotificationImplCopyWith<$Res>
+    implements $AdminPanelNotificationCopyWith<$Res> {
+  factory _$$AdminPanelNotificationImplCopyWith(
+          _$AdminPanelNotificationImpl value,
+          $Res Function(_$AdminPanelNotificationImpl) then) =
+      __$$AdminPanelNotificationImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String id,
+      String title,
+      String body,
+      String type,
+      @JsonKey(name: 'is_read') bool isRead,
+      @JsonKey(name: 'created_at') DateTime? createdAt,
+      @JsonKey(name: 'read_at') DateTime? readAt,
+      Map<String, dynamic>? data});
+}
+
+/// @nodoc
+class __$$AdminPanelNotificationImplCopyWithImpl<$Res>
+    extends _$AdminPanelNotificationCopyWithImpl<$Res,
+        _$AdminPanelNotificationImpl>
+    implements _$$AdminPanelNotificationImplCopyWith<$Res> {
+  __$$AdminPanelNotificationImplCopyWithImpl(
+      _$AdminPanelNotificationImpl _value,
+      $Res Function(_$AdminPanelNotificationImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of AdminPanelNotification
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? title = null,
+    Object? body = null,
+    Object? type = null,
+    Object? isRead = null,
+    Object? createdAt = freezed,
+    Object? readAt = freezed,
+    Object? data = freezed,
+  }) {
+    return _then(_$AdminPanelNotificationImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      title: null == title
+          ? _value.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      body: null == body
+          ? _value.body
+          : body // ignore: cast_nullable_to_non_nullable
+              as String,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as String,
+      isRead: null == isRead
+          ? _value.isRead
+          : isRead // ignore: cast_nullable_to_non_nullable
+              as bool,
+      createdAt: freezed == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      readAt: freezed == readAt
+          ? _value.readAt
+          : readAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      data: freezed == data
+          ? _value._data
+          : data // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$AdminPanelNotificationImpl implements _AdminPanelNotification {
+  const _$AdminPanelNotificationImpl(
+      {required this.id,
+      required this.title,
+      required this.body,
+      this.type = 'system',
+      @JsonKey(name: 'is_read') this.isRead = false,
+      @JsonKey(name: 'created_at') this.createdAt,
+      @JsonKey(name: 'read_at') this.readAt,
+      final Map<String, dynamic>? data})
+      : _data = data;
+
+  factory _$AdminPanelNotificationImpl.fromJson(Map<String, dynamic> json) =>
+      _$$AdminPanelNotificationImplFromJson(json);
+
+  @override
+  final String id;
+  @override
+  final String title;
+  @override
+  final String body;
+  @override
+  @JsonKey()
+  final String type;
+// appointment, order, comment, system
+  @override
+  @JsonKey(name: 'is_read')
+  final bool isRead;
+  @override
+  @JsonKey(name: 'created_at')
+  final DateTime? createdAt;
+  @override
+  @JsonKey(name: 'read_at')
+  final DateTime? readAt;
+  final Map<String, dynamic>? _data;
+  @override
+  Map<String, dynamic>? get data {
+    final value = _data;
+    if (value == null) return null;
+    if (_data is EqualUnmodifiableMapView) return _data;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(value);
+  }
+
+  @override
+  String toString() {
+    return 'AdminPanelNotification(id: $id, title: $title, body: $body, type: $type, isRead: $isRead, createdAt: $createdAt, readAt: $readAt, data: $data)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$AdminPanelNotificationImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.title, title) || other.title == title) &&
+            (identical(other.body, body) || other.body == body) &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.isRead, isRead) || other.isRead == isRead) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.readAt, readAt) || other.readAt == readAt) &&
+            const DeepCollectionEquality().equals(other._data, _data));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, id, title, body, type, isRead,
+      createdAt, readAt, const DeepCollectionEquality().hash(_data));
+
+  /// Create a copy of AdminPanelNotification
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$AdminPanelNotificationImplCopyWith<_$AdminPanelNotificationImpl>
+      get copyWith => __$$AdminPanelNotificationImplCopyWithImpl<
+          _$AdminPanelNotificationImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$AdminPanelNotificationImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _AdminPanelNotification implements AdminPanelNotification {
+  const factory _AdminPanelNotification(
+      {required final String id,
+      required final String title,
+      required final String body,
+      final String type,
+      @JsonKey(name: 'is_read') final bool isRead,
+      @JsonKey(name: 'created_at') final DateTime? createdAt,
+      @JsonKey(name: 'read_at') final DateTime? readAt,
+      final Map<String, dynamic>? data}) = _$AdminPanelNotificationImpl;
+
+  factory _AdminPanelNotification.fromJson(Map<String, dynamic> json) =
+      _$AdminPanelNotificationImpl.fromJson;
+
+  @override
+  String get id;
+  @override
+  String get title;
+  @override
+  String get body;
+  @override
+  String get type; // appointment, order, comment, system
+  @override
+  @JsonKey(name: 'is_read')
+  bool get isRead;
+  @override
+  @JsonKey(name: 'created_at')
+  DateTime? get createdAt;
+  @override
+  @JsonKey(name: 'read_at')
+  DateTime? get readAt;
+  @override
+  Map<String, dynamic>? get data;
+
+  /// Create a copy of AdminPanelNotification
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$AdminPanelNotificationImplCopyWith<_$AdminPanelNotificationImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}

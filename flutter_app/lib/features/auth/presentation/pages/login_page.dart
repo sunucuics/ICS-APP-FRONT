@@ -106,6 +106,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     print('🔐 LoginPage - Build: isLoading=$isLoading, isAuthenticated=${authState.isAuthenticated}');
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              Navigator.of(context).pushReplacementNamed('/welcome');
+            }
+          },
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(

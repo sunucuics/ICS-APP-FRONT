@@ -267,4 +267,35 @@ class AdminRepository {
   Future<void> updateUserRole(String userId, String role) async {
     return await _apiService.updateUserRole(userId, role);
   }
+
+  // Admin Panel Notifications (gelen bildirimler - randevu, sipariş vb.)
+  Future<List<AdminPanelNotification>> getAdminPanelNotifications({
+    int limit = 50,
+    bool unreadOnly = false,
+  }) async {
+    return await _apiService.getAdminPanelNotifications(
+      limit: limit,
+      unreadOnly: unreadOnly,
+    );
+  }
+
+  Future<int> getAdminPanelNotificationsUnreadCount() async {
+    return await _apiService.getAdminPanelNotificationsUnreadCount();
+  }
+
+  Future<void> markAdminPanelNotificationAsRead(String notificationId) async {
+    return await _apiService.markAdminPanelNotificationAsRead(notificationId);
+  }
+
+  Future<void> markAllAdminPanelNotificationsAsRead() async {
+    return await _apiService.markAllAdminPanelNotificationsAsRead();
+  }
+
+  Future<void> deleteAdminPanelNotification(String notificationId) async {
+    return await _apiService.deleteAdminPanelNotification(notificationId);
+  }
+
+  Future<void> clearAllReadAdminPanelNotifications() async {
+    return await _apiService.clearAllReadAdminPanelNotifications();
+  }
 }

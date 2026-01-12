@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/admin_dashboard_provider.dart';
 import '../../providers/admin_provider.dart';
+import '../../providers/admin_notifications_provider.dart';
+import '../../models/admin_notification_model.dart';
 import '../widgets/admin_stats_card.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../features/auth/providers/auth_provider.dart';
@@ -86,6 +88,11 @@ class AdminDashboardPageContent extends ConsumerWidget {
                 ],
               ),
             ),
+
+            const SizedBox(height: 24),
+
+            // Recent Notifications Section (moved to top)
+            _buildNotificationsSection(context, ref, onNavigateToTab),
 
             const SizedBox(height: 24),
 
@@ -211,7 +218,269 @@ class AdminDashboardPageContent extends ConsumerWidget {
           ],
         ),
       ),
+
     );
+  }
+
+  Widget _buildNotificationsSection(
+      BuildContext context, WidgetRef ref, Function(int)? onNavigateToTab) {
+    final notificationsAsync = ref.watch(adminPanelNotificationsNotifierProvider);
+    final unreadCountAsync = ref.watch(adminPanelUnreadCountProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Son Bildirimler',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                unreadCountAsync.when(
+                  data: (count) => count > 0
+                      ? Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            count.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+              ],
+            ),
+            TextButton(
+              onPressed: () {
+                // Navigate to Notifications tab (index 9)
+                onNavigateToTab?.call(9);
+              },
+              child: const Text('Tümünü Gör'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        notificationsAsync.when(
+          data: (notifications) {
+            if (notifications.isEmpty) {
+              return Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Theme.of(context).dividerColor,
+                  ),
+                ),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.notifications_none,
+                        size: 48,
+                        color: Colors.grey[400],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Henüz bildirim yok',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            // Show last 5 notifications
+            final recentNotifications = notifications.take(5).toList();
+
+            return Column(
+              children: recentNotifications.map((notification) {
+                return _buildNotificationCard(context, ref, notification);
+              }).toList(),
+            );
+          },
+          loading: () => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: CircularProgressIndicator(),
+            ),
+          ),
+          error: (error, _) => Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.red[50],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              'Bildirimler yüklenemedi: $error',
+              style: TextStyle(color: Colors.red[700]),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNotificationCard(
+      BuildContext context, WidgetRef ref, AdminPanelNotification notification) {
+    final isUnread = !notification.isRead;
+    final typeIcon = _getNotificationTypeIcon(notification.type);
+    final typeColor = _getNotificationTypeColor(notification.type);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      elevation: isUnread ? 2 : 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: isUnread
+            ? BorderSide(color: typeColor.withOpacity(0.5), width: 1)
+            : BorderSide.none,
+      ),
+      child: InkWell(
+        onTap: () {
+          // Mark as read and navigate based on type
+          ref
+              .read(adminPanelNotificationsNotifierProvider.notifier)
+              .markAsRead(notification.id);
+          // Navigate based on notification type
+          if (notification.type == 'appointment') {
+            // Navigate to appointments
+          }
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: typeColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(typeIcon, color: typeColor, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            notification.title,
+                            style: TextStyle(
+                              fontWeight:
+                                  isUnread ? FontWeight.bold : FontWeight.w500,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        if (isUnread)
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      notification.body,
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 12,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (notification.createdAt != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatTimeAgo(notification.createdAt!),
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  IconData _getNotificationTypeIcon(String type) {
+    switch (type) {
+      case 'appointment':
+        return Icons.event;
+      case 'order':
+        return Icons.shopping_cart;
+      case 'comment':
+        return Icons.comment;
+      default:
+        return Icons.notifications;
+    }
+  }
+
+  Color _getNotificationTypeColor(String type) {
+    switch (type) {
+      case 'appointment':
+        return Colors.teal;
+      case 'order':
+        return Colors.green;
+      case 'comment':
+        return Colors.orange;
+      default:
+        return AppTheme.primaryNavy;
+    }
+  }
+
+  String _formatTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inMinutes < 1) {
+      return 'Az önce';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} dakika önce';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours} saat önce';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} gün önce';
+    } else {
+      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    }
   }
 
   Widget _buildQuickActionCard(

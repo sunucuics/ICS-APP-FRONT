@@ -43,6 +43,7 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
   bool _formSubmitted = false;
   bool _isRefreshingToken = false;
   bool _isFetchingQuote = false;
+  bool _isValidating = false;
 
   // Kart formu değerleri
   final _cardOwnerController = TextEditingController();
@@ -112,6 +113,8 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
   }
 
   void _checkPaymentResult(String url) {
+    if (_isValidating) return;
+
     final uri = Uri.parse(url);
     final path = uri.path.toLowerCase();
 
@@ -127,6 +130,13 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
   }
 
   Future<void> _handlePaymentSuccess() async {
+    if (!mounted) return;
+    
+    // Validasyon başladı, loading göster ve close butonunu gizle
+    setState(() {
+      _isValidating = true;
+    });
+
     // Ödeme doğrulamasını bekle
     await ref.read(checkoutProvider.notifier).verifyPayment();
 
@@ -136,6 +146,7 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
   }
 
   void _handlePaymentFailure() {
+    if (!mounted) return;
     ref
         .read(checkoutProvider.notifier)
         .paymentFailed('Ödeme işlemi başarısız oldu');
@@ -406,6 +417,14 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Validasyon sırasında tam ekran loading göster
+    if (_isValidating) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: _buildValidationView(),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -418,6 +437,54 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
         ),
       ),
       body: _formSubmitted ? _buildWebView() : _buildCardForm(),
+    );
+  }
+
+  Widget _buildValidationView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.check_circle,
+              color: Colors.green,
+              size: 64,
+            ),
+          ),
+          const SizedBox(height: 32),
+          const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              color: AppTheme.primaryOrange,
+              strokeWidth: 2,
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Ödeme Başarılı!',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Siparişiniz oluşturuluyor, lütfen bekleyin...',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.7),
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

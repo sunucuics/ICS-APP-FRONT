@@ -131,3 +131,33 @@ Map<String, dynamic> _$$UserSegmentImplToJson(_$UserSegmentImpl instance) =>
       'is_active': instance.isActive,
       'created_at': instance.createdAt.toIso8601String(),
     };
+
+_$AdminPanelNotificationImpl _$$AdminPanelNotificationImplFromJson(
+        Map<String, dynamic> json) =>
+    _$AdminPanelNotificationImpl(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      body: json['body'] as String,
+      type: json['type'] as String? ?? 'system',
+      isRead: json['is_read'] as bool? ?? false,
+      createdAt: json['created_at'] == null
+          ? null
+          : DateTime.parse(json['created_at'] as String),
+      readAt: json['read_at'] == null
+          ? null
+          : DateTime.parse(json['read_at'] as String),
+      data: json['data'] as Map<String, dynamic>?,
+    );
+
+Map<String, dynamic> _$$AdminPanelNotificationImplToJson(
+        _$AdminPanelNotificationImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'title': instance.title,
+      'body': instance.body,
+      'type': instance.type,
+      'is_read': instance.isRead,
+      'created_at': instance.createdAt?.toIso8601String(),
+      'read_at': instance.readAt?.toIso8601String(),
+      'data': instance.data,
+    };

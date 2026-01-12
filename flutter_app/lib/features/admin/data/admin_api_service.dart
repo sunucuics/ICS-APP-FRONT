@@ -871,4 +871,91 @@ class AdminApiService {
       throw ApiException.fromDioException(e);
     }
   }
+
+  // Admin Panel Notifications (gelen bildirimler - randevu, sipariş vb.)
+  Future<List<AdminPanelNotification>> getAdminPanelNotifications({
+    int limit = 50,
+    bool unreadOnly = false,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{
+        'limit': limit,
+        if (unreadOnly) 'unread_only': true,
+      };
+      final response = await _apiClient.get(
+        ApiEndpoints.adminPanelNotifications,
+        queryParameters: queryParams,
+      );
+      if (response.data == null) return [];
+      
+      // Handle both List and Map responses
+      final data = response.data;
+      if (data is List) {
+        return data
+            .map((item) =>
+                AdminPanelNotification.fromJson(item as Map<String, dynamic>))
+            .toList();
+      } else if (data is Map<String, dynamic>) {
+        // If backend returns a wrapped response like {"items": [...]}
+        final items = data['items'] ?? data['notifications'] ?? data['data'];
+        if (items is List) {
+          return items
+              .map((item) =>
+                  AdminPanelNotification.fromJson(item as Map<String, dynamic>))
+              .toList();
+        }
+      }
+      return [];
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+
+  Future<int> getAdminPanelNotificationsUnreadCount() async {
+    try {
+      final response = await _apiClient.get(
+        ApiEndpoints.adminPanelNotificationsUnreadCount,
+      );
+      return (response.data as Map<String, dynamic>)['count'] as int? ?? 0;
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<void> markAdminPanelNotificationAsRead(String notificationId) async {
+    try {
+      await _apiClient.put(
+        ApiEndpoints.adminPanelNotificationRead(notificationId),
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<void> markAllAdminPanelNotificationsAsRead() async {
+    try {
+      await _apiClient.put(ApiEndpoints.adminPanelNotificationsReadAll);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<void> deleteAdminPanelNotification(String notificationId) async {
+    try {
+      await _apiClient.delete(
+        ApiEndpoints.adminPanelNotificationDelete(notificationId),
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<void> clearAllReadAdminPanelNotifications() async {
+    try {
+      await _apiClient.delete(ApiEndpoints.adminPanelNotificationsClearAll);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
 }

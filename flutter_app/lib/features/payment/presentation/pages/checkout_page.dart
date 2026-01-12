@@ -9,6 +9,7 @@ import '../../../addresses/providers/addresses_provider.dart';
 import '../../models/paytr_models.dart';
 import '../../providers/checkout_provider.dart';
 import 'paytr_webview_page.dart';
+import 'payment_success_page.dart';
 import '../../../../core/services/navigation_service.dart';
 
 /// Checkout Sayfası
@@ -56,9 +57,15 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         _navigateToPayment(current.paytrResponse!);
       } else if (current.status == CheckoutStatus.completed) {
         // Ödeme başarılı - sipariş oluşturuldu
-        _showSuccessDialog();
+        // _navigateToPayment dönüşünde işlenecek
       } else if (current.status == CheckoutStatus.failed) {
         // Hata oluştu
+        // Kullanıcı iptal ettiyse bildirim gösterme
+        if (current.errorMessage == 'Ödeme iptal edildi') return;
+        
+        // Zaman aşımı hatası ise gösterme - PaymentSuccessPage zaten açılacak
+        if (current.errorMessage?.contains('zaman aşımına uğradı') == true) return;
+
         _showErrorSnackBar(current.errorMessage ?? 'Bir hata oluştu');
       }
     });
@@ -614,7 +621,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   void _navigateToPayment(PayTRInitResponse paytrResponse) async {
     // Sepet bilgilerini al
     final cart = ref.read(cartProvider).valueOrNull;
-    final currentAddress = ref.read(currentAddressDataProvider);
 
     // Cart'tan BasketItem'lara dönüştür
     final basketItems = cart?.items
@@ -632,7 +638,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     final userAddress = paytrResponse.fields['user_address'] ?? '';
     final userPhone = paytrResponse.fields['user_phone'] ?? '';
 
-    await Navigator.push<bool>(
+    final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (context) => PayTRWebViewPage(
@@ -645,100 +651,36 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         ),
       ),
     );
-    // verifyPayment zaten WebView içinde çağrıldı ve beklendi
-    // Durum listener tarafından yakalanacak (completed veya failed)
+
+    // WebView'dan döndü
+    // result == true: PayTR success URL tespit edildi, ödeme başarılı
+    // result == false veya null: ödeme iptal veya başarısız
+    if (result == true) {
+      // PayTR'de ödeme başarılı oldu (success URL görüldü)
+      // Backend verification timeout olsa bile success page'e git
+      // Çünkü local'de PayTR callback localhost'a ulaşamaz
+      _navigateToSuccessPage();
+    }
+    // result != true durumunda listener zaten hata gösterecek
   }
 
-  void _showSuccessDialog() {
+  void _navigateToSuccessPage() {
     final checkoutState = ref.read(checkoutProvider);
-    // orderId veya merchantOid'den birini göster
-    final displayId = checkoutState.orderId ?? checkoutState.merchantOid;
+    // orderId veya merchantOid'den birini kullan
+    final orderId = checkoutState.orderId ?? checkoutState.merchantOid;
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 64,
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Sipariş Onaylandı!',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Ödemeniz alındı ve siparişiniz başarıyla oluşturuldu.',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            if (displayId != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                'Sipariş No: $displayId',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ],
+    if (orderId != null) {
+      // Mevcut sayfaları temizle ve success page'e git
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => PaymentSuccessPage(orderId: orderId),
         ),
-        actions: [
-          Row(
-            children: [
-              Expanded(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.pop(dialogContext); // Dialog'u kapat
-                    NavigationService.navigateToHomeTab(0); // Ana sayfaya dön
-                  },
-                  child: const Text('Ana Sayfa'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                flex: 2,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(dialogContext); // Dialog'u kapat
-                    // CheckoutPage'i kapat ve ana sayfaya dön, profile tab'ına geç (siparişler orada)
-                    NavigationService.navigateToHomeTab(4);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryOrange,
-                  ),
-                  child: const Text(
-                    'Siparişlerim',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+        (route) => route.isFirst, // Sadece ilk route'u koru (ana sayfa)
+      );
+    } else {
+      // orderId yoksa ana sayfaya dön
+      NavigationService.navigateToHomeTab(0);
+    }
   }
 
   void _showErrorSnackBar(String message) {

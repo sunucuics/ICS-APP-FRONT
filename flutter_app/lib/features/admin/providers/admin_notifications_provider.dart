@@ -101,3 +101,125 @@ final adminNotificationTemplatesNotifierProvider = StateNotifierProvider<
     AsyncValue<List<NotificationTemplate>>>((ref) {
   return AdminNotificationTemplatesNotifier(ref.watch(adminRepositoryProvider));
 });
+
+// ============================================================================
+// Admin Panel Notifications (gelen bildirimler - randevu, sipariş vb.)
+// ============================================================================
+
+/// Okunmamış admin bildirim sayısı
+final adminPanelUnreadCountProvider = FutureProvider<int>((ref) async {
+  final repository = ref.watch(adminRepositoryProvider);
+  return await repository.getAdminPanelNotificationsUnreadCount();
+});
+
+/// Admin panel bildirimleri listesi
+final adminPanelNotificationsProvider =
+    FutureProvider<List<AdminPanelNotification>>((ref) async {
+  final repository = ref.watch(adminRepositoryProvider);
+  return await repository.getAdminPanelNotifications();
+});
+
+/// Admin panel bildirimleri için StateNotifier (CRUD işlemleri)
+class AdminPanelNotificationsNotifier
+    extends StateNotifier<AsyncValue<List<AdminPanelNotification>>> {
+  final AdminRepository _repository;
+  final Ref _ref;
+
+  AdminPanelNotificationsNotifier(this._repository, this._ref)
+      : super(const AsyncValue.loading()) {
+    loadNotifications();
+  }
+
+  Future<void> loadNotifications() async {
+    state = const AsyncValue.loading();
+    try {
+      final notifications = await _repository.getAdminPanelNotifications();
+      state = AsyncValue.data(notifications);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  Future<void> markAsRead(String notificationId) async {
+    try {
+      await _repository.markAdminPanelNotificationAsRead(notificationId);
+      // Update local state
+      state.whenData((notifications) {
+        final updated = notifications.map((n) {
+          if (n.id == notificationId) {
+            return AdminPanelNotification(
+              id: n.id,
+              title: n.title,
+              body: n.body,
+              type: n.type,
+              isRead: true,
+              createdAt: n.createdAt,
+              readAt: DateTime.now(),
+              data: n.data,
+            );
+          }
+          return n;
+        }).toList();
+        state = AsyncValue.data(updated);
+      });
+      // Refresh unread count
+      _ref.invalidate(adminPanelUnreadCountProvider);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  Future<void> markAllAsRead() async {
+    try {
+      await _repository.markAllAdminPanelNotificationsAsRead();
+      // Update local state
+      state.whenData((notifications) {
+        final updated = notifications.map((n) {
+          return AdminPanelNotification(
+            id: n.id,
+            title: n.title,
+            body: n.body,
+            type: n.type,
+            isRead: true,
+            createdAt: n.createdAt,
+            readAt: DateTime.now(),
+            data: n.data,
+          );
+        }).toList();
+        state = AsyncValue.data(updated);
+      });
+      // Refresh unread count
+      _ref.invalidate(adminPanelUnreadCountProvider);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  Future<void> deleteNotification(String notificationId) async {
+    try {
+      await _repository.deleteAdminPanelNotification(notificationId);
+      // Update local state
+      state.whenData((notifications) {
+        final updated =
+            notifications.where((n) => n.id != notificationId).toList();
+        state = AsyncValue.data(updated);
+      });
+      // Refresh unread count
+      _ref.invalidate(adminPanelUnreadCountProvider);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  Future<void> refresh() async {
+    await loadNotifications();
+    _ref.invalidate(adminPanelUnreadCountProvider);
+  }
+}
+
+final adminPanelNotificationsNotifierProvider = StateNotifierProvider<
+    AdminPanelNotificationsNotifier,
+    AsyncValue<List<AdminPanelNotification>>>((ref) {
+  final repository = ref.watch(adminRepositoryProvider);
+  return AdminPanelNotificationsNotifier(repository, ref);
+});

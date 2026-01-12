@@ -158,4 +158,17 @@ class ApiEndpoints {
   
   static const String adminComments = '/admin/comments';
   static const String adminFeatured = '/admin/featured';
+
+  // Admin Panel Notifications endpoints (gelen bildirimler - randevu, sipariş vb.)
+  static const String adminPanelNotifications = '/admin/notifications';
+  static const String adminPanelNotificationsUnreadCount =
+      '/admin/notifications/unread-count';
+  static const String adminPanelNotificationsReadAll =
+      '/admin/notifications/read-all';
+  static const String adminPanelNotificationsClearAll =
+      '/admin/notifications/clear-all';
+  static String adminPanelNotificationRead(String id) =>
+      '/admin/notifications/$id/read';
+  static String adminPanelNotificationDelete(String id) =>
+      '/admin/notifications/$id';
 }
