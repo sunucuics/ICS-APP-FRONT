@@ -88,7 +88,24 @@ class AuthApiService {
 
         // Kullanıcı zaten giriş yapmış, profil bilgilerini çek
         try {
-          final userProfile = await getCurrentUser();
+          var userProfile = await getCurrentUser();
+          
+          // Eğer mevcut profilde isim boşsa, kayıt formundaki isimle güncelle
+          if (userProfile.name == null || userProfile.name!.isEmpty) {
+            AppLogger.info(
+                'AuthApiService: Existing profile has no name, updating with registration name: ${request.name}');
+            try {
+              userProfile = await updateProfile(
+                ProfileUpdateRequest(name: request.name),
+              );
+              AppLogger.success('AuthApiService: Profile name updated successfully');
+            } catch (updateError) {
+              AppLogger.warning(
+                  'AuthApiService: Failed to update profile name', updateError);
+              // Güncelleme başarısız olsa bile devam et
+            }
+          }
+          
           return AuthResponse(
             userId: userCredential!.user!.uid,
             user: userProfile,

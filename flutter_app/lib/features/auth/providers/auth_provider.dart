@@ -242,17 +242,36 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String password,
   }) async {
     state = state.copyWith(isLoading: true, error: null);
+    _isLoggingIn = true; // Use same flag to prevent authStateChanged from loading profile
 
     try {
-      await _authRepository.register(
+      final response = await _authRepository.register(
         name: name,
         phone: phone,
         email: email,
         password: password,
       );
 
-      // Firebase auth state change will automatically update the state
-      // No need to manually update state here
+      // Use the returned user profile directly (not from authStateChanged)
+      state = state.copyWith(
+        user: response.user,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      );
+
+      // Clear anonymous authentication when user registers
+      try {
+        await _ref.read(anonymous.anonymousAuthProvider.notifier).signOut();
+        AppLogger.debug('AuthProvider - Anonymous auth cleared after register');
+      } catch (e) {
+        AppLogger.warning('AuthProvider - Error clearing anonymous auth', e);
+      }
+
+      // Update FCM token to backend after successful registration
+      FCMService.updateTokenToBackend().catchError((e) {
+        AppLogger.warning('Failed to update FCM token after register', e);
+      });
 
       return true;
     } catch (e) {
@@ -261,6 +280,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isLoading: false,
       );
       return false;
+    } finally {
+      _isLoggingIn = false;
     }
   }
 

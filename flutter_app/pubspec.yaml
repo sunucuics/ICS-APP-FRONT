@@ -2,7 +2,7 @@ name: innova_craft_studio
 description: "Innova Craft Studio - El Yapımı Ürünler ve Sanat Eserleri"
 publish_to: 'none'
 
-version: 1.2.4+19
+version: 1.2.5+20
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
