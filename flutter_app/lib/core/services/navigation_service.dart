@@ -21,6 +21,14 @@ class NavigationService {
     }
   }
 
+  // Navigate to welcome screen
+  static void navigateToWelcome() {
+    final context = navigatorKey.currentContext;
+    if (context != null) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (route) => false);
+    }
+  }
+
   // Navigate to home screen and switch to specific tab
   // This method clears all routes and navigates directly to home with the desired tab
   static void navigateToHomeTab(int tabIndex) {

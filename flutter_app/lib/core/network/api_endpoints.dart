@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 class ApiEndpoints {
   // Production URL - Google Cloud deployed backend
   static const String _productionUrl =
-      'https://ics-api-443215445942.europe-west1.run.app';
+      'https://ics-backend-443215445942.europe-west1.run.app';
 
   // Local development URL
   // Android Emulator: 10.0.2.2 (localhost'un emulator karşılığı)
@@ -88,6 +88,8 @@ class ApiEndpoints {
   static const String paytrRefreshToken = '/paytr/direct/refresh-token';
   static const String paytrCallback = '/paytr/callback';
   static const String paytrInstallments = '/paytr/installments';
+  static const String paytrInstallmentQuote = '/paytr/direct/installment-quote';
+  static const String paytrBinDetail = '/paytr/direct/bin-detail';
 
   // PayTR iFrame API (optional)
   static const String paytrIframeInit = '/paytr/iframe/init';

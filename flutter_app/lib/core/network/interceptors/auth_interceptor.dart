@@ -76,8 +76,8 @@ class AuthInterceptor extends Interceptor {
     // If session is revoked, don't retry
     if (errorDetail == 'Session revoked') {
       AppLogger.warning(
-          'AuthInterceptor: Session revoked, redirecting to login');
-      NavigationService.navigateToLogin();
+          'AuthInterceptor: Session revoked, redirecting to welcome page');
+      NavigationService.navigateToWelcome();
       handler.next(err);
       return;
     }
@@ -163,8 +163,8 @@ class AuthInterceptor extends Interceptor {
 
     // If we get here, token refresh failed
     AppLogger.warning(
-        'AuthInterceptor: Token refresh failed, redirecting to login');
-    NavigationService.navigateToLogin();
+        'AuthInterceptor: Token refresh failed, redirecting to welcome page');
+    NavigationService.navigateToWelcome();
     handler.next(err);
   }
 }

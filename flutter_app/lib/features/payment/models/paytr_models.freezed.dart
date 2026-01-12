@@ -214,11 +214,12 @@ mixin _$PayTRInitRequest {
   double get paymentAmount =>
       throw _privateConstructorUsedError; // TL cinsinden toplam tutar
   int get installmentCount =>
-      throw _privateConstructorUsedError; // 0=tek çekim, 2-12=taksit
+      throw _privateConstructorUsedError; // 0=peşin, 3=3 taksit (sadece bu değerler geçerli)
   String get userName => throw _privateConstructorUsedError;
   String get userAddress => throw _privateConstructorUsedError;
   String get userPhone => throw _privateConstructorUsedError;
   List<BasketItem> get basket => throw _privateConstructorUsedError;
+  String? get binNumber => throw _privateConstructorUsedError;
 
   /// Serializes this PayTRInitRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -244,7 +245,8 @@ abstract class $PayTRInitRequestCopyWith<$Res> {
       String userName,
       String userAddress,
       String userPhone,
-      List<BasketItem> basket});
+      List<BasketItem> basket,
+      String? binNumber});
 }
 
 /// @nodoc
@@ -270,6 +272,7 @@ class _$PayTRInitRequestCopyWithImpl<$Res, $Val extends PayTRInitRequest>
     Object? userAddress = null,
     Object? userPhone = null,
     Object? basket = null,
+    Object? binNumber = freezed,
   }) {
     return _then(_value.copyWith(
       merchantOid: null == merchantOid
@@ -304,6 +307,10 @@ class _$PayTRInitRequestCopyWithImpl<$Res, $Val extends PayTRInitRequest>
           ? _value.basket
           : basket // ignore: cast_nullable_to_non_nullable
               as List<BasketItem>,
+      binNumber: freezed == binNumber
+          ? _value.binNumber
+          : binNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -324,7 +331,8 @@ abstract class _$$PayTRInitRequestImplCopyWith<$Res>
       String userName,
       String userAddress,
       String userPhone,
-      List<BasketItem> basket});
+      List<BasketItem> basket,
+      String? binNumber});
 }
 
 /// @nodoc
@@ -348,6 +356,7 @@ class __$$PayTRInitRequestImplCopyWithImpl<$Res>
     Object? userAddress = null,
     Object? userPhone = null,
     Object? basket = null,
+    Object? binNumber = freezed,
   }) {
     return _then(_$PayTRInitRequestImpl(
       merchantOid: null == merchantOid
@@ -382,6 +391,10 @@ class __$$PayTRInitRequestImplCopyWithImpl<$Res>
           ? _value._basket
           : basket // ignore: cast_nullable_to_non_nullable
               as List<BasketItem>,
+      binNumber: freezed == binNumber
+          ? _value.binNumber
+          : binNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -397,7 +410,8 @@ class _$PayTRInitRequestImpl implements _PayTRInitRequest {
       required this.userName,
       required this.userAddress,
       required this.userPhone,
-      required final List<BasketItem> basket})
+      required final List<BasketItem> basket,
+      this.binNumber})
       : _basket = basket;
 
   factory _$PayTRInitRequestImpl.fromJson(Map<String, dynamic> json) =>
@@ -414,7 +428,7 @@ class _$PayTRInitRequestImpl implements _PayTRInitRequest {
   @override
   @JsonKey()
   final int installmentCount;
-// 0=tek çekim, 2-12=taksit
+// 0=peşin, 3=3 taksit (sadece bu değerler geçerli)
   @override
   final String userName;
   @override
@@ -430,8 +444,11 @@ class _$PayTRInitRequestImpl implements _PayTRInitRequest {
   }
 
   @override
+  final String? binNumber;
+
+  @override
   String toString() {
-    return 'PayTRInitRequest(merchantOid: $merchantOid, email: $email, paymentAmount: $paymentAmount, installmentCount: $installmentCount, userName: $userName, userAddress: $userAddress, userPhone: $userPhone, basket: $basket)';
+    return 'PayTRInitRequest(merchantOid: $merchantOid, email: $email, paymentAmount: $paymentAmount, installmentCount: $installmentCount, userName: $userName, userAddress: $userAddress, userPhone: $userPhone, basket: $basket, binNumber: $binNumber)';
   }
 
   @override
@@ -452,7 +469,9 @@ class _$PayTRInitRequestImpl implements _PayTRInitRequest {
                 other.userAddress == userAddress) &&
             (identical(other.userPhone, userPhone) ||
                 other.userPhone == userPhone) &&
-            const DeepCollectionEquality().equals(other._basket, _basket));
+            const DeepCollectionEquality().equals(other._basket, _basket) &&
+            (identical(other.binNumber, binNumber) ||
+                other.binNumber == binNumber));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -466,7 +485,8 @@ class _$PayTRInitRequestImpl implements _PayTRInitRequest {
       userName,
       userAddress,
       userPhone,
-      const DeepCollectionEquality().hash(_basket));
+      const DeepCollectionEquality().hash(_basket),
+      binNumber);
 
   /// Create a copy of PayTRInitRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -494,7 +514,8 @@ abstract class _PayTRInitRequest implements PayTRInitRequest {
       required final String userName,
       required final String userAddress,
       required final String userPhone,
-      required final List<BasketItem> basket}) = _$PayTRInitRequestImpl;
+      required final List<BasketItem> basket,
+      final String? binNumber}) = _$PayTRInitRequestImpl;
 
   factory _PayTRInitRequest.fromJson(Map<String, dynamic> json) =
       _$PayTRInitRequestImpl.fromJson;
@@ -506,7 +527,7 @@ abstract class _PayTRInitRequest implements PayTRInitRequest {
   @override
   double get paymentAmount; // TL cinsinden toplam tutar
   @override
-  int get installmentCount; // 0=tek çekim, 2-12=taksit
+  int get installmentCount; // 0=peşin, 3=3 taksit (sadece bu değerler geçerli)
   @override
   String get userName;
   @override
@@ -515,6 +536,8 @@ abstract class _PayTRInitRequest implements PayTRInitRequest {
   String get userPhone;
   @override
   List<BasketItem> get basket;
+  @override
+  String? get binNumber;
 
   /// Create a copy of PayTRInitRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -682,13 +705,1122 @@ abstract class _PayTRInitResponse implements PayTRInitResponse {
       throw _privateConstructorUsedError;
 }
 
+BinDetailRequest _$BinDetailRequestFromJson(Map<String, dynamic> json) {
+  return _BinDetailRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$BinDetailRequest {
+  String get binNumber =>
+      throw _privateConstructorUsedError; // Kartın ilk 6 veya 8 hanesi
+  int get debugOn => throw _privateConstructorUsedError;
+
+  /// Serializes this BinDetailRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of BinDetailRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $BinDetailRequestCopyWith<BinDetailRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $BinDetailRequestCopyWith<$Res> {
+  factory $BinDetailRequestCopyWith(
+          BinDetailRequest value, $Res Function(BinDetailRequest) then) =
+      _$BinDetailRequestCopyWithImpl<$Res, BinDetailRequest>;
+  @useResult
+  $Res call({String binNumber, int debugOn});
+}
+
+/// @nodoc
+class _$BinDetailRequestCopyWithImpl<$Res, $Val extends BinDetailRequest>
+    implements $BinDetailRequestCopyWith<$Res> {
+  _$BinDetailRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of BinDetailRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? binNumber = null,
+    Object? debugOn = null,
+  }) {
+    return _then(_value.copyWith(
+      binNumber: null == binNumber
+          ? _value.binNumber
+          : binNumber // ignore: cast_nullable_to_non_nullable
+              as String,
+      debugOn: null == debugOn
+          ? _value.debugOn
+          : debugOn // ignore: cast_nullable_to_non_nullable
+              as int,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$BinDetailRequestImplCopyWith<$Res>
+    implements $BinDetailRequestCopyWith<$Res> {
+  factory _$$BinDetailRequestImplCopyWith(_$BinDetailRequestImpl value,
+          $Res Function(_$BinDetailRequestImpl) then) =
+      __$$BinDetailRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String binNumber, int debugOn});
+}
+
+/// @nodoc
+class __$$BinDetailRequestImplCopyWithImpl<$Res>
+    extends _$BinDetailRequestCopyWithImpl<$Res, _$BinDetailRequestImpl>
+    implements _$$BinDetailRequestImplCopyWith<$Res> {
+  __$$BinDetailRequestImplCopyWithImpl(_$BinDetailRequestImpl _value,
+      $Res Function(_$BinDetailRequestImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of BinDetailRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? binNumber = null,
+    Object? debugOn = null,
+  }) {
+    return _then(_$BinDetailRequestImpl(
+      binNumber: null == binNumber
+          ? _value.binNumber
+          : binNumber // ignore: cast_nullable_to_non_nullable
+              as String,
+      debugOn: null == debugOn
+          ? _value.debugOn
+          : debugOn // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$BinDetailRequestImpl implements _BinDetailRequest {
+  const _$BinDetailRequestImpl({required this.binNumber, this.debugOn = 0});
+
+  factory _$BinDetailRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$BinDetailRequestImplFromJson(json);
+
+  @override
+  final String binNumber;
+// Kartın ilk 6 veya 8 hanesi
+  @override
+  @JsonKey()
+  final int debugOn;
+
+  @override
+  String toString() {
+    return 'BinDetailRequest(binNumber: $binNumber, debugOn: $debugOn)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$BinDetailRequestImpl &&
+            (identical(other.binNumber, binNumber) ||
+                other.binNumber == binNumber) &&
+            (identical(other.debugOn, debugOn) || other.debugOn == debugOn));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, binNumber, debugOn);
+
+  /// Create a copy of BinDetailRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$BinDetailRequestImplCopyWith<_$BinDetailRequestImpl> get copyWith =>
+      __$$BinDetailRequestImplCopyWithImpl<_$BinDetailRequestImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$BinDetailRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _BinDetailRequest implements BinDetailRequest {
+  const factory _BinDetailRequest(
+      {required final String binNumber,
+      final int debugOn}) = _$BinDetailRequestImpl;
+
+  factory _BinDetailRequest.fromJson(Map<String, dynamic> json) =
+      _$BinDetailRequestImpl.fromJson;
+
+  @override
+  String get binNumber; // Kartın ilk 6 veya 8 hanesi
+  @override
+  int get debugOn;
+
+  /// Create a copy of BinDetailRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$BinDetailRequestImplCopyWith<_$BinDetailRequestImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+mixin _$BinDetailResponse {
+  String get status =>
+      throw _privateConstructorUsedError; // "success" veya "failed"
+  String? get cardType =>
+      throw _privateConstructorUsedError; // "credit" veya "debit"
+  String? get brand =>
+      throw _privateConstructorUsedError; // "visa", "mastercard", "bonus", "world", vb.
+  String? get bankName => throw _privateConstructorUsedError;
+  String? get cardFamily => throw _privateConstructorUsedError;
+  String? get errMsg => throw _privateConstructorUsedError; // Hata durumunda
+  Map<String, dynamic>? get raw => throw _privateConstructorUsedError;
+
+  /// Create a copy of BinDetailResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $BinDetailResponseCopyWith<BinDetailResponse> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $BinDetailResponseCopyWith<$Res> {
+  factory $BinDetailResponseCopyWith(
+          BinDetailResponse value, $Res Function(BinDetailResponse) then) =
+      _$BinDetailResponseCopyWithImpl<$Res, BinDetailResponse>;
+  @useResult
+  $Res call(
+      {String status,
+      String? cardType,
+      String? brand,
+      String? bankName,
+      String? cardFamily,
+      String? errMsg,
+      Map<String, dynamic>? raw});
+}
+
+/// @nodoc
+class _$BinDetailResponseCopyWithImpl<$Res, $Val extends BinDetailResponse>
+    implements $BinDetailResponseCopyWith<$Res> {
+  _$BinDetailResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of BinDetailResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? status = null,
+    Object? cardType = freezed,
+    Object? brand = freezed,
+    Object? bankName = freezed,
+    Object? cardFamily = freezed,
+    Object? errMsg = freezed,
+    Object? raw = freezed,
+  }) {
+    return _then(_value.copyWith(
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      cardType: freezed == cardType
+          ? _value.cardType
+          : cardType // ignore: cast_nullable_to_non_nullable
+              as String?,
+      brand: freezed == brand
+          ? _value.brand
+          : brand // ignore: cast_nullable_to_non_nullable
+              as String?,
+      bankName: freezed == bankName
+          ? _value.bankName
+          : bankName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      cardFamily: freezed == cardFamily
+          ? _value.cardFamily
+          : cardFamily // ignore: cast_nullable_to_non_nullable
+              as String?,
+      errMsg: freezed == errMsg
+          ? _value.errMsg
+          : errMsg // ignore: cast_nullable_to_non_nullable
+              as String?,
+      raw: freezed == raw
+          ? _value.raw
+          : raw // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$BinDetailResponseImplCopyWith<$Res>
+    implements $BinDetailResponseCopyWith<$Res> {
+  factory _$$BinDetailResponseImplCopyWith(_$BinDetailResponseImpl value,
+          $Res Function(_$BinDetailResponseImpl) then) =
+      __$$BinDetailResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String status,
+      String? cardType,
+      String? brand,
+      String? bankName,
+      String? cardFamily,
+      String? errMsg,
+      Map<String, dynamic>? raw});
+}
+
+/// @nodoc
+class __$$BinDetailResponseImplCopyWithImpl<$Res>
+    extends _$BinDetailResponseCopyWithImpl<$Res, _$BinDetailResponseImpl>
+    implements _$$BinDetailResponseImplCopyWith<$Res> {
+  __$$BinDetailResponseImplCopyWithImpl(_$BinDetailResponseImpl _value,
+      $Res Function(_$BinDetailResponseImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of BinDetailResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? status = null,
+    Object? cardType = freezed,
+    Object? brand = freezed,
+    Object? bankName = freezed,
+    Object? cardFamily = freezed,
+    Object? errMsg = freezed,
+    Object? raw = freezed,
+  }) {
+    return _then(_$BinDetailResponseImpl(
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      cardType: freezed == cardType
+          ? _value.cardType
+          : cardType // ignore: cast_nullable_to_non_nullable
+              as String?,
+      brand: freezed == brand
+          ? _value.brand
+          : brand // ignore: cast_nullable_to_non_nullable
+              as String?,
+      bankName: freezed == bankName
+          ? _value.bankName
+          : bankName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      cardFamily: freezed == cardFamily
+          ? _value.cardFamily
+          : cardFamily // ignore: cast_nullable_to_non_nullable
+              as String?,
+      errMsg: freezed == errMsg
+          ? _value.errMsg
+          : errMsg // ignore: cast_nullable_to_non_nullable
+              as String?,
+      raw: freezed == raw
+          ? _value._raw
+          : raw // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$BinDetailResponseImpl implements _BinDetailResponse {
+  const _$BinDetailResponseImpl(
+      {required this.status,
+      this.cardType,
+      this.brand,
+      this.bankName,
+      this.cardFamily,
+      this.errMsg,
+      final Map<String, dynamic>? raw})
+      : _raw = raw;
+
+  @override
+  final String status;
+// "success" veya "failed"
+  @override
+  final String? cardType;
+// "credit" veya "debit"
+  @override
+  final String? brand;
+// "visa", "mastercard", "bonus", "world", vb.
+  @override
+  final String? bankName;
+  @override
+  final String? cardFamily;
+  @override
+  final String? errMsg;
+// Hata durumunda
+  final Map<String, dynamic>? _raw;
+// Hata durumunda
+  @override
+  Map<String, dynamic>? get raw {
+    final value = _raw;
+    if (value == null) return null;
+    if (_raw is EqualUnmodifiableMapView) return _raw;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(value);
+  }
+
+  @override
+  String toString() {
+    return 'BinDetailResponse(status: $status, cardType: $cardType, brand: $brand, bankName: $bankName, cardFamily: $cardFamily, errMsg: $errMsg, raw: $raw)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$BinDetailResponseImpl &&
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.cardType, cardType) ||
+                other.cardType == cardType) &&
+            (identical(other.brand, brand) || other.brand == brand) &&
+            (identical(other.bankName, bankName) ||
+                other.bankName == bankName) &&
+            (identical(other.cardFamily, cardFamily) ||
+                other.cardFamily == cardFamily) &&
+            (identical(other.errMsg, errMsg) || other.errMsg == errMsg) &&
+            const DeepCollectionEquality().equals(other._raw, _raw));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, status, cardType, brand,
+      bankName, cardFamily, errMsg, const DeepCollectionEquality().hash(_raw));
+
+  /// Create a copy of BinDetailResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$BinDetailResponseImplCopyWith<_$BinDetailResponseImpl> get copyWith =>
+      __$$BinDetailResponseImplCopyWithImpl<_$BinDetailResponseImpl>(
+          this, _$identity);
+}
+
+abstract class _BinDetailResponse implements BinDetailResponse {
+  const factory _BinDetailResponse(
+      {required final String status,
+      final String? cardType,
+      final String? brand,
+      final String? bankName,
+      final String? cardFamily,
+      final String? errMsg,
+      final Map<String, dynamic>? raw}) = _$BinDetailResponseImpl;
+
+  @override
+  String get status; // "success" veya "failed"
+  @override
+  String? get cardType; // "credit" veya "debit"
+  @override
+  String? get brand; // "visa", "mastercard", "bonus", "world", vb.
+  @override
+  String? get bankName;
+  @override
+  String? get cardFamily;
+  @override
+  String? get errMsg; // Hata durumunda
+  @override
+  Map<String, dynamic>? get raw;
+
+  /// Create a copy of BinDetailResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$BinDetailResponseImplCopyWith<_$BinDetailResponseImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+mixin _$InstallmentOption {
+  int get installmentCount =>
+      throw _privateConstructorUsedError; // 0=peşin, 3=3 taksit
+  double get ratePercent =>
+      throw _privateConstructorUsedError; // Vade farkı yüzdesi (0 veya 15)
+  String get totalTl =>
+      throw _privateConstructorUsedError; // Toplam tutar (TL string)
+  String get perInstallmentTl => throw _privateConstructorUsedError;
+
+  /// Create a copy of InstallmentOption
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $InstallmentOptionCopyWith<InstallmentOption> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $InstallmentOptionCopyWith<$Res> {
+  factory $InstallmentOptionCopyWith(
+          InstallmentOption value, $Res Function(InstallmentOption) then) =
+      _$InstallmentOptionCopyWithImpl<$Res, InstallmentOption>;
+  @useResult
+  $Res call(
+      {int installmentCount,
+      double ratePercent,
+      String totalTl,
+      String perInstallmentTl});
+}
+
+/// @nodoc
+class _$InstallmentOptionCopyWithImpl<$Res, $Val extends InstallmentOption>
+    implements $InstallmentOptionCopyWith<$Res> {
+  _$InstallmentOptionCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of InstallmentOption
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? installmentCount = null,
+    Object? ratePercent = null,
+    Object? totalTl = null,
+    Object? perInstallmentTl = null,
+  }) {
+    return _then(_value.copyWith(
+      installmentCount: null == installmentCount
+          ? _value.installmentCount
+          : installmentCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      ratePercent: null == ratePercent
+          ? _value.ratePercent
+          : ratePercent // ignore: cast_nullable_to_non_nullable
+              as double,
+      totalTl: null == totalTl
+          ? _value.totalTl
+          : totalTl // ignore: cast_nullable_to_non_nullable
+              as String,
+      perInstallmentTl: null == perInstallmentTl
+          ? _value.perInstallmentTl
+          : perInstallmentTl // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$InstallmentOptionImplCopyWith<$Res>
+    implements $InstallmentOptionCopyWith<$Res> {
+  factory _$$InstallmentOptionImplCopyWith(_$InstallmentOptionImpl value,
+          $Res Function(_$InstallmentOptionImpl) then) =
+      __$$InstallmentOptionImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {int installmentCount,
+      double ratePercent,
+      String totalTl,
+      String perInstallmentTl});
+}
+
+/// @nodoc
+class __$$InstallmentOptionImplCopyWithImpl<$Res>
+    extends _$InstallmentOptionCopyWithImpl<$Res, _$InstallmentOptionImpl>
+    implements _$$InstallmentOptionImplCopyWith<$Res> {
+  __$$InstallmentOptionImplCopyWithImpl(_$InstallmentOptionImpl _value,
+      $Res Function(_$InstallmentOptionImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of InstallmentOption
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? installmentCount = null,
+    Object? ratePercent = null,
+    Object? totalTl = null,
+    Object? perInstallmentTl = null,
+  }) {
+    return _then(_$InstallmentOptionImpl(
+      installmentCount: null == installmentCount
+          ? _value.installmentCount
+          : installmentCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      ratePercent: null == ratePercent
+          ? _value.ratePercent
+          : ratePercent // ignore: cast_nullable_to_non_nullable
+              as double,
+      totalTl: null == totalTl
+          ? _value.totalTl
+          : totalTl // ignore: cast_nullable_to_non_nullable
+              as String,
+      perInstallmentTl: null == perInstallmentTl
+          ? _value.perInstallmentTl
+          : perInstallmentTl // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$InstallmentOptionImpl implements _InstallmentOption {
+  const _$InstallmentOptionImpl(
+      {required this.installmentCount,
+      required this.ratePercent,
+      required this.totalTl,
+      required this.perInstallmentTl});
+
+  @override
+  final int installmentCount;
+// 0=peşin, 3=3 taksit
+  @override
+  final double ratePercent;
+// Vade farkı yüzdesi (0 veya 15)
+  @override
+  final String totalTl;
+// Toplam tutar (TL string)
+  @override
+  final String perInstallmentTl;
+
+  @override
+  String toString() {
+    return 'InstallmentOption(installmentCount: $installmentCount, ratePercent: $ratePercent, totalTl: $totalTl, perInstallmentTl: $perInstallmentTl)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$InstallmentOptionImpl &&
+            (identical(other.installmentCount, installmentCount) ||
+                other.installmentCount == installmentCount) &&
+            (identical(other.ratePercent, ratePercent) ||
+                other.ratePercent == ratePercent) &&
+            (identical(other.totalTl, totalTl) || other.totalTl == totalTl) &&
+            (identical(other.perInstallmentTl, perInstallmentTl) ||
+                other.perInstallmentTl == perInstallmentTl));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, installmentCount, ratePercent, totalTl, perInstallmentTl);
+
+  /// Create a copy of InstallmentOption
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$InstallmentOptionImplCopyWith<_$InstallmentOptionImpl> get copyWith =>
+      __$$InstallmentOptionImplCopyWithImpl<_$InstallmentOptionImpl>(
+          this, _$identity);
+}
+
+abstract class _InstallmentOption implements InstallmentOption {
+  const factory _InstallmentOption(
+      {required final int installmentCount,
+      required final double ratePercent,
+      required final String totalTl,
+      required final String perInstallmentTl}) = _$InstallmentOptionImpl;
+
+  @override
+  int get installmentCount; // 0=peşin, 3=3 taksit
+  @override
+  double get ratePercent; // Vade farkı yüzdesi (0 veya 15)
+  @override
+  String get totalTl; // Toplam tutar (TL string)
+  @override
+  String get perInstallmentTl;
+
+  /// Create a copy of InstallmentOption
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$InstallmentOptionImplCopyWith<_$InstallmentOptionImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+InstallmentQuoteRequest _$InstallmentQuoteRequestFromJson(
+    Map<String, dynamic> json) {
+  return _InstallmentQuoteRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$InstallmentQuoteRequest {
+  String get binNumber =>
+      throw _privateConstructorUsedError; // Kartın ilk 6 veya 8 hanesi
+  double get amountTl => throw _privateConstructorUsedError;
+
+  /// Serializes this InstallmentQuoteRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of InstallmentQuoteRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $InstallmentQuoteRequestCopyWith<InstallmentQuoteRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $InstallmentQuoteRequestCopyWith<$Res> {
+  factory $InstallmentQuoteRequestCopyWith(InstallmentQuoteRequest value,
+          $Res Function(InstallmentQuoteRequest) then) =
+      _$InstallmentQuoteRequestCopyWithImpl<$Res, InstallmentQuoteRequest>;
+  @useResult
+  $Res call({String binNumber, double amountTl});
+}
+
+/// @nodoc
+class _$InstallmentQuoteRequestCopyWithImpl<$Res,
+        $Val extends InstallmentQuoteRequest>
+    implements $InstallmentQuoteRequestCopyWith<$Res> {
+  _$InstallmentQuoteRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of InstallmentQuoteRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? binNumber = null,
+    Object? amountTl = null,
+  }) {
+    return _then(_value.copyWith(
+      binNumber: null == binNumber
+          ? _value.binNumber
+          : binNumber // ignore: cast_nullable_to_non_nullable
+              as String,
+      amountTl: null == amountTl
+          ? _value.amountTl
+          : amountTl // ignore: cast_nullable_to_non_nullable
+              as double,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$InstallmentQuoteRequestImplCopyWith<$Res>
+    implements $InstallmentQuoteRequestCopyWith<$Res> {
+  factory _$$InstallmentQuoteRequestImplCopyWith(
+          _$InstallmentQuoteRequestImpl value,
+          $Res Function(_$InstallmentQuoteRequestImpl) then) =
+      __$$InstallmentQuoteRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String binNumber, double amountTl});
+}
+
+/// @nodoc
+class __$$InstallmentQuoteRequestImplCopyWithImpl<$Res>
+    extends _$InstallmentQuoteRequestCopyWithImpl<$Res,
+        _$InstallmentQuoteRequestImpl>
+    implements _$$InstallmentQuoteRequestImplCopyWith<$Res> {
+  __$$InstallmentQuoteRequestImplCopyWithImpl(
+      _$InstallmentQuoteRequestImpl _value,
+      $Res Function(_$InstallmentQuoteRequestImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of InstallmentQuoteRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? binNumber = null,
+    Object? amountTl = null,
+  }) {
+    return _then(_$InstallmentQuoteRequestImpl(
+      binNumber: null == binNumber
+          ? _value.binNumber
+          : binNumber // ignore: cast_nullable_to_non_nullable
+              as String,
+      amountTl: null == amountTl
+          ? _value.amountTl
+          : amountTl // ignore: cast_nullable_to_non_nullable
+              as double,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$InstallmentQuoteRequestImpl implements _InstallmentQuoteRequest {
+  const _$InstallmentQuoteRequestImpl(
+      {required this.binNumber, required this.amountTl});
+
+  factory _$InstallmentQuoteRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$InstallmentQuoteRequestImplFromJson(json);
+
+  @override
+  final String binNumber;
+// Kartın ilk 6 veya 8 hanesi
+  @override
+  final double amountTl;
+
+  @override
+  String toString() {
+    return 'InstallmentQuoteRequest(binNumber: $binNumber, amountTl: $amountTl)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$InstallmentQuoteRequestImpl &&
+            (identical(other.binNumber, binNumber) ||
+                other.binNumber == binNumber) &&
+            (identical(other.amountTl, amountTl) ||
+                other.amountTl == amountTl));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, binNumber, amountTl);
+
+  /// Create a copy of InstallmentQuoteRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$InstallmentQuoteRequestImplCopyWith<_$InstallmentQuoteRequestImpl>
+      get copyWith => __$$InstallmentQuoteRequestImplCopyWithImpl<
+          _$InstallmentQuoteRequestImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$InstallmentQuoteRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _InstallmentQuoteRequest implements InstallmentQuoteRequest {
+  const factory _InstallmentQuoteRequest(
+      {required final String binNumber,
+      required final double amountTl}) = _$InstallmentQuoteRequestImpl;
+
+  factory _InstallmentQuoteRequest.fromJson(Map<String, dynamic> json) =
+      _$InstallmentQuoteRequestImpl.fromJson;
+
+  @override
+  String get binNumber; // Kartın ilk 6 veya 8 hanesi
+  @override
+  double get amountTl;
+
+  /// Create a copy of InstallmentQuoteRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$InstallmentQuoteRequestImplCopyWith<_$InstallmentQuoteRequestImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+mixin _$InstallmentQuoteResponse {
+  String get status =>
+      throw _privateConstructorUsedError; // "success" veya "failed"
+  String? get brand =>
+      throw _privateConstructorUsedError; // Kart markası (bonus, world, vb.)
+  String? get cardType =>
+      throw _privateConstructorUsedError; // "credit" veya "debit"
+  List<InstallmentOption> get installments =>
+      throw _privateConstructorUsedError; // Taksit seçenekleri
+  String? get reason =>
+      throw _privateConstructorUsedError; // Başarısızlık nedeni
+  Map<String, dynamic>? get bin => throw _privateConstructorUsedError;
+
+  /// Create a copy of InstallmentQuoteResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $InstallmentQuoteResponseCopyWith<InstallmentQuoteResponse> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $InstallmentQuoteResponseCopyWith<$Res> {
+  factory $InstallmentQuoteResponseCopyWith(InstallmentQuoteResponse value,
+          $Res Function(InstallmentQuoteResponse) then) =
+      _$InstallmentQuoteResponseCopyWithImpl<$Res, InstallmentQuoteResponse>;
+  @useResult
+  $Res call(
+      {String status,
+      String? brand,
+      String? cardType,
+      List<InstallmentOption> installments,
+      String? reason,
+      Map<String, dynamic>? bin});
+}
+
+/// @nodoc
+class _$InstallmentQuoteResponseCopyWithImpl<$Res,
+        $Val extends InstallmentQuoteResponse>
+    implements $InstallmentQuoteResponseCopyWith<$Res> {
+  _$InstallmentQuoteResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of InstallmentQuoteResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? status = null,
+    Object? brand = freezed,
+    Object? cardType = freezed,
+    Object? installments = null,
+    Object? reason = freezed,
+    Object? bin = freezed,
+  }) {
+    return _then(_value.copyWith(
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      brand: freezed == brand
+          ? _value.brand
+          : brand // ignore: cast_nullable_to_non_nullable
+              as String?,
+      cardType: freezed == cardType
+          ? _value.cardType
+          : cardType // ignore: cast_nullable_to_non_nullable
+              as String?,
+      installments: null == installments
+          ? _value.installments
+          : installments // ignore: cast_nullable_to_non_nullable
+              as List<InstallmentOption>,
+      reason: freezed == reason
+          ? _value.reason
+          : reason // ignore: cast_nullable_to_non_nullable
+              as String?,
+      bin: freezed == bin
+          ? _value.bin
+          : bin // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$InstallmentQuoteResponseImplCopyWith<$Res>
+    implements $InstallmentQuoteResponseCopyWith<$Res> {
+  factory _$$InstallmentQuoteResponseImplCopyWith(
+          _$InstallmentQuoteResponseImpl value,
+          $Res Function(_$InstallmentQuoteResponseImpl) then) =
+      __$$InstallmentQuoteResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String status,
+      String? brand,
+      String? cardType,
+      List<InstallmentOption> installments,
+      String? reason,
+      Map<String, dynamic>? bin});
+}
+
+/// @nodoc
+class __$$InstallmentQuoteResponseImplCopyWithImpl<$Res>
+    extends _$InstallmentQuoteResponseCopyWithImpl<$Res,
+        _$InstallmentQuoteResponseImpl>
+    implements _$$InstallmentQuoteResponseImplCopyWith<$Res> {
+  __$$InstallmentQuoteResponseImplCopyWithImpl(
+      _$InstallmentQuoteResponseImpl _value,
+      $Res Function(_$InstallmentQuoteResponseImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of InstallmentQuoteResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? status = null,
+    Object? brand = freezed,
+    Object? cardType = freezed,
+    Object? installments = null,
+    Object? reason = freezed,
+    Object? bin = freezed,
+  }) {
+    return _then(_$InstallmentQuoteResponseImpl(
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      brand: freezed == brand
+          ? _value.brand
+          : brand // ignore: cast_nullable_to_non_nullable
+              as String?,
+      cardType: freezed == cardType
+          ? _value.cardType
+          : cardType // ignore: cast_nullable_to_non_nullable
+              as String?,
+      installments: null == installments
+          ? _value._installments
+          : installments // ignore: cast_nullable_to_non_nullable
+              as List<InstallmentOption>,
+      reason: freezed == reason
+          ? _value.reason
+          : reason // ignore: cast_nullable_to_non_nullable
+              as String?,
+      bin: freezed == bin
+          ? _value._bin
+          : bin // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$InstallmentQuoteResponseImpl implements _InstallmentQuoteResponse {
+  const _$InstallmentQuoteResponseImpl(
+      {required this.status,
+      this.brand,
+      this.cardType,
+      required final List<InstallmentOption> installments,
+      this.reason,
+      final Map<String, dynamic>? bin})
+      : _installments = installments,
+        _bin = bin;
+
+  @override
+  final String status;
+// "success" veya "failed"
+  @override
+  final String? brand;
+// Kart markası (bonus, world, vb.)
+  @override
+  final String? cardType;
+// "credit" veya "debit"
+  final List<InstallmentOption> _installments;
+// "credit" veya "debit"
+  @override
+  List<InstallmentOption> get installments {
+    if (_installments is EqualUnmodifiableListView) return _installments;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_installments);
+  }
+
+// Taksit seçenekleri
+  @override
+  final String? reason;
+// Başarısızlık nedeni
+  final Map<String, dynamic>? _bin;
+// Başarısızlık nedeni
+  @override
+  Map<String, dynamic>? get bin {
+    final value = _bin;
+    if (value == null) return null;
+    if (_bin is EqualUnmodifiableMapView) return _bin;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(value);
+  }
+
+  @override
+  String toString() {
+    return 'InstallmentQuoteResponse(status: $status, brand: $brand, cardType: $cardType, installments: $installments, reason: $reason, bin: $bin)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$InstallmentQuoteResponseImpl &&
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.brand, brand) || other.brand == brand) &&
+            (identical(other.cardType, cardType) ||
+                other.cardType == cardType) &&
+            const DeepCollectionEquality()
+                .equals(other._installments, _installments) &&
+            (identical(other.reason, reason) || other.reason == reason) &&
+            const DeepCollectionEquality().equals(other._bin, _bin));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      status,
+      brand,
+      cardType,
+      const DeepCollectionEquality().hash(_installments),
+      reason,
+      const DeepCollectionEquality().hash(_bin));
+
+  /// Create a copy of InstallmentQuoteResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$InstallmentQuoteResponseImplCopyWith<_$InstallmentQuoteResponseImpl>
+      get copyWith => __$$InstallmentQuoteResponseImplCopyWithImpl<
+          _$InstallmentQuoteResponseImpl>(this, _$identity);
+}
+
+abstract class _InstallmentQuoteResponse implements InstallmentQuoteResponse {
+  const factory _InstallmentQuoteResponse(
+      {required final String status,
+      final String? brand,
+      final String? cardType,
+      required final List<InstallmentOption> installments,
+      final String? reason,
+      final Map<String, dynamic>? bin}) = _$InstallmentQuoteResponseImpl;
+
+  @override
+  String get status; // "success" veya "failed"
+  @override
+  String? get brand; // Kart markası (bonus, world, vb.)
+  @override
+  String? get cardType; // "credit" veya "debit"
+  @override
+  List<InstallmentOption> get installments; // Taksit seçenekleri
+  @override
+  String? get reason; // Başarısızlık nedeni
+  @override
+  Map<String, dynamic>? get bin;
+
+  /// Create a copy of InstallmentQuoteResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$InstallmentQuoteResponseImplCopyWith<_$InstallmentQuoteResponseImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
 /// @nodoc
 mixin _$CheckoutState {
   CheckoutStatus get status => throw _privateConstructorUsedError;
-  String? get orderId => throw _privateConstructorUsedError;
+  String? get merchantOid =>
+      throw _privateConstructorUsedError; // Payment session ID (sipariş ID değil)
+  String? get orderId =>
+      throw _privateConstructorUsedError; // Sipariş ID (callback success sonrası oluşur)
   @JsonKey(includeFromJson: false, includeToJson: false)
   PayTRInitResponse? get paytrResponse => throw _privateConstructorUsedError;
-  String? get errorMessage => throw _privateConstructorUsedError;
+  String? get errorMessage =>
+      throw _privateConstructorUsedError; // Taksit bilgileri
+  int get selectedInstallment =>
+      throw _privateConstructorUsedError; // 0=peşin, 3=3 taksit
+  String? get binNumber =>
+      throw _privateConstructorUsedError; // Kart BIN numarası
+  InstallmentQuoteResponse? get installmentQuote =>
+      throw _privateConstructorUsedError;
 
   /// Create a copy of CheckoutState
   /// with the given fields replaced by the non-null parameter values.
@@ -705,12 +1837,17 @@ abstract class $CheckoutStateCopyWith<$Res> {
   @useResult
   $Res call(
       {CheckoutStatus status,
+      String? merchantOid,
       String? orderId,
       @JsonKey(includeFromJson: false, includeToJson: false)
       PayTRInitResponse? paytrResponse,
-      String? errorMessage});
+      String? errorMessage,
+      int selectedInstallment,
+      String? binNumber,
+      InstallmentQuoteResponse? installmentQuote});
 
   $PayTRInitResponseCopyWith<$Res>? get paytrResponse;
+  $InstallmentQuoteResponseCopyWith<$Res>? get installmentQuote;
 }
 
 /// @nodoc
@@ -729,15 +1866,23 @@ class _$CheckoutStateCopyWithImpl<$Res, $Val extends CheckoutState>
   @override
   $Res call({
     Object? status = null,
+    Object? merchantOid = freezed,
     Object? orderId = freezed,
     Object? paytrResponse = freezed,
     Object? errorMessage = freezed,
+    Object? selectedInstallment = null,
+    Object? binNumber = freezed,
+    Object? installmentQuote = freezed,
   }) {
     return _then(_value.copyWith(
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as CheckoutStatus,
+      merchantOid: freezed == merchantOid
+          ? _value.merchantOid
+          : merchantOid // ignore: cast_nullable_to_non_nullable
+              as String?,
       orderId: freezed == orderId
           ? _value.orderId
           : orderId // ignore: cast_nullable_to_non_nullable
@@ -750,6 +1895,18 @@ class _$CheckoutStateCopyWithImpl<$Res, $Val extends CheckoutState>
           ? _value.errorMessage
           : errorMessage // ignore: cast_nullable_to_non_nullable
               as String?,
+      selectedInstallment: null == selectedInstallment
+          ? _value.selectedInstallment
+          : selectedInstallment // ignore: cast_nullable_to_non_nullable
+              as int,
+      binNumber: freezed == binNumber
+          ? _value.binNumber
+          : binNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
+      installmentQuote: freezed == installmentQuote
+          ? _value.installmentQuote
+          : installmentQuote // ignore: cast_nullable_to_non_nullable
+              as InstallmentQuoteResponse?,
     ) as $Val);
   }
 
@@ -766,6 +1923,21 @@ class _$CheckoutStateCopyWithImpl<$Res, $Val extends CheckoutState>
       return _then(_value.copyWith(paytrResponse: value) as $Val);
     });
   }
+
+  /// Create a copy of CheckoutState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $InstallmentQuoteResponseCopyWith<$Res>? get installmentQuote {
+    if (_value.installmentQuote == null) {
+      return null;
+    }
+
+    return $InstallmentQuoteResponseCopyWith<$Res>(_value.installmentQuote!,
+        (value) {
+      return _then(_value.copyWith(installmentQuote: value) as $Val);
+    });
+  }
 }
 
 /// @nodoc
@@ -778,13 +1950,19 @@ abstract class _$$CheckoutStateImplCopyWith<$Res>
   @useResult
   $Res call(
       {CheckoutStatus status,
+      String? merchantOid,
       String? orderId,
       @JsonKey(includeFromJson: false, includeToJson: false)
       PayTRInitResponse? paytrResponse,
-      String? errorMessage});
+      String? errorMessage,
+      int selectedInstallment,
+      String? binNumber,
+      InstallmentQuoteResponse? installmentQuote});
 
   @override
   $PayTRInitResponseCopyWith<$Res>? get paytrResponse;
+  @override
+  $InstallmentQuoteResponseCopyWith<$Res>? get installmentQuote;
 }
 
 /// @nodoc
@@ -801,15 +1979,23 @@ class __$$CheckoutStateImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? status = null,
+    Object? merchantOid = freezed,
     Object? orderId = freezed,
     Object? paytrResponse = freezed,
     Object? errorMessage = freezed,
+    Object? selectedInstallment = null,
+    Object? binNumber = freezed,
+    Object? installmentQuote = freezed,
   }) {
     return _then(_$CheckoutStateImpl(
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as CheckoutStatus,
+      merchantOid: freezed == merchantOid
+          ? _value.merchantOid
+          : merchantOid // ignore: cast_nullable_to_non_nullable
+              as String?,
       orderId: freezed == orderId
           ? _value.orderId
           : orderId // ignore: cast_nullable_to_non_nullable
@@ -822,6 +2008,18 @@ class __$$CheckoutStateImplCopyWithImpl<$Res>
           ? _value.errorMessage
           : errorMessage // ignore: cast_nullable_to_non_nullable
               as String?,
+      selectedInstallment: null == selectedInstallment
+          ? _value.selectedInstallment
+          : selectedInstallment // ignore: cast_nullable_to_non_nullable
+              as int,
+      binNumber: freezed == binNumber
+          ? _value.binNumber
+          : binNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
+      installmentQuote: freezed == installmentQuote
+          ? _value.installmentQuote
+          : installmentQuote // ignore: cast_nullable_to_non_nullable
+              as InstallmentQuoteResponse?,
     ));
   }
 }
@@ -831,24 +2029,42 @@ class __$$CheckoutStateImplCopyWithImpl<$Res>
 class _$CheckoutStateImpl implements _CheckoutState {
   const _$CheckoutStateImpl(
       {this.status = CheckoutStatus.idle,
+      this.merchantOid,
       this.orderId,
       @JsonKey(includeFromJson: false, includeToJson: false) this.paytrResponse,
-      this.errorMessage});
+      this.errorMessage,
+      this.selectedInstallment = 0,
+      this.binNumber,
+      this.installmentQuote});
 
   @override
   @JsonKey()
   final CheckoutStatus status;
   @override
+  final String? merchantOid;
+// Payment session ID (sipariş ID değil)
+  @override
   final String? orderId;
+// Sipariş ID (callback success sonrası oluşur)
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   final PayTRInitResponse? paytrResponse;
   @override
   final String? errorMessage;
+// Taksit bilgileri
+  @override
+  @JsonKey()
+  final int selectedInstallment;
+// 0=peşin, 3=3 taksit
+  @override
+  final String? binNumber;
+// Kart BIN numarası
+  @override
+  final InstallmentQuoteResponse? installmentQuote;
 
   @override
   String toString() {
-    return 'CheckoutState(status: $status, orderId: $orderId, paytrResponse: $paytrResponse, errorMessage: $errorMessage)';
+    return 'CheckoutState(status: $status, merchantOid: $merchantOid, orderId: $orderId, paytrResponse: $paytrResponse, errorMessage: $errorMessage, selectedInstallment: $selectedInstallment, binNumber: $binNumber, installmentQuote: $installmentQuote)';
   }
 
   @override
@@ -857,16 +2073,32 @@ class _$CheckoutStateImpl implements _CheckoutState {
         (other.runtimeType == runtimeType &&
             other is _$CheckoutStateImpl &&
             (identical(other.status, status) || other.status == status) &&
+            (identical(other.merchantOid, merchantOid) ||
+                other.merchantOid == merchantOid) &&
             (identical(other.orderId, orderId) || other.orderId == orderId) &&
             (identical(other.paytrResponse, paytrResponse) ||
                 other.paytrResponse == paytrResponse) &&
             (identical(other.errorMessage, errorMessage) ||
-                other.errorMessage == errorMessage));
+                other.errorMessage == errorMessage) &&
+            (identical(other.selectedInstallment, selectedInstallment) ||
+                other.selectedInstallment == selectedInstallment) &&
+            (identical(other.binNumber, binNumber) ||
+                other.binNumber == binNumber) &&
+            (identical(other.installmentQuote, installmentQuote) ||
+                other.installmentQuote == installmentQuote));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, status, orderId, paytrResponse, errorMessage);
+  int get hashCode => Object.hash(
+      runtimeType,
+      status,
+      merchantOid,
+      orderId,
+      paytrResponse,
+      errorMessage,
+      selectedInstallment,
+      binNumber,
+      installmentQuote);
 
   /// Create a copy of CheckoutState
   /// with the given fields replaced by the non-null parameter values.
@@ -880,25 +2112,229 @@ class _$CheckoutStateImpl implements _CheckoutState {
 abstract class _CheckoutState implements CheckoutState {
   const factory _CheckoutState(
       {final CheckoutStatus status,
+      final String? merchantOid,
       final String? orderId,
       @JsonKey(includeFromJson: false, includeToJson: false)
       final PayTRInitResponse? paytrResponse,
-      final String? errorMessage}) = _$CheckoutStateImpl;
+      final String? errorMessage,
+      final int selectedInstallment,
+      final String? binNumber,
+      final InstallmentQuoteResponse? installmentQuote}) = _$CheckoutStateImpl;
 
   @override
   CheckoutStatus get status;
   @override
-  String? get orderId;
+  String? get merchantOid; // Payment session ID (sipariş ID değil)
+  @override
+  String? get orderId; // Sipariş ID (callback success sonrası oluşur)
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   PayTRInitResponse? get paytrResponse;
   @override
-  String? get errorMessage;
+  String? get errorMessage; // Taksit bilgileri
+  @override
+  int get selectedInstallment; // 0=peşin, 3=3 taksit
+  @override
+  String? get binNumber; // Kart BIN numarası
+  @override
+  InstallmentQuoteResponse? get installmentQuote;
 
   /// Create a copy of CheckoutState
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$CheckoutStateImplCopyWith<_$CheckoutStateImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+RefreshTokenRequest _$RefreshTokenRequestFromJson(Map<String, dynamic> json) {
+  return _RefreshTokenRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$RefreshTokenRequest {
+  String get merchantOid => throw _privateConstructorUsedError;
+  int get installmentCount => throw _privateConstructorUsedError; // 0 veya 3
+  String? get binNumber => throw _privateConstructorUsedError;
+
+  /// Serializes this RefreshTokenRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of RefreshTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $RefreshTokenRequestCopyWith<RefreshTokenRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $RefreshTokenRequestCopyWith<$Res> {
+  factory $RefreshTokenRequestCopyWith(
+          RefreshTokenRequest value, $Res Function(RefreshTokenRequest) then) =
+      _$RefreshTokenRequestCopyWithImpl<$Res, RefreshTokenRequest>;
+  @useResult
+  $Res call({String merchantOid, int installmentCount, String? binNumber});
+}
+
+/// @nodoc
+class _$RefreshTokenRequestCopyWithImpl<$Res, $Val extends RefreshTokenRequest>
+    implements $RefreshTokenRequestCopyWith<$Res> {
+  _$RefreshTokenRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of RefreshTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? merchantOid = null,
+    Object? installmentCount = null,
+    Object? binNumber = freezed,
+  }) {
+    return _then(_value.copyWith(
+      merchantOid: null == merchantOid
+          ? _value.merchantOid
+          : merchantOid // ignore: cast_nullable_to_non_nullable
+              as String,
+      installmentCount: null == installmentCount
+          ? _value.installmentCount
+          : installmentCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      binNumber: freezed == binNumber
+          ? _value.binNumber
+          : binNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$RefreshTokenRequestImplCopyWith<$Res>
+    implements $RefreshTokenRequestCopyWith<$Res> {
+  factory _$$RefreshTokenRequestImplCopyWith(_$RefreshTokenRequestImpl value,
+          $Res Function(_$RefreshTokenRequestImpl) then) =
+      __$$RefreshTokenRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String merchantOid, int installmentCount, String? binNumber});
+}
+
+/// @nodoc
+class __$$RefreshTokenRequestImplCopyWithImpl<$Res>
+    extends _$RefreshTokenRequestCopyWithImpl<$Res, _$RefreshTokenRequestImpl>
+    implements _$$RefreshTokenRequestImplCopyWith<$Res> {
+  __$$RefreshTokenRequestImplCopyWithImpl(_$RefreshTokenRequestImpl _value,
+      $Res Function(_$RefreshTokenRequestImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of RefreshTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? merchantOid = null,
+    Object? installmentCount = null,
+    Object? binNumber = freezed,
+  }) {
+    return _then(_$RefreshTokenRequestImpl(
+      merchantOid: null == merchantOid
+          ? _value.merchantOid
+          : merchantOid // ignore: cast_nullable_to_non_nullable
+              as String,
+      installmentCount: null == installmentCount
+          ? _value.installmentCount
+          : installmentCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      binNumber: freezed == binNumber
+          ? _value.binNumber
+          : binNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$RefreshTokenRequestImpl implements _RefreshTokenRequest {
+  const _$RefreshTokenRequestImpl(
+      {required this.merchantOid, this.installmentCount = 0, this.binNumber});
+
+  factory _$RefreshTokenRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$RefreshTokenRequestImplFromJson(json);
+
+  @override
+  final String merchantOid;
+  @override
+  @JsonKey()
+  final int installmentCount;
+// 0 veya 3
+  @override
+  final String? binNumber;
+
+  @override
+  String toString() {
+    return 'RefreshTokenRequest(merchantOid: $merchantOid, installmentCount: $installmentCount, binNumber: $binNumber)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$RefreshTokenRequestImpl &&
+            (identical(other.merchantOid, merchantOid) ||
+                other.merchantOid == merchantOid) &&
+            (identical(other.installmentCount, installmentCount) ||
+                other.installmentCount == installmentCount) &&
+            (identical(other.binNumber, binNumber) ||
+                other.binNumber == binNumber));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, merchantOid, installmentCount, binNumber);
+
+  /// Create a copy of RefreshTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$RefreshTokenRequestImplCopyWith<_$RefreshTokenRequestImpl> get copyWith =>
+      __$$RefreshTokenRequestImplCopyWithImpl<_$RefreshTokenRequestImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$RefreshTokenRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _RefreshTokenRequest implements RefreshTokenRequest {
+  const factory _RefreshTokenRequest(
+      {required final String merchantOid,
+      final int installmentCount,
+      final String? binNumber}) = _$RefreshTokenRequestImpl;
+
+  factory _RefreshTokenRequest.fromJson(Map<String, dynamic> json) =
+      _$RefreshTokenRequestImpl.fromJson;
+
+  @override
+  String get merchantOid;
+  @override
+  int get installmentCount; // 0 veya 3
+  @override
+  String? get binNumber;
+
+  /// Create a copy of RefreshTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$RefreshTokenRequestImplCopyWith<_$RefreshTokenRequestImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

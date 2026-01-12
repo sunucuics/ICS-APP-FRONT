@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/models/cart_model.dart';
@@ -17,13 +18,15 @@ final paytrServiceProvider = Provider<PayTRService>((ref) {
 
 /// Checkout State Notifier
 ///
-/// Tüm checkout akışını yönetir:
-/// 1. idle -> sipariş oluştur
-/// 2. creatingOrder -> PayTR init al
-/// 3. initializingPayment -> WebView aç
-/// 4. awaitingPayment -> kullanıcı ödeme yapıyor
-/// 5. verifyingPayment -> sipariş durumu kontrol et
-/// 6. completed / failed
+/// Yeni Payment Session mimarisi ile checkout akışını yönetir:
+/// 1. idle -> merchant_oid üret
+/// 2. initializingPayment -> PayTR init al
+/// 3. awaitingPayment -> WebView aç, kullanıcı ödeme yapıyor
+/// 4. verifyingPayment -> callback sonrası sipariş durumu kontrol et
+/// 5. completed / failed
+///
+/// NOT: Sipariş artık frontend'de oluşturulmuyor!
+/// Sipariş, PayTR callback success geldiğinde backend tarafından oluşturuluyor.
 class CheckoutNotifier extends StateNotifier<CheckoutState> {
   final OrdersRepository _ordersRepository;
   final PayTRService _paytrService;
@@ -32,14 +35,94 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
   CheckoutNotifier(this._ordersRepository, this._paytrService, this._ref)
       : super(const CheckoutState());
 
+  /// Benzersiz merchant_oid üret
+  /// Format: YYYYMMDDHHmmss + 6 random alfanümerik karakter
+  /// Örnek: 20260105143022A1B2C3
+  String _generateMerchantOid() {
+    final now = DateTime.now();
+    final timestamp = '${now.year}'
+        '${now.month.toString().padLeft(2, '0')}'
+        '${now.day.toString().padLeft(2, '0')}'
+        '${now.hour.toString().padLeft(2, '0')}'
+        '${now.minute.toString().padLeft(2, '0')}'
+        '${now.second.toString().padLeft(2, '0')}';
+
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final random = Random();
+    final randomSuffix =
+        List.generate(6, (_) => chars[random.nextInt(chars.length)]).join();
+
+    return '$timestamp$randomSuffix';
+  }
+
+  /// BIN numarası ile taksit seçeneklerini sorgula
+  ///
+  /// Kart numarasının ilk 6-8 hanesi girildiğinde çağrılır.
+  /// Backend'den peşin ve 3 taksit seçeneklerini alır.
+  Future<void> fetchInstallmentQuote({
+    required String binNumber,
+    required double amountTl,
+  }) async {
+    if (binNumber.replaceAll(' ', '').length < 6) {
+      // BIN henüz yeterli değil
+      state = state.copyWith(
+        installmentQuote: null,
+        binNumber: null,
+      );
+      return;
+    }
+
+    try {
+      final quote = await _paytrService.getInstallmentQuote(
+        binNumber: binNumber,
+        amountTl: amountTl,
+      );
+
+      state = state.copyWith(
+        installmentQuote: quote,
+        binNumber: binNumber.replaceAll(' ', ''),
+        // Debit kart ise taksit seçimini sıfırla
+        selectedInstallment: quote.isDebitCard ? 0 : state.selectedInstallment,
+      );
+    } catch (e) {
+      // Hata durumunda sadece peşin göster
+      state = state.copyWith(
+        installmentQuote: null,
+        binNumber: binNumber.replaceAll(' ', ''),
+        selectedInstallment: 0,
+      );
+    }
+  }
+
+  /// Taksit seçimini güncelle
+  /// Sadece 0 (peşin) veya 3 (3 taksit) kabul edilir.
+  void selectInstallment(int count) {
+    if (count != 0 && count != 3) return;
+
+    // 3 taksit için kredi kartı gerekli
+    if (count == 3) {
+      final quote = state.installmentQuote;
+      if (quote == null || !quote.has3Installment) {
+        return; // 3 taksit mevcut değil
+      }
+    }
+
+    state = state.copyWith(selectedInstallment: count);
+  }
+
   /// Checkout akışını başlat
   ///
-  /// 1. Backend'de sipariş oluştur (sepetten otomatik)
+  /// YENİ AKIŞ (Payment Session):
+  /// 1. merchant_oid üret (sipariş değil, payment session ID)
   /// 2. PayTR Direct API init çağır
   /// 3. WebView'a yönlendir
+  ///
+  /// NOT: Sipariş artık burada oluşturulmuyor!
+  /// Backend, PayTR callback success geldiğinde siparişi oluşturacak.
   Future<void> startCheckout({
     required Cart cart,
-    int installmentCount = 0,
+    int? installmentCount,
+    String? binNumber,
   }) async {
     if (cart.items.isEmpty) {
       state = state.copyWith(
@@ -49,17 +132,24 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
       return;
     }
 
-    try {
-      // 1. Sipariş oluştur
-      state = state.copyWith(status: CheckoutStatus.creatingOrder);
-      final order = await _ordersRepository.createOrder();
+    // Taksit sayısını belirle
+    final finalInstallment = installmentCount ?? state.selectedInstallment;
+    final finalBinNumber = binNumber ?? state.binNumber;
 
+    // 3 taksit için BIN zorunlu
+    if (finalInstallment == 3 &&
+        (finalBinNumber == null || finalBinNumber.isEmpty)) {
       state = state.copyWith(
-        status: CheckoutStatus.initializingPayment,
-        orderId: order.id,
+        status: CheckoutStatus.failed,
+        errorMessage: '3 taksit için kart numarası gereklidir',
       );
+      return;
+    }
 
-      // 2. Kullanıcı bilgilerini al
+    try {
+      state = state.copyWith(status: CheckoutStatus.initializingPayment);
+
+      // 1. Kullanıcı bilgilerini al
       final authState = _ref.read(authProvider);
       final user = authState.user;
       final currentAddress = _ref.read(currentAddressDataProvider);
@@ -67,6 +157,9 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
       if (user == null) {
         throw Exception('Kullanıcı bilgisi bulunamadı');
       }
+
+      // 2. merchant_oid üret (payment session ID)
+      final merchantOid = _generateMerchantOid();
 
       // Adres bilgisini string olarak oluştur
       String addressString = 'Adres bilgisi yok';
@@ -79,7 +172,8 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
           if (currentAddress.apartment != null)
             'Daire: ${currentAddress.apartment}',
           if (currentAddress.floor != null) 'Kat: ${currentAddress.floor}',
-          if (currentAddress.neighborhood != null) currentAddress.neighborhood!,
+          if (currentAddress.neighborhood != null)
+            currentAddress.neighborhood!,
           if (currentAddress.district != null) currentAddress.district!,
           if (currentAddress.city != null) currentAddress.city!,
         ];
@@ -94,7 +188,7 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
         final price = item.finalPrice ?? item.price;
         return BasketItem(
           name: item.title,
-          price: price, // TL cinsinden (backend kuruşa çevirir)
+          price: price, // TL cinsinden
           quantity: item.qty,
         );
       }).toList();
@@ -107,14 +201,15 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
 
       // 3. PayTR init isteği oluştur
       final request = PayTRInitRequest(
-        merchantOid: order.id,
+        merchantOid: merchantOid,
         email: user.email,
         paymentAmount: totalAmount, // TL cinsinden
-        installmentCount: installmentCount,
+        installmentCount: finalInstallment,
         userName: user.name ?? 'Müşteri',
         userAddress: addressString,
         userPhone: phone,
         basket: basketItems,
+        binNumber: finalInstallment == 3 ? finalBinNumber : null,
       );
 
       // 4. PayTR Direct API çağır
@@ -122,7 +217,80 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
 
       state = state.copyWith(
         status: CheckoutStatus.awaitingPayment,
+        merchantOid: merchantOid,
         paytrResponse: paytrResponse,
+        selectedInstallment: finalInstallment,
+        binNumber: finalBinNumber,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        status: CheckoutStatus.failed,
+        errorMessage: _parseErrorMessage(e.toString()),
+      );
+    }
+  }
+
+  /// Ödeme sonucunu doğrula
+  ///
+  /// PayTR redirect sonrası çağrılır.
+  /// Backend, callback ile siparişi oluşturur/günceller.
+  /// Bu metod sipariş durumunu polling ile kontrol eder.
+  Future<void> verifyPayment() async {
+    if (state.merchantOid == null) {
+      state = state.copyWith(
+        status: CheckoutStatus.failed,
+        errorMessage: 'Ödeme oturumu bulunamadı',
+      );
+      return;
+    }
+
+    state = state.copyWith(status: CheckoutStatus.verifyingPayment);
+
+    try {
+      // Sipariş durumunu backend'den al (polling)
+      // PayTR callback backend'e geldiğinde sipariş oluşturulur/güncellenir
+      int attempts = 0;
+      const maxAttempts = 15; // 15 saniye (local'de daha kısa)
+      const delay = Duration(seconds: 1);
+
+      while (attempts < maxAttempts) {
+        try {
+          // merchant_oid = sipariş ID (callback sonrası oluşuyor)
+          final order =
+              await _ordersRepository.getOrderDetail(state.merchantOid!);
+          final paymentStatus = order.payment?['status'] as String?;
+
+          if (paymentStatus == 'succeeded') {
+            // Sepeti temizle
+            await _ref.read(cartProvider.notifier).clearCart();
+
+            state = state.copyWith(
+              status: CheckoutStatus.completed,
+              orderId: order.id,
+            );
+            return;
+          } else if (paymentStatus == 'failed') {
+            state = state.copyWith(
+              status: CheckoutStatus.failed,
+              errorMessage: 'Ödeme başarısız oldu',
+            );
+            return;
+          }
+        } catch (e) {
+          // Sipariş henüz oluşturulmamış olabilir - devam et
+        }
+
+        // Henüz güncellenmedi, bekle ve tekrar dene
+        await Future.delayed(delay);
+        attempts++;
+      }
+
+      // Timeout - ödeme sonucu alınamadı
+      // Local geliştirme ortamında PayTR callback localhost'a ulaşamaz
+      state = state.copyWith(
+        status: CheckoutStatus.failed,
+        errorMessage:
+            'Ödeme doğrulaması zaman aşımına uğradı.\n\nLocal ortamda test ediyorsanız, PayTR callback localhost\'a ulaşamaz. Production ortamında bu sorun olmayacaktır.\n\nSiparişlerim sayfasından kontrol edebilirsiniz.',
       );
     } catch (e) {
       state = state.copyWith(
@@ -132,59 +300,39 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
     }
   }
 
-  /// Ödeme başarılı - sipariş durumunu kontrol et
-  Future<void> verifyPayment() async {
-    if (state.orderId == null) {
-      state = state.copyWith(
-        status: CheckoutStatus.failed,
-        errorMessage: 'Sipariş ID bulunamadı',
-      );
-      return;
+  /// Taksit değişikliği için token yenile
+  ///
+  /// WebView açıkken taksit değiştirildiğinde çağrılır.
+  Future<PayTRInitResponse?> refreshPaymentToken({
+    required int installmentCount,
+    String? binNumber,
+  }) async {
+    if (state.merchantOid == null) return null;
+
+    final finalBinNumber = binNumber ?? state.binNumber;
+
+    // 3 taksit için BIN zorunlu
+    if (installmentCount == 3 &&
+        (finalBinNumber == null || finalBinNumber.isEmpty)) {
+      throw Exception('3 taksit için kart numarası gereklidir');
     }
 
-    state = state.copyWith(status: CheckoutStatus.verifyingPayment);
-
     try {
-      // Sipariş durumunu backend'den al (polling)
-      // PayTR callback backend'e geldiğinde sipariş güncellenir
-      int attempts = 0;
-      const maxAttempts = 30; // 30 saniye
-      const delay = Duration(seconds: 1);
-
-      while (attempts < maxAttempts) {
-        final order = await _ordersRepository.getOrderDetail(state.orderId!);
-        final paymentStatus = order.payment?['status'] as String?;
-
-        if (paymentStatus == 'succeeded') {
-          // Sepeti temizle
-          await _ref.read(cartProvider.notifier).clearCart();
-
-          state = state.copyWith(status: CheckoutStatus.completed);
-          return;
-        } else if (paymentStatus == 'failed') {
-          state = state.copyWith(
-            status: CheckoutStatus.failed,
-            errorMessage: 'Ödeme başarısız oldu',
-          );
-          return;
-        }
-
-        // Henüz güncellenmedi, bekle ve tekrar dene
-        await Future.delayed(delay);
-        attempts++;
-      }
-
-      // Timeout - ödeme sonucu alınamadı
-      state = state.copyWith(
-        status: CheckoutStatus.failed,
-        errorMessage:
-            'Ödeme doğrulaması zaman aşımına uğradı. Siparişlerim sayfasından kontrol edebilirsiniz.',
+      final response = await _paytrService.refreshToken(
+        merchantOid: state.merchantOid!,
+        installmentCount: installmentCount,
+        binNumber: installmentCount == 3 ? finalBinNumber : null,
       );
+
+      state = state.copyWith(
+        paytrResponse: response,
+        selectedInstallment: installmentCount,
+        binNumber: finalBinNumber,
+      );
+
+      return response;
     } catch (e) {
-      state = state.copyWith(
-        status: CheckoutStatus.failed,
-        errorMessage: e.toString(),
-      );
+      rethrow;
     }
   }
 
@@ -201,7 +349,42 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
     state = const CheckoutState();
   }
 
-  /// Sipariş ID'sini getir (WebView sonrası için)
+  /// Hata mesajını parse et
+  /// 
+  /// Backend'den gelen hata kodlarını kullanıcı dostu Türkçe mesajlara çevirir.
+  /// Dokümandaki hata kodları:
+  /// - 400 user_ip required
+  /// - 400 3 taksit için bin_number zorunludur
+  /// - 400 Banka kartı (debit) ile 3 taksit yapılamaz
+  /// - 400 Bu kart taksit programına uygun değil (brand=none)
+  /// - 400 Ödeme tutarı doğrulaması başarısız
+  /// - 502 get-token failed
+  String _parseErrorMessage(String error) {
+    // Backend'den gelen spesifik hata mesajlarını Türkçeleştir
+    if (error.contains('bin_number zorunludur')) {
+      return '3 taksit için kart numarası gereklidir';
+    }
+    if (error.contains('Banka kartı') || error.contains('debit')) {
+      return 'Banka kartı ile taksitli ödeme yapılamaz';
+    }
+    if (error.contains('taksit programına uygun değil')) {
+      return 'Bu kart ile taksitli ödeme yapılamaz';
+    }
+    if (error.contains('user_ip required')) {
+      return 'Bağlantı hatası, lütfen tekrar deneyin';
+    }
+    if (error.contains('Ödeme tutarı doğrulaması başarısız') || 
+        error.contains('payment_amount')) {
+      return 'Ödeme tutarı doğrulanamadı, lütfen tekrar deneyin';
+    }
+    if (error.contains('get-token failed') || error.contains('502')) {
+      return 'Ödeme servisi şu an kullanılamıyor, lütfen daha sonra tekrar deneyin';
+    }
+    return error.replaceAll('Exception:', '').trim();
+  }
+
+  /// Getter'lar
+  String? get merchantOid => state.merchantOid;
   String? get orderId => state.orderId;
 }
 
@@ -228,3 +411,12 @@ final paytrResponseProvider = Provider<PayTRInitResponse?>((ref) {
   return ref.watch(checkoutProvider).paytrResponse;
 });
 
+/// Taksit seçenekleri provider'ı
+final installmentQuoteProvider = Provider<InstallmentQuoteResponse?>((ref) {
+  return ref.watch(checkoutProvider).installmentQuote;
+});
+
+/// Seçili taksit provider'ı
+final selectedInstallmentProvider = Provider<int>((ref) {
+  return ref.watch(checkoutProvider).selectedInstallment;
+});

@@ -20,7 +20,9 @@ class NotificationCard extends StatelessWidget {
     final isUnread = !notification.isRead;
     final dateFormat = DateFormat('dd MMM yyyy, HH:mm', 'tr_TR');
     final formattedDate = notification.createdAt != null
-        ? dateFormat.format(notification.createdAt!)
+        ? dateFormat.format(notification.createdAt!.isUtc 
+            ? notification.createdAt!.toLocal() 
+            : notification.createdAt!)
         : '';
 
     return Card(

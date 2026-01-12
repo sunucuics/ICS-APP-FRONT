@@ -31,7 +31,7 @@ class ProfileTab extends ConsumerWidget {
         // User has logged out, navigate to login page
         if (context.mounted) {
           Navigator.of(context)
-              .pushNamedAndRemoveUntil('/login', (route) => false);
+              .pushNamedAndRemoveUntil('/welcome', (route) => false);
         }
       }
     });

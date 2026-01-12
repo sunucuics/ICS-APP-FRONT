@@ -14,12 +14,15 @@ import '../../../../core/services/navigation_service.dart';
 /// Checkout Sayfası
 ///
 /// Sipariş özeti gösterir ve ödeme işlemini başlatır.
-/// Checkout akışı:
+/// 
+/// YENİ Checkout akışı (Payment Session mimarisi):
 /// 1. Sepet ve adres bilgilerini göster
 /// 2. "Ödemeye Geç" butonuna tıkla
-/// 3. Sipariş oluştur + PayTR init al
-/// 4. WebView'a yönlendir
-/// 5. Ödeme sonucu bekle
+/// 3. merchant_oid üret + PayTR init al (sipariş henüz oluşturulmaz!)
+/// 4. WebView'a yönlendir (kart bilgileri ve taksit seçimi burada)
+/// 5. PayTR callback backend'e gelir
+/// 6. Callback success ise backend sipariş oluşturur
+/// 7. Frontend sipariş durumunu kontrol eder
 class CheckoutPage extends ConsumerStatefulWidget {
   const CheckoutPage({super.key});
 
@@ -46,13 +49,13 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     // Checkout durumuna göre UI göster
     ref.listen<CheckoutState>(checkoutProvider, (previous, current) {
       if (!mounted) return;
-      
+
       if (current.status == CheckoutStatus.awaitingPayment &&
           current.paytrResponse != null) {
         // PayTR response geldi, WebView'a yönlendir
         _navigateToPayment(current.paytrResponse!);
       } else if (current.status == CheckoutStatus.completed) {
-        // Ödeme başarılı - sepet temizlendi
+        // Ödeme başarılı - sipariş oluşturuldu
         _showSuccessDialog();
       } else if (current.status == CheckoutStatus.failed) {
         // Hata oluştu
@@ -68,7 +71,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         foregroundColor: Colors.white,
       ),
       body: cartAsync.when(
-        data: (cart) => _buildContent(context, cart, checkoutState, currentAddress),
+        data: (cart) =>
+            _buildContent(context, cart, checkoutState, currentAddress),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => _buildError(error.toString()),
       ),
@@ -81,28 +85,28 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     CheckoutState checkoutState,
     Address? currentAddress,
   ) {
-    // Ödeme doğrulanıyorsa veya tamamlandıysa loading göster
-    if (checkoutState.status == CheckoutStatus.verifyingPayment ||
-        checkoutState.status == CheckoutStatus.completed) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CircularProgressIndicator(
-              color: AppTheme.primaryOrange,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              checkoutState.status == CheckoutStatus.completed
-                  ? 'Sipariş onaylanıyor...'
-                  : 'Ödeme doğrulanıyor...',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
+    // Ödeme durumlarına göre loading göster
+    if (checkoutState.status == CheckoutStatus.initializingPayment) {
+      return _buildLoadingState(
+        icon: Icons.payment,
+        message: 'Ödeme hazırlanıyor...',
+        subMessage: 'Lütfen bekleyin',
+      );
+    }
+
+    if (checkoutState.status == CheckoutStatus.verifyingPayment) {
+      return _buildLoadingState(
+        icon: Icons.verified_user,
+        message: 'Ödeme doğrulanıyor...',
+        subMessage: 'Sipariş durumu kontrol ediliyor',
+      );
+    }
+
+    if (checkoutState.status == CheckoutStatus.completed) {
+      return _buildLoadingState(
+        icon: Icons.check_circle_outline,
+        message: 'Sipariş onaylanıyor...',
+        subMessage: 'Neredeyse bitti!',
       );
     }
 
@@ -110,7 +114,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       return _buildEmptyCart();
     }
 
-    final totalAmount = cart.items.fold<double>(0.0, (double sum, CartItem item) {
+    final totalAmount =
+        cart.items.fold<double>(0.0, (double sum, CartItem item) {
       final price = item.finalPrice ?? item.price;
       return sum + (price * item.qty);
     });
@@ -133,6 +138,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
 
                 // Sipariş Özeti
                 _buildOrderSummary(cart.items, totalAmount),
+                
+                const SizedBox(height: 16),
+                
+                // Taksit bilgisi notu
+                _buildInstallmentNote(),
               ],
             ),
           ),
@@ -141,6 +151,81 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         // Alt Bar - Ödeme Butonu
         _buildBottomBar(totalAmount, checkoutState, cart),
       ],
+    );
+  }
+
+  Widget _buildLoadingState({
+    required IconData icon,
+    required String message,
+    String? subMessage,
+  }) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryOrange.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              color: AppTheme.primaryOrange,
+              size: 48,
+            ),
+          ),
+          const SizedBox(height: 24),
+          const CircularProgressIndicator(
+            color: AppTheme.primaryOrange,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            message,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          if (subMessage != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              subMessage,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.6),
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInstallmentNote() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline, color: Colors.blue, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Kredi kartı ile 3 taksit seçeneği mevcuttur. Taksit seçimi ödeme ekranında yapılır.',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.7),
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -241,7 +326,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
 
   Widget _buildProductItem(CartItem item) {
     final price = item.finalPrice ?? item.price;
-    final hasDiscount = item.finalPrice != null && item.finalPrice! < item.price;
+    final hasDiscount =
+        item.finalPrice != null && item.finalPrice! < item.price;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -329,7 +415,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   }
 
   Widget _buildOrderSummary(List<CartItem> items, double totalAmount) {
-    final itemCount = items.fold<int>(0, (int sum, CartItem item) => sum + item.qty);
+    final itemCount =
+        items.fold<int>(0, (int sum, CartItem item) => sum + item.qty);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -382,10 +469,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     );
   }
 
-  Widget _buildBottomBar(double totalAmount, CheckoutState checkoutState, Cart cart) {
-    final isLoading = checkoutState.status == CheckoutStatus.creatingOrder ||
+  Widget _buildBottomBar(
+      double totalAmount, CheckoutState checkoutState, Cart cart) {
+    final isLoading =
         checkoutState.status == CheckoutStatus.initializingPayment ||
-        checkoutState.status == CheckoutStatus.verifyingPayment;
+            checkoutState.status == CheckoutStatus.verifyingPayment;
 
     final currentAddress = ref.watch(currentAddressDataProvider);
     final hasAddress = currentAddress != null;
@@ -524,10 +612,37 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   }
 
   void _navigateToPayment(PayTRInitResponse paytrResponse) async {
+    // Sepet bilgilerini al
+    final cart = ref.read(cartProvider).valueOrNull;
+    final currentAddress = ref.read(currentAddressDataProvider);
+
+    // Cart'tan BasketItem'lara dönüştür
+    final basketItems = cart?.items
+            .map((item) => BasketItem(
+                  name: item.title,
+                  price: item.finalPrice ?? item.price,
+                  quantity: item.qty,
+                ))
+            .toList() ??
+        [];
+
+    // User ve address bilgilerini fields'tan al (başlangıçta init'e gönderilen değerler)
+    final email = paytrResponse.fields['email'] ?? '';
+    final userName = paytrResponse.fields['user_name'] ?? 'Müşteri';
+    final userAddress = paytrResponse.fields['user_address'] ?? '';
+    final userPhone = paytrResponse.fields['user_phone'] ?? '';
+
     await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (context) => PayTRWebViewPage(paytrResponse: paytrResponse),
+        builder: (context) => PayTRWebViewPage(
+          paytrResponse: paytrResponse,
+          basketItems: basketItems,
+          email: email,
+          userName: userName,
+          userAddress: userAddress,
+          userPhone: userPhone,
+        ),
       ),
     );
     // verifyPayment zaten WebView içinde çağrıldı ve beklendi
@@ -535,8 +650,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   }
 
   void _showSuccessDialog() {
-    final orderId = ref.read(checkoutProvider).orderId;
-    
+    final checkoutState = ref.read(checkoutProvider);
+    // orderId veya merchantOid'den birini göster
+    final displayId = checkoutState.orderId ?? checkoutState.merchantOid;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -575,10 +692,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               ),
               textAlign: TextAlign.center,
             ),
-            if (orderId != null) ...[
+            if (displayId != null) ...[
               const SizedBox(height: 8),
               Text(
-                'Sipariş No: $orderId',
+                'Sipariş No: $displayId',
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.5),
                   fontSize: 12,
@@ -645,4 +762,3 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     );
   }
 }
-

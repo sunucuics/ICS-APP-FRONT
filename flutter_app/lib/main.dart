@@ -22,6 +22,7 @@ import 'core/utils/route_aware_refresh_mixin.dart';
 import 'features/auth/data/auth_api_service.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
+import 'features/auth/presentation/pages/guest_welcome_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
 
 void main() async {
@@ -170,6 +171,7 @@ class _MyAppState extends ConsumerState<MyApp> {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/home': (context) => const HomePage(),
+        '/welcome': (context) => const GuestWelcomePage(),
       },
     );
   }

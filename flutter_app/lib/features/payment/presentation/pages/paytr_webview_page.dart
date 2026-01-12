@@ -10,15 +10,27 @@ import '../../providers/checkout_provider.dart';
 /// PayTR WebView Ödeme Sayfası
 ///
 /// PayTR Direct API ile ödeme almak için WebView kullanır.
-/// - Kart numarası girildikten sonra kredi/banka kartı tespiti yapar
-/// - Kredi kartı ise taksit seçeneklerini gösterir
+/// - Kart numarası girildikten sonra backend BIN API ile kart tipini tespit eder
+/// - Kredi kartı ise peşin ve 3 taksit seçeneklerini gösterir (%15 vade farkı ile)
 /// - Seçilen taksit için yeni token alır ve PayTR'ye gönderir
 class PayTRWebViewPage extends ConsumerStatefulWidget {
   final PayTRInitResponse paytrResponse;
 
+  /// Taksit değişikliğinde yeni init için gerekli bilgiler
+  final List<BasketItem> basketItems;
+  final String email;
+  final String userName;
+  final String userAddress;
+  final String userPhone;
+
   const PayTRWebViewPage({
     super.key,
     required this.paytrResponse,
+    required this.basketItems,
+    required this.email,
+    required this.userName,
+    required this.userAddress,
+    required this.userPhone,
   });
 
   @override
@@ -30,6 +42,7 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
   bool _isLoading = true;
   bool _formSubmitted = false;
   bool _isRefreshingToken = false;
+  bool _isFetchingQuote = false;
 
   // Kart formu değerleri
   final _cardOwnerController = TextEditingController();
@@ -38,20 +51,23 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
   final _cvvController = TextEditingController();
   final _emailController = TextEditingController();
 
-  // Taksit seçimi
+  // Taksit seçimi (Backend'den alınır)
   int _selectedInstallment = 0;
-  bool _isCreditCard = false;
-  String _cardBrand = '';
-  
+  InstallmentQuoteResponse? _installmentQuote;
+  String _currentBin = '';
+
   // Güncel PayTR fields (taksit değişince güncellenir)
   late Map<String, String> _currentFields;
   late String _currentAction;
+
+  // Peşin tutar (sepet toplamı)
+  double _baseAmount = 0;
 
   @override
   void initState() {
     super.initState();
     _initWebView();
-    
+
     // Initial fields
     _currentFields = Map.from(widget.paytrResponse.fields);
     _currentAction = widget.paytrResponse.action;
@@ -59,6 +75,10 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
     // Email'i fields'dan al
     final email = widget.paytrResponse.fields['email'] ?? '';
     _emailController.text = email;
+
+    // Peşin tutarı al
+    final paymentAmountStr = widget.paytrResponse.fields['payment_amount'] ?? '0';
+    _baseAmount = double.tryParse(paymentAmountStr) ?? 0;
   }
 
   @override
@@ -109,94 +129,90 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
   Future<void> _handlePaymentSuccess() async {
     // Ödeme doğrulamasını bekle
     await ref.read(checkoutProvider.notifier).verifyPayment();
-    
+
     if (mounted) {
       Navigator.of(context).pop(true);
     }
   }
 
   void _handlePaymentFailure() {
-    ref.read(checkoutProvider.notifier).paymentFailed('Ödeme işlemi başarısız oldu');
+    ref
+        .read(checkoutProvider.notifier)
+        .paymentFailed('Ödeme işlemi başarısız oldu');
     if (mounted) {
       Navigator.of(context).pop(false);
     }
   }
 
-  /// Kart numarasının ilk 6 hanesine (BIN) göre kart tipini tespit et
-  void _detectCardType(String cardNumber) {
-    final cleanNumber = cardNumber.replaceAll(' ', '');
-    
+  /// Kart numarası değiştiğinde backend'den taksit seçeneklerini al
+  Future<void> _onCardNumberChanged(String value) async {
+    _formatCardNumber(value);
+
+    final cleanNumber = _cardNumberController.text.replaceAll(' ', '');
+
+    // 6 haneden az ise temizle
     if (cleanNumber.length < 6) {
-      setState(() {
-        _isCreditCard = false;
-        _cardBrand = '';
-        if (_selectedInstallment != 0) {
+      if (_installmentQuote != null || _currentBin.isNotEmpty) {
+        setState(() {
+          _installmentQuote = null;
+          _currentBin = '';
           _selectedInstallment = 0;
-        }
-      });
+        });
+      }
       return;
     }
 
-    final firstDigit = cleanNumber[0];
-    final firstTwo = cleanNumber.substring(0, 2);
-    final firstFour = cleanNumber.substring(0, 4);
+    final bin = cleanNumber.substring(0, cleanNumber.length >= 8 ? 8 : 6);
 
-    String brand = '';
-    bool isCreditCard = true;
-
-    // Kart markası tespiti
-    if (firstDigit == '4') {
-      brand = 'Visa';
-    } else if (['51', '52', '53', '54', '55'].contains(firstTwo) ||
-        (int.tryParse(firstTwo) ?? 0) >= 22 && (int.tryParse(firstTwo) ?? 0) <= 27) {
-      brand = 'Mastercard';
-    } else if (firstTwo == '34' || firstTwo == '37') {
-      brand = 'American Express';
-    } else if (firstFour == '9792') {
-      brand = 'Troy';
-    }
-
-    // Türkiye'deki yaygın banka kartı BIN'leri
-    final debitBinPrefixes = [
-      '979201', '979202', '979203', '979204', '979205', // Troy Banka Kartları
-      '650000', '650001', '650002', // Maestro
-      '676770', '676771', '676772', '676773', '676774', // Maestro TR
-      '639000', '639001', '639002', // Banka kartları
-    ];
-
-    // 6 haneli BIN kontrolü
-    if (cleanNumber.length >= 6) {
-      final bin6 = cleanNumber.substring(0, 6);
-      for (final prefix in debitBinPrefixes) {
-        if (bin6.startsWith(prefix.substring(0, prefix.length.clamp(0, 6)))) {
-          isCreditCard = false;
-          break;
-        }
-      }
-      
-      // Troy kartları için ek kontrol - genellikle 979200-979299 arası banka kartı
-      if (bin6.startsWith('9792')) {
-        // Troy BIN'leri genellikle banka kartı olarak kullanılıyor
-        // Ama bazı Troy kredi kartları da var, bu yüzden default olarak
-        // banka kartı kabul ediyoruz
-        isCreditCard = false;
-      }
-    }
+    // Aynı BIN ise tekrar sorma
+    if (bin == _currentBin) return;
 
     setState(() {
-      _isCreditCard = isCreditCard;
-      _cardBrand = brand;
-      // Banka kartıysa taksit seçimini sıfırla
-      if (!isCreditCard && _selectedInstallment != 0) {
-        _selectedInstallment = 0;
-      }
+      _currentBin = bin;
+      _isFetchingQuote = true;
     });
+
+    try {
+      final paytrService = ref.read(paytrServiceProvider);
+      final quote = await paytrService.getInstallmentQuote(
+        binNumber: bin,
+        amountTl: _baseAmount,
+      );
+
+      if (mounted) {
+        setState(() {
+          _installmentQuote = quote;
+          _isFetchingQuote = false;
+          // Debit kart ise taksit seçimini sıfırla
+          if (quote.isDebitCard && _selectedInstallment != 0) {
+            _selectedInstallment = 0;
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _installmentQuote = null;
+          _isFetchingQuote = false;
+          _selectedInstallment = 0;
+        });
+      }
+    }
   }
 
   /// Taksit seçildiğinde token yenile
   Future<void> _onInstallmentSelected(int installment) async {
     if (installment == _selectedInstallment) return;
-    
+    if (installment != 0 && installment != 3) return;
+
+    // 3 taksit için kredi kartı kontrolü
+    if (installment == 3) {
+      if (_installmentQuote == null || !_installmentQuote!.has3Installment) {
+        _showError('Bu kart ile taksitli ödeme yapılamaz');
+        return;
+      }
+    }
+
     setState(() {
       _selectedInstallment = installment;
       _isRefreshingToken = true;
@@ -205,14 +221,25 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
     try {
       final merchantOid = _currentFields['merchant_oid'];
       if (merchantOid == null || merchantOid.isEmpty) {
-        throw Exception('Sipariş ID bulunamadı');
+        throw Exception('Ödeme oturumu bulunamadı');
       }
 
+      // refreshToken yerine yeni initDirectPayment çağır
+      // Çünkü backend payment session'ı Firestore'da saklamıyor
       final paytrService = ref.read(paytrServiceProvider);
-      final newResponse = await paytrService.refreshToken(
+      final request = PayTRInitRequest(
         merchantOid: merchantOid,
+        email: widget.email,
+        paymentAmount: _baseAmount, // Peşin tutar
         installmentCount: installment,
+        userName: widget.userName,
+        userAddress: widget.userAddress,
+        userPhone: widget.userPhone,
+        basket: widget.basketItems,
+        binNumber: installment == 3 ? _currentBin : null,
       );
+
+      final newResponse = await paytrService.initDirectPayment(request);
 
       setState(() {
         _currentFields = Map.from(newResponse.fields);
@@ -221,10 +248,24 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
       });
     } catch (e) {
       setState(() {
+        _selectedInstallment = 0; // Hata durumunda peşine dön
         _isRefreshingToken = false;
       });
-      _showError('Taksit güncellenirken hata oluştu: $e');
+      _showError('Taksit güncellenirken hata oluştu: ${_parseError(e.toString())}');
     }
+  }
+
+  String _parseError(String error) {
+    if (error.contains('bin_number zorunludur')) {
+      return 'Kart numarası gereklidir';
+    }
+    if (error.contains('Banka kartı') || error.contains('debit')) {
+      return 'Banka kartı ile taksit yapılamaz';
+    }
+    if (error.contains('taksit programına uygun değil')) {
+      return 'Bu kart ile taksit yapılamaz';
+    }
+    return error.replaceAll('Exception:', '').trim();
   }
 
   /// HTML form oluştur ve WebView'a yükle
@@ -246,19 +287,17 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    .loading { display: flex; justify-content: center; align-items: center; height: 100vh; }
-    .spinner { width: 50px; height: 50px; border: 3px solid #f3f3f3; border-top: 3px solid #FF6B00; border-radius: 50%; animation: spin 1s linear infinite; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #000; }
+    .loading { display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; }
+    .spinner { width: 50px; height: 50px; border: 3px solid #333; border-top: 3px solid #FF6B00; border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    p { text-align: center; color: #666; margin-top: 20px; }
+    p { text-align: center; color: #999; margin-top: 20px; }
   </style>
 </head>
 <body>
   <div class="loading">
-    <div>
-      <div class="spinner"></div>
-      <p>Ödeme işleniyor...</p>
-    </div>
+    <div class="spinner"></div>
+    <p>Ödeme işleniyor...</p>
   </div>
   <form id="paytr_form" method="POST" action="$_currentAction" style="display:none;">
     ${_buildHiddenInputs(_currentFields)}
@@ -346,9 +385,6 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
         selection: TextSelection.collapsed(offset: formatted.length),
       );
     }
-
-    // Kart tipini tespit et
-    _detectCardType(text);
   }
 
   void _formatExpiry(String value) {
@@ -400,9 +436,9 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
   }
 
   Widget _buildCardForm() {
+    // Güncel ödenecek tutar (taksit seçimine göre)
     final paymentAmountStr = _currentFields['payment_amount'] ?? '0';
-    final paymentAmountTL = double.tryParse(paymentAmountStr) ?? 0;
-    final cardNumber = _cardNumberController.text.replaceAll(' ', '');
+    final currentPaymentAmount = double.tryParse(paymentAmountStr) ?? 0;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
@@ -410,35 +446,7 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Tutar gösterimi
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryOrange.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.primaryOrange),
-            ),
-            child: Column(
-              children: [
-                const Text(
-                  'Ödenecek Tutar',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  formatPrice(paymentAmountTL),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildAmountCard(currentPaymentAmount),
           const SizedBox(height: 32),
 
           // Kart Bilgileri Başlığı
@@ -470,24 +478,8 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
             icon: Icons.credit_card,
             keyboardType: TextInputType.number,
             maxLength: 19,
-            onChanged: _formatCardNumber,
-            suffixWidget: _cardBrand.isNotEmpty
-                ? Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _isCreditCard ? Colors.green.withOpacity(0.2) : Colors.blue.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      _isCreditCard ? '$_cardBrand Kredi' : '$_cardBrand Banka',
-                      style: TextStyle(
-                        color: _isCreditCard ? Colors.green : Colors.blue,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  )
-                : null,
+            onChanged: _onCardNumberChanged,
+            suffixWidget: _buildCardTypeBadge(),
           ),
           const SizedBox(height: 16),
 
@@ -521,71 +513,174 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
           ),
           const SizedBox(height: 24),
 
-          // Taksit Seçimi (sadece kart numarası girildikten ve kredi kartı ise)
-          if (cardNumber.length >= 6) _buildInstallmentSection(paymentAmountTL),
+          // Taksit Seçimi
+          _buildInstallmentSection(),
           const SizedBox(height: 24),
 
           // Ödeme Yap Butonu
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _isRefreshingToken ? null : _submitPaymentForm,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryOrange,
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: Colors.grey[800],
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: _isRefreshingToken
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : Text(
-                      'Ödemeyi Tamamla - ${formatPrice(paymentAmountTL)}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-            ),
-          ),
+          _buildPayButton(currentPaymentAmount),
           const SizedBox(height: 16),
 
           // Güvenlik notu
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.lock,
-                size: 16,
-                color: Colors.white.withOpacity(0.5),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '256-bit SSL ile korunan güvenli ödeme',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
+          _buildSecurityNote(),
         ],
       ),
     );
   }
 
-  Widget _buildInstallmentSection(double totalAmount) {
-    // Banka kartıysa
-    if (!_isCreditCard) {
+  Widget _buildAmountCard(double amount) {
+    final isInstallment = _selectedInstallment == 3;
+    
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppTheme.primaryOrange.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.primaryOrange),
+      ),
+      child: Column(
+        children: [
+          Text(
+            isInstallment ? 'Toplam Ödenecek Tutar' : 'Ödenecek Tutar',
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            formatPrice(amount),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          if (isInstallment && _installmentQuote?.taksit3Option != null) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                '3 x ${formatPrice(_installmentQuote!.taksit3Option!.perInstallmentAmount)} / ay',
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget? _buildCardTypeBadge() {
+    if (_isFetchingQuote) {
+      return const SizedBox(
+        width: 16,
+        height: 16,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: AppTheme.primaryOrange,
+        ),
+      );
+    }
+
+    if (_installmentQuote == null) return null;
+
+    final isCreditCard = _installmentQuote!.isCreditCard;
+    final brand = _installmentQuote!.brand ?? '';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isCreditCard
+            ? Colors.green.withOpacity(0.2)
+            : Colors.blue.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        isCreditCard
+            ? (brand.isNotEmpty ? '${brand.toUpperCase()} Kredi' : 'Kredi Kartı')
+            : (brand.isNotEmpty ? '${brand.toUpperCase()} Banka' : 'Banka Kartı'),
+        style: TextStyle(
+          color: isCreditCard ? Colors.green : Colors.blue,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInstallmentSection() {
+    final cleanNumber = _cardNumberController.text.replaceAll(' ', '');
+
+    // Kart numarası yetersiz
+    if (cleanNumber.length < 6) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withOpacity(0.1)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.info_outline, color: Colors.white.withOpacity(0.5), size: 20),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Taksit seçeneklerini görmek için kart numarasını girin',
+                style: TextStyle(
+                  color: Colors.white54,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // BIN sorgulanıyor
+    if (_isFetchingQuote) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppTheme.primaryOrange,
+              ),
+            ),
+            SizedBox(width: 12),
+            Text(
+              'Taksit seçenekleri yükleniyor...',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Debit kart veya taksit yok
+    if (_installmentQuote == null ||
+        _installmentQuote!.isDebitCard ||
+        !_installmentQuote!.has3Installment) {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -599,9 +694,9 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                _cardBrand.isNotEmpty
-                    ? '$_cardBrand Banka Kartı ile tek çekim ödeme yapılacaktır'
-                    : 'Banka kartı ile sadece tek çekim yapılabilir',
+                _installmentQuote?.isDebitCard == true
+                    ? 'Banka kartı ile sadece tek çekim yapılabilir'
+                    : 'Bu kart ile sadece tek çekim yapılabilir',
                 style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 13,
@@ -613,7 +708,10 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
       );
     }
 
-    // Kredi kartı - taksit seçeneklerini göster
+    // Kredi kartı - Peşin ve 3 Taksit seçenekleri
+    final pesinOption = _installmentQuote!.pesinOption;
+    final taksit3Option = _installmentQuote!.taksit3Option;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -626,10 +724,11 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
         children: [
           Row(
             children: [
-              const Icon(Icons.calendar_month, color: AppTheme.primaryOrange, size: 20),
+              const Icon(Icons.calendar_month,
+                  color: AppTheme.primaryOrange, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Taksit Seçenekleri${_cardBrand.isNotEmpty ? ' ($_cardBrand)' : ''}',
+                'Ödeme Seçenekleri${_installmentQuote?.brand != null ? ' (${_installmentQuote!.brand!.toUpperCase()})' : ''}',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -638,20 +737,39 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          const SizedBox(height: 16),
+
+          // Peşin ve 3 Taksit seçenekleri yan yana
+          Row(
             children: [
-              _buildInstallmentOption(0, 'Tek Çekim', totalAmount),
-              _buildInstallmentOption(2, '2 Taksit', totalAmount / 2),
-              _buildInstallmentOption(3, '3 Taksit', totalAmount / 3),
-              _buildInstallmentOption(6, '6 Taksit', totalAmount / 6),
-              _buildInstallmentOption(9, '9 Taksit', totalAmount / 9),
-              _buildInstallmentOption(12, '12 Taksit', totalAmount / 12),
+              // Peşin
+              Expanded(
+                child: _buildInstallmentCard(
+                  isSelected: _selectedInstallment == 0,
+                  title: 'PEŞİN',
+                  totalAmount: pesinOption?.totalAmount ?? _baseAmount,
+                  perMonth: null,
+                  surchargePercent: 0,
+                  onTap: () => _onInstallmentSelected(0),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // 3 Taksit
+              Expanded(
+                child: _buildInstallmentCard(
+                  isSelected: _selectedInstallment == 3,
+                  title: '3 TAKSİT',
+                  totalAmount: taksit3Option?.totalAmount ?? 0,
+                  perMonth: taksit3Option?.perInstallmentAmount,
+                  surchargePercent: taksit3Option?.ratePercent ?? 15,
+                  onTap: () => _onInstallmentSelected(3),
+                ),
+              ),
             ],
           ),
-          if (_selectedInstallment > 0) ...[
+
+          // Seçim bilgisi
+          if (_selectedInstallment == 3 && taksit3Option != null) ...[
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
@@ -661,11 +779,12 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.check_circle, color: AppTheme.primaryOrange, size: 18),
+                  const Icon(Icons.check_circle,
+                      color: AppTheme.primaryOrange, size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '$_selectedInstallment taksit seçildi - Aylık ${formatPrice(totalAmount / _selectedInstallment)}',
+                      '3 taksit seçildi - Aylık ${formatPrice(taksit3Option.perInstallmentAmount)}',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 13,
@@ -681,18 +800,24 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
     );
   }
 
-  Widget _buildInstallmentOption(int count, String label, double monthlyAmount) {
-    final isSelected = _selectedInstallment == count;
-
+  Widget _buildInstallmentCard({
+    required bool isSelected,
+    required String title,
+    required double totalAmount,
+    required double? perMonth,
+    required double surchargePercent,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
-      onTap: _isRefreshingToken ? null : () => _onInstallmentSelected(count),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      onTap: _isRefreshingToken ? null : onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppTheme.primaryOrange
+              ? AppTheme.primaryOrange.withOpacity(0.2)
               : Colors.white.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
                 ? AppTheme.primaryOrange
@@ -702,27 +827,115 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
         ),
         child: Column(
           children: [
+            // Başlık
             Text(
-              label,
+              title,
               style: TextStyle(
                 color: isSelected ? Colors.white : Colors.white70,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
               ),
             ),
-            if (count > 0) ...[
-              const SizedBox(height: 2),
+            const SizedBox(height: 8),
+            // Toplam tutar
+            Text(
+              formatPrice(totalAmount),
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.white70,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            // Aylık tutar (varsa)
+            if (perMonth != null) ...[
+              const SizedBox(height: 4),
               Text(
-                '${formatPrice(monthlyAmount)}/ay',
+                '${formatPrice(perMonth)} x 3 ay',
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.white54,
-                  fontSize: 10,
+                  color: isSelected ? Colors.white70 : Colors.white54,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+            // Vade farkı (varsa)
+            if (surchargePercent > 0) ...[
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  '+%${surchargePercent.toStringAsFixed(0)} vade farkı',
+                  style: const TextStyle(
+                    color: Colors.orange,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ],
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildPayButton(double amount) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: (_isRefreshingToken || _isFetchingQuote)
+            ? null
+            : _submitPaymentForm,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppTheme.primaryOrange,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: Colors.grey[800],
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: (_isRefreshingToken || _isFetchingQuote)
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            : Text(
+                'Ödemeyi Tamamla - ${formatPrice(amount)}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildSecurityNote() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.lock,
+          size: 16,
+          color: Colors.white.withOpacity(0.5),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '256-bit SSL ile korunan güvenli ödeme',
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.5),
+            fontSize: 12,
+          ),
+        ),
+      ],
     );
   }
 
@@ -795,7 +1008,9 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              ref.read(checkoutProvider.notifier).paymentFailed('Ödeme iptal edildi');
+              ref
+                  .read(checkoutProvider.notifier)
+                  .paymentFailed('Ödeme iptal edildi');
               Navigator.pop(context, false);
             },
             style: ElevatedButton.styleFrom(

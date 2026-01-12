@@ -33,6 +33,7 @@ _$PayTRInitRequestImpl _$$PayTRInitRequestImplFromJson(
       basket: (json['basket'] as List<dynamic>)
           .map((e) => BasketItem.fromJson(e as Map<String, dynamic>))
           .toList(),
+      binNumber: json['binNumber'] as String?,
     );
 
 Map<String, dynamic> _$$PayTRInitRequestImplToJson(
@@ -46,4 +47,49 @@ Map<String, dynamic> _$$PayTRInitRequestImplToJson(
       'userAddress': instance.userAddress,
       'userPhone': instance.userPhone,
       'basket': instance.basket,
+      'binNumber': instance.binNumber,
+    };
+
+_$BinDetailRequestImpl _$$BinDetailRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$BinDetailRequestImpl(
+      binNumber: json['binNumber'] as String,
+      debugOn: (json['debugOn'] as num?)?.toInt() ?? 0,
+    );
+
+Map<String, dynamic> _$$BinDetailRequestImplToJson(
+        _$BinDetailRequestImpl instance) =>
+    <String, dynamic>{
+      'binNumber': instance.binNumber,
+      'debugOn': instance.debugOn,
+    };
+
+_$InstallmentQuoteRequestImpl _$$InstallmentQuoteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$InstallmentQuoteRequestImpl(
+      binNumber: json['binNumber'] as String,
+      amountTl: (json['amountTl'] as num).toDouble(),
+    );
+
+Map<String, dynamic> _$$InstallmentQuoteRequestImplToJson(
+        _$InstallmentQuoteRequestImpl instance) =>
+    <String, dynamic>{
+      'binNumber': instance.binNumber,
+      'amountTl': instance.amountTl,
+    };
+
+_$RefreshTokenRequestImpl _$$RefreshTokenRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$RefreshTokenRequestImpl(
+      merchantOid: json['merchantOid'] as String,
+      installmentCount: (json['installmentCount'] as num?)?.toInt() ?? 0,
+      binNumber: json['binNumber'] as String?,
+    );
+
+Map<String, dynamic> _$$RefreshTokenRequestImplToJson(
+        _$RefreshTokenRequestImpl instance) =>
+    <String, dynamic>{
+      'merchantOid': instance.merchantOid,
+      'installmentCount': instance.installmentCount,
+      'binNumber': instance.binNumber,
     };

@@ -324,8 +324,8 @@ class SettingsPage extends ConsumerWidget {
                         if (context.mounted) {
                           Navigator.of(context).pop(); // Close dialog
                           
-                          // Navigate to login
-                          NavigationService.navigateToLogin();
+                          // Navigate to welcome page
+                          NavigationService.navigateToWelcome();
                           
                           SnackBarService.showSnackBar(
                             context: context,

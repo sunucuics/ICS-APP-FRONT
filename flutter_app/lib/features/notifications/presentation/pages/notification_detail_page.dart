@@ -63,7 +63,9 @@ class _NotificationDetailPageState
       BuildContext context, UserNotification notification) {
     final dateFormat = DateFormat('dd MMMM yyyy, HH:mm', 'tr_TR');
     final formattedDate = notification.createdAt != null
-        ? dateFormat.format(notification.createdAt!)
+        ? dateFormat.format(notification.createdAt!.isUtc 
+            ? notification.createdAt!.toLocal() 
+            : notification.createdAt!)
         : '';
 
     return SingleChildScrollView(

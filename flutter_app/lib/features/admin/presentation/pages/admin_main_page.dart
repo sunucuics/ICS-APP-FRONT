@@ -113,7 +113,7 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
       child: Column(
         children: [
           TabBar(
-            labelColor: AppTheme.primaryNavy,
+            labelColor: Colors.white,
             unselectedLabelColor: _secondaryTextColor,
             indicatorColor: AppTheme.primaryOrange,
             tabs: [
@@ -3433,7 +3433,7 @@ class _AdminNotificationsPageContentState
       children: [
         TabBar(
           controller: _tabController,
-          labelColor: AppTheme.primaryNavy,
+          labelColor: Colors.white,
           unselectedLabelColor: _secondaryTextColor,
           indicatorColor: AppTheme.primaryOrange,
           tabs: const [
