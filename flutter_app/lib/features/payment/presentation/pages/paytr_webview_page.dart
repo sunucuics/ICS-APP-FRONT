@@ -103,12 +103,30 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
           onPageFinished: (url) {
             setState(() => _isLoading = false);
             _checkPaymentResult(url);
+            
+            // JSON hata kontrolü (PayTR bazen HTML yerine JSON döndürüyor)
+            // Örnek: {"status":"failed","reason":"..."}
+            _controller.runJavaScript('''
+              try {
+                var body = document.body.innerText;
+                if (body.startsWith('{') && body.includes('"status":"failed"')) {
+                  var data = JSON.parse(body);
+                  PayTRError.postMessage(data.reason || 'Ödeme hatası');
+                }
+              } catch(e) {}
+            ''');
           },
           onNavigationRequest: (request) {
             _checkPaymentResult(request.url);
             return NavigationDecision.navigate;
           },
         ),
+      )
+      ..addJavaScriptChannel(
+        'PayTRError',
+        onMessageReceived: (message) {
+          _handlePaymentFailure(message.message);
+        },
       );
   }
 
@@ -145,14 +163,15 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
     }
   }
 
-  void _handlePaymentFailure() {
+  void _handlePaymentFailure([String? message]) {
     if (!mounted) return;
-    ref
-        .read(checkoutProvider.notifier)
-        .paymentFailed('Ödeme işlemi başarısız oldu');
-    if (mounted) {
-      Navigator.of(context).pop(false);
-    }
+    
+    setState(() {
+      _formSubmitted = false; // Formu tekrar göster
+      _isLoading = false;
+    });
+
+    _showError(message ?? 'Ödeme işlemi başarısız oldu');
   }
 
   /// Kart numarası değiştiğinde backend'den taksit seçeneklerini al

@@ -24,6 +24,7 @@ import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
 import 'features/auth/presentation/pages/guest_welcome_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
+import 'core/widgets/video_splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -142,7 +143,7 @@ class _MyAppState extends ConsumerState<MyApp> {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode, // Dynamic theme mode based on user preference
-      home: const AuthWrapper(),
+      home: const VideoSplashScreen(),
       debugShowCheckedModeBanner: false,
       navigatorKey: NavigationService.navigatorKey,
       scaffoldMessengerKey: SnackBarService.scaffoldMessengerKey,

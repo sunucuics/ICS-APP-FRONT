@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 class ApiEndpoints {
-  // Production URL - Google Cloud deployed backend
+  // Production URL - Custom domain backend
   static const String _productionUrl =
-      'https://ics-backend-443215445942.europe-west1.run.app';
+      'https://api.innovacraftstudio.com';
 
   // Local development URL
   // Android Emulator: 10.0.2.2 (localhost'un emulator karşılığı)

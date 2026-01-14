@@ -670,6 +670,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     final orderId = checkoutState.orderId ?? checkoutState.merchantOid;
 
     if (orderId != null) {
+      // FIX: Explicitly clear the cart upon success detection
+      ref.read(cartProvider.notifier).clearCart();
+
       // Mevcut sayfaları temizle ve success page'e git
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(

@@ -2,7 +2,7 @@ name: innova_craft_studio
 description: "Innova Craft Studio - El Yapımı Ürünler ve Sanat Eserleri"
 publish_to: 'none'
 
-version: 1.2.5+20
+version: 1.2.7+22
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -30,6 +30,8 @@ dependencies:
   firebase_auth: ^5.3.1
   firebase_messaging: ^15.2.10
   
+  video_player: ^2.8.2
+
   # Notifications
   flutter_local_notifications: ^17.2.3
   flutter_app_badger: ^1.5.0
@@ -76,6 +78,7 @@ flutter:
   uses-material-design: true
   
   assets:
+    - assets/
     - assets/images/
 
 flutter_launcher_icons:
