@@ -79,9 +79,9 @@ class Address with _$Address {
 @freezed
 class OrderItem with _$OrderItem {
   const factory OrderItem({
-    @JsonKey(name: 'product_id') required String productId,
-    required String name,
-    @JsonKey(name: 'qty', fromJson: _qtyFromJson) required int qty,
+    @JsonKey(name: 'product_id') @Default('') String productId,
+    @Default('') String name,
+    @JsonKey(name: 'qty', readValue: _qtyReadValue, fromJson: _qtyFromJson) required int qty,
     double? price, // Fallback price
     @JsonKey(name: 'final_price') double? finalPrice, // Priority price
     @JsonKey(name: 'image_url') String? imageUrl,
@@ -102,18 +102,25 @@ class OrderItem with _$OrderItem {
       _$OrderItemFromJson(json);
 }
 
+// Helper to read 'qty' or 'quantity'
+Object? _qtyReadValue(Map p, String k) {
+  return p['qty'] ?? p['quantity'];
+}
+
 // Helper function to handle both qty and quantity fields
 int _qtyFromJson(dynamic json) {
+  if (json == null) return 1; // Default to 1 if null
   if (json is int) return json;
   if (json is num) return json.toInt();
-  return 0;
+  if (json is String) return int.tryParse(json) ?? 1;
+  return 1;
 }
 
 // Totals Model - Updated for backend integration
 @freezed
 class OrderTotals with _$OrderTotals {
   const factory OrderTotals({
-    @JsonKey(name: 'grand_total') required double grandTotal,
+    @JsonKey(name: 'grand_total') @Default(0.0) double grandTotal,
     @Default('TRY') String currency,
     double? subtotal, // Backend internal calculation
     @JsonKey(name: 'item_count') int? itemCount,
@@ -130,10 +137,11 @@ class OrderTotals with _$OrderTotals {
 @freezed
 class OrderPayment with _$OrderPayment {
   const factory OrderPayment({
-    required String provider,
-    required String status,
+    @Default('UNKNOWN') String provider,
+    @Default('unknown') String status,
+    @JsonKey(name: 'merchant_oid') String? merchantOid,
     @JsonKey(name: 'received_total') double? receivedTotal,
-    required String currency,
+    String? currency,
     @JsonKey(name: 'payment_type') String? paymentType,
     @JsonKey(name: 'reported_at') DateTime? reportedAt,
     Map<String, dynamic>? paytr,
@@ -159,8 +167,8 @@ class StatusEventMeta with _$StatusEventMeta {
 @freezed
 class StatusEvent with _$StatusEvent {
   const factory StatusEvent({
-    required String status,
-    required DateTime at,
+    @Default('') String status,
+    @JsonKey(fromJson: _dateTimeFromJson) required DateTime at,
     String? by, // Optional user_id or admin id
     StatusEventMeta? meta,
   }) = _StatusEvent;
@@ -178,6 +186,7 @@ class ShippingInfo with _$ShippingInfo {
     @JsonKey(name: 'tracking_url') String? trackingUrl,
     @JsonKey(name: 'shipped_at') DateTime? shippedAt,
     @JsonKey(name: 'delivered_at') DateTime? deliveredAt,
+    @JsonKey(name: 'address') String? shippingAddress, // Renamed from address to avoid conflict
     // Legacy fields
     String? status,
     bool? simulated,
@@ -197,8 +206,8 @@ typedef OrderShipment = ShippingInfo;
 @freezed
 class OrderStatusHistory with _$OrderStatusHistory {
   const factory OrderStatusHistory({
-    required String status,
-    required DateTime at,
+    @Default('') String status,
+    @JsonKey(fromJson: _dateTimeFromJson) required DateTime at,
     required String by,
   }) = _OrderStatusHistory;
 
@@ -210,14 +219,20 @@ class OrderStatusHistory with _$OrderStatusHistory {
 @freezed
 class CustomerAddress with _$CustomerAddress {
   const factory CustomerAddress({
-    String? line1,
+    @JsonKey(readValue: _readLine1) String? line1,
     String? city,
     @JsonKey(name: 'postal_code') String? postalCode,
     String? country,
+    @JsonKey(name: 'full_address') String? fullAddress,
+    String? ip,
   }) = _CustomerAddress;
 
   factory CustomerAddress.fromJson(Map<String, dynamic> json) =>
       _$CustomerAddressFromJson(json);
+}
+
+Object? _readLine1(Map p, String k) {
+  return p['line1'] ?? p['full_address'];
 }
 
 // Customer Info Model - Updated for backend integration
@@ -239,9 +254,9 @@ class CustomerInfo with _$CustomerInfo {
 @freezed
 class OrderCustomer with _$OrderCustomer {
   const factory OrderCustomer({
-    @JsonKey(name: 'full_name') required String fullName,
-    required String email,
-    required String phone,
+    @JsonKey(name: 'full_name') @Default('') String fullName,
+    @Default('') String email,
+    @Default('') String phone,
     @JsonKey(fromJson: OrderAddress.fromJson, toJson: _orderAddressToJson)
     required OrderAddress address,
   }) = _OrderCustomer;
@@ -257,9 +272,9 @@ Map<String, dynamic> _orderAddressToJson(OrderAddress address) => address.toJson
 @freezed
 class OrderAddress with _$OrderAddress {
   const factory OrderAddress({
-    @JsonKey(name: 'line1') required String line1,
-    required String city,
-    @JsonKey(name: 'postal_code') required String postalCode,
+    @JsonKey(name: 'line1') @Default('') String line1,
+    @Default('') String city,
+    @JsonKey(name: 'postal_code') @Default('') String postalCode,
     @Default('TR') String country,
   }) = _OrderAddress;
 
@@ -331,7 +346,8 @@ extension OrderAddressToJson on OrderAddress {
 @freezed
 class OrderShipping with _$OrderShipping {
   const factory OrderShipping({
-    required String provider,
+    @Default('MANUAL') String provider,
+    @JsonKey(name: 'address') String? shippingAddress,
   }) = _OrderShipping;
 
   factory OrderShipping.fromJson(Map<String, dynamic> json) =>
@@ -355,8 +371,8 @@ class OrderEmailFlags with _$OrderEmailFlags {
 @freezed
 class Order with _$Order {
   const factory Order({
-    required String id,
-    @JsonKey(name: 'user_id') required String userId,
+    @Default('') String id,
+    @JsonKey(name: 'user_id') @Default('') String userId,
     @JsonKey(name: 'created_at', fromJson: _dateTimeFromJson) required DateTime createdAt,
     @JsonKey(name: 'updated_at', fromJson: _dateTimeFromJson) required DateTime updatedAt,
     @JsonKey(name: 'is_deleted') @Default(false) bool isDeleted,
@@ -365,10 +381,11 @@ class Order with _$Order {
     @JsonKey(name: 'status_history', fromJson: _statusHistoryFromJson) List<StatusEvent>? statusHistory,
     @JsonKey(fromJson: _customerInfoFromJson) required CustomerInfo customer,
     @JsonKey(fromJson: _shippingInfoFromJson) required ShippingInfo shipping,
-    required List<OrderItem> items,
+    @JsonKey(name: 'shipping_info') ShippingInfo? shippingInfo,
+    @Default([]) List<OrderItem> items,
     @JsonKey(fromJson: _totalsFromJson) required OrderTotals totals,
     String? note,
-    @JsonKey(name: 'payment') Map<String, dynamic>? payment,
+    @JsonKey(name: 'payment') OrderPayment? payment,
     // Legacy fields for backward compatibility
     @JsonKey(name: 'tracking_number') String? trackingNumber,
     @JsonKey(name: 'shipping_provider') String? shippingProvider,
@@ -479,10 +496,10 @@ class OrderCreateRequest with _$OrderCreateRequest {
 @freezed
 class OrderCreateItem with _$OrderCreateItem {
   const factory OrderCreateItem({
-    @JsonKey(name: 'product_id') required String productId,
-    required String name,
-    required int quantity,
-    required double price,
+    @JsonKey(name: 'product_id') @Default('') String productId,
+    @Default('') String name,
+    @Default(1) int quantity,
+    @Default(0.0) double price,
   }) = _OrderCreateItem;
 
   factory OrderCreateItem.fromJson(Map<String, dynamic> json) =>
@@ -493,9 +510,9 @@ class OrderCreateItem with _$OrderCreateItem {
 @freezed
 class OrdersListResponse with _$OrdersListResponse {
   const factory OrdersListResponse({
-    required List<Order> items,
+    @Default([]) List<Order> items,
     @JsonKey(name: 'next_cursor') String? nextCursor,
-    required int count,
+    @Default(0) int count,
   }) = _OrdersListResponse;
 
   factory OrdersListResponse.fromJson(Map<String, dynamic> json) =>

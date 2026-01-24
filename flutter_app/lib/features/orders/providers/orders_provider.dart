@@ -11,43 +11,121 @@ final ordersRepositoryProvider = Provider<OrdersRepository>((ref) {
   return OrdersRepository(apiService);
 });
 
-// Orders List Provider
-class OrdersNotifier extends StateNotifier<AsyncValue<OrdersListResponse>> {
-  final OrdersRepository _repository;
+// Paginated Orders State
+class PaginatedOrdersState {
+  final List<Order> items;
+  final bool isLoading;
+  final bool hasMore;
+  final String? nextCursor;
+  final Object? error;
 
-  OrdersNotifier(this._repository) : super(const AsyncValue.loading()) {
-    loadOrders();
+  const PaginatedOrdersState({
+    this.items = const [],
+    this.isLoading = false,
+    this.hasMore = true,
+    this.nextCursor,
+    this.error,
+  });
+
+  PaginatedOrdersState copyWith({
+    List<Order>? items,
+    bool? isLoading,
+    bool? hasMore,
+    String? nextCursor,
+    Object? error,
+  }) {
+    return PaginatedOrdersState(
+      items: items ?? this.items,
+      isLoading: isLoading ?? this.isLoading,
+      hasMore: hasMore ?? this.hasMore,
+      nextCursor: nextCursor ?? this.nextCursor,
+      error: error, // Error is nullable, so if passed as null it clears
+    );
+  }
+}
+
+// Paginated Orders Notifier
+class PaginatedOrdersNotifier extends StateNotifier<PaginatedOrdersState> {
+  final OrdersRepository _repository;
+  final String _viewType; // 'active' or 'past'
+  bool _isFetching = false;
+
+  PaginatedOrdersNotifier(this._repository, this._viewType)
+      : super(const PaginatedOrdersState()) {
+    loadInitial();
   }
 
-  Future<void> loadOrders({
-    String? status,
-    int? limit,
-    String? startAfter,
-  }) async {
+  Future<void> loadInitial() async {
+    if (_isFetching) return;
+    _isFetching = true;
+    state = state.copyWith(isLoading: true, error: null);
+
     try {
-      state = const AsyncValue.loading();
-      final orders = await _repository.getMyOrders(
-        status: status,
-        limit: limit,
-        startAfter: startAfter,
+      final response = await _repository.getMyOrders(
+        viewType: _viewType,
+        limit: 20,
       );
-      state = AsyncValue.data(orders);
-    } catch (error, stackTrace) {
-      state = AsyncValue.error(error, stackTrace);
+
+      state = state.copyWith(
+        items: response.items,
+        isLoading: false,
+        hasMore: response.nextCursor != null && response.items.length >= 20,
+        nextCursor: response.nextCursor,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e);
+    } finally {
+      _isFetching = false;
+    }
+  }
+
+  Future<void> loadMore() async {
+    if (_isFetching || !state.hasMore || state.nextCursor == null) return;
+    _isFetching = true;
+    
+    // Don't set isLoading = true here to avoid full page loader, 
+    // maybe add isLoadingMore flag if needed, but for now just append
+    
+    try {
+      final response = await _repository.getMyOrders(
+        viewType: _viewType,
+        limit: 20,
+        startAfter: state.nextCursor,
+      );
+
+      state = state.copyWith(
+        items: [...state.items, ...response.items],
+        hasMore: response.nextCursor != null && response.items.length >= 20,
+        nextCursor: response.nextCursor,
+      );
+    } catch (e) {
+      // Handle error quietly or show snackbar via listener? 
+      // For list state, we might just stop loading
+      state = state.copyWith(error: e);
+    } finally {
+      _isFetching = false;
     }
   }
 
   Future<void> refresh() async {
-    await loadOrders();
+    state = const PaginatedOrdersState(); // Reset state
+    await loadInitial();
   }
 }
 
-final ordersProvider =
-    StateNotifierProvider<OrdersNotifier, AsyncValue<OrdersListResponse>>(
-        (ref) {
+// Providers for Active and Past orders
+final activeOrdersProvider =
+    StateNotifierProvider<PaginatedOrdersNotifier, PaginatedOrdersState>((ref) {
   final repository = ref.read(ordersRepositoryProvider);
-  return OrdersNotifier(repository);
+  return PaginatedOrdersNotifier(repository, 'active');
 });
+
+final pastOrdersProvider =
+    StateNotifierProvider<PaginatedOrdersNotifier, PaginatedOrdersState>((ref) {
+  final repository = ref.read(ordersRepositoryProvider);
+  return PaginatedOrdersNotifier(repository, 'past');
+});
+
 
 // Order Detail Provider
 class OrderDetailNotifier extends StateNotifier<AsyncValue<Order>> {
@@ -88,6 +166,27 @@ class OrderDetailNotifier extends StateNotifier<AsyncValue<Order>> {
       }
     }
   }
+
+  Future<void> cancelAwaitingOrder() async {
+    if (_currentOrderId != null) {
+      try {
+        await _repository.cancelAwaitingOrder(_currentOrderId!);
+        // Refresh order detail to get updated status
+        await loadOrderDetail(_currentOrderId!);
+      } catch (error, stackTrace) {
+        // Here we might want to keep the current state but maybe notify UI of error?
+        // Since we are using AsyncValue, setting error will replace content.
+        // Better strategy for actions is to rethrow or use a separate side-effect provider.
+        // For simplicity, we'll assume UI handles AsyncValue.error but it might hide the detail.
+        // Let's just rethrow so UI can catch it? 
+        // Cannot rethrow easily from void method.
+        // Let's set error state temporarily or use a specific pattern?
+        // For now, let's just refresh, if it failed on backend, it might throw.
+        // Ideally we should have a separate 'actionStatus' provider.
+        throw error; // Let UI handle try-catch
+      }
+    }
+  }
 }
 
 final orderDetailProvider =
@@ -108,6 +207,7 @@ class CreateOrderNotifier extends StateNotifier<AsyncValue<Order?>> {
     bool simulate = false,
     bool clearCartOnSuccess = true,
     String? checkoutId,
+    String? referenceNumber, // Added to match other flows if needed
   }) async {
     try {
       state = const AsyncValue.loading();
@@ -137,35 +237,6 @@ final createOrderProvider =
   return CreateOrderNotifier(repository);
 });
 
-// Convenience Providers
-final activeOrdersProvider = Provider<List<Order>>((ref) {
-  return ref.watch(ordersProvider).when(
-        data: (ordersResponse) => ordersResponse.items.where((order) => 
-            order.status == const OrderStatus.preparing() || 
-            order.status == const OrderStatus.shipped()).toList(),
-        loading: () => <Order>[],
-        error: (error, stack) => <Order>[],
-      );
-});
-
-final pastOrdersProvider = Provider<List<Order>>((ref) {
-  return ref.watch(ordersProvider).when(
-        data: (ordersResponse) => ordersResponse.items.where((order) => 
-            order.status == const OrderStatus.delivered() || 
-            order.status == const OrderStatus.canceled() ||
-            order.status == const OrderStatus.paymentFailed()).toList(),
-        loading: () => <Order>[],
-        error: (error, stack) => <Order>[],
-      );
-});
-
-final ordersCountProvider = Provider<int>((ref) {
-  return ref.watch(ordersProvider).when(
-        data: (ordersResponse) => ordersResponse.items.length,
-        loading: () => 0,
-        error: (error, stack) => 0,
-      );
-});
 
 // Helper to create order from anywhere in the app
 final createOrderHelperProvider = Provider<

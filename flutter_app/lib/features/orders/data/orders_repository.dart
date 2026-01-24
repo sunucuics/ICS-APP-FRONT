@@ -25,12 +25,12 @@ class OrdersRepository {
 
   /// Get user's orders with filtering and pagination
   Future<OrdersListResponse> getMyOrders({
-    String? status,
+    String viewType = 'active',
     int? limit,
     String? startAfter,
   }) async {
     return await _apiService.getMyOrders(
-      status: status,
+      viewType: viewType,
       limit: limit,
       startAfter: startAfter,
     );
@@ -39,6 +39,11 @@ class OrdersRepository {
   /// Get order details by ID
   Future<Order> getOrderDetail(String orderId) async {
     return await _apiService.getOrderDetail(orderId);
+  }
+
+  /// Cancel awaiting order
+  Future<void> cancelAwaitingOrder(String orderId) async {
+    await _apiService.cancelAwaitingOrder(orderId);
   }
 
   /// Sync order status from Aras Kargo

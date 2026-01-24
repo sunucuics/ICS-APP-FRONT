@@ -5,6 +5,7 @@ import '../../../core/network/api_endpoints.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/services/firebase_auth_service.dart';
 import '../../../core/services/fcm_service.dart';
+import '../../../core/services/token_storage_service.dart';
 import '../../../core/utils/logger.dart';
 
 class AuthApiService {
@@ -68,13 +69,61 @@ class AuthApiService {
       // 5. Backend'den dönen user profile'ını kullan
       final userProfile = UserProfile.fromJson(response.data['user']);
 
-      // Client-first'te backend token'ları boş döner, Firebase'deki token'ları kullan
+      // 6. Backend'den dönen token'ları al (eğer varsa)
+      String finalIdToken = idToken ?? '';
+      String finalRefreshToken = '';
+      int finalExpiresIn = 3600;
+
+      // Backend'den token döndüyse onları kullan (server-first yaklaşım)
+      if (response.data['id_token'] != null && response.data['id_token'].toString().isNotEmpty) {
+        finalIdToken = response.data['id_token'] as String;
+        finalRefreshToken = response.data['refresh_token'] as String? ?? '';
+        finalExpiresIn = response.data['expires_in'] as int? ?? 3600;
+      } else {
+        // Client-first yaklaşım: Backend token döndürmedi, login endpoint'ini çağırarak token al
+        AppLogger.debug('AuthApiService: Backend did not return tokens, calling login endpoint...');
+        try {
+          final loginFormData = FormData.fromMap({
+            'email': request.email,
+            'password': request.password,
+          });
+          
+          final loginResponse = await _apiClient.postMultipart(
+            ApiEndpoints.authLogin,
+            loginFormData,
+          );
+          
+          finalIdToken = loginResponse.data['id_token'] as String;
+          finalRefreshToken = loginResponse.data['refresh_token'] as String;
+          finalExpiresIn = loginResponse.data['expires_in'] as int;
+          
+          AppLogger.debug('AuthApiService: Tokens obtained from login endpoint');
+        } catch (loginError) {
+          AppLogger.warning('AuthApiService: Failed to get tokens from login endpoint', loginError);
+          // Token alınamazsa Firebase token'ını kullan (refresh token olmadan)
+          // Bu durumda kullanıcı token yenileme yapamaz, tekrar login yapması gerekir
+        }
+      }
+
+      // 7. Token'ları secure storage'a kaydet
+      if (finalRefreshToken.isNotEmpty) {
+        await TokenStorageService.saveTokens(
+          accessToken: finalIdToken,
+          refreshToken: finalRefreshToken,
+        );
+        AppLogger.debug('AuthApiService: Tokens saved to secure storage');
+      } else if (finalIdToken.isNotEmpty) {
+        // Sadece access token varsa onu kaydet (refresh token olmadan)
+        await TokenStorageService.saveAccessToken(finalIdToken);
+        AppLogger.warning('AuthApiService: Only access token saved (no refresh token)');
+      }
+
       return AuthResponse(
         userId: response.data['user_id'],
         user: userProfile,
-        idToken: idToken ?? '', // Firebase'den alınan token
-        refreshToken: '', // Firebase otomatik yönetir
-        expiresIn: 3600, // Firebase default
+        idToken: finalIdToken,
+        refreshToken: finalRefreshToken,
+        expiresIn: finalExpiresIn,
       );
     } catch (e, stackTrace) {
       AppLogger.error('AuthApiService: Registration failed', e, stackTrace);
@@ -106,11 +155,25 @@ class AuthApiService {
             }
           }
           
+          // userCredential null check
+          if (userCredential?.user == null) {
+            throw Exception('UserCredential or user is null');
+          }
+          
+          final existingIdToken = await userCredential!.user!.getIdToken() ?? '';
+          
+          // Token'ları secure storage'a kaydet (Firebase token'ları)
+          // Not: Firebase refresh token'ı direkt alamıyoruz, bu durumda sadece ID token kaydediyoruz
+          if (existingIdToken.isNotEmpty) {
+            await TokenStorageService.saveAccessToken(existingIdToken);
+            AppLogger.debug('AuthApiService: Existing token saved to secure storage');
+          }
+
           return AuthResponse(
-            userId: userCredential!.user!.uid,
+            userId: userCredential.user!.uid,
             user: userProfile,
-            idToken: await userCredential.user!.getIdToken() ?? '',
-            refreshToken: '',
+            idToken: existingIdToken,
+            refreshToken: '', // Firebase refresh token'ı direkt alamıyoruz
             expiresIn: 3600,
           );
         } catch (profileError) {
@@ -143,45 +206,102 @@ class AuthApiService {
     }
   }
 
-  // Login - Firebase ile giriş yap (önerilen yaklaşım)
+  // Login - Backend endpoint kullanarak login yap (refresh token almak için)
   Future<AuthResponse> login(LoginRequest request) async {
     AppLogger.info(
-        'AuthApiService: Starting Firebase login for email: ${AppLogger.maskEmail(request.email)}');
+        'AuthApiService: Starting login for email: ${AppLogger.maskEmail(request.email)}');
 
     try {
-      // 1. Firebase ile giriş yap - Android için timeout artırıldı
-      final userCredential =
-          await FirebaseAuthService.signInWithEmailAndPassword(
-        email: request.email,
-        password: request.password,
+      // 1. FCM token'ı al
+      final fcmToken = await FCMService.getFCMToken();
+
+      // 2. Backend login endpoint'ine istek gönder
+      final formData = FormData.fromMap({
+        'email': request.email,
+        'password': request.password,
+        if (fcmToken != null) 'fcm_token': fcmToken,
+      });
+
+      final response = await _apiClient.postMultipart(
+        ApiEndpoints.authLogin,
+        formData,
       );
 
-      if (userCredential?.user == null) {
-        throw Exception('Failed to sign in with Firebase');
-      }
+      AppLogger.success('AuthApiService: Backend login successful');
 
-      AppLogger.success('AuthApiService: Firebase login successful');
+      // 3. Backend'den dönen token'ları al
+      final idToken = response.data['id_token'] as String;
+      final refreshToken = response.data['refresh_token'] as String;
+      final expiresIn = response.data['expires_in'] as int;
+      final userId = response.data['user_id'] as String;
 
-      // 2. Token refresh timeout optimizasyonu - force refresh yapma
-      final idToken = await userCredential!.user!.getIdToken(false);
-      AppLogger.debug('AuthApiService: Got fresh ID token');
+      // 4. Token'ları secure storage'a kaydet
+      await TokenStorageService.saveTokens(
+        accessToken: idToken,
+        refreshToken: refreshToken,
+      );
+      AppLogger.debug('AuthApiService: Tokens saved to secure storage');
 
-      // 3. FCM token'ı backend'e gönder (opsiyonel)
-      // FCM token güncellemesi FCMService.updateTokenToBackend() ile yapılıyor
-      // Burada tekrar çağırmaya gerek yok
+      // 5. Firebase'e de giriş yap (mevcut sistemle uyumluluk için)
+      // Not: Backend login zaten Firebase'e sign-in yapıyor, burada tekrar yapmaya gerek yok
+      // Ancak Firebase Auth state'i senkronize etmek için yapılabilir
+      // Şimdilik atlıyoruz çünkü backend token'ları kullanıyoruz
 
-      // 4. User profile'ını çek
+      // 6. User profile'ını çek
       final userProfile = await getCurrentUser();
 
       return AuthResponse(
-        userId: userCredential.user!.uid,
+        userId: userId,
         user: userProfile,
-        idToken: idToken ?? '',
-        refreshToken: '', // Firebase otomatik yönetir
-        expiresIn: 3600, // Firebase tokens expire in 1 hour
+        idToken: idToken,
+        refreshToken: refreshToken,
+        expiresIn: expiresIn,
       );
     } catch (e, stackTrace) {
       AppLogger.error('AuthApiService: Login failed', e, stackTrace);
+      rethrow;
+    }
+  }
+
+  // Refresh Token - Backend refresh endpoint'ini kullan
+  Future<AuthResponse> refreshToken(String refreshToken) async {
+    AppLogger.info('AuthApiService: Refreshing token');
+
+    try {
+      // Backend refresh endpoint'ine istek gönder
+      final response = await _apiClient.post(
+        ApiEndpoints.authRefresh,
+        data: {
+          'refresh_token': refreshToken,
+        },
+      );
+
+      AppLogger.success('AuthApiService: Token refresh successful');
+
+      // Yeni token'ları al
+      final idToken = response.data['id_token'] as String;
+      final newRefreshToken = response.data['refresh_token'] as String;
+      final expiresIn = response.data['expires_in'] as int;
+
+      // Token'ları secure storage'a kaydet
+      await TokenStorageService.saveTokens(
+        accessToken: idToken,
+        refreshToken: newRefreshToken,
+      );
+      AppLogger.debug('AuthApiService: New tokens saved to secure storage');
+
+      // User profile'ını çek (userId için)
+      final userProfile = await getCurrentUser();
+
+      return AuthResponse(
+        userId: userProfile.id,
+        user: userProfile,
+        idToken: idToken,
+        refreshToken: newRefreshToken,
+        expiresIn: expiresIn,
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error('AuthApiService: Token refresh failed', e, stackTrace);
       rethrow;
     }
   }
@@ -212,28 +332,49 @@ class AuthApiService {
     AppLogger.debug('AuthApiService: Starting logout process');
 
     try {
-      // 1. Backend logout endpoint'ini çağır (tüm refresh token'ları iptal eder)
-      final idToken = await FirebaseAuthService.getIdToken();
-      if (idToken != null) {
+      // 1. Secure storage'dan access token al (eğer varsa)
+      final accessToken = await TokenStorageService.getAccessToken();
+      
+      // 2. Backend logout endpoint'ini çağır (tüm refresh token'ları iptal eder)
+      if (accessToken != null) {
         AppLogger.debug('AuthApiService: Calling backend logout endpoint');
         await _apiClient.post(
           ApiEndpoints.authLogout,
           options: Options(
             headers: {
-              'Authorization': 'Bearer $idToken',
+              'Authorization': 'Bearer $accessToken',
             },
           ),
         );
         AppLogger.success('AuthApiService: Backend logout successful');
       } else {
-        AppLogger.debug(
-            'AuthApiService: No ID token found, skipping backend logout');
+        // Fallback: Firebase'den token al
+        final idToken = await FirebaseAuthService.getIdToken();
+        if (idToken != null) {
+          AppLogger.debug('AuthApiService: Calling backend logout with Firebase token');
+          await _apiClient.post(
+            ApiEndpoints.authLogout,
+            options: Options(
+              headers: {
+                'Authorization': 'Bearer $idToken',
+              },
+            ),
+          );
+          AppLogger.success('AuthApiService: Backend logout successful');
+        } else {
+          AppLogger.debug(
+              'AuthApiService: No ID token found, skipping backend logout');
+        }
       }
     } catch (e) {
       AppLogger.warning('AuthApiService: Backend logout failed', e);
-      // Continue with Firebase logout even if backend call fails
+      // Continue with cleanup even if backend call fails
     } finally {
-      // 2. Firebase'den çık
+      // 3. Token'ları secure storage'dan temizle
+      await TokenStorageService.clearTokens();
+      AppLogger.debug('AuthApiService: Tokens cleared from secure storage');
+
+      // 4. Firebase'den çık
       AppLogger.debug('AuthApiService: Signing out from Firebase');
       await FirebaseAuthService.signOut();
       AppLogger.success('AuthApiService: Firebase logout completed');

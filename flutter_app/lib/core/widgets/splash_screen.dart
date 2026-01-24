@@ -7,6 +7,7 @@ import '../../features/auth/providers/anonymous_auth_provider.dart'
 import '../../features/auth/presentation/pages/guest_welcome_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../theme/app_theme.dart';
+import '../services/token_storage_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'onboarding_screen.dart';
 
@@ -122,28 +123,48 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     }
   }
 
-  void _checkAuthAndNavigate() {
+  void _checkAuthAndNavigate() async {
     if (!mounted) return;
 
-    // Check auth state immediately (providers should be ready by now)
+    // Önce secure storage'dan token kontrolü yap
+    final hasTokens = await TokenStorageService.hasTokens();
+    
+    if (hasTokens) {
+      // Token varsa ana sayfaya yönlendir
+      // AuthProvider arka planda token geçerliliğini kontrol edecek
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const HomePage(),
+          ),
+        );
+      }
+      return;
+    }
+
+    // Token yoksa, mevcut auth state kontrolü yap
     final authState = ref.read(authProvider);
     final anonymousAuthState = ref.read(anonymous.anonymousAuthProvider);
 
     // Check if user is authenticated (either registered or anonymous)
     if (authState.isAuthenticated ||
         (anonymousAuthState.hasValue && anonymousAuthState.value != null)) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const HomePage(),
-        ),
-      );
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const HomePage(),
+          ),
+        );
+      }
     } else {
       // If not authenticated, navigate to welcome page
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const GuestWelcomePage(),
-        ),
-      );
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const GuestWelcomePage(),
+          ),
+        );
+      }
     }
   }
 

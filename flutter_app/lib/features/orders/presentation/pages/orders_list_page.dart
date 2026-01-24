@@ -2,124 +2,116 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/models/order_model.dart';
-import '../../../../core/utils/price_utils.dart';
 import '../../providers/orders_provider.dart';
 import 'order_detail_page.dart';
 
-class OrdersListPage extends ConsumerWidget {
+class OrdersListPage extends ConsumerStatefulWidget {
   const OrdersListPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ordersAsync = ref.watch(ordersProvider);
+  ConsumerState<OrdersListPage> createState() => _OrdersListPageState();
+}
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Siparişlerim'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.read(ordersProvider.notifier).refresh(),
+class _OrdersListPageState extends ConsumerState<OrdersListPage> {
+  // Scroll controllers for specific tab behavior if needed
+  // For now, relying on notification listener is cleaner
+
+  @override
+  void initState() {
+    super.initState();
+    // Refresh orders when page opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(activeOrdersProvider.notifier).refresh();
+      ref.read(pastOrdersProvider.notifier).refresh();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Siparişlerim'),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Devam Eden'),
+              Tab(text: 'Geçmiş'),
+            ],
           ),
-        ],
-      ),
-      body: ordersAsync.when(
-        data: (ordersResponse) =>
-            _buildOrdersContent(context, ref, ordersResponse),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) =>
-            _buildErrorState(context, ref, error.toString()),
+          actions: [
+             IconButton(
+               icon: const Icon(Icons.refresh),
+               onPressed: () {
+                 ref.read(activeOrdersProvider.notifier).refresh();
+                 ref.read(pastOrdersProvider.notifier).refresh();
+               },
+             ),
+          ],
+        ),
+        body: TabBarView(
+          children: [
+            _buildOrdersTab(context, ref, activeOrdersProvider, 'Aktif sipariş bulunmuyor'),
+            _buildOrdersTab(context, ref, pastOrdersProvider, 'Geçmiş sipariş bulunmuyor'),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildOrdersContent(
-      BuildContext context, WidgetRef ref, OrdersListResponse ordersResponse) {
-    if (ordersResponse.items.isEmpty) {
+  Widget _buildOrdersTab(
+    BuildContext context, 
+    WidgetRef ref, 
+    StateNotifierProvider<PaginatedOrdersNotifier, PaginatedOrdersState> provider, 
+    String emptyMessage
+  ) {
+    final state = ref.watch(provider);
+    final notifier = ref.read(provider.notifier);
+
+    // Initial loading
+    if (state.isLoading && state.items.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Error state (only if no items)
+    if (state.error != null && state.items.isEmpty) {
+      return _buildErrorState(context, () => notifier.refresh(), state.error.toString());
+    }
+
+    // Empty state
+    if (state.items.isEmpty) {
       return _buildEmptyState(context);
     }
 
-    // Filter orders by status
-    final preparingOrders = ordersResponse.items.where((order) => 
-        order.status == const OrderStatus.preparing()).toList();
-    final shippedOrders = ordersResponse.items.where((order) => 
-        order.status == const OrderStatus.shipped()).toList();
-    final deliveredOrders = ordersResponse.items.where((order) => 
-        order.status == const OrderStatus.delivered()).toList();
+    // List with pagination
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification scrollInfo) {
+        if (state.hasMore && 
+            !state.isLoading && 
+            scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
+          notifier.loadMore();
+        }
+        return false;
+      },
+      child: RefreshIndicator(
+        onRefresh: () => notifier.refresh(),
+        child: ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: state.items.length + (state.hasMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == state.items.length) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
 
-    return DefaultTabController(
-      length: 4,
-      child: Column(
-        children: [
-          const TabBar(
-            isScrollable: true,
-            tabs: [
-              Tab(
-                text: 'Tümü',
-                icon: Icon(Icons.list),
-              ),
-              Tab(
-                text: 'Hazırlanıyor',
-                icon: Icon(Icons.shopping_bag),
-              ),
-              Tab(
-                text: 'Kargoda',
-                icon: Icon(Icons.local_shipping),
-              ),
-              Tab(
-                text: 'Teslim Edildi',
-                icon: Icon(Icons.check_circle),
-              ),
-            ],
-          ),
-          Expanded(
-            child: TabBarView(
-              children: [
-                _buildOrdersList(context, ref, ordersResponse.items, 'Sipariş bulunmuyor'),
-                _buildOrdersList(context, ref, preparingOrders, 'Hazırlanan sipariş bulunmuyor'),
-                _buildOrdersList(context, ref, shippedOrders, 'Kargoda sipariş bulunmuyor'),
-                _buildOrdersList(context, ref, deliveredOrders, 'Teslim edilen sipariş bulunmuyor'),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOrdersList(BuildContext context, WidgetRef ref,
-      List<Order> orders, String emptyMessage) {
-    if (orders.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.shopping_bag_outlined,
-              size: 64,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              emptyMessage,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-            ),
-          ],
+            final order = state.items[index];
+            return _buildOrderCard(context, ref, order);
+          },
         ),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: () => ref.read(ordersProvider.notifier).refresh(),
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: orders.length,
-        itemBuilder: (context, index) {
-          final order = orders[index];
-          return _buildOrderCard(context, ref, order);
-        },
       ),
     );
   }
@@ -132,7 +124,7 @@ class OrdersListPage extends ConsumerWidget {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => OrderDetailPage(orderId: order.id ?? ''),
+              builder: (context) => OrderDetailPage(orderId: order.id),
             ),
           );
         },
@@ -146,16 +138,18 @@ class OrdersListPage extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Sipariş #${(order.id ?? '').substring(0, 8)}',
+                    'Sipariş #${order.id.substring(0, 8)}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                   ),
                   Row(
                     children: [
-                      if (order.payment != null) _buildPaymentStatusChip(order.payment!['status'] as String? ?? 'unknown'),
-                      const SizedBox(width: 8),
-                      _buildStatusChip(order.status),
+                      if (order.status == const OrderStatus.preparing() && 
+                          order.payment?.status == 'awaiting')
+                        _buildPaymentStatusChip('Ödeme Bekliyor')
+                      else
+                        _buildStatusChip(order.status),
                     ],
                   ),
                 ],
@@ -163,49 +157,47 @@ class OrdersListPage extends ConsumerWidget {
               const SizedBox(height: 12),
 
               // Items preview
-              if (order.items?.isNotEmpty == true) ...[
+              if (order.items.isNotEmpty) ...[
                 Row(
                   children: [
-                    // First item image
-                    Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.grey[200],
-                      ),
-                      child: order.items?.isNotEmpty == true &&
-                              _getFirstItemImage(order.items!.first) != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: CachedNetworkImage(
-                                imageUrl:
-                                    _getFirstItemImage(order.items!.first)!,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => Container(
-                                  color: Colors.grey[200],
-                                  child: const Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                ),
-                                errorWidget: (context, url, error) => Container(
-                                  color: Colors.grey[200],
-                                  child: const Icon(Icons.image_not_supported),
-                                ),
+                    if (_getFirstItemImage(order.items.first) != null) ...[
+                      // First item image
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.grey[200],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: CachedNetworkImage(
+                            imageUrl: _getFirstItemImage(order.items.first)!,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              color: Colors.grey[200],
+                              child: const Center(
+                                child: CircularProgressIndicator(strokeWidth: 2),
                               ),
-                            )
-                          : const Icon(Icons.image_not_supported),
-                    ),
-                    const SizedBox(width: 12),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: Colors.grey[200],
+                              child: const Icon(Icons.image_not_supported),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
                     // Items info
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            (order.items?.length ?? 0) == 1
-                                ? (order.items?.first.name ?? 'Ürün Adı Yok')
-                                : '${order.items?.first.name ?? 'Ürün Adı Yok'} ve ${(order.items?.length ?? 0) - 1} ürün daha',
+                            (order.items.length) == 1
+                                ? (order.items.first.name)
+                                : '${order.items.first.name} ve ${(order.items.length) - 1} ürün daha',
                             style: const TextStyle(
                               fontWeight: FontWeight.w500,
                             ),
@@ -214,7 +206,7 @@ class OrdersListPage extends ConsumerWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${order.items?.length ?? 0} ürün',
+                            '${order.items.length} ürün',
                             style: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 12,
@@ -232,18 +224,9 @@ class OrdersListPage extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Total amount - convert from kuruş to TL
-                  if (order.totals != null)
-                    Text(
-                      '₺${(order.totals?.grandTotal ?? 0.0).toStringAsFixed(2)}',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                    )
-                  else
-                    Text(
-                      '₺${_calculateOrderTotal(order.items).toStringAsFixed(2)}',
+                  // Total amount
+                   Text(
+                      '₺${(order.totals.grandTotal).toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).primaryColor,
@@ -262,7 +245,7 @@ class OrdersListPage extends ConsumerWidget {
               ),
 
               // Tracking info
-              if (order.trackingNumber != null) ...[
+              if (order.shipping.trackingNumber != null) ...[
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -273,7 +256,7 @@ class OrdersListPage extends ConsumerWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      'Takip No: ${order.trackingNumber}',
+                      'Takip No: ${order.shipping.trackingNumber}',
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 12,
@@ -290,7 +273,7 @@ class OrdersListPage extends ConsumerWidget {
   }
 
   Widget _buildStatusChip(OrderStatus status) {
-    Color chipColor = Colors.grey; // Default color
+    Color chipColor = Colors.grey;
     Color textColor = Colors.white;
 
     switch (status) {
@@ -328,73 +311,20 @@ class OrdersListPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildPaymentStatusChip(String paymentStatus) {
-    Color chipColor;
-    String displayText;
-    IconData icon;
-
-    switch (paymentStatus.toLowerCase()) {
-      case 'paid':
-      case 'succeeded':
-      case 'success':
-        chipColor = Colors.green;
-        displayText = 'Ödendi';
-        icon = Icons.check_circle;
-        break;
-      case 'failed':
-      case 'failure':
-        chipColor = Colors.red;
-        displayText = 'Başarısız';
-        icon = Icons.cancel;
-        break;
-      case 'pending':
-      case 'processing':
-        chipColor = Colors.orange;
-        displayText = 'İşleniyor';
-        icon = Icons.schedule;
-        break;
-      case 'awaiting':
-        chipColor = Colors.amber;
-        displayText = 'Ödeme Bekliyor';
-        icon = Icons.payment;
-        break;
-      case 'canceled':
-      case 'cancelled':
-        chipColor = Colors.grey;
-        displayText = 'İptal';
-        icon = Icons.block;
-        break;
-      default:
-        chipColor = Colors.grey;
-        displayText = 'Bilinmiyor';
-        icon = Icons.help;
-    }
-
+  Widget _buildPaymentStatusChip(String label) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: chipColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: chipColor.withOpacity(0.3)),
+        color: Colors.amber,
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 12,
-            color: chipColor,
-          ),
-          const SizedBox(width: 2),
-          Text(
-            displayText,
-            style: TextStyle(
-              color: chipColor,
-              fontSize: 9,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }
@@ -427,8 +357,8 @@ class OrdersListPage extends ConsumerWidget {
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () {
-              // Navigate to catalog tab
-              Navigator.of(context).pop();
+              // Navigate to catalog or home (pop to root)
+              Navigator.of(context).popUntil((route) => route.isFirst);
             },
             icon: const Icon(Icons.store),
             label: const Text('Mağazaya Git'),
@@ -438,7 +368,7 @@ class OrdersListPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, WidgetRef ref, String error) {
+  Widget _buildErrorState(BuildContext context, VoidCallback onRetry, String error) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -457,7 +387,7 @@ class OrdersListPage extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () => ref.read(ordersProvider.notifier).refresh(),
+            onPressed: onRetry,
             child: const Text('Tekrar Dene'),
           ),
         ],
@@ -466,31 +396,17 @@ class OrdersListPage extends ConsumerWidget {
   }
 
   String? _getFirstItemImage(OrderItem item) {
-    // First try to get image from imageUrl field
     if (item.imageUrl != null && item.imageUrl!.isNotEmpty) {
       return item.imageUrl;
     }
-
-    // Then try to get first image from product.images array
+    // Try to get from product object if available
     if (item.product != null && item.product!['images'] != null) {
       final images = item.product!['images'] as List<dynamic>?;
       if (images != null && images.isNotEmpty) {
         return images.first as String;
       }
     }
-
     return null;
-  }
-
-  /// Calculate total amount from order items (handles nullable values safely)
-  double _calculateOrderTotal(List<OrderItem>? items) {
-    if (items == null || items.isEmpty) return 0.0;
-    
-    return items.fold<double>(0.0, (sum, item) {
-      final itemTotal = item.total ?? 
-          ((item.price ?? 0.0) * (item.quantity ?? 0));
-      return sum + itemTotal;
-    });
   }
 
   String _formatDate(DateTime? date) {

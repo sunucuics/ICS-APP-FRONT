@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/admin_order_detail_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/admin_orders_provider.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -150,7 +151,7 @@ class AdminOrdersPage extends ConsumerWidget {
                 Row(
                   children: [
                     if (order.payment != null) 
-                      _buildPaymentStatusChip(order.payment!['status'] as String? ?? 'unknown'),
+                      _buildPaymentStatusChip(order.payment!.status),
                     const SizedBox(width: 8),
                     _buildStatusChip(
                         order.status.displayName, _getStatusColor(order.status)),
@@ -385,7 +386,10 @@ class AdminOrdersPage extends ConsumerWidget {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: () => _showOrderDetails(context, order),
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (_) => AdminOrderDetailDialog(order: order),
+                ),
                 child: const Text('Detaylar'),
               ),
             ),
@@ -527,93 +531,7 @@ class AdminOrdersPage extends ConsumerWidget {
     );
   }
 
-  void _showOrderDetails(BuildContext context, Order order) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Sipariş Detayları #${order.id}'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Customer Info
-              Text('Müşteri ID: ${order.userId}'),
-              if (order.customer.fullName != null)
-                Text('Müşteri: ${order.customer.fullName}'),
-              if (order.customer.phone != null)
-                Text('Telefon: ${order.customer.phone}'),
-              if (order.customer.email != null)
-                Text('Email: ${order.customer.email}'),
-              if (order.customer.address != null) ...[
-                const SizedBox(height: 8),
-                const Text('Adres:', style: TextStyle(fontWeight: FontWeight.bold)),
-                if (order.customer.address!.line1 != null)
-                  Text(order.customer.address!.line1!),
-                Text('${order.customer.address!.city ?? ''} ${order.customer.address!.postalCode ?? ''}'),
-              ],
-              const SizedBox(height: 16),
-              // Status
-              Text('Durum: ${order.status.displayName}'),
-              // Shipping Info
-              if (order.shipping.provider != null || order.shipping.trackingNumber != null) ...[
-                const SizedBox(height: 8),
-                const Text('Kargo Bilgileri:', style: TextStyle(fontWeight: FontWeight.bold)),
-                if (order.shipping.provider != null)
-                  Text('Firma: ${order.shipping.provider}'),
-                if (order.shipping.trackingNumber != null)
-                  Text('Takip No: ${order.shipping.trackingNumber}'),
-                if (order.shipping.trackingUrl != null)
-                  Text('Takip URL: ${order.shipping.trackingUrl}'),
-                if (order.shipping.shippedAt != null)
-                  Text('Kargoya Verilme: ${formatDateTime(order.shipping.shippedAt)}'),
-                if (order.shipping.deliveredAt != null)
-                  Text('Teslim Tarihi: ${formatDateTime(order.shipping.deliveredAt)}'),
-              ],
-              // Status History
-              if (order.statusHistory != null && order.statusHistory!.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                const Text('Durum Geçmişi:', style: TextStyle(fontWeight: FontWeight.bold)),
-                ...order.statusHistory!.map((event) => Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        '• ${event.status} - ${formatDateTime(event.at)}',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    )),
-              ],
-              if (order.note != null && order.note!.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Text('Not: ${order.note}'),
-              ],
-              const SizedBox(height: 16),
-              const Text('Ürünler:', style: TextStyle(fontWeight: FontWeight.bold)),
-              ...order.items.map((item) => Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text('• ${item.name} x${item.qty}'),
-                  )),
-              const SizedBox(height: 16),
-              const Text('Toplamlar:', style: TextStyle(fontWeight: FontWeight.bold)),
-              if (order.totals.subtotal != null)
-                Text('Ara Toplam: ${formatMoney(order.totals.subtotal!)}'),
-              if (order.totals.shipping != null && order.totals.shipping! > 0)
-                Text('Kargo: ${formatMoney(order.totals.shipping!)}'),
-              if (order.totals.tax != null && order.totals.tax! > 0)
-                Text('Vergi: ${formatMoney(order.totals.tax!)}'),
-              Text('Genel Toplam: ${formatMoney(order.totals.grandTotal)}',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Kapat'),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   void _showShipOrderDialog(BuildContext context, WidgetRef ref, Order order) {
     final trackingController = TextEditingController();

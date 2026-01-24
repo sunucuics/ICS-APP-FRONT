@@ -110,6 +110,39 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
     state = state.copyWith(selectedInstallment: count);
   }
 
+  /// Ödeme yöntemini seç
+  void selectPaymentMethod(PaymentMethod method) {
+    if (state.paymentMethod == method) return;
+    state = state.copyWith(paymentMethod: method);
+  }
+
+  /// Manuel ödeme (Havale/EFT) işlemini başlat
+  ///
+  /// Backend POST /orders endpoint'ini çağırır.
+  /// Backend sepeti otomatik okur ve siparişi oluşturur.
+  Future<void> processManualPayment() async {
+    try {
+      state = state.copyWith(status: CheckoutStatus.initializingPayment);
+
+      // POST /orders çağrısı (backend cart'tan okur)
+      final order = await _ordersRepository.createOrder();
+
+      // Başarılı
+      // Sepeti temizle
+      await _ref.read(cartProvider.notifier).clearCart();
+
+      state = state.copyWith(
+        status: CheckoutStatus.completed,
+        orderId: order.id,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        status: CheckoutStatus.failed,
+        errorMessage: _parseErrorMessage(e.toString()),
+      );
+    }
+  }
+
   /// Checkout akışını başlat
   ///
   /// YENİ AKIŞ (Payment Session):
@@ -258,9 +291,11 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
           // merchant_oid = sipariş ID (callback sonrası oluşuyor)
           final order =
               await _ordersRepository.getOrderDetail(state.merchantOid!);
-          final paymentStatus = order.payment?['status'] as String?;
+          final paymentStatus = order.payment?.status;
 
-          if (paymentStatus == 'succeeded') {
+          if (paymentStatus == 'succeeded' || paymentStatus == 'paid') {
+            print('✅ Checkout Provider: Payment verified successfully');
+
             // Sepeti temizle
             await _ref.read(cartProvider.notifier).clearCart();
 

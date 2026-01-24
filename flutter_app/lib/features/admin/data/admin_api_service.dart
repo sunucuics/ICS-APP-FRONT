@@ -357,6 +357,19 @@ class AdminApiService {
     }
   }
 
+  Future<void> deleteAppointment(
+      String appointmentId, String status) async {
+    try {
+      final formData = FormData.fromMap({'status': status});
+      await _apiClient.delete(
+        '/admin/appointments/$appointmentId',
+        data: formData,
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   // Comments Management
   Future<List<Comment>> getComments() async {
     try {

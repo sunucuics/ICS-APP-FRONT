@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/admin_repository.dart';
 import '../models/admin_notification_model.dart';
 import 'admin_dashboard_provider.dart';
+import '../../../../core/services/admin_notification_stream_service.dart';
+import '../../../../core/utils/logger.dart';
 
 final adminNotificationTemplatesProvider =
     FutureProvider<List<NotificationTemplate>>((ref) async {
@@ -124,9 +127,15 @@ class AdminPanelNotificationsNotifier
     extends StateNotifier<AsyncValue<List<AdminPanelNotification>>> {
   final AdminRepository _repository;
   final Ref _ref;
+  final AdminNotificationStreamService _streamService;
+  StreamSubscription<SSEEvent>? _streamSubscription;
+  bool _isStreamActive = false;
 
-  AdminPanelNotificationsNotifier(this._repository, this._ref)
-      : super(const AsyncValue.loading()) {
+  AdminPanelNotificationsNotifier(
+    this._repository,
+    this._ref,
+    this._streamService,
+  ) : super(const AsyncValue.loading()) {
     loadNotifications();
   }
 
@@ -135,9 +144,128 @@ class AdminPanelNotificationsNotifier
     try {
       final notifications = await _repository.getAdminPanelNotifications();
       state = AsyncValue.data(notifications);
+      
+      // Start SSE stream if not already active
+      if (!_isStreamActive) {
+        _startSSEStream();
+      }
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
+  }
+
+  /// Start SSE stream for real-time notifications
+  void _startSSEStream() {
+    if (_isStreamActive) return;
+
+    _isStreamActive = true;
+    _streamService.start().catchError((e) {
+      // Log error but don't fail
+      AppLogger.error('Failed to start SSE stream', e);
+    });
+
+    _streamSubscription = _streamService.eventStream.listen(
+      (event) {
+        _handleSSEEvent(event);
+      },
+      onError: (error) {
+        AppLogger.error('SSE stream error', error);
+        _isStreamActive = false;
+        // Try to reconnect after a delay
+        Future.delayed(const Duration(seconds: 5), () {
+          if (!_isStreamActive) {
+            _startSSEStream();
+          }
+        });
+      },
+    );
+  }
+
+  /// Handle SSE events
+  void _handleSSEEvent(SSEEvent event) {
+    switch (event.type) {
+      case SSEEventType.connected:
+        AppLogger.info('SSE stream connected');
+        break;
+
+      case SSEEventType.notification:
+        // New notification received
+        if (event.data != null) {
+          try {
+            final notification = AdminPanelNotification.fromJson(event.data!);
+            
+            // Add to current state (handle all states: loading, error, data)
+            final currentNotifications = state.valueOrNull ?? [];
+            
+            // Check if notification already exists (avoid duplicates)
+            if (!currentNotifications.any((n) => n.id == notification.id)) {
+              final updated = [notification, ...currentNotifications];
+              state = AsyncValue.data(updated);
+              
+              // Invalidate unread count
+              _ref.invalidate(adminPanelUnreadCountProvider);
+              
+              AppLogger.info('New notification added via SSE: ${notification.id} - ${notification.title}');
+            }
+          } catch (e) {
+            AppLogger.error('Error parsing notification from SSE', e);
+          }
+        }
+        break;
+
+      case SSEEventType.notificationUpdated:
+        // Notification updated (e.g., marked as read)
+        if (event.data != null) {
+          final notificationId = event.data!['id'] as String?;
+          final isRead = event.data!['is_read'] as bool? ?? false;
+          
+          if (notificationId != null) {
+            state.whenData((notifications) {
+              final updated = notifications.map((n) {
+                if (n.id == notificationId) {
+                  return n.copyWith(
+                    isRead: isRead,
+                    readAt: isRead ? DateTime.now() : null,
+                  );
+                }
+                return n;
+              }).toList();
+              state = AsyncValue.data(updated);
+              
+              // Invalidate unread count
+              _ref.invalidate(adminPanelUnreadCountProvider);
+            });
+          }
+        }
+        break;
+
+      case SSEEventType.unreadCount:
+        // Unread count updated
+        if (event.data != null) {
+          final count = event.data!['count'] as int?;
+          if (count != null) {
+            // Invalidate unread count provider to refresh
+            _ref.invalidate(adminPanelUnreadCountProvider);
+          }
+        }
+        break;
+
+      case SSEEventType.heartbeat:
+        // Heartbeat - connection is alive
+        break;
+
+      case SSEEventType.error:
+        AppLogger.error('SSE error: ${event.data}');
+        break;
+    }
+  }
+
+  /// Stop SSE stream
+  void stopSSEStream() {
+    _isStreamActive = false;
+    _streamSubscription?.cancel();
+    _streamSubscription = null;
+    _streamService.stop();
   }
 
   Future<void> markAsRead(String notificationId) async {
@@ -217,9 +345,27 @@ class AdminPanelNotificationsNotifier
   }
 }
 
+final adminNotificationStreamServiceProvider =
+    Provider<AdminNotificationStreamService>((ref) {
+  final service = AdminNotificationStreamService();
+  // Cleanup when provider is disposed
+  ref.onDispose(() {
+    service.dispose();
+  });
+  return service;
+});
+
 final adminPanelNotificationsNotifierProvider = StateNotifierProvider<
     AdminPanelNotificationsNotifier,
     AsyncValue<List<AdminPanelNotification>>>((ref) {
   final repository = ref.watch(adminRepositoryProvider);
-  return AdminPanelNotificationsNotifier(repository, ref);
+  final streamService = ref.watch(adminNotificationStreamServiceProvider);
+  final notifier = AdminPanelNotificationsNotifier(repository, ref, streamService);
+  
+  // Cleanup when provider is disposed
+  ref.onDispose(() {
+    notifier.stopSSEStream();
+  });
+  
+  return notifier;
 });

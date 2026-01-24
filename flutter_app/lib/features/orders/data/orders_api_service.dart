@@ -53,21 +53,17 @@ class OrdersApiService {
   }
 
   /// Get user's orders with filtering and pagination
-  /// Query parameters: status (preparing|shipped|delivered|canceled), limit (1..100, default 20), start_after (ISO datetime cursor)
+  /// Query parameters: view_type (active|past), limit (1..100, default 20), start_after (ISO datetime cursor)
   Future<OrdersListResponse> getMyOrders({
-    String? status, // preparing|shipped|delivered|canceled
+    String viewType = 'active', // active|past
     int? limit, // 1..100, default 20
     String? startAfter, // ISO datetime cursor (start_after)
   }) async {
     try {
-      final queryParams = <String, dynamic>{};
-      if (status != null) {
-        // Validate status
-        final validStatuses = ['preparing', 'shipped', 'delivered', 'canceled'];
-        if (validStatuses.contains(status.toLowerCase())) {
-          queryParams['status'] = status.toLowerCase();
-        }
-      }
+      final queryParams = <String, dynamic>{
+        'view_type': viewType,
+      };
+      
       if (limit != null && limit >= 1 && limit <= 100) {
         queryParams['limit'] = limit;
       }
@@ -77,7 +73,7 @@ class OrdersApiService {
 
       final response = await _dio.get(
         ApiEndpoints.orders,
-        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+        queryParameters: queryParams,
       );
       final data = Map<String, dynamic>.from(response.data);
       final items = (data['items'] as List<dynamic>? ?? [])
@@ -98,6 +94,15 @@ class OrdersApiService {
       final response = await _dio.get(ApiEndpoints.order(orderId));
       final data = Map<String, dynamic>.from(response.data);
       return Order.fromJson(_sanitizeOrderJson(data));
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Cancel awaiting order
+  Future<void> cancelAwaitingOrder(String orderId) async {
+    try {
+      await _dio.post('${ApiEndpoints.order(orderId)}/cancel-awaiting');
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
@@ -132,8 +137,8 @@ Map<String, dynamic> _sanitizeOrderJson(Map<String, dynamic> json) {
   final payment = sanitized['payment'];
   if (payment is Map<String, dynamic>) {
     final hasRequiredPaymentFields =
-        (payment['provider'] != null && payment['status'] != null) &&
-            payment['currency'] != null;
+        (payment['provider'] != null && payment['status'] != null); 
+        // currency and received_total are optional now
 
     if (!hasRequiredPaymentFields || payment.isEmpty) {
       sanitized['payment'] = null;

@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/services/firebase_auth_service.dart';
 import '../../../core/services/fcm_service.dart';
+import '../../../core/services/token_storage_service.dart';
 import '../../../core/utils/logger.dart';
 import '../data/auth_repository.dart';
 import 'anonymous_auth_provider.dart' as anonymous;
@@ -158,12 +159,38 @@ class AuthNotifier extends StateNotifier<AuthState> {
           AppLogger.warning('Failed to update FCM token after profile load', e);
         });
       } else {
+        // Token varsa ama user profile çekilemiyorsa, token refresh deneyebiliriz
+        final hasTokens = await TokenStorageService.hasTokens();
+        if (hasTokens) {
+          AppLogger.debug('AuthProvider: Token exists but user profile failed, attempting token refresh...');
+          try {
+            final refreshToken = await TokenStorageService.getRefreshToken();
+            if (refreshToken != null) {
+              await _authRepository.refreshToken(refreshToken);
+              // Token yenilendi, tekrar user profile çekmeyi dene
+              final retryUser = await _authRepository.getCurrentUser();
+              if (retryUser != null) {
+                state = state.copyWith(
+                  user: retryUser,
+                  isAuthenticated: true,
+                  isLoading: false,
+                );
+                return;
+              }
+            }
+          } catch (refreshError) {
+            AppLogger.warning('AuthProvider: Token refresh failed', refreshError);
+            // Token refresh başarısız, devam et
+          }
+        }
+
         // Firebase user exists but backend user fetch failed
         // This means the user was created in Firebase but not in backend
         // Sign out from Firebase to clean up the state
         AppLogger.warning(
             'Firebase user exists but backend user not found. Signing out...');
         await FirebaseAuthService.signOut();
+        await TokenStorageService.clearTokens();
         state = state.copyWith(
           isAuthenticated: false,
           isLoading: false,
@@ -171,9 +198,35 @@ class AuthNotifier extends StateNotifier<AuthState> {
         );
       }
     } catch (e) {
+      // If there's an error, try token refresh if token exists
+      final hasTokens = await TokenStorageService.hasTokens();
+      if (hasTokens && e.toString().contains('401')) {
+        AppLogger.debug('AuthProvider: 401 error, attempting token refresh...');
+        try {
+          final refreshToken = await TokenStorageService.getRefreshToken();
+          if (refreshToken != null) {
+            await _authRepository.refreshToken(refreshToken);
+            // Token yenilendi, tekrar user profile çekmeyi dene
+            final retryUser = await _authRepository.getCurrentUser();
+            if (retryUser != null) {
+              state = state.copyWith(
+                user: retryUser,
+                isAuthenticated: true,
+                isLoading: false,
+              );
+              return;
+            }
+          }
+        } catch (refreshError) {
+          AppLogger.warning('AuthProvider: Token refresh failed', refreshError);
+          // Token refresh başarısız, devam et
+        }
+      }
+
       // If there's an error, also sign out to clean up the state
       AppLogger.error('Error loading user profile. Signing out...', e);
       await FirebaseAuthService.signOut();
+      await TokenStorageService.clearTokens();
       state = state.copyWith(
         error: e.toString(),
         isAuthenticated: false,

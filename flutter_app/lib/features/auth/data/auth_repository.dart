@@ -1,5 +1,6 @@
 import '../../../core/models/user_model.dart';
 import '../../../core/services/firebase_auth_service.dart';
+import '../../../core/services/token_storage_service.dart';
 import 'auth_api_service.dart';
 
 class AuthRepository {
@@ -9,10 +10,7 @@ class AuthRepository {
   Future<AuthResponse> login(String email, String password) async {
     final request = LoginRequest(email: email, password: password);
     final response = await _authApiService.login(request);
-
-    // Firebase handles token management automatically
-    // No need to manually save tokens to secure storage
-
+    // Token'lar AuthApiService tarafından secure storage'a kaydediliyor
     return response;
   }
 
@@ -31,10 +29,7 @@ class AuthRepository {
     );
 
     final response = await _authApiService.register(request);
-
-    // Firebase handles token management automatically
-    // No need to manually save tokens to secure storage
-
+    // Token'lar AuthApiService tarafından secure storage'a kaydediliyor
     return response;
   }
 
@@ -50,8 +45,21 @@ class AuthRepository {
   }
 
   // Check if user is logged in
+  // Önce secure storage'dan token kontrolü yap, yoksa Firebase kontrolü yap
   Future<bool> isLoggedIn() async {
+    // Secure storage'dan token kontrolü (öncelikli)
+    final hasTokens = await TokenStorageService.hasTokens();
+    if (hasTokens) {
+      return true;
+    }
+    
+    // Fallback: Firebase kontrolü
     return FirebaseAuthService.isSignedIn;
+  }
+
+  // Refresh token ile yeni access token al
+  Future<AuthResponse> refreshToken(String refreshToken) async {
+    return await _authApiService.refreshToken(refreshToken);
   }
 
   // Get current user

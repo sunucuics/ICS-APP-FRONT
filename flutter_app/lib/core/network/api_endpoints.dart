@@ -34,6 +34,7 @@ class ApiEndpoints {
   static const String authRegister = '/auth/register';
   static const String authLogin = '/auth/login';
   static const String authLogout = '/auth/logout';
+  static const String authRefresh = '/auth/refresh';
   static const String authResetPassword = '/auth/reset-password';
   static const String authUpdateProfile = '/auth/me';
   static const String authCheckEmail = '/auth/check-email';
@@ -161,6 +162,8 @@ class ApiEndpoints {
 
   // Admin Panel Notifications endpoints (gelen bildirimler - randevu, sipariş vb.)
   static const String adminPanelNotifications = '/admin/notifications';
+  static const String adminPanelNotificationsStream =
+      '/admin/notifications/stream';
   static const String adminPanelNotificationsUnreadCount =
       '/admin/notifications/unread-count';
   static const String adminPanelNotificationsReadAll =

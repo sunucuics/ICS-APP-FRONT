@@ -701,15 +701,15 @@ class _MonthlyCalendarWidgetState extends ConsumerState<MonthlyCalendarWidget>
   }
 
   void _showModernAvailableHours(DateTime date, List<String> availableHours) {
-    // Get busy slots for this date
     final dateString = date.toIso8601String().split('T')[0];
+    const days = 90;
 
-    // Preload the data before showing modal
+    // Güne tıklanınca dolu saatleri yeniden çek (randevu alındıktan sonra güncel veri)
+    ref.invalidate(busySlotsProvider(
+      BusySlotsParams(serviceId: widget.serviceId, days: days),
+    ));
     final busySlotsAsync = ref.read(busySlotsProvider(
-      BusySlotsParams(
-        serviceId: widget.serviceId,
-        days: 30,
-      ),
+      BusySlotsParams(serviceId: widget.serviceId, days: days),
     ).future);
 
     showModalBottomSheet(

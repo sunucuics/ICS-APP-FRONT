@@ -258,6 +258,12 @@ enum CheckoutStatus {
   failed, // Ödeme başarısız
 }
 
+/// Ödeme yöntemi
+enum PaymentMethod {
+  creditCard,
+  bankTransfer,
+}
+
 /// Checkout state - tüm checkout akışını yönetir
 /// NOT: Bu model JSON'a dönüştürülmez, sadece runtime state yönetimi için kullanılır
 @freezed
@@ -269,6 +275,8 @@ class CheckoutState with _$CheckoutState {
     @JsonKey(includeFromJson: false, includeToJson: false)
     PayTRInitResponse? paytrResponse,
     String? errorMessage,
+    // Ödeme yöntemi
+    @Default(PaymentMethod.creditCard) PaymentMethod paymentMethod,
     // Taksit bilgileri
     @Default(0) int selectedInstallment, // 0=peşin, 3=3 taksit
     String? binNumber, // Kart BIN numarası

@@ -1,10 +1,23 @@
 import 'package:dio/dio.dart';
 import '../../services/firebase_auth_service.dart';
 import '../../services/navigation_service.dart';
+import '../../services/token_storage_service.dart';
 import '../../utils/logger.dart';
+import '../../../features/auth/data/auth_api_service.dart';
 import '../../../features/auth/services/mock_anonymous_auth_service.dart';
 
+// Pending request için helper class
+class _PendingRequest {
+  final RequestOptions requestOptions;
+  final ErrorInterceptorHandler handler;
+
+  _PendingRequest(this.requestOptions, this.handler);
+}
+
 class AuthInterceptor extends Interceptor {
+  // Token refresh işlemi için lock mekanizması
+  static bool _isRefreshing = false;
+  static final List<_PendingRequest> _pendingRequests = [];
   @override
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
@@ -15,14 +28,16 @@ class AuthInterceptor extends Interceptor {
       '/categories',
       '/featured',
       '/auth/login', // Login endpoint doesn't need auth
+      '/auth/register', // Register endpoint doesn't need auth
       '/auth/reset-password', // Reset password doesn't need auth
+      '/auth/refresh', // Refresh endpoint doesn't need auth
     ];
 
     // Check if this is a public endpoint
     final isPublicEndpoint =
         publicPaths.any((path) => options.path.startsWith(path));
 
-    // For all endpoints, add token if available (client-first approach)
+    // For all endpoints, add token if available
     final token = await _getAuthToken();
     if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';
@@ -37,10 +52,18 @@ class AuthInterceptor extends Interceptor {
 
   Future<String?> _getAuthToken() async {
     try {
-      // Get fresh ID token from Firebase (auto-refreshes if needed)
+      // Önce secure storage'dan access token al
+      final accessToken = await TokenStorageService.getAccessToken();
+      if (accessToken != null) {
+        AppLogger.debug('AuthInterceptor: Using access token from secure storage');
+        return accessToken;
+      }
+
+      // Fallback: Firebase'den token al (eski sistemle uyumluluk için)
+      AppLogger.debug('AuthInterceptor: No token in storage, trying Firebase');
       return await FirebaseAuthService.getIdToken();
     } catch (e) {
-      AppLogger.error('Error getting Firebase ID token', e);
+      AppLogger.error('Error getting auth token', e);
       return null;
     }
   }
@@ -77,6 +100,7 @@ class AuthInterceptor extends Interceptor {
     if (errorDetail == 'Session revoked') {
       AppLogger.warning(
           'AuthInterceptor: Session revoked, redirecting to welcome page');
+      await TokenStorageService.clearTokens();
       NavigationService.navigateToWelcome();
       handler.next(err);
       return;
@@ -105,66 +129,113 @@ class AuthInterceptor extends Interceptor {
       AppLogger.error('AuthInterceptor: Error checking user type', e);
     }
 
-    try {
-      AppLogger.debug('AuthInterceptor: Attempting token refresh...');
-      // Force refresh the token
-      final freshToken =
-          await FirebaseAuthService.getIdToken(forceRefresh: true);
-
-      if (freshToken != null) {
-        AppLogger.success(
-            'AuthInterceptor: Token refreshed successfully, retrying request');
-        // Mark request as retried
-        originalRequest.extra['_retried'] = true;
-        originalRequest.headers['Authorization'] = 'Bearer $freshToken';
-
-        // Retry the original request with new FormData
-        final dio = Dio();
-
-        // Create completely new request to avoid FormData reuse
-        // Don't retry FormData requests to avoid the finalized error
-        if (originalRequest.data is FormData) {
-          AppLogger.debug(
-              'AuthInterceptor: Skipping FormData retry to avoid finalized error');
-          handler.next(err);
-          return;
-        }
-
-        final newRequest = RequestOptions(
-          method: originalRequest.method,
-          path: originalRequest.path,
-          baseUrl: originalRequest.baseUrl,
-          headers: {
-            ...originalRequest.headers,
-            'Authorization': 'Bearer $freshToken',
-          },
-          data: originalRequest.data,
-          queryParameters: originalRequest.queryParameters,
-          connectTimeout: originalRequest.connectTimeout,
-          receiveTimeout: originalRequest.receiveTimeout,
-          sendTimeout: originalRequest.sendTimeout,
-          validateStatus: originalRequest.validateStatus,
-          followRedirects: originalRequest.followRedirects,
-          maxRedirects: originalRequest.maxRedirects,
-          responseType: originalRequest.responseType,
-          contentType: originalRequest.contentType,
-          extra: originalRequest.extra,
-        );
-
-        final response = await dio.fetch(newRequest);
-        handler.resolve(response);
-        return;
-      } else {
-        AppLogger.warning('AuthInterceptor: Token refresh returned null');
-      }
-    } catch (e) {
-      AppLogger.error('AuthInterceptor: Token refresh failed', e);
+    // Eğer zaten bir refresh işlemi devam ediyorsa, bu isteği beklet
+    if (_isRefreshing) {
+      AppLogger.debug('AuthInterceptor: Token refresh already in progress, queuing request');
+      _pendingRequests.add(_PendingRequest(originalRequest, handler));
+      return;
     }
 
-    // If we get here, token refresh failed
-    AppLogger.warning(
-        'AuthInterceptor: Token refresh failed, redirecting to welcome page');
-    NavigationService.navigateToWelcome();
-    handler.next(err);
+    // Refresh işlemini başlat
+    _isRefreshing = true;
+
+    try {
+      AppLogger.debug('AuthInterceptor: Attempting token refresh...');
+
+      // Secure storage'dan refresh token al
+      final refreshToken = await TokenStorageService.getRefreshToken();
+      if (refreshToken == null) {
+        AppLogger.warning('AuthInterceptor: No refresh token found');
+        throw Exception('No refresh token available');
+      }
+
+      // Backend refresh endpoint'ine istek gönder
+      final authApiService = AuthApiService();
+      final authResponse = await authApiService.refreshToken(refreshToken);
+
+      AppLogger.success('AuthInterceptor: Token refreshed successfully');
+
+      // Yeni token'ları kullan (zaten secure storage'a kaydedildi)
+      final newAccessToken = authResponse.idToken;
+
+      // Bekleyen tüm istekleri yeni token ile tekrarla
+      for (final pendingRequest in _pendingRequests) {
+        _retryRequest(pendingRequest.requestOptions, pendingRequest.handler, newAccessToken);
+      }
+      _pendingRequests.clear();
+
+      // Orijinal isteği yeni token ile tekrarla
+      _retryRequest(originalRequest, handler, newAccessToken);
+    } catch (e) {
+      AppLogger.error('AuthInterceptor: Token refresh failed', e);
+
+      // Refresh başarısız oldu, tüm bekleyen istekleri iptal et
+      for (final pendingRequest in _pendingRequests) {
+        pendingRequest.handler.next(err);
+      }
+      _pendingRequests.clear();
+
+      // Token'ları temizle ve login sayfasına yönlendir
+      await TokenStorageService.clearTokens();
+      NavigationService.navigateToWelcome();
+      handler.next(err);
+    } finally {
+      _isRefreshing = false;
+    }
+  }
+
+  void _retryRequest(
+    RequestOptions originalRequest,
+    ErrorInterceptorHandler handler,
+    String newToken,
+  ) async {
+    try {
+      // Mark request as retried
+      originalRequest.extra['_retried'] = true;
+      originalRequest.headers['Authorization'] = 'Bearer $newToken';
+
+      // Don't retry FormData requests to avoid the finalized error
+      if (originalRequest.data is FormData) {
+        AppLogger.debug(
+            'AuthInterceptor: Skipping FormData retry to avoid finalized error');
+        handler.next(DioException(
+          requestOptions: originalRequest,
+          error: 'FormData request cannot be retried',
+        ));
+        return;
+      }
+
+      final dio = Dio();
+
+      final newRequest = RequestOptions(
+        method: originalRequest.method,
+        path: originalRequest.path,
+        baseUrl: originalRequest.baseUrl,
+        headers: {
+          ...originalRequest.headers,
+          'Authorization': 'Bearer $newToken',
+        },
+        data: originalRequest.data,
+        queryParameters: originalRequest.queryParameters,
+        connectTimeout: originalRequest.connectTimeout,
+        receiveTimeout: originalRequest.receiveTimeout,
+        sendTimeout: originalRequest.sendTimeout,
+        validateStatus: originalRequest.validateStatus,
+        followRedirects: originalRequest.followRedirects,
+        maxRedirects: originalRequest.maxRedirects,
+        responseType: originalRequest.responseType,
+        contentType: originalRequest.contentType,
+        extra: originalRequest.extra,
+      );
+
+      final response = await dio.fetch(newRequest);
+      handler.resolve(response);
+    } catch (e) {
+      AppLogger.error('AuthInterceptor: Failed to retry request', e);
+      handler.next(DioException(
+        requestOptions: originalRequest,
+        error: e,
+      ));
+    }
   }
 }

@@ -6,6 +6,7 @@ import '../../../../core/utils/price_utils.dart';
 import '../../data/paytr_service.dart';
 import '../../models/paytr_models.dart';
 import '../../providers/checkout_provider.dart';
+import '../utils/paytr_html_builder.dart';
 
 /// PayTR WebView Ödeme Sayfası
 ///
@@ -310,61 +311,21 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
     final expiryMonth = expiryParts.isNotEmpty ? expiryParts[0].trim() : '';
     final expiryYear = expiryParts.length > 1 ? expiryParts[1].trim() : '';
 
-    final html = '''
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #000; }
-    .loading { display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; }
-    .spinner { width: 50px; height: 50px; border: 3px solid #333; border-top: 3px solid #FF6B00; border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    p { text-align: center; color: #999; margin-top: 20px; }
-  </style>
-</head>
-<body>
-  <div class="loading">
-    <div class="spinner"></div>
-    <p>Ödeme işleniyor...</p>
-  </div>
-  <form id="paytr_form" method="POST" action="$_currentAction" style="display:none;">
-    ${_buildHiddenInputs(_currentFields)}
-    <input type="hidden" name="cc_owner" value="${_escapeHtml(_cardOwnerController.text)}">
-    <input type="hidden" name="card_number" value="${_escapeHtml(_cardNumberController.text.replaceAll(' ', ''))}">
-    <input type="hidden" name="expiry_month" value="${_escapeHtml(expiryMonth)}">
-    <input type="hidden" name="expiry_year" value="${_escapeHtml(expiryYear)}">
-    <input type="hidden" name="cvv" value="${_escapeHtml(_cvvController.text)}">
-  </form>
-  <script>
-    document.getElementById('paytr_form').submit();
-  </script>
-</body>
-</html>
-''';
+    final html = PayTRHtmlBuilder.buildPaymentForm(
+      actionUrl: _currentAction,
+      fields: _currentFields,
+      cardOwner: _cardOwnerController.text,
+      cardNumber: _cardNumberController.text.replaceAll(' ', ''),
+      expiryMonth: expiryMonth,
+      expiryYear: expiryYear,
+      cvv: _cvvController.text,
+    );
 
     setState(() {
       _formSubmitted = true;
     });
 
     _controller.loadHtmlString(html);
-  }
-
-  String _buildHiddenInputs(Map<String, String> fields) {
-    return fields.entries
-        .map((e) =>
-            '<input type="hidden" name="${_escapeHtml(e.key)}" value="${_escapeHtml(e.value)}">')
-        .join('\n    ');
-  }
-
-  String _escapeHtml(String text) {
-    return text
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
   }
 
   bool _validateForm() {

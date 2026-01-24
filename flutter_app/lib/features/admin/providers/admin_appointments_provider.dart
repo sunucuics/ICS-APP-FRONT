@@ -46,6 +46,16 @@ class AdminAppointmentsNotifier
     }
   }
 
+  Future<void> deleteAppointment(String appointmentId) async {
+    try {
+      await _repository.deleteAppointment(appointmentId, 'cancelled');
+      await loadAppointments();
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+      rethrow;
+    }
+  }
+
   Future<void> refresh() async {
     await loadAppointments();
   }

@@ -72,11 +72,11 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
             const SizedBox(height: 16),
           ],
 
-          // Payment Status Card
-          if (order.payment != null) ...[
-            _buildPaymentStatusCard(context, order),
-            const SizedBox(height: 16),
-          ],
+          // Payment Status Card (Removed requested by user)
+          // if (order.payment != null) ...[
+          //   _buildPaymentStatusCard(context, order),
+          //   const SizedBox(height: 16),
+          // ],
 
           // Tracking Info
           if (order.shipping.provider != null || order.shipping.trackingNumber != null) ...[
@@ -157,10 +157,10 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
     final payment = order.payment;
     if (payment == null) return const SizedBox.shrink();
     
-    final status = payment['status'] as String? ?? 'unknown';
-    final receivedTotal = payment['received_total'] as num?;
-    final provider = payment['provider'] as String?;
-    final reportedAt = payment['reported_at'] as String?;
+    final status = payment.status;
+    final receivedTotal = payment.receivedTotal;
+    final provider = payment.provider;
+    final reportedAt = payment.reportedAt;
     
     return Card(
       child: Padding(
@@ -168,11 +168,27 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Ödeme Durumu',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Ödeme Durumu',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                if (status == 'awaiting')
+                  TextButton.icon(
+                    onPressed: () => _confirmCancelOrder(context),
+                    icon: const Icon(Icons.cancel_outlined, color: Colors.red, size: 16),
+                    label: const Text('Siparişi İptal Et', style: TextStyle(color: Colors.red)),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                   ),
+              ],
             ),
             const SizedBox(height: 12),
             Row(
@@ -189,20 +205,18 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
                   ),
               ],
             ),
-            if (provider != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                'Ödeme Yöntemi: $provider',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
-                ),
+            const SizedBox(height: 8),
+            Text(
+              'Ödeme Yöntemi: $provider',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 12,
               ),
-            ],
+            ),
             if (reportedAt != null) ...[
               const SizedBox(height: 4),
               Text(
-                'Ödeme Tarihi: ${formatDate(reportedAt)}',
+                'Ödeme Tarihi: ${formatDate(reportedAt.toString())}',
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 12,
@@ -213,6 +227,53 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmCancelOrder(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Siparişi İptal Et'),
+        content: const Text(
+            'Ödeme bekleyen bu siparişi iptal etmek istediğinize emin misiniz?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('İptal Et'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      try {
+        await ref.read(orderDetailProvider.notifier).cancelAwaitingOrder();
+        if (context.mounted) {
+          SnackBarService.showSnackBar(
+            context: context,
+            snackBar: const SnackBar(
+              content: Text('Sipariş iptal edildi'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          SnackBarService.showSnackBar(
+            context: context,
+            snackBar: SnackBar(
+              content: Text('Hata: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 
   Widget _buildTrackingCard(BuildContext context, Order order) {
@@ -352,34 +413,34 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
       child: Row(
         children: [
           // Product image
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: Colors.grey[200],
-            ),
-            child: item.imageUrl != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: CachedNetworkImage(
-                      imageUrl: item.imageUrl!,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: Colors.grey[200],
-                        child: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: Colors.grey[200],
-                        child: const Icon(Icons.image_not_supported),
-                      ),
+          if (item.imageUrl != null && item.imageUrl!.isNotEmpty) ...[
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.grey[200],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: CachedNetworkImage(
+                  imageUrl: item.imageUrl!,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    color: Colors.grey[200],
+                    child: const Center(
+                      child: CircularProgressIndicator(),
                     ),
-                  )
-                : const Icon(Icons.image_not_supported),
-          ),
-          const SizedBox(width: 12),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: Colors.grey[200],
+                    child: const Icon(Icons.image_not_supported),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
           // Product details
           Expanded(
             child: Column(
@@ -528,9 +589,13 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
             if (customer.address != null) ...[
               const SizedBox(height: 8),
               const Text('Adres:', style: TextStyle(fontWeight: FontWeight.w500)),
-              if (customer.address!.line1 != null)
-                Text(customer.address!.line1!),
-              Text('${customer.address!.city ?? ''} ${customer.address!.postalCode ?? ''}'),
+              if (customer.address!.line1 != null && customer.address!.line1!.isNotEmpty)
+                Text(customer.address!.line1!)
+              else if (customer.address!.fullAddress != null)
+                Text(customer.address!.fullAddress!),
+              
+              if (customer.address!.city != null || customer.address!.postalCode != null)
+                Text('${customer.address!.city ?? ''} ${customer.address!.postalCode ?? ''}'),
             ],
           ],
         ),

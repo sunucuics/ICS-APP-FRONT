@@ -624,6 +624,8 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
   }
 
   void _showSuccessDialog() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -631,18 +633,12 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(28),
         ),
+        backgroundColor: Colors.transparent,
         child: Container(
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(28),
-            gradient: LinearGradient(
-              colors: [
-                Colors.white,
-                Colors.green.withOpacity(0.02),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
+            color: colorScheme.surface,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -651,7 +647,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AppTheme.successGreen.withOpacity(0.1),
+                  color: AppTheme.successGreen.withOpacity(0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -664,10 +660,10 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
               // Title
               Text(
                 'Randevu Talebi Oluşturuldu!',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                style: textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -676,9 +672,8 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
                 '🎉 Randevu talebiniz başarıyla oluşturuldu!\n\n'
                 'Admin onayından sonra randevunuz aktif olacaktır. '
                 'Randevularım sayfasından durumunuzu takip edebilirsiniz.',
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 16,
+                style: textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                   height: 1.5,
                 ),
                 textAlign: TextAlign.center,
@@ -690,7 +685,14 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
                 height: 56,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Reset provider state
+                    // Takvim dolu saatlerini güncelle (yeni randevu yansısın)
+                    ref.invalidate(busySlotsProvider(
+                      BusySlotsParams(
+                        serviceId: widget.service.id,
+                        days: 90,
+                      ),
+                    ));
+                    ref.invalidate(myAppointmentsProvider);
                     ref.read(appointmentBookingProvider.notifier).reset();
                     Navigator.pop(context);
                     Navigator.pop(context);
@@ -720,24 +722,20 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
   }
 
   void _showErrorDialog(String error) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     showDialog(
       context: context,
       builder: (context) => Dialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(28),
         ),
+        backgroundColor: Colors.transparent,
         child: Container(
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(28),
-            gradient: LinearGradient(
-              colors: [
-                Colors.white,
-                Colors.red.withOpacity(0.02),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
+            color: colorScheme.surface,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -746,7 +744,7 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AppTheme.errorRed.withOpacity(0.1),
+                  color: AppTheme.errorRed.withOpacity(0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -759,19 +757,18 @@ class _AppointmentBookingPageState extends ConsumerState<AppointmentBookingPage>
               // Title
               Text(
                 'Randevu Alınamadı',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                style: textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               // Message
               Text(
                 '❌ Randevu talebi oluşturulurken bir hata oluştu:\n\n$error\n\nLütfen tekrar deneyin.',
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 16,
+                style: textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                   height: 1.5,
                 ),
                 textAlign: TextAlign.center,

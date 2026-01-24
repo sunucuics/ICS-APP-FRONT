@@ -1814,6 +1814,8 @@ mixin _$CheckoutState {
   @JsonKey(includeFromJson: false, includeToJson: false)
   PayTRInitResponse? get paytrResponse => throw _privateConstructorUsedError;
   String? get errorMessage =>
+      throw _privateConstructorUsedError; // Ödeme yöntemi
+  PaymentMethod get paymentMethod =>
       throw _privateConstructorUsedError; // Taksit bilgileri
   int get selectedInstallment =>
       throw _privateConstructorUsedError; // 0=peşin, 3=3 taksit
@@ -1842,6 +1844,7 @@ abstract class $CheckoutStateCopyWith<$Res> {
       @JsonKey(includeFromJson: false, includeToJson: false)
       PayTRInitResponse? paytrResponse,
       String? errorMessage,
+      PaymentMethod paymentMethod,
       int selectedInstallment,
       String? binNumber,
       InstallmentQuoteResponse? installmentQuote});
@@ -1870,6 +1873,7 @@ class _$CheckoutStateCopyWithImpl<$Res, $Val extends CheckoutState>
     Object? orderId = freezed,
     Object? paytrResponse = freezed,
     Object? errorMessage = freezed,
+    Object? paymentMethod = null,
     Object? selectedInstallment = null,
     Object? binNumber = freezed,
     Object? installmentQuote = freezed,
@@ -1895,6 +1899,10 @@ class _$CheckoutStateCopyWithImpl<$Res, $Val extends CheckoutState>
           ? _value.errorMessage
           : errorMessage // ignore: cast_nullable_to_non_nullable
               as String?,
+      paymentMethod: null == paymentMethod
+          ? _value.paymentMethod
+          : paymentMethod // ignore: cast_nullable_to_non_nullable
+              as PaymentMethod,
       selectedInstallment: null == selectedInstallment
           ? _value.selectedInstallment
           : selectedInstallment // ignore: cast_nullable_to_non_nullable
@@ -1955,6 +1963,7 @@ abstract class _$$CheckoutStateImplCopyWith<$Res>
       @JsonKey(includeFromJson: false, includeToJson: false)
       PayTRInitResponse? paytrResponse,
       String? errorMessage,
+      PaymentMethod paymentMethod,
       int selectedInstallment,
       String? binNumber,
       InstallmentQuoteResponse? installmentQuote});
@@ -1983,6 +1992,7 @@ class __$$CheckoutStateImplCopyWithImpl<$Res>
     Object? orderId = freezed,
     Object? paytrResponse = freezed,
     Object? errorMessage = freezed,
+    Object? paymentMethod = null,
     Object? selectedInstallment = null,
     Object? binNumber = freezed,
     Object? installmentQuote = freezed,
@@ -2008,6 +2018,10 @@ class __$$CheckoutStateImplCopyWithImpl<$Res>
           ? _value.errorMessage
           : errorMessage // ignore: cast_nullable_to_non_nullable
               as String?,
+      paymentMethod: null == paymentMethod
+          ? _value.paymentMethod
+          : paymentMethod // ignore: cast_nullable_to_non_nullable
+              as PaymentMethod,
       selectedInstallment: null == selectedInstallment
           ? _value.selectedInstallment
           : selectedInstallment // ignore: cast_nullable_to_non_nullable
@@ -2033,6 +2047,7 @@ class _$CheckoutStateImpl implements _CheckoutState {
       this.orderId,
       @JsonKey(includeFromJson: false, includeToJson: false) this.paytrResponse,
       this.errorMessage,
+      this.paymentMethod = PaymentMethod.creditCard,
       this.selectedInstallment = 0,
       this.binNumber,
       this.installmentQuote});
@@ -2051,6 +2066,10 @@ class _$CheckoutStateImpl implements _CheckoutState {
   final PayTRInitResponse? paytrResponse;
   @override
   final String? errorMessage;
+// Ödeme yöntemi
+  @override
+  @JsonKey()
+  final PaymentMethod paymentMethod;
 // Taksit bilgileri
   @override
   @JsonKey()
@@ -2064,7 +2083,7 @@ class _$CheckoutStateImpl implements _CheckoutState {
 
   @override
   String toString() {
-    return 'CheckoutState(status: $status, merchantOid: $merchantOid, orderId: $orderId, paytrResponse: $paytrResponse, errorMessage: $errorMessage, selectedInstallment: $selectedInstallment, binNumber: $binNumber, installmentQuote: $installmentQuote)';
+    return 'CheckoutState(status: $status, merchantOid: $merchantOid, orderId: $orderId, paytrResponse: $paytrResponse, errorMessage: $errorMessage, paymentMethod: $paymentMethod, selectedInstallment: $selectedInstallment, binNumber: $binNumber, installmentQuote: $installmentQuote)';
   }
 
   @override
@@ -2080,6 +2099,8 @@ class _$CheckoutStateImpl implements _CheckoutState {
                 other.paytrResponse == paytrResponse) &&
             (identical(other.errorMessage, errorMessage) ||
                 other.errorMessage == errorMessage) &&
+            (identical(other.paymentMethod, paymentMethod) ||
+                other.paymentMethod == paymentMethod) &&
             (identical(other.selectedInstallment, selectedInstallment) ||
                 other.selectedInstallment == selectedInstallment) &&
             (identical(other.binNumber, binNumber) ||
@@ -2096,6 +2117,7 @@ class _$CheckoutStateImpl implements _CheckoutState {
       orderId,
       paytrResponse,
       errorMessage,
+      paymentMethod,
       selectedInstallment,
       binNumber,
       installmentQuote);
@@ -2117,6 +2139,7 @@ abstract class _CheckoutState implements CheckoutState {
       @JsonKey(includeFromJson: false, includeToJson: false)
       final PayTRInitResponse? paytrResponse,
       final String? errorMessage,
+      final PaymentMethod paymentMethod,
       final int selectedInstallment,
       final String? binNumber,
       final InstallmentQuoteResponse? installmentQuote}) = _$CheckoutStateImpl;
@@ -2131,7 +2154,9 @@ abstract class _CheckoutState implements CheckoutState {
   @JsonKey(includeFromJson: false, includeToJson: false)
   PayTRInitResponse? get paytrResponse;
   @override
-  String? get errorMessage; // Taksit bilgileri
+  String? get errorMessage; // Ödeme yöntemi
+  @override
+  PaymentMethod get paymentMethod; // Taksit bilgileri
   @override
   int get selectedInstallment; // 0=peşin, 3=3 taksit
   @override

@@ -311,8 +311,8 @@ class AdminDashboardPageContent extends ConsumerWidget {
               );
             }
 
-            // Show last 5 notifications
-            final recentNotifications = notifications.take(5).toList();
+            // Show last 3 notifications
+            final recentNotifications = notifications.take(3).toList();
 
             return Column(
               children: recentNotifications.map((notification) {

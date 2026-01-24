@@ -104,6 +104,11 @@ class AdminRepository {
     return await _apiService.updateAppointmentStatus(appointmentId, status);
   }
 
+  Future<void> deleteAppointment(
+      String appointmentId, String status) async {
+    return await _apiService.deleteAppointment(appointmentId, status);
+  }
+
   // Comments
   Future<List<Comment>> getComments() async {
     return await _apiService.getComments();

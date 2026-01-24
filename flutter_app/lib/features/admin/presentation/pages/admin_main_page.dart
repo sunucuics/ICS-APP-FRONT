@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/admin_navigation.dart';
 import '../widgets/admin_form_dialog.dart';
 import '../widgets/admin_service_form_dialog.dart';
+import '../widgets/admin_order_detail_dialog.dart';
 import '../../../../core/theme/app_theme.dart';
 import 'admin_dashboard_page.dart';
 import 'admin_categories_page.dart';
@@ -22,6 +23,7 @@ import '../../providers/admin_categories_provider.dart';
 import '../../providers/admin_services_provider.dart';
 import '../../providers/admin_comments_provider.dart';
 import '../../providers/admin_notifications_provider.dart';
+import '../../models/admin_notification_model.dart';
 import '../../models/admin_discount_model.dart';
 import '../../../../core/models/order_model.dart';
 import '../../../../core/models/appointment_model.dart';
@@ -212,7 +214,7 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
                 Row(
                   children: [
                     if (order.payment != null) 
-                      _buildPaymentStatusChip(order.payment!['status'] as String? ?? 'unknown'),
+                      _buildPaymentStatusChip(order.payment!.status),
                     const SizedBox(width: 8),
                     _buildStatusChip(
                         order.status.displayName, _getStatusColor(order.status)),
@@ -570,41 +572,7 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
   void _showOrderDetails(Order order) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Sipariş Detayları #${order.id}'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Müşteri ID: ${order.userId}', style: TextStyle(color: _textColor)),
-              if (order.customer.fullName != null)
-                Text('Müşteri: ${order.customer.fullName}', style: TextStyle(color: _textColor)),
-              if (order.customer.phone != null)
-                Text('Telefon: ${order.customer.phone}', style: TextStyle(color: _textColor)),
-              if (order.customer.email != null)
-                Text('Email: ${order.customer.email}', style: TextStyle(color: _textColor)),
-              const SizedBox(height: 16),
-              Text('Durum: ${order.status.displayName}', style: TextStyle(color: _textColor)),
-              const SizedBox(height: 16),
-              Text('Ürünler:', style: TextStyle(fontWeight: FontWeight.bold, color: _textColor)),
-              ...order.items.map((item) => Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text('• ${item.name} x${item.qty}', style: TextStyle(color: _textColor)),
-                  )),
-              const SizedBox(height: 16),
-              Text('Toplam: ${formatMoney(order.totals.grandTotal)}',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: _textColor)),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Kapat'),
-          ),
-        ],
-      ),
+      builder: (context) => AdminOrderDetailDialog(order: order),
     );
   }
 
@@ -1135,6 +1103,7 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
           'Admin Paneli',
           style: TextStyle(color: Colors.white),
@@ -1293,6 +1262,8 @@ class _AdminAppointmentsPageContentState
       return _buildEmptyStateForCategory(context, ref, status);
     }
 
+    final showDeleteButton = status.toLowerCase() == 'cancelled';
+
     return RefreshIndicator(
       onRefresh: () async {
         await ref.read(adminAppointmentsNotifierProvider.notifier).refresh();
@@ -1300,9 +1271,14 @@ class _AdminAppointmentsPageContentState
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: filteredAppointments.length,
-        itemBuilder: (context, index) {
+        itemBuilder: (_, index) {
           final appointment = filteredAppointments[index];
-          return _buildAppointmentCard(context, ref, appointment);
+          return _buildAppointmentCard(
+            context,
+            ref,
+            appointment,
+            showDeleteButton: showDeleteButton,
+          );
         },
       ),
     );
@@ -1330,7 +1306,11 @@ class _AdminAppointmentsPageContentState
   }
 
   Widget _buildAppointmentCard(
-      BuildContext context, WidgetRef ref, AppointmentWithDetails appointment) {
+    BuildContext context,
+    WidgetRef ref,
+    AppointmentWithDetails appointment, {
+    bool showDeleteButton = false,
+  }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 4,
@@ -1342,8 +1322,20 @@ class _AdminAppointmentsPageContentState
           children: [
             // Appointment Header
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                if (showDeleteButton)
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    color: Colors.red,
+                    iconSize: 24,
+                    onPressed: () =>
+                        _showDeleteAppointmentConfirmDialog(
+                            context, ref, appointment),
+                    tooltip: 'Sil',
+                  )
+                else
+                  const SizedBox.shrink(),
                 _buildStatusChip(
                     appointment.status, _getStatusColor(appointment.status)),
               ],
@@ -1501,6 +1493,93 @@ class _AdminAppointmentsPageContentState
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showDeleteAppointmentConfirmDialog(
+    BuildContext context,
+    WidgetRef ref,
+    AppointmentWithDetails appointment,
+  ) {
+    final scaffoldContext = context;
+    var isLoading = false;
+    showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (_, setState) {
+          return AlertDialog(
+            title: const Text('Randevuyu Sil'),
+            content: isLoading
+                ? const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      SizedBox(width: 16),
+                      Text('Siliniyor...'),
+                    ],
+                  )
+                : const Text(
+                    'Bu randevu kalıcı olarak silinecek. Bu işlem geri alınamaz. Devam etmek istiyor musunuz?',
+                  ),
+            actions: [
+              TextButton(
+                onPressed: isLoading
+                    ? null
+                    : () => Navigator.of(dialogContext).pop(),
+                child: const Text('İptal'),
+              ),
+              TextButton(
+                onPressed: isLoading
+                    ? null
+                    : () async {
+                        setState(() => isLoading = true);
+                        try {
+                          await ref
+                              .read(
+                                  adminAppointmentsNotifierProvider.notifier)
+                              .deleteAppointment(appointment.id);
+                          if (!dialogContext.mounted) return;
+                          Navigator.of(dialogContext).pop();
+                          if (scaffoldContext.mounted) {
+                            SnackBarService.showSnackBar(
+                              context: scaffoldContext,
+                              snackBar: const SnackBar(
+                                content: Text('Randevu silindi'),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (!dialogContext.mounted) return;
+                          setState(() => isLoading = false);
+                          if (scaffoldContext.mounted) {
+                            SnackBarService.showSnackBar(
+                              context: scaffoldContext,
+                              snackBar: SnackBar(
+                                content: Text(
+                                  'Silme hatası: ${e is ApiException ? e.message : e.toString()}',
+                                ),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                child: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Sil'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -3418,7 +3497,7 @@ class _AdminNotificationsPageContentState
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
   }
 
   @override
@@ -3437,6 +3516,7 @@ class _AdminNotificationsPageContentState
           unselectedLabelColor: _secondaryTextColor,
           indicatorColor: AppTheme.primaryOrange,
           tabs: const [
+            Tab(text: 'Gelen Bildirimler', icon: Icon(Icons.notifications)),
             Tab(text: 'Şablonlar', icon: Icon(Icons.description)),
             Tab(text: 'Gönder', icon: Icon(Icons.send)),
           ],
@@ -3445,6 +3525,7 @@ class _AdminNotificationsPageContentState
           child: TabBarView(
             controller: _tabController,
             children: [
+              _buildReceivedNotificationsTab(),
               _buildTemplatesTab(),
               _buildSendTab(),
             ],
@@ -3452,6 +3533,304 @@ class _AdminNotificationsPageContentState
         ),
       ],
     );
+  }
+
+  Widget _buildReceivedNotificationsTab() {
+    final notificationsAsync = ref.watch(adminPanelNotificationsNotifierProvider);
+    final unreadCountAsync = ref.watch(adminPanelUnreadCountProvider);
+
+    return Column(
+      children: [
+        // Header with unread count and actions
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Text(
+                    'Gelen Bildirimler',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  unreadCountAsync.when(
+                    data: (count) => count > 0
+                        ? Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              count.toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  onPressed: () {
+                    ref
+                        .read(adminPanelNotificationsNotifierProvider.notifier)
+                        .markAllAsRead();
+                  },
+                  icon: const Icon(Icons.done_all, size: 18),
+                  label: const Text('Tümünü Okundu İşaretle'),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Notifications list
+        Expanded(
+          child: notificationsAsync.when(
+            data: (notifications) {
+              if (notifications.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.notifications_none,
+                        size: 64,
+                        color: _emptyIconColor,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Henüz bildirim yok',
+                        style: TextStyle(
+                          color: _secondaryTextColor,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return RefreshIndicator(
+                onRefresh: () async {
+                  ref
+                      .read(adminPanelNotificationsNotifierProvider.notifier)
+                      .refresh();
+                },
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: notifications.length,
+                  itemBuilder: (context, index) {
+                    final notification = notifications[index];
+                    return _buildNotificationCard(context, notification);
+                  },
+                ),
+              );
+            },
+            loading: () => const Center(
+              child: CircularProgressIndicator(),
+            ),
+            error: (error, _) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 48, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Bildirimler yüklenemedi: $error',
+                    style: TextStyle(color: Colors.red[700]),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      ref
+                          .read(adminPanelNotificationsNotifierProvider.notifier)
+                          .refresh();
+                    },
+                    child: const Text('Tekrar Dene'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNotificationCard(
+      BuildContext context, AdminPanelNotification notification) {
+    final isUnread = !notification.isRead;
+    final typeIcon = _getNotificationTypeIcon(notification.type);
+    final typeColor = _getNotificationTypeColor(notification.type);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: isUnread ? 3 : 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: isUnread
+            ? BorderSide(color: typeColor.withOpacity(0.5), width: 2)
+            : BorderSide.none,
+      ),
+      child: InkWell(
+        onTap: () {
+          // Mark as read
+          if (isUnread) {
+            ref
+                .read(adminPanelNotificationsNotifierProvider.notifier)
+                .markAsRead(notification.id);
+          }
+          // Navigate based on notification type
+          if (notification.type == 'appointment' && notification.data != null) {
+            final appointmentId = notification.data!['appointment_id'] as String?;
+            if (appointmentId != null) {
+              // Navigate to appointments tab (index 4)
+              // This would require access to the parent's navigation callback
+              // For now, just mark as read
+            }
+          }
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: typeColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(typeIcon, color: typeColor, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            notification.title,
+                            style: TextStyle(
+                              fontWeight:
+                                  isUnread ? FontWeight.bold : FontWeight.w600,
+                              fontSize: 16,
+                              color: _textColor,
+                            ),
+                          ),
+                        ),
+                        if (isUnread)
+                          Container(
+                            width: 10,
+                            height: 10,
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      notification.body,
+                      style: TextStyle(
+                        color: _secondaryTextColor,
+                        fontSize: 14,
+                      ),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (notification.createdAt != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        _formatTimeAgo(notification.createdAt!),
+                        style: TextStyle(
+                          color: _iconColor,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.delete_outline,
+                  color: Colors.grey[400],
+                  size: 20,
+                ),
+                onPressed: () {
+                  ref
+                      .read(adminPanelNotificationsNotifierProvider.notifier)
+                      .deleteNotification(notification.id);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  IconData _getNotificationTypeIcon(String type) {
+    switch (type) {
+      case 'appointment':
+        return Icons.event;
+      case 'order':
+        return Icons.shopping_cart;
+      case 'comment':
+        return Icons.comment;
+      default:
+        return Icons.notifications;
+    }
+  }
+
+  Color _getNotificationTypeColor(String type) {
+    switch (type) {
+      case 'appointment':
+        return Colors.teal;
+      case 'order':
+        return Colors.green;
+      case 'comment':
+        return Colors.orange;
+      default:
+        return AppTheme.primaryNavy;
+    }
+  }
+
+  String _formatTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inMinutes < 1) {
+      return 'Az önce';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} dakika önce';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours} saat önce';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} gün önce';
+    } else {
+      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    }
   }
 
   Widget _buildTemplatesTab() {
