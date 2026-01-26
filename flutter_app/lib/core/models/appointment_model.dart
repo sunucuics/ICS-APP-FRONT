@@ -77,9 +77,10 @@ class AppointmentWithDetails with _$AppointmentWithDetails {
 
   factory AppointmentWithDetails.fromJson(Map<String, dynamic> json) {
     final userJson = json['user'] as Map<String, dynamic>?;
+    final serviceJson = json['service'] as Map<String, dynamic>?;
     return AppointmentWithDetails(
       id: json['id'] as String? ?? '',
-      serviceId: json['service_id'] as String? ?? '',
+      serviceId: json['service_id'] as String? ?? serviceJson?['id'] as String? ?? '',
       userId: json['user_id'] as String? ?? userJson?['id'] as String?,
       start: _parseBackendDateTime(json['start']),
       end: _parseBackendDateTime(json['end']),

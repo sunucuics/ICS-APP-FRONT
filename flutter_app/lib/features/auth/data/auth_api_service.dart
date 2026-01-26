@@ -105,15 +105,17 @@ class AuthApiService {
         }
       }
 
-      // 7. Token'ları secure storage'a kaydet
+      // 7. Token'ları expire time ile birlikte kaydet (Instagram gibi kalıcı oturum için)
       if (finalRefreshToken.isNotEmpty) {
-        await TokenStorageService.saveTokens(
+        await TokenStorageService.saveTokensWithExpiry(
           accessToken: finalIdToken,
           refreshToken: finalRefreshToken,
+          expiresInSeconds: finalExpiresIn,
         );
-        AppLogger.debug('AuthApiService: Tokens saved to secure storage');
+        AppLogger.debug('AuthApiService: Tokens saved with expiry to secure storage');
       } else if (finalIdToken.isNotEmpty) {
         // Sadece access token varsa onu kaydet (refresh token olmadan)
+        // Bu durumda expire time de kaydet
         await TokenStorageService.saveAccessToken(finalIdToken);
         AppLogger.warning('AuthApiService: Only access token saved (no refresh token)');
       }
@@ -235,17 +237,27 @@ class AuthApiService {
       final expiresIn = response.data['expires_in'] as int;
       final userId = response.data['user_id'] as String;
 
-      // 4. Token'ları secure storage'a kaydet
-      await TokenStorageService.saveTokens(
+      // 4. Token'ları expire time ile birlikte kaydet (Instagram gibi kalıcı oturum için)
+      await TokenStorageService.saveTokensWithExpiry(
         accessToken: idToken,
         refreshToken: refreshToken,
+        expiresInSeconds: expiresIn,
       );
-      AppLogger.debug('AuthApiService: Tokens saved to secure storage');
+      AppLogger.debug('AuthApiService: Tokens saved with expiry to secure storage');
 
-      // 5. Firebase'e de giriş yap (mevcut sistemle uyumluluk için)
-      // Not: Backend login zaten Firebase'e sign-in yapıyor, burada tekrar yapmaya gerek yok
-      // Ancak Firebase Auth state'i senkronize etmek için yapılabilir
-      // Şimdilik atlıyoruz çünkü backend token'ları kullanıyoruz
+      // 5. Firebase'e de giriş yap (session persistence için)
+      // Bu sayede uygulama yeniden açıldığında Firebase Auth state de persist edilir
+      try {
+        await FirebaseAuthService.signInWithEmailAndPassword(
+          email: request.email,
+          password: request.password,
+        );
+        AppLogger.debug('AuthApiService: Firebase sign-in successful for persistence');
+      } catch (firebaseError) {
+        // Firebase sign-in başarısız olsa bile devam et
+        // Token-based auth çalışmaya devam edecek
+        AppLogger.warning('AuthApiService: Firebase sign-in failed, continuing with token auth', firebaseError);
+      }
 
       // 6. User profile'ını çek
       final userProfile = await getCurrentUser();
@@ -264,12 +276,27 @@ class AuthApiService {
   }
 
   // Refresh Token - Backend refresh endpoint'ini kullan
+  // NOT: Bu method user profile çekmiyor çünkü token refresh sırasında
+  // getCurrentUser() çağrısı döngüsel bağımlılık yaratır.
+  // User profile gerekiyorsa, token refresh sonrası ayrıca çekilmeli.
+  // ÖNEMLİ: Ayrı Dio instance kullanılıyor - interceptor'lardan geçmez, döngüsel sorun olmaz
   Future<AuthResponse> refreshToken(String refreshToken) async {
     AppLogger.info('AuthApiService: Refreshing token');
 
     try {
+      // Ayrı Dio instance - interceptor'lardan geçmez, döngüsel sorun olmaz
+      final dio = Dio(BaseOptions(
+        baseUrl: ApiEndpoints.baseUrl,
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ));
+
       // Backend refresh endpoint'ine istek gönder
-      final response = await _apiClient.post(
+      final response = await dio.post(
         ApiEndpoints.authRefresh,
         data: {
           'refresh_token': refreshToken,
@@ -283,19 +310,19 @@ class AuthApiService {
       final newRefreshToken = response.data['refresh_token'] as String;
       final expiresIn = response.data['expires_in'] as int;
 
-      // Token'ları secure storage'a kaydet
-      await TokenStorageService.saveTokens(
+      // Token'ları expire time ile birlikte kaydet (Instagram gibi kalıcı oturum için)
+      await TokenStorageService.saveTokensWithExpiry(
         accessToken: idToken,
         refreshToken: newRefreshToken,
+        expiresInSeconds: expiresIn,
       );
-      AppLogger.debug('AuthApiService: New tokens saved to secure storage');
+      AppLogger.debug('AuthApiService: New tokens saved with expiry to secure storage');
 
-      // User profile'ını çek (userId için)
-      final userProfile = await getCurrentUser();
-
+      // User profile'ı burada çekmiyoruz - döngüsel bağımlılık önlenir
+      // Caller gerekirse ayrıca getCurrentUser() çağırabilir
       return AuthResponse(
-        userId: userProfile.id,
-        user: userProfile,
+        userId: '', // Token refresh sonrası bilinmiyor
+        user: const UserProfile(id: '', email: ''), // Placeholder profile
         idToken: idToken,
         refreshToken: newRefreshToken,
         expiresIn: expiresIn,

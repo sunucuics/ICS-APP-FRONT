@@ -341,40 +341,157 @@ class GuestWelcomePage extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Header
               const Text(
-                '1. Hizmet Kullanımı',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                'INNOVA CRAFT STUDIO (ICS)',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               const Text(
-                'Innova Craft Studio uygulamasını kullanarak bu koşulları kabul etmiş olursunuz. Uygulama, el yapımı ürünler ve sanat eserleri satışı için tasarlanmıştır.',
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                '2. Hesap Sorumluluğu',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Hesap bilgilerinizi güvenli tutmak sizin sorumluluğunuzdadır. Şifrenizi kimseyle paylaşmayın.',
+                'KULLANIM KOŞULLARI',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
+              // 1. Taraflar ve Kabul
               const Text(
-                '3. Ürün Sorumluluğu',
+                '1. Taraflar ve Kabul',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               const Text(
-                'Satın aldığınız ürünlerin kalitesi ve teslimatından sorumluyuz. Ürünler el yapımı olduğu için küçük farklılıklar olabilir.',
+                'Innova Craft Studio (ICS) tarafından sunulan mobil uygulama, web sitesi ve tüm dijital platformları kullanan herkes işbu Kullanım Koşulları\'nı okumuş, anlamış ve kabul etmiş sayılır.',
               ),
               const SizedBox(height: 16),
+              // 2. Platformun Amacı ve Kapsamı
               const Text(
-                '4. İptal ve İade',
+                '2. Platformun Amacı ve Kapsamı',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               const Text(
-                'Ürünler özel yapım olduğu için sipariş verildikten sonra iptal edilemez. Hasar durumunda iade yapılır.',
+                'ICS; aydınlatma sistemleri, ışıklı tabelalar, akıllı apartman giriş sistemleri, dekoratif ve teknolojik ürünler, hırdavat ürünleri ile bunlara bağlı hizmetlerin üretimi, satışı ve e-ticaret faaliyetlerini yürüten çok yönlü bir dijital platformdur.',
+              ),
+              const SizedBox(height: 16),
+              // 3. Ürün Satışı ve E-Ticaret
+              const Text(
+                '3. Ürün Satışı ve E-Ticaret',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'ICS;\n- Kendi üretimi olan ürünleri,\n- Konseptine uygun üçüncü taraf tedarikçilerden temin edilen ürünleri,\n- Hırdavat, teknik ekipman ve aksesuarları\ne-ticaret kapsamında satışa sunabilir.\n\nÜrünlerin seçimi, stok durumu, fiyatlandırması ve satıştan kaldırılması tamamen ICS yetkisindedir.',
+              ),
+              const SizedBox(height: 16),
+              // 4. Özel Üretim ve Ürün Bilgileri
+              const Text(
+                '4. Özel Üretim ve Ürün Bilgileri',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Bazı ürünler siparişe özel veya el işçiliğiyle üretilebilir. Bu ürünlerde ölçü, renk ve tasarım farklılıkları oluşabilir ve bu durum ayıp olarak kabul edilmez.',
+              ),
+              const SizedBox(height: 16),
+              // 5. Sipariş Süreci
+              const Text(
+                '5. Sipariş Süreci',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Uygulama veya platform üzerinden verilen siparişler elektronik ortamda onaylanır. Sipariş onayıyla birlikte satış sözleşmesi kurulmuş sayılır.',
+              ),
+              const SizedBox(height: 16),
+              // 6. Ödeme
+              const Text(
+                '6. Ödeme',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Ödemeler güvenli ödeme altyapıları aracılığıyla yapılır. Ödeme tamamlanmadan sipariş işleme alınmaz.',
+              ),
+              const SizedBox(height: 16),
+              // 7. Teslimat
+              const Text(
+                '7. Teslimat',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Teslimat süreleri ürün türüne, üretim süresine ve kargo koşullarına göre değişiklik gösterebilir. Kargo kaynaklı gecikmelerden ICS sorumlu tutulamaz.',
+              ),
+              const SizedBox(height: 16),
+              // 8. İptal, İade ve Cayma Hakkı
+              const Text(
+                '8. İptal, İade ve Cayma Hakkı',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Standart ürünlerde yürürlükteki tüketici mevzuatı uygulanır. Siparişe özel üretilen veya kişiselleştirilmiş ürünlerde cayma hakkı kullanılamaz.',
+              ),
+              const SizedBox(height: 16),
+              // 9. Hizmetler
+              const Text(
+                '9. Hizmetler',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'ICS; montaj, kurulum, danışmanlık ve teknik destek hizmetleri sunabilir. Hizmetlerin kapsamı, süresi ve bedeli platformda belirtilir.',
+              ),
+              const SizedBox(height: 16),
+              // 10. Kullanıcı Yükümlülükleri
+              const Text(
+                '10. Kullanıcı Yükümlülükleri',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Kullanıcılar platformu hukuka, ahlaka ve amacına uygun şekilde kullanmakla yükümlüdür.',
+              ),
+              const SizedBox(height: 16),
+              // 11. Sorumluluğun Sınırlandırılması
+              const Text(
+                '11. Sorumluluğun Sınırlandırılması',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Ürünlerin hatalı veya amacına aykırı kullanımından doğabilecek zararlardan ICS sorumlu değildir. Hırdavat ve teknik ürünlerin kullanım sorumluluğu kullanıcıya aittir.',
+              ),
+              const SizedBox(height: 16),
+              // 12. Fikri Mülkiyet Hakları
+              const Text(
+                '12. Fikri Mülkiyet Hakları',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Platformda yer alan tüm içerik, tasarım, metin ve görseller ICS\'ye aittir. İzinsiz kullanılamaz.',
+              ),
+              const SizedBox(height: 16),
+              // 13. Değişiklikler
+              const Text(
+                '13. Değişiklikler',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'ICS, işbu kullanım koşullarını önceden bildirimde bulunmaksızın değiştirme hakkını saklı tutar.',
+              ),
+              const SizedBox(height: 16),
+              // 14. Yürürlük
+              const Text(
+                '14. Yürürlük',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'İşbu Kullanım Koşulları platformda yayınlandığı tarihten itibaren yürürlüğe girer.',
               ),
             ],
           ),

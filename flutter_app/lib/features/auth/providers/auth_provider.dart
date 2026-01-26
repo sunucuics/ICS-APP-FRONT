@@ -67,9 +67,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
             await _loadUserProfile();
           }
         } else {
-          // User is signed out
-          AppLogger.debug('AuthProvider: User signed out, updating state');
-          state = const AuthState(isAuthenticated: false);
+          // User is signed out from Firebase
+          // But check if we have tokens - token-based auth might still work
+          final hasTokens = await TokenStorageService.hasTokens();
+          if (!hasTokens) {
+            // No tokens either, user is truly signed out
+            AppLogger.debug('AuthProvider: User signed out, no tokens found, updating state');
+            state = const AuthState(isAuthenticated: false);
+          } else {
+            // Firebase user is null but tokens exist
+            // Don't immediately sign out - let _checkInitialAuthStatus handle it
+            AppLogger.debug('AuthProvider: Firebase user null but tokens exist, keeping session');
+            // If not yet initialized, _checkInitialAuthStatus will handle the auth flow
+            // If already initialized and authenticated, keep the session
+            if (_isInitialized && !state.isAuthenticated) {
+              // Already initialized but not authenticated - try to load profile with tokens
+              await _loadUserProfile();
+            }
+          }
         }
       });
 

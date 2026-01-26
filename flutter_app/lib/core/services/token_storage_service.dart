@@ -16,6 +16,7 @@ class TokenStorageService {
   // Storage key'leri
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
+  static const String _expiresAtKey = 'token_expires_at';
 
   /// Access token'ı kaydet
   static Future<void> saveAccessToken(String token) async {
@@ -53,6 +54,78 @@ class TokenStorageService {
     } catch (e) {
       AppLogger.error('TokenStorageService: Failed to save tokens', e);
       rethrow;
+    }
+  }
+
+  /// Token'ları expire time ile birlikte kaydet
+  /// Instagram gibi kalıcı oturum için - token expire olmadan önce refresh yapılır
+  static Future<void> saveTokensWithExpiry({
+    required String accessToken,
+    required String refreshToken,
+    required int expiresInSeconds,
+  }) async {
+    try {
+      final expiresAt = DateTime.now().add(Duration(seconds: expiresInSeconds));
+      await Future.wait([
+        saveAccessToken(accessToken),
+        saveRefreshToken(refreshToken),
+        _secureStorage.write(key: _expiresAtKey, value: expiresAt.toIso8601String()),
+      ]);
+      AppLogger.debug('TokenStorageService: Tokens saved with expiry: $expiresAt');
+    } catch (e) {
+      AppLogger.error('TokenStorageService: Failed to save tokens with expiry', e);
+      rethrow;
+    }
+  }
+
+  /// Token'ın expire zamanını oku
+  static Future<DateTime?> getExpiresAt() async {
+    try {
+      final expiresAtStr = await _secureStorage.read(key: _expiresAtKey);
+      if (expiresAtStr == null) return null;
+      return DateTime.parse(expiresAtStr);
+    } catch (e) {
+      AppLogger.error('TokenStorageService: Failed to read expires_at', e);
+      return null;
+    }
+  }
+
+  /// Token'ın expire olup olmadığını kontrol et
+  static Future<bool> isTokenExpired() async {
+    try {
+      final expiresAt = await getExpiresAt();
+      if (expiresAt == null) {
+        // Expire zamanı bilinmiyorsa, expired kabul et (güvenli taraf)
+        AppLogger.debug('TokenStorageService: No expires_at found, assuming expired');
+        return true;
+      }
+      final isExpired = DateTime.now().isAfter(expiresAt);
+      AppLogger.debug('TokenStorageService: Token expired: $isExpired (expires at: $expiresAt)');
+      return isExpired;
+    } catch (e) {
+      AppLogger.error('TokenStorageService: Failed to check token expiry', e);
+      return true;
+    }
+  }
+
+  /// Token'ın refresh edilmesi gerekip gerekmediğini kontrol et
+  /// Expire'dan 5 dakika önce true döner (proaktif refresh için)
+  static Future<bool> shouldRefreshToken() async {
+    try {
+      final expiresAt = await getExpiresAt();
+      if (expiresAt == null) {
+        // Expire zamanı bilinmiyorsa, refresh gerekli
+        AppLogger.debug('TokenStorageService: No expires_at found, refresh needed');
+        return true;
+      }
+      // 5 dakika kala refresh yap
+      final refreshThreshold = expiresAt.subtract(const Duration(minutes: 5));
+      final shouldRefresh = DateTime.now().isAfter(refreshThreshold);
+      AppLogger.debug('TokenStorageService: Should refresh: $shouldRefresh (threshold: $refreshThreshold)');
+      return shouldRefresh;
+    } catch (e) {
+      AppLogger.error('TokenStorageService: Failed to check if should refresh', e);
+      return true;
     }
   }
 
@@ -102,6 +175,7 @@ class TokenStorageService {
       await Future.wait([
         _secureStorage.delete(key: _accessTokenKey),
         _secureStorage.delete(key: _refreshTokenKey),
+        _secureStorage.delete(key: _expiresAtKey),
       ]);
       AppLogger.debug('TokenStorageService: All tokens cleared');
     } catch (e) {

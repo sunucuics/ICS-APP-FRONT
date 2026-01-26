@@ -17,6 +17,7 @@ import 'admin_comments_page.dart';
 import 'admin_notifications_page.dart';
 import '../../providers/admin_orders_provider.dart';
 import '../../providers/admin_appointments_provider.dart';
+import '../../../../features/appointments/providers/appointments_provider.dart';
 import '../../providers/admin_discounts_provider.dart';
 import '../../providers/admin_products_provider.dart';
 import '../../providers/admin_categories_provider.dart';
@@ -1114,35 +1115,35 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
         actions: [
           if (_selectedIndex == 3) // Orders page
             IconButton(
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh, color: Colors.white),
               onPressed: () {
                 ref.read(adminOrdersQueueProvider.notifier).refresh();
               },
             ),
           if (_selectedIndex == 4) // Appointments page
             IconButton(
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh, color: Colors.white),
               onPressed: () {
                 ref.read(adminAppointmentsNotifierProvider.notifier).refresh();
               },
             ),
           if (_selectedIndex == 5) // Discounts page
             IconButton(
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh, color: Colors.white),
               onPressed: () {
                 ref.read(adminDiscountsNotifierProvider.notifier).refresh();
               },
             ),
           if (_selectedIndex == 6) // Services page
             IconButton(
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh, color: Colors.white),
               onPressed: () {
                 ref.read(adminServicesNotifierProvider.notifier).refresh();
               },
             ),
           if (_selectedIndex == 8) // Comments page
             IconButton(
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh, color: Colors.white),
               onPressed: () {
                 ref.read(adminCommentsProvider.notifier).refresh();
               },
@@ -1200,48 +1201,64 @@ class _AdminAppointmentsPageContentState
   Widget build(BuildContext context) {
     final appointmentsAsync = ref.watch(adminAppointmentsNotifierProvider);
 
-    return Column(
+    return Stack(
       children: [
-        // Tab Bar
-        Container(
-          color: _isDarkTheme ? Colors.grey[900] : Colors.white,
-          child: TabBar(
-            controller: _tabController,
-            labelColor: AppTheme.primaryOrange,
-            unselectedLabelColor: _isDarkTheme ? Colors.white70 : Colors.grey[600]!,
-            indicatorColor: AppTheme.primaryOrange,
-            indicatorWeight: 3,
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            labelPadding: const EdgeInsets.symmetric(horizontal: 16),
-            tabs: const [
-              Tab(text: 'Onay Bekleyen'),
-              Tab(text: 'Aktif'),
-              Tab(text: 'Tamamlananlar'),
-              Tab(text: 'İptal Edilenler'),
-            ],
-          ),
-        ),
-        // Tab Bar View
-        Expanded(
-          child: appointmentsAsync.when(
-            data: (appointments) => TabBarView(
-              controller: _tabController,
-              children: [
-                _buildFilteredAppointmentsList(
-                    context, ref, appointments, 'pending'),
-                _buildFilteredAppointmentsList(
-                    context, ref, appointments, 'approved'),
-                _buildFilteredAppointmentsList(
-                    context, ref, appointments, 'completed'),
-                _buildFilteredAppointmentsList(
-                    context, ref, appointments, 'cancelled'),
-              ],
+        Column(
+          children: [
+            // Tab Bar
+            Container(
+              color: _isDarkTheme ? Colors.grey[900] : Colors.white,
+              child: TabBar(
+                controller: _tabController,
+                labelColor: AppTheme.primaryOrange,
+                unselectedLabelColor: _isDarkTheme ? Colors.white70 : Colors.grey[600]!,
+                indicatorColor: AppTheme.primaryOrange,
+                indicatorWeight: 3,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                labelPadding: const EdgeInsets.symmetric(horizontal: 16),
+                tabs: const [
+                  Tab(text: 'Onay Bekleyen'),
+                  Tab(text: 'Aktif'),
+                  Tab(text: 'Tamamlananlar'),
+                  Tab(text: 'İptal Edilenler'),
+                ],
+              ),
             ),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stack) =>
-                _buildErrorWidget(context, ref, error.toString()),
+            // Tab Bar View
+            Expanded(
+              child: appointmentsAsync.when(
+                data: (appointments) => TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildFilteredAppointmentsList(
+                        context, ref, appointments, 'pending'),
+                    _buildFilteredAppointmentsList(
+                        context, ref, appointments, 'approved'),
+                    _buildFilteredAppointmentsList(
+                        context, ref, appointments, 'completed'),
+                    _buildFilteredAppointmentsList(
+                        context, ref, appointments, 'cancelled'),
+                  ],
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) =>
+                    _buildErrorWidget(context, ref, error.toString()),
+              ),
+            ),
+          ],
+        ),
+        // FAB for blocking time slots
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: FloatingActionButton.extended(
+            onPressed: () => _showBlockTimeDialog(context, ref),
+            backgroundColor: AppTheme.primaryOrange,
+            foregroundColor: Colors.white,
+            icon: const Icon(Icons.add),
+            label: const Text('Saat Blokla'),
           ),
         ),
       ],
@@ -1862,6 +1879,580 @@ class _AdminAppointmentsPageContentState
       default:
         return status;
     }
+  }
+
+  void _showBlockTimeDialog(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (bottomSheetContext) => _BlockTimeBottomSheet(
+        onSubmit: (serviceId, start, end, notes) async {
+          try {
+            await ref.read(createAppointmentAdminProvider.notifier).createAppointment(
+              serviceId: serviceId,
+              userId: null, // null = blocked slot (no customer)
+              start: start,
+              end: end,
+            );
+            
+            // Refresh the appointments list
+            await ref.read(adminAppointmentsNotifierProvider.notifier).refresh();
+            
+            if (bottomSheetContext.mounted) {
+              Navigator.of(bottomSheetContext).pop();
+            }
+            if (context.mounted) {
+              SnackBarService.showSnackBar(
+                context: context,
+                snackBar: const SnackBar(
+                  content: Text('Saat başarıyla bloklandı'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            }
+          } catch (e) {
+            if (context.mounted) {
+              String errorMessage = 'Bir hata oluştu';
+              if (e is ApiException) {
+                if (e.message.toLowerCase().contains('overlap')) {
+                  errorMessage = 'Bu saat dilimi zaten dolu';
+                } else {
+                  errorMessage = e.message;
+                }
+              } else if (e.toString().toLowerCase().contains('overlap')) {
+                errorMessage = 'Bu saat dilimi zaten dolu';
+              }
+              SnackBarService.showSnackBar(
+                context: context,
+                snackBar: SnackBar(
+                  content: Text(errorMessage),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        },
+      ),
+    );
+  }
+}
+
+class _BlockTimeBottomSheet extends ConsumerStatefulWidget {
+  final Future<void> Function(String serviceId, DateTime start, DateTime? end, String? notes) onSubmit;
+
+  const _BlockTimeBottomSheet({
+    required this.onSubmit,
+  });
+
+  @override
+  ConsumerState<_BlockTimeBottomSheet> createState() => _BlockTimeBottomSheetState();
+}
+
+class _BlockTimeBottomSheetState extends ConsumerState<_BlockTimeBottomSheet> {
+  String? _selectedServiceId;
+  DateTime _selectedDate = DateTime.now();
+  String? _selectedTimeSlot;
+  final TextEditingController _notesController = TextEditingController();
+  bool _isLoading = false;
+
+  // Working hours (09:00 - 18:00)
+  final List<String> _workingHours = List.generate(
+    9,
+    (index) => '${(9 + index).toString().padLeft(2, '0')}:00',
+  );
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  bool get _isDarkTheme => Theme.of(context).brightness == Brightness.dark;
+
+  Future<void> _selectDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+        _selectedTimeSlot = null; // Reset selected time when date changes
+      });
+    }
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+      'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+    ];
+    return months[month - 1];
+  }
+
+  List<AppointmentWithDetails> _getBusySlotsForDate(List<AppointmentWithDetails> appointments) {
+    final dateString = _selectedDate.toIso8601String().split('T')[0];
+    return appointments.where((apt) {
+      final aptDateString = apt.start.toIso8601String().split('T')[0];
+      final status = apt.status.toLowerCase();
+      return aptDateString == dateString && 
+             (status == 'pending' || status == 'approved' || status == 'confirmed');
+    }).toList();
+  }
+
+  bool _isSlotBusy(String hour, List<AppointmentWithDetails> busyAppointments) {
+    for (final apt in busyAppointments) {
+      // Backend UTC olarak saklıyor, karşılaştırma için local saate çevir
+      final aptHour = apt.start.toLocal().hour.toString().padLeft(2, '0');
+      if (aptHour == hour.split(':')[0]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Future<void> _submit() async {
+    if (_selectedServiceId == null) {
+      SnackBarService.showSnackBar(
+        context: context,
+        snackBar: const SnackBar(
+          content: Text('Lütfen bir hizmet seçin'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_selectedTimeSlot == null) {
+      SnackBarService.showSnackBar(
+        context: context,
+        snackBar: const SnackBar(
+          content: Text('Lütfen bir saat seçin'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final hour = int.parse(_selectedTimeSlot!.split(':')[0]);
+    // Local time olarak oluştur, sonra UTC'ye çevir (backend UTC bekliyor)
+    final localStart = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, hour, 0);
+    final start = localStart.toUtc();
+    final end = start.add(const Duration(hours: 1));
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    await widget.onSubmit(
+      _selectedServiceId!,
+      start,
+      end,
+      _notesController.text.isEmpty ? null : _notesController.text,
+    );
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appointmentsAsync = ref.watch(adminAppointmentsNotifierProvider);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: _isDarkTheme ? Colors.grey[900] : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Handle bar
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              
+              // Title
+              Text(
+                'Saat Blokla',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: _isDarkTheme ? Colors.white : Colors.black87,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Seçtiğiniz saat müşteriler için kapalı olacaktır',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: _isDarkTheme ? Colors.white70 : Colors.grey[600],
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+
+              // Service Dropdown
+              ref.watch(adminServicesNotifierProvider).when(
+                data: (services) {
+                  if (services.isEmpty) {
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        'Henüz hizmet bulunmuyor. Önce bir hizmet oluşturun.',
+                        textAlign: TextAlign.center,
+                      ),
+                    );
+                  }
+                  return DropdownButtonFormField<String>(
+                    value: _selectedServiceId,
+                    decoration: InputDecoration(
+                      labelText: 'Hizmet Seçin',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: const Icon(Icons.work_outline),
+                    ),
+                    items: services.map((service) {
+                      return DropdownMenuItem<String>(
+                        value: service.id,
+                        child: Text(service.title),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedServiceId = value;
+                        _selectedTimeSlot = null;
+                      });
+                    },
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Hizmetler yüklenirken hata oluştu: $error',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Date Picker
+              InkWell(
+                onTap: _selectDate,
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey[400]!),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.calendar_today, color: AppTheme.primaryOrange),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Tarih',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: _isDarkTheme ? Colors.white70 : Colors.grey[600],
+                              ),
+                            ),
+                            Text(
+                              '${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: _isDarkTheme ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(Icons.arrow_drop_down, color: Colors.grey[600]),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Time Slots Header
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryOrange.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.access_time_rounded,
+                      color: AppTheme.primaryOrange,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Saatler',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: _isDarkTheme ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      Text(
+                        '${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: _isDarkTheme ? Colors.white70 : Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Time Slots Grid
+              appointmentsAsync.when(
+                data: (appointments) {
+                  // Filter appointments for selected service
+                  final serviceAppointments = _selectedServiceId != null
+                      ? appointments.where((apt) => apt.serviceId == _selectedServiceId).toList()
+                      : appointments;
+                  final busySlots = _getBusySlotsForDate(serviceAppointments);
+
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      childAspectRatio: 2.2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                    ),
+                    itemCount: _workingHours.length,
+                    itemBuilder: (context, index) {
+                      final hour = _workingHours[index];
+                      final isBusy = _isSlotBusy(hour, busySlots);
+                      final isSelected = _selectedTimeSlot == hour;
+
+                      return _buildTimeSlotButton(hour, isBusy, isSelected);
+                    },
+                  );
+                },
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                error: (error, stack) => Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Saatler yüklenirken hata: $error',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Notes Field (optional)
+              TextField(
+                controller: _notesController,
+                decoration: InputDecoration(
+                  labelText: 'Not (Opsiyonel)',
+                  hintText: 'Örn: Toplantı, Özel randevu...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  prefixIcon: const Icon(Icons.note_alt_outlined),
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 24),
+
+              // Submit Button
+              ElevatedButton(
+                onPressed: _isLoading || _selectedTimeSlot == null ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryOrange,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: Colors.grey.withOpacity(0.3),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : Text(
+                        _selectedTimeSlot != null 
+                            ? 'Saati Blokla ($_selectedTimeSlot)'
+                            : 'Saat Seçin',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimeSlotButton(String hour, bool isBusy, bool isSelected) {
+    if (isBusy) {
+      // Busy slot - show with X
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.grey.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Stack(
+          children: [
+            Center(
+              child: Text(
+                hour,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey.withOpacity(0.5),
+                ),
+              ),
+            ),
+            Center(
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.close_rounded,
+                  color: Colors.red,
+                  size: 22,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Available slot
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedTimeSlot = hour;
+        });
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: isSelected
+              ? LinearGradient(
+                  colors: [
+                    AppTheme.primaryOrange,
+                    AppTheme.primaryOrange.withOpacity(0.8),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: isSelected ? null : AppTheme.primaryOrange,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primaryOrange.withOpacity(isSelected ? 0.4 : 0.3),
+              blurRadius: isSelected ? 12 : 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          border: isSelected
+              ? Border.all(color: Colors.white, width: 2)
+              : null,
+        ),
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (isSelected)
+                const Padding(
+                  padding: EdgeInsets.only(right: 4),
+                  child: Icon(
+                    Icons.check_circle,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+              Text(
+                hour,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

@@ -150,10 +150,13 @@ class AuthInterceptor extends Interceptor {
       }
 
       // Backend refresh endpoint'ine istek gönder
+      // NOT: AuthApiService.refreshToken() ayrı Dio instance kullanır,
+      // bu interceptor'dan geçmez - döngüsel sorun olmaz
+      // Token'lar expire time ile birlikte kaydedilir (Instagram gibi kalıcı oturum)
       final authApiService = AuthApiService();
       final authResponse = await authApiService.refreshToken(refreshToken);
 
-      AppLogger.success('AuthInterceptor: Token refreshed successfully');
+      AppLogger.success('AuthInterceptor: Token refreshed successfully with expiry');
 
       // Yeni token'ları kullan (zaten secure storage'a kaydedildi)
       final newAccessToken = authResponse.idToken;

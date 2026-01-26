@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/anonymous_auth_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../../../core/services/snackbar_service.dart';
 
 class GuestUpgradePage extends ConsumerStatefulWidget {
@@ -334,6 +334,32 @@ class _GuestUpgradePageState extends ConsumerState<GuestUpgradePage> {
     );
   }
 
+  /// Formats phone number to "555 123 4567" format for backend
+  String? _formatPhoneNumber(String phone) {
+    if (phone.isEmpty) return null;
+
+    // Remove all non-digit characters
+    String digitsOnly = phone.replaceAll(RegExp(r'\D'), '');
+
+    // Remove leading zero if present
+    if (digitsOnly.startsWith('0')) {
+      digitsOnly = digitsOnly.substring(1);
+    }
+
+    // Remove country code if present (90 for Turkey)
+    if (digitsOnly.startsWith('90') && digitsOnly.length > 10) {
+      digitsOnly = digitsOnly.substring(2);
+    }
+
+    // If we have exactly 10 digits, format as "555 123 4567"
+    if (digitsOnly.length == 10) {
+      return '${digitsOnly.substring(0, 3)} ${digitsOnly.substring(3, 6)} ${digitsOnly.substring(6)}';
+    }
+
+    // If format doesn't match expected, return as is
+    return phone;
+  }
+
   Widget _buildActionButtons(BuildContext context) {
     return Column(
       children: [
@@ -400,28 +426,64 @@ class _GuestUpgradePageState extends ConsumerState<GuestUpgradePage> {
     });
 
     try {
-      final authNotifier = ref.read(anonymousAuthProvider.notifier);
-
-      await authNotifier.linkWithEmailAndPassword(
+      // Use real auth provider for registration (same as RegisterPage)
+      final success = await ref.read(authProvider.notifier).register(
+        name: _nameController.text.trim(),
+        phone: _formatPhoneNumber(_phoneController.text.trim()),
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
       if (mounted) {
-        SnackBarService.showSnackBar(context: context, snackBar: 
-          const SnackBar(
-            content: Text('Hesap başarıyla oluşturuldu!'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        if (success) {
+          SnackBarService.showSnackBar(
+            context: context,
+            snackBar: const SnackBar(
+              content: Text('Hesap başarıyla oluşturuldu!'),
+              backgroundColor: Colors.green,
+            ),
+          );
 
-        // Navigate back to main app
-        Navigator.of(context).pop();
+          // Navigate back to main app
+          Navigator.of(context).pop();
+        } else {
+          // Show error message
+          final error = ref.read(authErrorProvider);
+          String userFriendlyError = 'Hesap oluşturulurken bir hata oluştu';
+
+          if (error != null) {
+            if (error.contains('Bu e-posta zaten kayıtlı') ||
+                error.contains('Bu kullanıcı zaten kayıtlı')) {
+              // User already exists, redirect back
+              Navigator.of(context).pop();
+              return;
+            } else if (error.contains('email-already-in-use')) {
+              userFriendlyError = 'Bu e-posta adresi zaten kullanılıyor.';
+            } else if (error.contains('weak-password') ||
+                error.contains('Şifre çok zayıf')) {
+              userFriendlyError = 'Şifre çok zayıf, daha güçlü bir şifre seçin';
+            } else if (error.contains('invalid-email') ||
+                error.contains('Geçersiz e-posta')) {
+              userFriendlyError = 'Geçersiz e-posta adresi';
+            } else if (error.contains('NO_INTERNET')) {
+              userFriendlyError = 'İnternet bağlantısı bulunamadı';
+            }
+          }
+
+          SnackBarService.showSnackBar(
+            context: context,
+            snackBar: SnackBar(
+              content: Text(userFriendlyError),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
-        SnackBarService.showSnackBar(context: context, snackBar: 
-          SnackBar(
+        SnackBarService.showSnackBar(
+          context: context,
+          snackBar: SnackBar(
             content: Text('Hesap oluşturma başarısız: $e'),
             backgroundColor: Colors.red,
           ),

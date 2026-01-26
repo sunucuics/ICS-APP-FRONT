@@ -7,7 +7,7 @@ import '../../features/auth/providers/anonymous_auth_provider.dart'
 import '../../features/auth/presentation/pages/guest_welcome_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../theme/app_theme.dart';
-import '../services/token_storage_service.dart';
+import '../services/token_refresh_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'onboarding_screen.dart';
 
@@ -126,12 +126,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   void _checkAuthAndNavigate() async {
     if (!mounted) return;
 
-    // Önce secure storage'dan token kontrolü yap
-    final hasTokens = await TokenStorageService.hasTokens();
+    // Token'ı kontrol et ve gerekirse refresh yap (Instagram gibi kalıcı oturum)
+    // Bu sayede 1 gün sonra bile token expired olsa, refresh token ile yenilenir
+    final hasValidToken = await TokenRefreshService.ensureValidToken();
     
-    if (hasTokens) {
-      // Token varsa ana sayfaya yönlendir
-      // AuthProvider arka planda token geçerliliğini kontrol edecek
+    if (hasValidToken) {
+      // Token geçerli veya başarıyla yenilendi - ana sayfaya yönlendir
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
@@ -142,7 +142,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       return;
     }
 
-    // Token yoksa, mevcut auth state kontrolü yap
+    // Token yok veya refresh başarısız - auth state kontrolü yap
     final authState = ref.read(authProvider);
     final anonymousAuthState = ref.read(anonymous.anonymousAuthProvider);
 
