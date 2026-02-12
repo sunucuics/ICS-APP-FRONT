@@ -285,10 +285,11 @@ class AuthApiService {
 
     try {
       // Ayrı Dio instance - interceptor'lardan geçmez, döngüsel sorun olmaz
+      // Timeout'lar 30s - mobil ağda backend→Firebase zinciri yavaş olabilir
       final dio = Dio(BaseOptions(
         baseUrl: ApiEndpoints.baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

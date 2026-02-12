@@ -145,6 +145,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  /// Geçici hata mı (timeout, network) yoksa gerçek auth hatası mı kontrol et
+  bool _isTemporaryError(dynamic error) {
+    final errorStr = error.toString().toLowerCase();
+    return errorStr.contains('timeout') ||
+        errorStr.contains('connection') ||
+        errorStr.contains('network') ||
+        errorStr.contains('socket') ||
+        errorStr.contains('receive_timeout') ||
+        errorStr.contains('send_timeout') ||
+        errorStr.contains('connection_timeout') ||
+        errorStr.contains('no_internet');
+  }
+
   // Load user profile when Firebase user is authenticated (optimized with timeout)
   Future<void> _loadUserProfile() async {
     // Don't set loading if already authenticated (prevents UI flicker)
@@ -154,9 +167,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     try {
       // Add timeout to prevent blocking on slow network
+      // 15s - mobil ağda backend + Firebase doğrulama zinciri yavaş olabilir
       final user = await _authRepository
           .getCurrentUser()
-          .timeout(const Duration(seconds: 5), onTimeout: () {
+          .timeout(const Duration(seconds: 15), onTimeout: () {
         AppLogger.warning('User profile load timeout');
         return null;
       });
@@ -174,6 +188,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
           AppLogger.warning('Failed to update FCM token after profile load', e);
         });
       } else {
+        // user == null → timeout veya backend erişilemedi
+        // Eğer zaten authenticated ise oturumu KORU (geçici hata olabilir)
+        if (state.isAuthenticated && state.user != null) {
+          AppLogger.warning('AuthProvider: Profile reload failed but user already authenticated, keeping session');
+          state = state.copyWith(isLoading: false);
+          return;
+        }
+
         // Token varsa ama user profile çekilemiyorsa, token refresh deneyebiliriz
         final hasTokens = await TokenStorageService.hasTokens();
         if (hasTokens) {
@@ -195,15 +217,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
             }
           } catch (refreshError) {
             AppLogger.warning('AuthProvider: Token refresh failed', refreshError);
-            // Token refresh başarısız, devam et
+            // Geçici hata ise oturumu koru
+            if (_isTemporaryError(refreshError)) {
+              AppLogger.warning('AuthProvider: Temporary error during refresh, keeping session');
+              state = state.copyWith(isLoading: false);
+              return;
+            }
           }
         }
 
-        // Firebase user exists but backend user fetch failed
-        // This means the user was created in Firebase but not in backend
-        // Sign out from Firebase to clean up the state
+        // Token yok veya gerçek auth hatası - oturumu kapat
         AppLogger.warning(
-            'Firebase user exists but backend user not found. Signing out...');
+            'AuthProvider: No valid session found. Signing out...');
         await FirebaseAuthService.signOut();
         await TokenStorageService.clearTokens();
         state = state.copyWith(
@@ -213,7 +238,23 @@ class AuthNotifier extends StateNotifier<AuthState> {
         );
       }
     } catch (e) {
-      // If there's an error, try token refresh if token exists
+      // Geçici hata ise (timeout, network) oturumu KORU
+      if (_isTemporaryError(e)) {
+        AppLogger.warning('AuthProvider: Temporary error loading profile, keeping session', e);
+        // Zaten authenticated ise state'i koru
+        if (state.isAuthenticated && state.user != null) {
+          state = state.copyWith(isLoading: false);
+          return;
+        }
+        // İlk yükleme ise token'lar varsa authenticated kabul et
+        final hasTokens = await TokenStorageService.hasTokens();
+        if (hasTokens) {
+          state = state.copyWith(isLoading: false);
+          return;
+        }
+      }
+
+      // Gerçek auth hatası (401) - token refresh dene
       final hasTokens = await TokenStorageService.hasTokens();
       if (hasTokens && e.toString().contains('401')) {
         AppLogger.debug('AuthProvider: 401 error, attempting token refresh...');
@@ -234,12 +275,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
           }
         } catch (refreshError) {
           AppLogger.warning('AuthProvider: Token refresh failed', refreshError);
-          // Token refresh başarısız, devam et
+          // Geçici hata ise yine oturumu koru
+          if (_isTemporaryError(refreshError)) {
+            AppLogger.warning('AuthProvider: Temporary error during 401 refresh, keeping session');
+            state = state.copyWith(isLoading: false);
+            return;
+          }
         }
       }
 
-      // If there's an error, also sign out to clean up the state
-      AppLogger.error('Error loading user profile. Signing out...', e);
+      // Gerçek auth hatası ve refresh başarısız - oturumu kapat
+      AppLogger.error('AuthProvider: Auth error, signing out...', e);
       await FirebaseAuthService.signOut();
       await TokenStorageService.clearTokens();
       state = state.copyWith(

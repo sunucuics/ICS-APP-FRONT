@@ -18,6 +18,22 @@ class AuthInterceptor extends Interceptor {
   // Token refresh işlemi için lock mekanizması
   static bool _isRefreshing = false;
   static final List<_PendingRequest> _pendingRequests = [];
+
+  /// Geçici hata mı (timeout, network) kontrol et
+  bool _isTemporaryError(dynamic error) {
+    final errorStr = error.toString().toLowerCase();
+    // DioException tipini de kontrol et
+    if (error is DioException) {
+      return error.type == DioExceptionType.connectionTimeout ||
+          error.type == DioExceptionType.receiveTimeout ||
+          error.type == DioExceptionType.sendTimeout ||
+          error.type == DioExceptionType.connectionError;
+    }
+    return errorStr.contains('timeout') ||
+        errorStr.contains('connection') ||
+        errorStr.contains('network') ||
+        errorStr.contains('socket');
+  }
   @override
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
@@ -178,10 +194,22 @@ class AuthInterceptor extends Interceptor {
       }
       _pendingRequests.clear();
 
-      // Token'ları temizle ve login sayfasına yönlendir
-      await TokenStorageService.clearTokens();
-      NavigationService.navigateToWelcome();
-      handler.next(err);
+      // Geçici hata mı (timeout, network) yoksa gerçek auth hatası mı?
+      final isTemporary = _isTemporaryError(e);
+
+      if (isTemporary) {
+        // Timeout/network hatası → oturumu KORUMA, sadece isteği başarısız döndür
+        AppLogger.warning(
+            'AuthInterceptor: Temporary error during refresh, keeping session');
+        handler.next(err);
+      } else {
+        // Gerçek auth hatası (invalid refresh token, revoked, vb.) → logout
+        AppLogger.warning(
+            'AuthInterceptor: Auth error during refresh, logging out');
+        await TokenStorageService.clearTokens();
+        NavigationService.navigateToWelcome();
+        handler.next(err);
+      }
     } finally {
       _isRefreshing = false;
     }
