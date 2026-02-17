@@ -1,7 +1,6 @@
 import '../../../core/models/user_model.dart';
 import '../../../core/services/firebase_auth_service.dart';
 import '../../../core/services/token_storage_service.dart';
-import '../../../core/services/token_refresh_service.dart';
 import 'auth_api_service.dart';
 
 class AuthRepository {
@@ -46,16 +45,17 @@ class AuthRepository {
   }
 
   // Check if user is logged in
-  // Token var mı VE geçerli mi kontrol et (expire olmamış veya refresh başarılı)
+  // Sadece token'ların VAR olup olmadığını kontrol et (ağ çağrısı YOK)
+  // Token refresh işlemi startup'ta değil, API çağrısı sırasında auth interceptor tarafından yapılır
   Future<bool> isLoggedIn() async {
-    // Önce token kontrolü ve gerekirse refresh yap
-    // Bu sayede expired token ile "logged in" döndürmez
-    final hasValidToken = await TokenRefreshService.ensureValidToken();
-    if (hasValidToken) {
+    // Token'lar varsa kullanıcı giriş yapmış kabul et
+    // Token expired olsa bile auth interceptor otomatik refresh yapacak
+    final hasTokens = await TokenStorageService.hasTokens();
+    if (hasTokens) {
       return true;
     }
     
-    // Fallback: Firebase kontrolü (token yoksa veya refresh başarısızsa)
+    // Fallback: Firebase kontrolü (token yoksa)
     return FirebaseAuthService.isSignedIn;
   }
 

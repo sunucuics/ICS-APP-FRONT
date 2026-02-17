@@ -11,7 +11,7 @@ import '../../../admin/providers/admin_provider.dart';
 import '../../../admin/presentation/pages/admin_main_page.dart';
 import '../../../services/providers/services_provider.dart' show servicesProvider;
 import '../../../products/providers/products_provider.dart';
-import '../../../featured/providers/featured_provider.dart' show featuredServicesProvider, featuredProductsProvider;
+
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -26,6 +26,7 @@ class HomePageState extends ConsumerState<HomePage> {
   
   int _currentIndex = 0;
   final Map<int, Widget> _tabCache = {};
+  final Map<int, DateTime> _lastRefreshTime = {}; // Tab refresh throttle
 
   @override
   void initState() {
@@ -56,22 +57,27 @@ class HomePageState extends ConsumerState<HomePage> {
     });
   }
   
-  /// Refresh providers based on the tab being switched to
+  /// Refresh providers based on the tab being switched to.
+  /// Minimum 5 dakika aralıkla refresh yapar — her tab geçişinde gereksiz API çağrısı önlenir.
   void _refreshTabProviders(int tabIndex) {
+    final now = DateTime.now();
+    final lastRefresh = _lastRefreshTime[tabIndex];
+    if (lastRefresh != null && now.difference(lastRefresh).inMinutes < 5) {
+      return; // Son 5 dakika içinde zaten refresh edilmiş
+    }
+
     switch (tabIndex) {
-      case 0: // Home tab - refresh featured content
-        // Refresh will be handled by HomeTab widget itself
-        // No need to refresh here to avoid double refresh
+      case 0: // Home tab - provider'lar kendi init'lerinde yükleniyor
         break;
       case 1: // Services tab
         ref.invalidate(servicesProvider);
+        _lastRefreshTime[tabIndex] = now;
         break;
       case 3: // Catalog/Market tab
         ref.invalidate(categoriesProvider);
-        // Also invalidate products provider (all categories)
         ref.invalidate(productsProvider(null));
+        _lastRefreshTime[tabIndex] = now;
         break;
-      // Tab 2 (Cart) and Tab 4 (Profile) don't need refresh on switch
     }
   }
 

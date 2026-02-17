@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../auth/providers/auth_provider.dart';
-import '../../../featured/providers/featured_provider.dart' show featuredServicesProvider, featuredProductsProvider, featuredServicesListProvider, featuredProductsListProvider, FeaturedService;
+import '../../../featured/providers/featured_provider.dart' show featuredServicesListProvider, featuredProductsListProvider;
 import '../../../cart/providers/cart_provider.dart';
 import '../../../services/providers/services_provider.dart' show servicesProvider;
 import '../../../appointments/presentation/pages/appointment_booking_page.dart';
@@ -24,38 +24,12 @@ class HomeTab extends ConsumerStatefulWidget {
 }
 
 class _HomeTabState extends ConsumerState<HomeTab> {
-  int _lastBuildTime = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    // Refresh featured content when HomeTab is first created
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _refreshFeaturedContent();
-    });
-  }
-
-  void _refreshFeaturedContent() {
-    if (!mounted) return;
-    // Refresh featured services and products
-    ref.read(featuredServicesProvider.notifier).refresh();
-    ref.read(featuredProductsProvider.notifier).refresh();
-    // Also refresh base services provider since featured services depend on it
-    ref.invalidate(servicesProvider);
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Refresh featured content periodically when tab is visible (every 5 seconds)
-    // This ensures data stays fresh even when user stays on Home tab
-    final now = DateTime.now().millisecondsSinceEpoch;
-    if (now - _lastBuildTime > 5000) {
-      _lastBuildTime = now;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _refreshFeaturedContent();
-      });
-    }
-    final authState = ref.watch(authProvider);
+    // Provider'lar oluşturulurken zaten loadFeaturedProducts/Services çağrılıyor.
+    // ref.watch() provider değişince UI'ı rebuild ediyor — ekstra refresh gereksiz.
+    // currentUserProvider sadece user değişince rebuild eder (isLoading değişimlerinde değil)
+    final currentUser = ref.watch(currentUserProvider);
     final featuredServices = ref.watch(featuredServicesListProvider);
     final featuredProducts = ref.watch(featuredProductsListProvider);
     return Scaffold(
@@ -189,9 +163,10 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                           height: 64,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
-                            return (authState.user?.name != null && authState.user!.name!.isNotEmpty)
+                            final userName = currentUser?.name;
+                            return (userName != null && userName.isNotEmpty)
                                 ? Text(
-                                    _getInitials(authState.user!.name!),
+                                    _getInitials(userName),
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 24,
@@ -210,8 +185,8 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            (authState.user?.name != null && authState.user!.name!.isNotEmpty)
-                                ? 'Hoş geldiniz, ${authState.user!.name}!'
+                            (currentUser?.name != null && currentUser!.name!.isNotEmpty)
+                                ? 'Hoş geldiniz, ${currentUser.name}!'
                                 : 'Hoş geldiniz!',
                             style: const TextStyle(
                               color: Colors.white,

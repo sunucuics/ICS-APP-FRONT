@@ -10,81 +10,137 @@ import '../../../../core/models/service_model.dart';
 import '../../../appointments/presentation/pages/appointment_booking_page.dart';
 import '../../../../core/theme/app_theme.dart';
 
-class ServicesTab extends ConsumerWidget {
+class ServicesTab extends ConsumerStatefulWidget {
   const ServicesTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final servicesAsync = ref.watch(servicesProvider);
-    final theme = Theme.of(context);
+  ConsumerState<ServicesTab> createState() => _ServicesTabState();
+}
+
+class _ServicesTabState extends ConsumerState<ServicesTab> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    // Liste sonuna yaklaşınca (200px kala) sonraki sayfayı yükle
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref.read(servicesNotifierProvider.notifier).loadMore();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final servicesState = ref.watch(servicesNotifierProvider);
 
     return Scaffold(
       body: SafeArea(
-        child: servicesAsync.when(
-          data: (services) {
-            if (services.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.work_off, size: 64, color: Colors.grey[400]),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Henüz hizmet yok',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Yakında hizmetler eklenecek',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
+        child: _buildBody(context, servicesState),
+      ),
+    );
+  }
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: services.length,
-              itemBuilder: (context, index) {
-                final service = services[index];
-                return _ServiceCard(service: service);
-              },
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                const SizedBox(height: 16),
-                Text(
-                  'Hizmetler yüklenemedi',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  error.toString(),
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => ref.refresh(servicesProvider),
-                  child: const Text('Tekrar Dene'),
-                ),
-              ],
+  Widget _buildBody(BuildContext context, dynamic servicesState) {
+    // Initial loading state
+    if (servicesState.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Error state
+    if (servicesState.error != null && servicesState.items.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              'Hizmetler yüklenemedi',
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
-          ),
+            const SizedBox(height: 8),
+            Text(
+              servicesState.error.toString(),
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () =>
+                  ref.read(servicesNotifierProvider.notifier).refresh(),
+              child: const Text('Tekrar Dene'),
+            ),
+          ],
         ),
+      );
+    }
+
+    // Empty state
+    if (servicesState.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.work_off, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'Henüz hizmet yok',
+              style: TextStyle(
+                fontSize: 18,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Yakında hizmetler eklenecek',
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Data loaded — infinite scroll list
+    final services = servicesState.items;
+    return RefreshIndicator(
+      onRefresh: () => ref.read(servicesNotifierProvider.notifier).refresh(),
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(16.0),
+        // +1 for loading footer when loading more
+        itemCount: services.length + (servicesState.isLoadingMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          // Loading footer
+          if (index == services.length) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Center(
+                child: CircularProgressIndicator(
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(AppTheme.primaryOrange),
+                ),
+              ),
+            );
+          }
+          final service = services[index];
+          return _ServiceCard(service: service);
+        },
       ),
     );
   }

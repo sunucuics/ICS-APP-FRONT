@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
+import '../../../core/network/interceptors/auth_interceptor.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/services/firebase_auth_service.dart';
 import '../../../core/services/fcm_service.dart';
@@ -356,53 +357,59 @@ class AuthApiService {
   }
 
   // Logout - Backend logout endpoint'ini çağır, sonra Firebase'den çık
+  // NOT: Ayrı Dio instance kullanılıyor - interceptor'dan GEÇMEZ.
+  // Bu sayede logout sırasında interceptor'un token refresh başlatması engellenir.
   Future<void> logout() async {
     AppLogger.debug('AuthApiService: Starting logout process');
 
+    // 1. Önce interceptor state'ini sıfırla
+    // Devam eden refresh varsa iptal edilir, yeni istekler kuyruğa GİRMEZ
+    AuthInterceptor.reset();
+
     try {
-      // 1. Secure storage'dan access token al (eğer varsa)
+      // 2. Secure storage'dan access token al (eğer varsa)
       final accessToken = await TokenStorageService.getAccessToken();
-      
-      // 2. Backend logout endpoint'ini çağır (tüm refresh token'ları iptal eder)
-      if (accessToken != null) {
-        AppLogger.debug('AuthApiService: Calling backend logout endpoint');
-        await _apiClient.post(
-          ApiEndpoints.authLogout,
-          options: Options(
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-            },
-          ),
-        );
-        AppLogger.success('AuthApiService: Backend logout successful');
-      } else {
-        // Fallback: Firebase'den token al
-        final idToken = await FirebaseAuthService.getIdToken();
-        if (idToken != null) {
-          AppLogger.debug('AuthApiService: Calling backend logout with Firebase token');
-          await _apiClient.post(
-            ApiEndpoints.authLogout,
-            options: Options(
-              headers: {
-                'Authorization': 'Bearer $idToken',
-              },
-            ),
-          );
+      String? tokenToUse = accessToken;
+
+      // Fallback: Firebase'den token al
+      if (tokenToUse == null) {
+        tokenToUse = await FirebaseAuthService.getIdToken();
+      }
+
+      // 3. Backend logout endpoint'ini çağır (tüm refresh token'ları iptal eder)
+      // AYRI Dio instance - interceptor'dan geçmez, döngüsel sorun olmaz
+      if (tokenToUse != null) {
+        AppLogger.debug('AuthApiService: Calling backend logout (separate Dio)');
+        final dio = Dio(BaseOptions(
+          baseUrl: ApiEndpoints.baseUrl,
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 15),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer $tokenToUse',
+          },
+        ));
+
+        try {
+          await dio.post(ApiEndpoints.authLogout);
           AppLogger.success('AuthApiService: Backend logout successful');
-        } else {
-          AppLogger.debug(
-              'AuthApiService: No ID token found, skipping backend logout');
+        } catch (e) {
+          // Backend çağrısı başarısız olsa bile temizliğe devam et
+          AppLogger.warning('AuthApiService: Backend logout call failed', e);
         }
+      } else {
+        AppLogger.debug(
+            'AuthApiService: No token found, skipping backend logout');
       }
     } catch (e) {
       AppLogger.warning('AuthApiService: Backend logout failed', e);
-      // Continue with cleanup even if backend call fails
     } finally {
-      // 3. Token'ları secure storage'dan temizle
+      // 4. Token'ları secure storage'dan temizle
       await TokenStorageService.clearTokens();
       AppLogger.debug('AuthApiService: Tokens cleared from secure storage');
 
-      // 4. Firebase'den çık
+      // 5. Firebase'den çık
       AppLogger.debug('AuthApiService: Signing out from Firebase');
       await FirebaseAuthService.signOut();
       AppLogger.success('AuthApiService: Firebase logout completed');
@@ -416,16 +423,11 @@ class AuthApiService {
   }
 
   // Update user profile
+  // AuthInterceptor otomatik olarak secure storage'dan token ekler
   Future<UserProfile> updateProfile(ProfileUpdateRequest request) async {
     AppLogger.info('AuthApiService: Updating user profile');
-    
-    try {
-      // Get ID token for authorization
-      final idToken = await FirebaseAuthService.getIdToken();
-      if (idToken == null) {
-        throw Exception('No ID token available. Please login again.');
-      }
 
+    try {
       // Prepare request data - only include non-null fields
       final data = <String, dynamic>{};
       if (request.name != null) {
@@ -438,15 +440,10 @@ class AuthApiService {
         data['email'] = request.email;
       }
 
-      // Make PUT request to update profile
+      // AuthInterceptor token'ı secure storage'dan ekler, 401 gelirse refresh yapar
       final response = await _apiClient.put(
         ApiEndpoints.authUpdateProfile,
         data: data,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $idToken',
-          },
-        ),
       );
 
       AppLogger.success('AuthApiService: Profile updated successfully');

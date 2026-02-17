@@ -1,39 +1,35 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import '../../services/firebase_auth_service.dart';
 import '../../services/navigation_service.dart';
 import '../../services/token_storage_service.dart';
+import '../../utils/error_utils.dart';
 import '../../utils/logger.dart';
 import '../../../features/auth/data/auth_api_service.dart';
 import '../../../features/auth/services/mock_anonymous_auth_service.dart';
 
-// Pending request için helper class
-class _PendingRequest {
-  final RequestOptions requestOptions;
-  final ErrorInterceptorHandler handler;
-
-  _PendingRequest(this.requestOptions, this.handler);
-}
-
 class AuthInterceptor extends Interceptor {
-  // Token refresh işlemi için lock mekanizması
-  static bool _isRefreshing = false;
-  static final List<_PendingRequest> _pendingRequests = [];
+  /// Completer tabanlı lock mekanizması.
+  /// null = refresh yok, non-null = refresh devam ediyor.
+  /// Tüm 401 alan istekler aynı Completer'ı bekler.
+  /// Completer String? ile tamamlanır: yeni token (başarılı) veya null (başarısız).
+  static Completer<String?>? _refreshCompleter;
+
+  /// Interceptor state'ini sıfırla.
+  /// Logout ve login öncesi çağrılmalı.
+  /// Devam eden bir refresh varsa null ile tamamlar (bekleyen istekler başarısız olur).
+  static void reset() {
+    if (_refreshCompleter != null && !_refreshCompleter!.isCompleted) {
+      AppLogger.debug('AuthInterceptor.reset(): Completing pending refresh with null');
+      _refreshCompleter!.complete(null);
+    }
+    _refreshCompleter = null;
+    AppLogger.debug('AuthInterceptor.reset(): State cleared');
+  }
 
   /// Geçici hata mı (timeout, network) kontrol et
-  bool _isTemporaryError(dynamic error) {
-    final errorStr = error.toString().toLowerCase();
-    // DioException tipini de kontrol et
-    if (error is DioException) {
-      return error.type == DioExceptionType.connectionTimeout ||
-          error.type == DioExceptionType.receiveTimeout ||
-          error.type == DioExceptionType.sendTimeout ||
-          error.type == DioExceptionType.connectionError;
-    }
-    return errorStr.contains('timeout') ||
-        errorStr.contains('connection') ||
-        errorStr.contains('network') ||
-        errorStr.contains('socket');
-  }
+  bool _isTemporaryError(dynamic error) => ErrorUtils.isTemporaryError(error);
+
   @override
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
@@ -43,13 +39,12 @@ class AuthInterceptor extends Interceptor {
       '/services',
       '/categories',
       '/featured',
-      '/auth/login', // Login endpoint doesn't need auth
-      '/auth/register', // Register endpoint doesn't need auth
-      '/auth/reset-password', // Reset password doesn't need auth
-      '/auth/refresh', // Refresh endpoint doesn't need auth
+      '/auth/login',
+      '/auth/register',
+      '/auth/reset-password',
+      '/auth/refresh',
     ];
 
-    // Check if this is a public endpoint
     final isPublicEndpoint =
         publicPaths.any((path) => options.path.startsWith(path));
 
@@ -58,7 +53,6 @@ class AuthInterceptor extends Interceptor {
     if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';
     } else if (!isPublicEndpoint) {
-      // Protected endpoint without token - this will result in 401
       AppLogger.warning(
           'AuthInterceptor: No token available for protected endpoint: ${options.path}');
     }
@@ -71,12 +65,14 @@ class AuthInterceptor extends Interceptor {
       // Önce secure storage'dan access token al
       final accessToken = await TokenStorageService.getAccessToken();
       if (accessToken != null) {
-        AppLogger.debug('AuthInterceptor: Using access token from secure storage');
+        AppLogger.debug(
+            'AuthInterceptor: Using access token from secure storage');
         return accessToken;
       }
 
       // Fallback: Firebase'den token al (eski sistemle uyumluluk için)
-      AppLogger.debug('AuthInterceptor: No token in storage, trying Firebase');
+      AppLogger.debug(
+          'AuthInterceptor: No token in storage, trying Firebase');
       return await FirebaseAuthService.getIdToken();
     } catch (e) {
       AppLogger.error('Error getting auth token', e);
@@ -86,7 +82,6 @@ class AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    // Handle 401 Unauthorized
     if (err.response?.statusCode == 401) {
       AppLogger.debug(
           'AuthInterceptor: 401 Unauthorized for ${err.requestOptions.path}');
@@ -102,42 +97,39 @@ class AuthInterceptor extends Interceptor {
   ) async {
     final originalRequest = err.requestOptions;
 
-    // Check if this request has already been retried
+    // Zaten retry edilmiş ise tekrar deneme
     if (originalRequest.extra['_retried'] == true) {
       AppLogger.debug('AuthInterceptor: Request already retried, giving up');
       handler.next(err);
       return;
     }
 
-    // Get error detail from response
+    // Session revoked ise doğrudan çıkış
     final errorDetail = err.response?.data?['detail'] as String?;
-
-    // If session is revoked, don't retry
     if (errorDetail == 'Session revoked') {
       AppLogger.warning(
-          'AuthInterceptor: Session revoked, redirecting to welcome page');
+          'AUTH_REDIRECT | reason: session_revoked | path: ${originalRequest.path} | status: ${err.response?.statusCode} | uid: ${FirebaseAuthService.currentUser?.uid ?? 'null'}');
       await TokenStorageService.clearTokens();
+      await FirebaseAuthService.signOut();
       NavigationService.navigateToWelcome();
       handler.next(err);
       return;
     }
 
-    // Check if user is anonymous/guest - don't redirect to login for guest users
+    // Anonymous/guest kullanıcı kontrolü
     try {
-      // Check Firebase Auth first
       final firebaseUser = FirebaseAuthService.currentUser;
       if (firebaseUser?.isAnonymous == true) {
         AppLogger.debug(
-            'AuthInterceptor: Firebase guest user 401 error, not redirecting to login');
+            'AuthInterceptor: Firebase guest user 401 error, not redirecting');
         handler.next(err);
         return;
       }
 
-      // Check Mock Anonymous Auth Service
       final mockAuthService = MockAnonymousAuthService();
       if (mockAuthService.isAnonymous) {
         AppLogger.debug(
-            'AuthInterceptor: Mock guest user 401 error, not redirecting to login');
+            'AuthInterceptor: Mock guest user 401 error, not redirecting');
         handler.next(err);
         return;
       }
@@ -145,87 +137,86 @@ class AuthInterceptor extends Interceptor {
       AppLogger.error('AuthInterceptor: Error checking user type', e);
     }
 
-    // Eğer zaten bir refresh işlemi devam ediyorsa, bu isteği beklet
-    if (_isRefreshing) {
-      AppLogger.debug('AuthInterceptor: Token refresh already in progress, queuing request');
-      _pendingRequests.add(_PendingRequest(originalRequest, handler));
+    // --- Completer tabanlı refresh koordinasyonu ---
+    // Zaten bir refresh devam ediyorsa, aynı Completer'ı bekle
+    if (_refreshCompleter != null) {
+      AppLogger.debug(
+          'AuthInterceptor: Refresh already in progress, waiting for result...');
+      final newToken = await _refreshCompleter!.future;
+      if (newToken != null) {
+        // Refresh başarılı → bu isteği yeni token ile tekrar dene
+        await _retryRequest(originalRequest, handler, newToken);
+      } else {
+        // Refresh başarısız → bu isteği de başarısız döndür
+        handler.next(err);
+      }
       return;
     }
 
-    // Refresh işlemini başlat
-    _isRefreshing = true;
+    // Bu istek refresh'i başlatan ilk istek
+    _refreshCompleter = Completer<String?>();
 
     try {
-      AppLogger.debug('AuthInterceptor: Attempting token refresh...');
+      AppLogger.debug('AuthInterceptor: Starting token refresh...');
 
-      // Secure storage'dan refresh token al
       final refreshToken = await TokenStorageService.getRefreshToken();
       if (refreshToken == null) {
         AppLogger.warning('AuthInterceptor: No refresh token found');
         throw Exception('No refresh token available');
       }
 
-      // Backend refresh endpoint'ine istek gönder
-      // NOT: AuthApiService.refreshToken() ayrı Dio instance kullanır,
+      // AuthApiService.refreshToken() ayrı Dio instance kullanır,
       // bu interceptor'dan geçmez - döngüsel sorun olmaz
-      // Token'lar expire time ile birlikte kaydedilir (Instagram gibi kalıcı oturum)
       final authApiService = AuthApiService();
       final authResponse = await authApiService.refreshToken(refreshToken);
 
-      AppLogger.success('AuthInterceptor: Token refreshed successfully with expiry');
-
-      // Yeni token'ları kullan (zaten secure storage'a kaydedildi)
       final newAccessToken = authResponse.idToken;
+      AppLogger.success(
+          'AuthInterceptor: Token refreshed successfully');
 
-      // Bekleyen tüm istekleri yeni token ile tekrarla
-      for (final pendingRequest in _pendingRequests) {
-        _retryRequest(pendingRequest.requestOptions, pendingRequest.handler, newAccessToken);
-      }
-      _pendingRequests.clear();
+      // Completer'ı tamamla → bekleyen tüm istekler yeni token'ı alır
+      _refreshCompleter!.complete(newAccessToken);
+      _refreshCompleter = null;
 
-      // Orijinal isteği yeni token ile tekrarla
-      _retryRequest(originalRequest, handler, newAccessToken);
+      // Bu isteği yeni token ile tekrar dene
+      await _retryRequest(originalRequest, handler, newAccessToken);
     } catch (e) {
       AppLogger.error('AuthInterceptor: Token refresh failed', e);
 
-      // Refresh başarısız oldu, tüm bekleyen istekleri iptal et
-      for (final pendingRequest in _pendingRequests) {
-        pendingRequest.handler.next(err);
+      // Completer'ı null ile tamamla → bekleyen istekler başarısız olur
+      if (_refreshCompleter != null && !_refreshCompleter!.isCompleted) {
+        _refreshCompleter!.complete(null);
       }
-      _pendingRequests.clear();
+      _refreshCompleter = null;
 
-      // Geçici hata mı (timeout, network) yoksa gerçek auth hatası mı?
-      final isTemporary = _isTemporaryError(e);
-
-      if (isTemporary) {
-        // Timeout/network hatası → oturumu KORUMA, sadece isteği başarısız döndür
+      // Geçici hata mı yoksa gerçek auth hatası mı?
+      if (_isTemporaryError(e)) {
         AppLogger.warning(
-            'AuthInterceptor: Temporary error during refresh, keeping session');
+            'AUTH_REDIRECT | reason: temporary_error_kept_session | path: ${originalRequest.path} | status: ${err.response?.statusCode} | error: ${e.runtimeType}');
         handler.next(err);
       } else {
-        // Gerçek auth hatası (invalid refresh token, revoked, vb.) → logout
+        // Gerçek auth hatası → token'ları temizle, Firebase signOut ve çıkış yap
         AppLogger.warning(
-            'AuthInterceptor: Auth error during refresh, logging out');
+            'AUTH_REDIRECT | reason: auth_error_refresh_failed | path: ${originalRequest.path} | status: ${err.response?.statusCode} | error: ${e.runtimeType} | uid: ${FirebaseAuthService.currentUser?.uid ?? 'null'}');
         await TokenStorageService.clearTokens();
+        await FirebaseAuthService.signOut();
         NavigationService.navigateToWelcome();
         handler.next(err);
       }
-    } finally {
-      _isRefreshing = false;
     }
   }
 
-  void _retryRequest(
+  /// İsteği yeni token ile tekrar dene.
+  /// Future<void> döner (fire-and-forget değil, düzgün hata yönetimi).
+  Future<void> _retryRequest(
     RequestOptions originalRequest,
     ErrorInterceptorHandler handler,
     String newToken,
   ) async {
     try {
-      // Mark request as retried
       originalRequest.extra['_retried'] = true;
-      originalRequest.headers['Authorization'] = 'Bearer $newToken';
 
-      // Don't retry FormData requests to avoid the finalized error
+      // FormData istekleri tekrar denenemez (finalized hatası)
       if (originalRequest.data is FormData) {
         AppLogger.debug(
             'AuthInterceptor: Skipping FormData retry to avoid finalized error');

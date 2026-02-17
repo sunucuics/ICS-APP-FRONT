@@ -1,21 +1,35 @@
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/models/product_model.dart';
+import '../../../core/models/paginated_response.dart';
 
 class ProductsApiService {
   final ApiClient _apiClient = ApiClient.instance;
 
-  // Get all products with optional category filter
-  Future<List<Product>> getProducts({String? categoryName}) async {
-    final queryParameters = <String, dynamic>{};
+  /// Get products with cursor-based pagination.
+  ///
+  /// Backend CursorPage<ProductOut> response döner:
+  /// ```json
+  /// {"items": [...], "count": 20, "next_cursor": "...", "has_more": true}
+  /// ```
+  Future<CursorPageResponse<Product>> getProducts({
+    String? categoryName,
+    int limit = 20,
+    String? startAfter,
+  }) async {
+    final queryParameters = <String, dynamic>{
+      'limit': limit,
+    };
     if (categoryName != null && categoryName.isNotEmpty) {
       queryParameters['category_name'] = categoryName;
+    }
+    if (startAfter != null) {
+      queryParameters['start_after'] = startAfter;
     }
 
     if (ApiEndpoints.isDebug) {
       print(
-          '🔍 ProductsApiService.getProducts called with categoryName: $categoryName');
-      print('🔍 Query parameters: $queryParameters');
+          '🔍 ProductsApiService.getProducts called with categoryName: $categoryName, limit: $limit, startAfter: $startAfter');
     }
 
     final response = await _apiClient.get(
@@ -25,27 +39,11 @@ class ProductsApiService {
 
     if (ApiEndpoints.isDebug) {
       print('🔍 Backend response status: ${response.statusCode}');
-      print('🔍 Backend response data type: ${response.data.runtimeType}');
-      print(
-          '🔍 Backend response data length: ${response.data is List ? (response.data as List).length : 'Not a list'}');
-      if (response.data is List && (response.data as List).isNotEmpty) {
-        print('🔍 First product sample: ${(response.data as List).first}');
-      }
     }
 
-    // Backend returns List<Product>
-    final productList = (response.data as List)
-        .map((item) => Product.fromJson(item as Map<String, dynamic>))
-        .toList();
-
-    if (ApiEndpoints.isDebug) {
-      print('🔍 Parsed products count: ${productList.length}');
-      if (productList.isNotEmpty) {
-        print('🔍 First parsed product: ${productList.first.title}');
-      }
-    }
-
-    return productList;
+    // Backend returns CursorPage<ProductOut> envelope
+    final data = response.data as Map<String, dynamic>;
+    return CursorPageResponse.fromJson(data, Product.fromJson);
   }
 
   // Get single product by ID

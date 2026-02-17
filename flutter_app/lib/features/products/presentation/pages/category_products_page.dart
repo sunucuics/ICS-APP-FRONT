@@ -5,10 +5,9 @@ import '../../../products/providers/products_provider.dart';
 import '../../../cart/providers/cart_provider.dart';
 import '../../../auth/providers/anonymous_auth_provider.dart';
 import '../../../../core/models/product_model.dart';
+import '../../../../core/models/paginated_list_state.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/route_aware_refresh_mixin.dart';
-import '../../../../core/utils/price_utils.dart';
-import '../../../home/presentation/pages/home_page.dart';
 import 'product_detail_page.dart';
 import '../../../../core/services/snackbar_service.dart';
 import '../../../../core/services/navigation_service.dart';
@@ -28,12 +27,12 @@ class CategoryProductsPage extends ConsumerStatefulWidget {
 
 class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
     with TickerProviderStateMixin, RouteAware, RouteAwareRefreshMixin {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void onRouteVisible() {
     // Refresh products when page becomes visible
-    final categoryName =
-        widget.category.name.isEmpty ? null : widget.category.name;
-    ref.invalidate(productsProvider(categoryName));
+    ref.read(productsNotifierProvider.notifier).refresh();
   }
   late AnimationController _fadeAnimationController;
   late AnimationController _slideAnimationController;
@@ -43,6 +42,17 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
+
+    // Kategori ile ilk yükleme başlat
+    final categoryName =
+        widget.category.name.isEmpty ? null : widget.category.name;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(productsNotifierProvider.notifier)
+          .loadInitial(categoryName: categoryName);
+    });
+
     _fadeAnimationController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
@@ -72,8 +82,17 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
     _slideAnimationController.forward();
   }
 
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref.read(productsNotifierProvider.notifier).loadMore();
+    }
+  }
+
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _fadeAnimationController.dispose();
     _slideAnimationController.dispose();
     super.dispose();
@@ -81,10 +100,7 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
 
   @override
   Widget build(BuildContext context) {
-    // For "Tümü" category (empty name), pass null to get all products
-    final categoryName =
-        widget.category.name.isEmpty ? null : widget.category.name;
-    final productsAsync = ref.watch(productsProvider(categoryName));
+    final productsState = ref.watch(productsNotifierProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
@@ -130,7 +146,7 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
             opacity: _fadeAnimation,
             child: SlideTransition(
               position: _slideAnimation,
-              child: _buildProductsContent(productsAsync),
+              child: _buildProductsContent(productsState),
             ),
           );
         },
@@ -282,18 +298,17 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
     );
   }
 
-  Widget _buildProductsContent(AsyncValue<List<Product>> productsAsync) {
-    return productsAsync.when(
-      data: (products) {
-        if (products.isEmpty) {
-          return _buildEmptyState();
-        }
-
-        return _buildProductsGrid(products);
-      },
-      loading: () => _buildLoadingState(),
-      error: (error, stack) => _buildErrorState(error),
-    );
+  Widget _buildProductsContent(PaginatedListState<Product> productsState) {
+    if (productsState.isLoading) {
+      return _buildLoadingState();
+    }
+    if (productsState.error != null && productsState.items.isEmpty) {
+      return _buildErrorState(productsState.error!);
+    }
+    if (productsState.isEmpty) {
+      return _buildEmptyState();
+    }
+    return _buildProductsGrid(productsState);
   }
 
   Widget _buildEmptyState() {
@@ -395,9 +410,7 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
           const SizedBox(height: 20),
           ElevatedButton.icon(
             onPressed: () {
-              final categoryName =
-                  widget.category.name.isEmpty ? null : widget.category.name;
-              ref.invalidate(productsProvider(categoryName));
+              ref.read(productsNotifierProvider.notifier).refresh();
             },
             icon: const Icon(Icons.refresh_rounded),
             label: const Text('Tekrar Dene'),
@@ -414,20 +427,46 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
     );
   }
 
-  Widget _buildProductsGrid(List<Product> products) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(20),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.65, // Reduced to accommodate the button
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
+  Widget _buildProductsGrid(PaginatedListState<Product> productsState) {
+    final products = productsState.items;
+    return RefreshIndicator(
+      onRefresh: () => ref.read(productsNotifierProvider.notifier).refresh(),
+      child: CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.all(20),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.65,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final product = products[index];
+                  return _ProductCard(product: product);
+                },
+                childCount: products.length,
+              ),
+            ),
+          ),
+          // Loading more footer
+          if (productsState.isLoadingMore)
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        AppTheme.primaryOrange),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
-      itemCount: products.length,
-      itemBuilder: (context, index) {
-        final product = products[index];
-        return _ProductCard(product: product);
-      },
     );
   }
 }

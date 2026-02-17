@@ -108,9 +108,13 @@ class CartNotifier extends StateNotifier<AsyncValue<Cart>> {
       // Reload cart to get accurate data from server
       await loadCart();
     } catch (error, stackTrace) {
-      // Revert optimistic update on error
-      await loadCart();
-      state = AsyncValue.error(error, stackTrace);
+      // Revert optimistic update on error — loadCart ile sunucu state'ini geri al
+      try {
+        await loadCart();
+      } catch (_) {
+        // loadCart başarısız olursa error state'ini koru
+        state = AsyncValue.error(error, stackTrace);
+      }
     } finally {
       _isAddingToCart = false;
     }
@@ -153,8 +157,11 @@ class CartNotifier extends StateNotifier<AsyncValue<Cart>> {
       await loadCart();
     } catch (error, stackTrace) {
       // Revert optimistic update on error
-      await loadCart();
-      state = AsyncValue.error(error, stackTrace);
+      try {
+        await loadCart();
+      } catch (_) {
+        state = AsyncValue.error(error, stackTrace);
+      }
     }
   }
 
@@ -184,8 +191,11 @@ class CartNotifier extends StateNotifier<AsyncValue<Cart>> {
       await loadCart();
     } catch (error, stackTrace) {
       // Revert optimistic update on error
-      await loadCart();
-      state = AsyncValue.error(error, stackTrace);
+      try {
+        await loadCart();
+      } catch (_) {
+        state = AsyncValue.error(error, stackTrace);
+      }
     }
   }
 

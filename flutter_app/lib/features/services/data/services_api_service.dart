@@ -1,19 +1,31 @@
 import '../../../core/models/service_model.dart';
+import '../../../core/models/paginated_response.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
 
 class ServicesApiService {
   final ApiClient _apiClient = ApiClient.instance;
 
-  // Get all services
-  Future<List<Service>> getServices() async {
-    final response = await _apiClient.get(ApiEndpoints.services);
+  /// Get services with cursor-based pagination.
+  Future<CursorPageResponse<Service>> getServices({
+    int limit = 20,
+    String? startAfter,
+  }) async {
+    final queryParameters = <String, dynamic>{
+      'limit': limit,
+    };
+    if (startAfter != null) {
+      queryParameters['start_after'] = startAfter;
+    }
 
-    // Backend returns List<Service> directly
-    final servicesList = response.data as List<dynamic>;
-    return servicesList
-        .map((service) => Service.fromJson(service as Map<String, dynamic>))
-        .toList();
+    final response = await _apiClient.get(
+      ApiEndpoints.services,
+      queryParameters: queryParameters,
+    );
+
+    // Backend returns CursorPage<ServiceOut> envelope
+    final data = response.data as Map<String, dynamic>;
+    return CursorPageResponse.fromJson(data, Service.fromJson);
   }
 
   // Get single service by ID

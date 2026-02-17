@@ -1,3 +1,4 @@
+import '../utils/error_utils.dart';
 import '../utils/logger.dart';
 import 'token_storage_service.dart';
 import '../../features/auth/data/auth_api_service.dart';
@@ -5,6 +6,7 @@ import '../../features/auth/data/auth_api_service.dart';
 /// Token yenileme servisi - Instagram gibi kalıcı oturum için
 /// Uygulama açıldığında proaktif token refresh yapar
 class TokenRefreshService {
+
   /// Token'ın geçerli olduğundan emin ol
   /// Token expired veya expire olmak üzere ise refresh yapar
   /// 
@@ -46,8 +48,14 @@ class TokenRefreshService {
         return true;
       } catch (e) {
         AppLogger.error('TokenRefreshService: Token refresh failed', e);
-        // Refresh başarısız - token'ları temizle
-        await TokenStorageService.clearTokens();
+        // Geçici hata ise (timeout, network) token'ları SİLME - oturumu koru
+        // Sadece gerçek auth hataları (invalid/revoked token) için sil
+        if (ErrorUtils.isTemporaryError(e)) {
+          AppLogger.warning('TokenRefreshService: Temporary error, keeping tokens');
+        } else {
+          AppLogger.warning('TokenRefreshService: Auth error, clearing tokens');
+          await TokenStorageService.clearTokens();
+        }
         return false;
       }
     } catch (e) {
@@ -95,6 +103,10 @@ class TokenRefreshService {
       return true;
     } catch (e) {
       AppLogger.error('TokenRefreshService: Force refresh failed', e);
+      // Geçici hata ise token'ları silme
+      if (!ErrorUtils.isTemporaryError(e)) {
+        await TokenStorageService.clearTokens();
+      }
       return false;
     }
   }

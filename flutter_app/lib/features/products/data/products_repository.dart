@@ -1,29 +1,36 @@
 import '../../../core/models/product_model.dart';
+import '../../../core/models/paginated_response.dart';
 import '../../../core/network/api_endpoints.dart';
 import 'products_api_service.dart';
 
 class ProductsRepository {
   final ProductsApiService _apiService = ProductsApiService();
 
-  // Get all products with optional category filter
-  Future<List<Product>> getProducts({String? categoryName}) async {
+  /// Get products with cursor-based pagination.
+  Future<CursorPageResponse<Product>> getProducts({
+    String? categoryName,
+    int limit = 20,
+    String? startAfter,
+  }) async {
     try {
       if (ApiEndpoints.isDebug) {
         print(
-            '📦 ProductsRepository.getProducts called with categoryName: $categoryName');
+            '📦 ProductsRepository.getProducts called with categoryName: $categoryName, limit: $limit, startAfter: $startAfter');
       }
 
-      final products =
-          await _apiService.getProducts(categoryName: categoryName);
+      final response = await _apiService.getProducts(
+        categoryName: categoryName,
+        limit: limit,
+        startAfter: startAfter,
+      );
 
       if (ApiEndpoints.isDebug) {
         print(
-            '📦 ProductsRepository.getProducts returning ${products.length} products');
+            '📦 ProductsRepository.getProducts returning ${response.count} products, hasMore: ${response.hasMore}');
       }
 
-      return products;
+      return response;
     } catch (e) {
-      // Only print in debug mode
       if (ApiEndpoints.isDebug) {
         print('❌ Error fetching products: $e');
       }

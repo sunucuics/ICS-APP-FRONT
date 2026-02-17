@@ -6,8 +6,9 @@ import '../../features/auth/providers/anonymous_auth_provider.dart'
     as anonymous;
 import '../../features/auth/presentation/pages/guest_welcome_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../services/token_storage_service.dart';
 import '../theme/app_theme.dart';
-import '../services/token_refresh_service.dart';
+import '../utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'onboarding_screen.dart';
 
@@ -123,48 +124,49 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     }
   }
 
-  void _checkAuthAndNavigate() async {
+  Future<void> _checkAuthAndNavigate() async {
     if (!mounted) return;
 
-    // Token'ı kontrol et ve gerekirse refresh yap (Instagram gibi kalıcı oturum)
-    // Bu sayede 1 gün sonra bile token expired olsa, refresh token ile yenilenir
-    final hasValidToken = await TokenRefreshService.ensureValidToken();
-    
-    if (hasValidToken) {
-      // Token geçerli veya başarıyla yenilendi - ana sayfaya yönlendir
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const HomePage(),
-          ),
-        );
-      }
+    // AuthNotifier'ın initialization'ını bekle (proaktif token refresh + profil yükleme)
+    // Max 10 saniye bekle - timeout olursa token varlığına göre karar ver
+    final authNotifier = ref.read(authProvider.notifier);
+    try {
+      await authNotifier.initialized.timeout(const Duration(seconds: 10));
+      AppLogger.debug('SplashScreen: Auth initialization completed');
+    } on TimeoutException {
+      AppLogger.warning('SplashScreen: Auth initialization timed out, using fallback');
+      // Timeout → token varlığına göre karar ver
+      if (!mounted) return;
+      final hasTokens = await TokenStorageService.hasTokens();
+      _navigateToPage(hasTokens);
       return;
     }
 
-    // Token yok veya refresh başarısız - auth state kontrolü yap
+    if (!mounted) return;
+
     final authState = ref.read(authProvider);
     final anonymousAuthState = ref.read(anonymous.anonymousAuthProvider);
 
-    // Check if user is authenticated (either registered or anonymous)
-    if (authState.isAuthenticated ||
-        (anonymousAuthState.hasValue && anonymousAuthState.value != null)) {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const HomePage(),
-          ),
-        );
-      }
+    final isAuthenticated = authState.isAuthenticated ||
+        (anonymousAuthState.hasValue && anonymousAuthState.value != null);
+    _navigateToPage(isAuthenticated);
+  }
+
+  void _navigateToPage(bool isAuthenticated) {
+    if (!mounted) return;
+
+    if (isAuthenticated) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const HomePage(),
+        ),
+      );
     } else {
-      // If not authenticated, navigate to welcome page
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const GuestWelcomePage(),
-          ),
-        );
-      }
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const GuestWelcomePage(),
+        ),
+      );
     }
   }
 

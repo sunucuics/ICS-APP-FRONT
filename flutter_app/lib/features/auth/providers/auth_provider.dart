@@ -1,13 +1,30 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/models/user_model.dart';
+import '../../../core/network/interceptors/auth_interceptor.dart';
 import '../../../core/services/firebase_auth_service.dart';
 import '../../../core/services/fcm_service.dart';
 import '../../../core/services/token_storage_service.dart';
+import '../../../core/utils/error_utils.dart';
 import '../../../core/utils/logger.dart';
 import '../data/auth_repository.dart';
 import 'anonymous_auth_provider.dart' as anonymous;
+
+// Admin provider imports — logout'ta invalidate etmek için
+import '../../admin/providers/admin_notifications_provider.dart';
+import '../../admin/providers/admin_dashboard_provider.dart';
+import '../../admin/providers/admin_orders_provider.dart';
+import '../../admin/providers/admin_products_provider.dart';
+import '../../admin/providers/admin_services_provider.dart';
+import '../../admin/providers/admin_appointments_provider.dart';
+import '../../admin/providers/admin_categories_provider.dart';
+import '../../admin/providers/admin_discounts_provider.dart';
+import '../../admin/providers/admin_settings_provider.dart';
+import '../../admin/providers/admin_users_provider.dart';
+import '../../admin/providers/admin_comments_provider.dart';
 
 // Auth Repository Provider
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -45,14 +62,56 @@ class AuthState {
 }
 
 // Auth State Notifier
-class AuthNotifier extends StateNotifier<AuthState> {
+class AuthNotifier extends StateNotifier<AuthState> with WidgetsBindingObserver {
   final AuthRepository _authRepository;
   final Ref _ref;
   bool _isInitialized = false;
   bool _isLoggingIn = false;
+  bool _isLoadingProfile = false; // Guard: çift _loadUserProfile() çağrısını önler
+
+  /// Initialization completer - splash screen bu future'ı bekler.
+  /// _checkInitialAuthStatus() tamamlandığında complete olur.
+  final Completer<void> _initCompleter = Completer<void>();
+  Future<void> get initialized => _initCompleter.future;
 
   AuthNotifier(this._authRepository, this._ref) : super(const AuthState()) {
+    WidgetsBinding.instance.addObserver(this);
     _listenToAuthStateChanges();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  /// App lifecycle: background → foreground geçişinde proaktif token refresh.
+  /// Token expired ise interceptor'ın 401→refresh döngüsünü beklemek yerine
+  /// burada önceden refresh yapar → kullanıcı "yavaş" hissetmez.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState lifecycleState) {
+    if (lifecycleState == AppLifecycleState.resumed && state.isAuthenticated) {
+      AppLogger.debug('AuthProvider: App resumed, checking token freshness...');
+      _proactiveTokenRefresh();
+    }
+  }
+
+  /// Background'dan dönüşte token expired veya expire'a yakınsa sessizce yenile.
+  Future<void> _proactiveTokenRefresh() async {
+    try {
+      final shouldRefresh = await TokenStorageService.shouldRefreshToken();
+      if (!shouldRefresh) return;
+
+      final refreshToken = await TokenStorageService.getRefreshToken();
+      if (refreshToken == null) return;
+
+      AppLogger.debug('AuthProvider: Proactive token refresh on app resume...');
+      await _authRepository.refreshToken(refreshToken);
+      AppLogger.success('AuthProvider: Proactive token refresh successful');
+    } catch (e) {
+      // Sessiz hata - interceptor gerekirse 401'de tekrar deneyecek
+      AppLogger.warning('AuthProvider: Proactive refresh failed (non-critical)', e);
+    }
   }
 
   // Listen to Firebase auth state changes
@@ -62,64 +121,73 @@ class AuthNotifier extends StateNotifier<AuthState> {
         AppLogger.debug(
             'AuthProvider: Firebase auth state changed - User: ${firebaseUser?.uid ?? 'null'}');
         if (firebaseUser != null) {
-          // User is signed in
-          if (!_isLoggingIn) {
+          // User is signed in via Firebase
+          // Guard: login sırasında veya zaten profil yükleniyorsa atla
+          if (!_isLoggingIn && !_isLoadingProfile && !state.isAuthenticated) {
             await _loadUserProfile();
           }
         } else {
           // User is signed out from Firebase
-          // But check if we have tokens - token-based auth might still work
+          // Token varsa oturumu koru (token-based auth çalışmaya devam eder)
           final hasTokens = await TokenStorageService.hasTokens();
           if (!hasTokens) {
-            // No tokens either, user is truly signed out
-            AppLogger.debug('AuthProvider: User signed out, no tokens found, updating state');
+            AppLogger.debug('AuthProvider: User signed out, no tokens found');
             state = const AuthState(isAuthenticated: false);
           } else {
-            // Firebase user is null but tokens exist
-            // Don't immediately sign out - let _checkInitialAuthStatus handle it
             AppLogger.debug('AuthProvider: Firebase user null but tokens exist, keeping session');
-            // If not yet initialized, _checkInitialAuthStatus will handle the auth flow
-            // If already initialized and authenticated, keep the session
-            if (_isInitialized && !state.isAuthenticated) {
-              // Already initialized but not authenticated - try to load profile with tokens
-              await _loadUserProfile();
-            }
           }
         }
       });
 
-      // Check current auth status immediately on startup (optimized)
+      // Check current auth status immediately on startup
       _checkInitialAuthStatus();
     } catch (e) {
       AppLogger.error('Firebase auth state listener setup failed', e);
-      // Fallback to manual auth check
       _checkAuthStatusManually();
     }
   }
 
-  // Check initial auth status when provider is created (optimized with timeout)
+  // Check initial auth status when provider is created
   Future<void> _checkInitialAuthStatus() async {
     if (_isInitialized) return;
 
     try {
       AppLogger.debug('AuthProvider: Checking initial auth status...');
 
-      // Fast check - just Firebase auth state (no API call)
-      final isLoggedIn = await _authRepository
-          .isLoggedIn()
-          .timeout(const Duration(seconds: 2), onTimeout: () {
-        AppLogger.warning('Auth check timeout, assuming not logged in');
-        return false;
-      });
+      // Hızlı kontrol - sadece token varlığı (ağ çağrısı YOK, anında döner)
+      final hasTokens = await TokenStorageService.hasTokens();
 
-      AppLogger.debug(
-          'AuthProvider: Initial auth status - isLoggedIn: $isLoggedIn');
+      AppLogger.debug('AuthProvider: Initial auth - hasTokens: $hasTokens');
 
-      if (isLoggedIn) {
-        // Load user profile with timeout
+      if (hasTokens) {
+        // Proaktif token refresh: expired veya expire'a yakınsa ÖNCE refresh yap
+        // Bu sayede _loadUserProfile() valid token ile çalışır,
+        // interceptor'ın 401→refresh→retry döngüsüne gerek kalmaz → daha hızlı startup
+        try {
+          final shouldRefresh = await TokenStorageService.shouldRefreshToken();
+          if (shouldRefresh) {
+            AppLogger.debug('AuthProvider: Token needs refresh on startup, refreshing proactively...');
+            final refreshToken = await TokenStorageService.getRefreshToken();
+            if (refreshToken != null) {
+              await _authRepository.refreshToken(refreshToken);
+              AppLogger.success('AuthProvider: Proactive startup refresh successful');
+            }
+          }
+        } catch (e) {
+          // Proaktif refresh başarısız olursa devam et - interceptor halleder
+          AppLogger.warning('AuthProvider: Proactive startup refresh failed (non-critical)', e);
+        }
+
+        // Token var → profil yükle
         await _loadUserProfile();
       } else {
-        state = const AuthState(isAuthenticated: false);
+        // Token yok → Firebase kontrolü
+        final isFirebaseSignedIn = FirebaseAuthService.isSignedIn;
+        if (isFirebaseSignedIn) {
+          await _loadUserProfile();
+        } else {
+          state = const AuthState(isAuthenticated: false);
+        }
       }
 
       _isInitialized = true;
@@ -127,14 +195,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
       AppLogger.error('Initial auth check failed', e);
       state = const AuthState(isAuthenticated: false);
       _isInitialized = true;
+    } finally {
+      // Splash screen'in beklemesini bitir - başarılı veya başarısız fark etmez
+      if (!_initCompleter.isCompleted) {
+        _initCompleter.complete();
+      }
     }
   }
 
   // Fallback method for manual auth check
   Future<void> _checkAuthStatusManually() async {
     try {
-      final isLoggedIn = await _authRepository.isLoggedIn();
-      if (isLoggedIn) {
+      final hasTokens = await TokenStorageService.hasTokens();
+      if (hasTokens) {
         await _loadUserProfile();
       } else {
         state = const AuthState(isAuthenticated: false);
@@ -146,34 +219,31 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   /// Geçici hata mı (timeout, network) yoksa gerçek auth hatası mı kontrol et
-  bool _isTemporaryError(dynamic error) {
-    final errorStr = error.toString().toLowerCase();
-    return errorStr.contains('timeout') ||
-        errorStr.contains('connection') ||
-        errorStr.contains('network') ||
-        errorStr.contains('socket') ||
-        errorStr.contains('receive_timeout') ||
-        errorStr.contains('send_timeout') ||
-        errorStr.contains('connection_timeout') ||
-        errorStr.contains('no_internet');
-  }
+  bool _isTemporaryError(dynamic error) => ErrorUtils.isTemporaryError(error);
 
-  // Load user profile when Firebase user is authenticated (optimized with timeout)
+  /// Profil yükle - BASİTLEŞTİRİLMİŞ versiyon
+  ///
+  /// Sadece TEK bir getCurrentUser() çağrısı yapar.
+  /// Token refresh işlemi auth interceptor tarafından otomatik yapılır (401 → refresh → retry).
+  /// Manuel refresh/retry fallback YOK - interceptor'a güveniyoruz.
+  /// Timeout YOK - Dio'nun kendi 30s timeout'u yeterli, interceptor'u yarıda kesmez.
   Future<void> _loadUserProfile() async {
+    // Guard: zaten yükleniyorsa tekrar çağırma (çift çağrı önleme)
+    if (_isLoadingProfile) {
+      AppLogger.debug('AuthProvider: Profile already loading, skipping duplicate call');
+      return;
+    }
+    _isLoadingProfile = true;
+
     // Don't set loading if already authenticated (prevents UI flicker)
     if (!state.isAuthenticated) {
       state = state.copyWith(isLoading: true, error: null);
     }
 
     try {
-      // Add timeout to prevent blocking on slow network
-      // 15s - mobil ağda backend + Firebase doğrulama zinciri yavaş olabilir
-      final user = await _authRepository
-          .getCurrentUser()
-          .timeout(const Duration(seconds: 15), onTimeout: () {
-        AppLogger.warning('User profile load timeout');
-        return null;
-      });
+      // TEK çağrı - interceptor 401 gelirse otomatik refresh + retry yapacak
+      // Timeout YOK - Dio'nun 30s timeout'u interceptor'un refresh+retry döngüsünü kapsar
+      final user = await _authRepository.getCurrentUser();
 
       if (user != null) {
         state = state.copyWith(
@@ -181,72 +251,41 @@ class AuthNotifier extends StateNotifier<AuthState> {
           isAuthenticated: true,
           isLoading: false,
         );
-        
-        // Update FCM token to backend when user profile is loaded
-        // This ensures token is updated even if login didn't trigger it
+
+        // Update FCM token to backend (fire-and-forget)
         FCMService.updateTokenToBackend().catchError((e) {
           AppLogger.warning('Failed to update FCM token after profile load', e);
         });
       } else {
-        // user == null → timeout veya backend erişilemedi
-        // Eğer zaten authenticated ise oturumu KORU (geçici hata olabilir)
+        // user == null → backend erişilemedi veya kullanıcı bulunamadı
+        // Zaten authenticated ise oturumu koru
         if (state.isAuthenticated && state.user != null) {
-          AppLogger.warning('AuthProvider: Profile reload failed but user already authenticated, keeping session');
+          AppLogger.warning('AuthProvider: Profile reload failed, keeping existing session');
           state = state.copyWith(isLoading: false);
           return;
         }
 
-        // Token varsa ama user profile çekilemiyorsa, token refresh deneyebiliriz
+        // Token varsa geçici hata olabilir, oturumu koru (loading kapat)
         final hasTokens = await TokenStorageService.hasTokens();
         if (hasTokens) {
-          AppLogger.debug('AuthProvider: Token exists but user profile failed, attempting token refresh...');
-          try {
-            final refreshToken = await TokenStorageService.getRefreshToken();
-            if (refreshToken != null) {
-              await _authRepository.refreshToken(refreshToken);
-              // Token yenilendi, tekrar user profile çekmeyi dene
-              final retryUser = await _authRepository.getCurrentUser();
-              if (retryUser != null) {
-                state = state.copyWith(
-                  user: retryUser,
-                  isAuthenticated: true,
-                  isLoading: false,
-                );
-                return;
-              }
-            }
-          } catch (refreshError) {
-            AppLogger.warning('AuthProvider: Token refresh failed', refreshError);
-            // Geçici hata ise oturumu koru
-            if (_isTemporaryError(refreshError)) {
-              AppLogger.warning('AuthProvider: Temporary error during refresh, keeping session');
-              state = state.copyWith(isLoading: false);
-              return;
-            }
-          }
+          AppLogger.warning('AuthProvider: Profile null but tokens exist, keeping session');
+          state = state.copyWith(isLoading: false);
+          return;
         }
 
-        // Token yok veya gerçek auth hatası - oturumu kapat
-        AppLogger.warning(
-            'AuthProvider: No valid session found. Signing out...');
-        await FirebaseAuthService.signOut();
-        await TokenStorageService.clearTokens();
-        state = state.copyWith(
-          isAuthenticated: false,
-          isLoading: false,
-          error: 'User profile not found. Please try again.',
-        );
+        // Token da yok - gerçekten giriş yapılmamış
+        state = state.copyWith(isAuthenticated: false, isLoading: false);
       }
     } catch (e) {
-      // Geçici hata ise (timeout, network) oturumu KORU
+      AppLogger.error('AuthProvider: Error loading profile', e);
+
+      // Geçici hata (timeout, network) → oturumu koru
       if (_isTemporaryError(e)) {
-        AppLogger.warning('AuthProvider: Temporary error loading profile, keeping session', e);
-        // Zaten authenticated ise state'i koru
+        AppLogger.warning('AuthProvider: Temporary error, keeping session');
         if (state.isAuthenticated && state.user != null) {
           state = state.copyWith(isLoading: false);
           return;
         }
-        // İlk yükleme ise token'lar varsa authenticated kabul et
         final hasTokens = await TokenStorageService.hasTokens();
         if (hasTokens) {
           state = state.copyWith(isLoading: false);
@@ -254,37 +293,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         }
       }
 
-      // Gerçek auth hatası (401) - token refresh dene
-      final hasTokens = await TokenStorageService.hasTokens();
-      if (hasTokens && e.toString().contains('401')) {
-        AppLogger.debug('AuthProvider: 401 error, attempting token refresh...');
-        try {
-          final refreshToken = await TokenStorageService.getRefreshToken();
-          if (refreshToken != null) {
-            await _authRepository.refreshToken(refreshToken);
-            // Token yenilendi, tekrar user profile çekmeyi dene
-            final retryUser = await _authRepository.getCurrentUser();
-            if (retryUser != null) {
-              state = state.copyWith(
-                user: retryUser,
-                isAuthenticated: true,
-                isLoading: false,
-              );
-              return;
-            }
-          }
-        } catch (refreshError) {
-          AppLogger.warning('AuthProvider: Token refresh failed', refreshError);
-          // Geçici hata ise yine oturumu koru
-          if (_isTemporaryError(refreshError)) {
-            AppLogger.warning('AuthProvider: Temporary error during 401 refresh, keeping session');
-            state = state.copyWith(isLoading: false);
-            return;
-          }
-        }
-      }
-
-      // Gerçek auth hatası ve refresh başarısız - oturumu kapat
+      // Gerçek auth hatası → oturumu kapat
       AppLogger.error('AuthProvider: Auth error, signing out...', e);
       await FirebaseAuthService.signOut();
       await TokenStorageService.clearTokens();
@@ -293,6 +302,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isAuthenticated: false,
         isLoading: false,
       );
+    } finally {
+      _isLoadingProfile = false;
     }
   }
 
@@ -300,6 +311,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<bool> login(String email, String password) async {
     AppLogger.info(
         'AuthProvider - Starting login for: ${AppLogger.maskEmail(email)}');
+
+    // Eski oturumdan kalan interceptor state'ini temizle
+    // Admin logout → customer login geçişinde kalan stale state'i önler
+    AuthInterceptor.reset();
+
     state = state.copyWith(isLoading: true, error: null);
     _isLoggingIn = true;
 
@@ -426,13 +442,74 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _authRepository.logout();
       AppLogger.success('AuthProvider - Logout successful');
 
+      // Admin provider'larını ve SSE stream'lerini temizle.
+      // Bu olmadan admin provider'lar bellekte kalır, SSE bağlantısı açık kalır
+      // ve customer login sırasında arka planda admin endpoint'leri çağrılmaya devam eder.
+      _invalidateAllAdminProviders();
+
       // Immediately update state to logged out since logout was successful
       state = const AuthState(isAuthenticated: false, isLoading: false);
       AppLogger.debug('AuthProvider - State updated to logged out');
     } catch (e) {
       // Even if logout fails, update state to not loading
       AppLogger.error('AuthProvider - Logout error', e);
+      // Yine de admin state'ini temizle
+      _invalidateAllAdminProviders();
       state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  /// Tüm admin provider'larını invalidate et.
+  /// Logout sırasında çağrılır — SSE stream, dashboard, orders vb. temizlenir.
+  /// StateNotifierProvider'lar dispose olur, FutureProvider cache'leri silinir.
+  void _invalidateAllAdminProviders() {
+    AppLogger.debug('AuthProvider - Invalidating all admin providers...');
+    try {
+      // SSE stream ve bildirimler (en kritik — açık bağlantı)
+      _ref.invalidate(adminPanelNotificationsNotifierProvider);
+      _ref.invalidate(adminNotificationStreamServiceProvider);
+      _ref.invalidate(adminNotificationTemplatesNotifierProvider);
+      _ref.invalidate(adminNotificationTemplatesProvider);
+      _ref.invalidate(adminNotificationCampaignsProvider);
+      _ref.invalidate(adminUserSegmentsProvider);
+      _ref.invalidate(adminPanelUnreadCountProvider);
+      _ref.invalidate(adminPanelNotificationsProvider);
+
+      // Dashboard
+      _ref.invalidate(adminDashboardStatsProvider);
+      _ref.invalidate(adminDashboardDataProvider);
+      _ref.invalidate(adminDashboardRefreshProvider);
+
+      // Orders
+      _ref.invalidate(adminOrdersProvider);
+      _ref.invalidate(adminOrdersNotifierProvider);
+      _ref.invalidate(adminOrdersQueueProvider);
+      _ref.invalidate(adminOrdersTestProvider);
+      _ref.invalidate(adminEmailTestProvider);
+
+      // Products, Services, Categories, Appointments
+      _ref.invalidate(adminProductsProvider);
+      _ref.invalidate(adminProductsNotifierProvider);
+      _ref.invalidate(adminServicesProvider);
+      _ref.invalidate(adminServicesNotifierProvider);
+      _ref.invalidate(adminCategoriesProvider);
+      _ref.invalidate(adminCategoriesNotifierProvider);
+      _ref.invalidate(adminAppointmentsProvider);
+      _ref.invalidate(adminAppointmentsNotifierProvider);
+
+      // Discounts, Settings, Users, Comments
+      _ref.invalidate(adminDiscountsProvider);
+      _ref.invalidate(adminDiscountsNotifierProvider);
+      _ref.invalidate(adminSystemSettingsProvider);
+      _ref.invalidate(adminSettingsNotifierProvider);
+      _ref.invalidate(adminEmailTemplatesProvider);
+      _ref.invalidate(adminEmailTemplatesNotifierProvider);
+      _ref.invalidate(adminUsersProvider);
+      _ref.invalidate(adminCommentsProvider);
+
+      AppLogger.success('AuthProvider - All admin providers invalidated');
+    } catch (e) {
+      AppLogger.warning('AuthProvider - Error invalidating admin providers', e);
     }
   }
 
