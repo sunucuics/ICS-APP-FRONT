@@ -41,8 +41,17 @@ class ProductsApiService {
       print('🔍 Backend response status: ${response.statusCode}');
     }
 
-    // Backend returns CursorPage<ProductOut> envelope
-    final data = response.data as Map<String, dynamic>;
+    // Backend CursorPage<ProductOut> envelope veya eski List format
+    final rawData = response.data;
+    if (rawData is List) {
+      final items = rawData
+          .map((e) => Product.fromJson(e as Map<String, dynamic>))
+          .toList();
+      return CursorPageResponse<Product>(
+        items: items, count: items.length, nextCursor: null, hasMore: false,
+      );
+    }
+    final data = rawData as Map<String, dynamic>;
     return CursorPageResponse.fromJson(data, Product.fromJson);
   }
 

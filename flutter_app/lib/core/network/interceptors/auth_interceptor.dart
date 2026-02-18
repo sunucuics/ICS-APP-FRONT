@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
 import '../../services/firebase_auth_service.dart';
 import '../../services/navigation_service.dart';
 import '../../services/token_storage_service.dart';
@@ -14,6 +15,15 @@ class AuthInterceptor extends Interceptor {
   /// Tüm 401 alan istekler aynı Completer'ı bekler.
   /// Completer String? ile tamamlanır: yeni token (başarılı) veya null (başarısız).
   static Completer<String?>? _refreshCompleter;
+
+  /// Force logout callback — AuthNotifier tarafından register edilir.
+  /// Interceptor'dan auth state'i sıfırlamak için kullanılır.
+  static VoidCallback? _onForceLogout;
+
+  /// AuthNotifier bu callback'i register eder.
+  static void registerForceLogout(VoidCallback callback) {
+    _onForceLogout = callback;
+  }
 
   /// Interceptor state'ini sıfırla.
   /// Logout ve login öncesi çağrılmalı.
@@ -109,9 +119,7 @@ class AuthInterceptor extends Interceptor {
     if (errorDetail == 'Session revoked') {
       AppLogger.warning(
           'AUTH_REDIRECT | reason: session_revoked | path: ${originalRequest.path} | status: ${err.response?.statusCode} | uid: ${FirebaseAuthService.currentUser?.uid ?? 'null'}');
-      await TokenStorageService.clearTokens();
-      await FirebaseAuthService.signOut();
-      NavigationService.navigateToWelcome();
+      _performForceLogout();
       handler.next(err);
       return;
     }
@@ -195,14 +203,26 @@ class AuthInterceptor extends Interceptor {
             'AUTH_REDIRECT | reason: temporary_error_kept_session | path: ${originalRequest.path} | status: ${err.response?.statusCode} | error: ${e.runtimeType}');
         handler.next(err);
       } else {
-        // Gerçek auth hatası → token'ları temizle, Firebase signOut ve çıkış yap
+        // Gerçek auth hatası → state sıfırla, token temizle, çıkış yap
         AppLogger.warning(
             'AUTH_REDIRECT | reason: auth_error_refresh_failed | path: ${originalRequest.path} | status: ${err.response?.statusCode} | error: ${e.runtimeType} | uid: ${FirebaseAuthService.currentUser?.uid ?? 'null'}');
-        await TokenStorageService.clearTokens();
-        await FirebaseAuthService.signOut();
-        NavigationService.navigateToWelcome();
+        _performForceLogout();
         handler.next(err);
       }
+    }
+  }
+
+  /// Force logout: callback varsa AuthNotifier üzerinden (state sıfırlanır),
+  /// yoksa fallback olarak direkt token temizle + navigasyon.
+  void _performForceLogout() {
+    if (_onForceLogout != null) {
+      _onForceLogout!.call();
+    } else {
+      // Fallback: callback henüz register edilmediyse
+      AppLogger.warning('AuthInterceptor: No forceLogout callback, using fallback');
+      TokenStorageService.clearTokens();
+      FirebaseAuthService.signOut();
+      NavigationService.navigateToWelcome();
     }
   }
 
@@ -216,13 +236,16 @@ class AuthInterceptor extends Interceptor {
     try {
       originalRequest.extra['_retried'] = true;
 
-      // FormData istekleri tekrar denenemez (finalized hatası)
+      // FormData istekleri tekrar denenemez (Dio finalized hatası)
+      // Token yenilendi ama dosya yükleme isteği retry edilemez — kullanıcıya bilgi ver
       if (originalRequest.data is FormData) {
-        AppLogger.debug(
-            'AuthInterceptor: Skipping FormData retry to avoid finalized error');
+        AppLogger.warning(
+            'AuthInterceptor: FormData request cannot be retried after token refresh. '
+            'Token was refreshed successfully — user should retry the action.');
         handler.next(DioException(
           requestOptions: originalRequest,
-          error: 'FormData request cannot be retried',
+          type: DioExceptionType.unknown,
+          error: 'Oturum yenilendi ancak dosya yükleme işlemi tekrar edilemedi. Lütfen tekrar deneyin.',
         ));
         return;
       }

@@ -6,6 +6,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/services/snackbar_service.dart';
 import '../../../../core/services/account_service.dart';
 import '../../../../core/services/navigation_service.dart';
+import '../../../auth/providers/auth_provider.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -152,7 +153,7 @@ class SettingsPage extends ConsumerWidget {
                   'Hesabımı Sil',
                   'Hesabınızı ve tüm verilerinizi kalıcı olarak silin',
                   Icons.delete_forever,
-                  () => _showDeleteAccountDialog(context),
+                  () => _showDeleteAccountDialog(context, ref),
                   isDestructive: true,
                 ),
               ],
@@ -224,7 +225,7 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  Future<void> _showDeleteAccountDialog(BuildContext context) async {
+  Future<void> _showDeleteAccountDialog(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -261,7 +262,7 @@ class SettingsPage extends ConsumerWidget {
         if (context.mounted) Navigator.of(context).pop();
 
         if (context.mounted) {
-          _showVerificationDialog(context);
+          _showVerificationDialog(context, ref);
         }
       } catch (e) {
         // Hide loading
@@ -277,7 +278,7 @@ class SettingsPage extends ConsumerWidget {
     }
   }
 
-  void _showVerificationDialog(BuildContext context) {
+  void _showVerificationDialog(BuildContext context, WidgetRef ref) {
     final codeController = TextEditingController();
     bool isLoading = false;
 
@@ -323,9 +324,9 @@ class SettingsPage extends ConsumerWidget {
                         
                         if (context.mounted) {
                           Navigator.of(context).pop(); // Close dialog
-                          
-                          // Navigate to welcome page
-                          NavigationService.navigateToWelcome();
+
+                          // Token + cache + state temizle ve welcome page'e git
+                          ref.read(authProvider.notifier).forceLogout();
                           
                           SnackBarService.showSnackBar(
                             context: context,

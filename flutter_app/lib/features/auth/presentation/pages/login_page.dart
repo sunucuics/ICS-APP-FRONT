@@ -19,6 +19,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   bool _obscurePassword = true;
 
   @override
+  void initState() {
+    super.initState();
+    // Önceki oturumdan kalan stale isLoading state'ini temizle
+    // Bu olmadan interceptor force logout sonrası buton disabled kalabilir
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(authProvider.notifier).resetLoadingState();
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();

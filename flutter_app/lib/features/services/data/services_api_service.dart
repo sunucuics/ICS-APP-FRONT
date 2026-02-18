@@ -23,8 +23,17 @@ class ServicesApiService {
       queryParameters: queryParameters,
     );
 
-    // Backend returns CursorPage<ServiceOut> envelope
-    final data = response.data as Map<String, dynamic>;
+    // Backend CursorPage<ServiceOut> envelope veya eski List format
+    final rawData = response.data;
+    if (rawData is List) {
+      final items = rawData
+          .map((e) => Service.fromJson(e as Map<String, dynamic>))
+          .toList();
+      return CursorPageResponse<Service>(
+        items: items, count: items.length, nextCursor: null, hasMore: false,
+      );
+    }
+    final data = rawData as Map<String, dynamic>;
     return CursorPageResponse.fromJson(data, Service.fromJson);
   }
 

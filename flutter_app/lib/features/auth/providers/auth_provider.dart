@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/network/interceptors/auth_interceptor.dart';
 import '../../../core/services/firebase_auth_service.dart';
+import '../../../core/services/navigation_service.dart';
 import '../../../core/services/fcm_service.dart';
 import '../../../core/services/token_storage_service.dart';
 import '../../../core/utils/error_utils.dart';
@@ -76,6 +77,8 @@ class AuthNotifier extends StateNotifier<AuthState> with WidgetsBindingObserver 
 
   AuthNotifier(this._authRepository, this._ref) : super(const AuthState()) {
     WidgetsBinding.instance.addObserver(this);
+    // Interceptor'a force logout callback'i ver — 401 hatalarında state sıfırlanır
+    AuthInterceptor.registerForceLogout(forceLogout);
     _listenToAuthStateChanges();
   }
 
@@ -154,28 +157,68 @@ class AuthNotifier extends StateNotifier<AuthState> with WidgetsBindingObserver 
     try {
       AppLogger.debug('AuthProvider: Checking initial auth status...');
 
-      // Hızlı kontrol - sadece token varlığı (ağ çağrısı YOK, anında döner)
-      final hasTokens = await TokenStorageService.hasTokens();
+      // Paralel secure storage okuması — 4 ardışık okuma yerine tek seferde
+      final storageResults = await Future.wait([
+        TokenStorageService.getAccessToken(),
+        TokenStorageService.getRefreshToken(),
+        TokenStorageService.getExpiresAt(),
+      ]);
+      final accessToken = storageResults[0] as String?;
+      final refreshToken = storageResults[1] as String?;
+      final expiresAt = storageResults[2] as DateTime?;
+      final hasTokens = accessToken != null && refreshToken != null;
 
       AppLogger.debug('AuthProvider: Initial auth - hasTokens: $hasTokens');
 
       if (hasTokens) {
-        // Proaktif token refresh: expired veya expire'a yakınsa ÖNCE refresh yap
-        // Bu sayede _loadUserProfile() valid token ile çalışır,
-        // interceptor'ın 401→refresh→retry döngüsüne gerek kalmaz → daha hızlı startup
-        try {
-          final shouldRefresh = await TokenStorageService.shouldRefreshToken();
-          if (shouldRefresh) {
-            AppLogger.debug('AuthProvider: Token needs refresh on startup, refreshing proactively...');
-            final refreshToken = await TokenStorageService.getRefreshToken();
-            if (refreshToken != null) {
-              await _authRepository.refreshToken(refreshToken);
-              AppLogger.success('AuthProvider: Proactive startup refresh successful');
+        // FAST PATH: Cached user profile varsa anında home screen göster
+        // Ağ çağrısı yapmadan ~200ms'de açılır, profil arka planda tazelenir
+        final cachedUserJson = await TokenStorageService.getCachedUserProfile();
+        if (cachedUserJson != null) {
+          try {
+            final cachedUser = UserProfile.fromJson(cachedUserJson);
+            state = state.copyWith(
+              user: cachedUser,
+              isAuthenticated: true,
+              isLoading: false,
+            );
+            AppLogger.success('AuthProvider: Restored cached user profile — instant home screen');
+
+            _isInitialized = true;
+            if (!_initCompleter.isCompleted) {
+              _initCompleter.complete();
             }
+
+            // Arka planda profili tazele (fire-and-forget, UI'ı bloklamaz)
+            _refreshProfileInBackground(refreshToken, expiresAt);
+            return;
+          } catch (e) {
+            AppLogger.warning('AuthProvider: Failed to parse cached profile, falling back to network', e);
           }
-        } catch (e) {
-          // Proaktif refresh başarısız olursa devam et - interceptor halleder
-          AppLogger.warning('AuthProvider: Proactive startup refresh failed (non-critical)', e);
+        }
+
+        // SLOW PATH: Cache yok — normal akış
+        // shouldRefresh inline hesapla (ek storage okuması yok)
+        bool shouldRefresh = false;
+        if (expiresAt != null) {
+          final threshold = expiresAt.subtract(const Duration(minutes: 5));
+          shouldRefresh = DateTime.now().isAfter(threshold);
+        }
+
+        // Proaktif token refresh: expired veya expire'a yakınsa ÖNCE refresh yap
+        // 5s timeout: backend soğuksa interceptor'a bırak, UI'ı bloklamak yerine
+        if (shouldRefresh && refreshToken != null) {
+          try {
+            AppLogger.debug('AuthProvider: Token needs refresh on startup, refreshing proactively (5s timeout)...');
+            await _authRepository.refreshToken(refreshToken)
+                .timeout(const Duration(seconds: 5), onTimeout: () {
+              throw TimeoutException('Proactive startup refresh timed out after 5s');
+            });
+            AppLogger.success('AuthProvider: Proactive startup refresh successful');
+          } catch (e) {
+            // Proaktif refresh başarısız olursa devam et - interceptor halleder
+            AppLogger.warning('AuthProvider: Proactive startup refresh failed (non-critical)', e);
+          }
         }
 
         // Token var → profil yükle
@@ -221,6 +264,43 @@ class AuthNotifier extends StateNotifier<AuthState> with WidgetsBindingObserver 
   /// Geçici hata mı (timeout, network) yoksa gerçek auth hatası mı kontrol et
   bool _isTemporaryError(dynamic error) => ErrorUtils.isTemporaryError(error);
 
+  /// Arka planda profili tazele — cached fast path'ten sonra çağrılır.
+  /// UI'ı bloklamaz, sessizce state günceller. Token expired ise interceptor handle eder.
+  Future<void> _refreshProfileInBackground(String? refreshToken, DateTime? expiresAt) async {
+    try {
+      // Token expire'a yakınsa veya expired ise önce refresh et
+      bool shouldRefresh = false;
+      if (expiresAt != null) {
+        final threshold = expiresAt.subtract(const Duration(minutes: 5));
+        shouldRefresh = DateTime.now().isAfter(threshold);
+      }
+      if (shouldRefresh && refreshToken != null) {
+        try {
+          await _authRepository.refreshToken(refreshToken)
+              .timeout(const Duration(seconds: 5), onTimeout: () {
+            throw TimeoutException('Background refresh timed out');
+          });
+        } catch (e) {
+          AppLogger.warning('AuthProvider: Background token refresh failed, interceptor will handle', e);
+        }
+      }
+
+      // Profili tazele
+      final user = await _authRepository.getCurrentUser();
+      if (user != null && mounted) {
+        state = state.copyWith(user: user);
+        // Cache'i güncelle
+        TokenStorageService.saveUserProfile(user.toJson()).catchError((e) {
+          AppLogger.warning('Failed to update cached profile', e);
+        });
+      }
+    } catch (e) {
+      AppLogger.warning('AuthProvider: Background profile refresh failed', e);
+      // Sessiz hata — cached profil ile devam et
+      // Gerçek auth hatası ise interceptor zaten NavigationService.navigateToWelcome() çağırır
+    }
+  }
+
   /// Profil yükle - BASİTLEŞTİRİLMİŞ versiyon
   ///
   /// Sadece TEK bir getCurrentUser() çağrısı yapar.
@@ -251,6 +331,11 @@ class AuthNotifier extends StateNotifier<AuthState> with WidgetsBindingObserver 
           isAuthenticated: true,
           isLoading: false,
         );
+
+        // Cache user profile for instant startup next time (fire-and-forget)
+        TokenStorageService.saveUserProfile(user.toJson()).catchError((e) {
+          AppLogger.warning('Failed to cache user profile', e);
+        });
 
         // Update FCM token to backend (fire-and-forget)
         FCMService.updateTokenToBackend().catchError((e) {
@@ -336,6 +421,13 @@ class AuthNotifier extends StateNotifier<AuthState> with WidgetsBindingObserver 
         error: null,
       );
 
+      // Cache user profile for instant startup next time (fire-and-forget)
+      if (response.user.id.isNotEmpty) {
+        TokenStorageService.saveUserProfile(response.user.toJson()).catchError((e) {
+          AppLogger.warning('Failed to cache user profile after login', e);
+        });
+      }
+
       // Clear anonymous authentication when user logs in
       try {
         await _ref.read(anonymous.anonymousAuthProvider.notifier).signOut();
@@ -390,6 +482,13 @@ class AuthNotifier extends StateNotifier<AuthState> with WidgetsBindingObserver 
         error: null,
       );
 
+      // Cache user profile for instant startup next time (fire-and-forget)
+      if (response.user.id.isNotEmpty) {
+        TokenStorageService.saveUserProfile(response.user.toJson()).catchError((e) {
+          AppLogger.warning('Failed to cache user profile after register', e);
+        });
+      }
+
       // Clear anonymous authentication when user registers
       try {
         await _ref.read(anonymous.anonymousAuthProvider.notifier).signOut();
@@ -441,6 +540,9 @@ class AuthNotifier extends StateNotifier<AuthState> with WidgetsBindingObserver 
       AppLogger.debug('AuthProvider - Calling auth repository logout...');
       await _authRepository.logout();
       AppLogger.success('AuthProvider - Logout successful');
+
+      // Cached user profile'ı temizle
+      await TokenStorageService.clearCachedUserProfile();
 
       // Admin provider'larını ve SSE stream'lerini temizle.
       // Bu olmadan admin provider'lar bellekte kalır, SSE bağlantısı açık kalır
@@ -513,6 +615,41 @@ class AuthNotifier extends StateNotifier<AuthState> with WidgetsBindingObserver 
     }
   }
 
+  /// Interceptor'dan çağrılır — token refresh tamamen başarısız olduğunda.
+  /// State'i derhal sıfırlar, navigasyon yapar.
+  /// Normal logout()'tan farkı: backend çağrısı YAPMAZ (zaten token geçersiz).
+  void forceLogout() {
+    AppLogger.warning('AuthProvider: Force logout triggered by interceptor');
+
+    // State'i ANINDA sıfırla — isLoading=false kritik!
+    state = const AuthState(isAuthenticated: false, isLoading: false);
+    _isLoadingProfile = false;
+    _isLoggingIn = false;
+
+    // Interceptor'ı HEMEN reset et — microtask'ta geç kalabilir
+    AuthInterceptor.reset();
+
+    // Arka planda temizlik (fire-and-forget)
+    Future.microtask(() async {
+      await TokenStorageService.clearTokens();
+      await TokenStorageService.clearCachedUserProfile();
+      await FirebaseAuthService.signOut();
+      _invalidateAllAdminProviders();
+    });
+
+    // Navigasyon
+    NavigationService.navigateToWelcome();
+  }
+
+  /// Login sayfasında stale isLoading state'ini temizle.
+  /// Önceki oturumdan kalan isLoading=true durumunu düzeltir.
+  void resetLoadingState() {
+    if (state.isLoading && !_isLoggingIn && !_isLoadingProfile) {
+      AppLogger.debug('AuthProvider: Resetting stale loading state');
+      state = state.copyWith(isLoading: false, error: null);
+    }
+  }
+
   // Clear error
   void clearError() {
     state = state.copyWith(error: null);
@@ -520,7 +657,8 @@ class AuthNotifier extends StateNotifier<AuthState> with WidgetsBindingObserver 
 
   // Refresh user data
   Future<void> refreshUser() async {
-    if (!state.isAuthenticated) return;
+    if (!state.isAuthenticated || _isLoadingProfile) return;
+    _isLoadingProfile = true;
 
     try {
       final user = await _authRepository.getCurrentUser();
@@ -529,6 +667,8 @@ class AuthNotifier extends StateNotifier<AuthState> with WidgetsBindingObserver 
       }
     } catch (e) {
       AppLogger.error('Failed to refresh user', e);
+    } finally {
+      _isLoadingProfile = false;
     }
   }
 }

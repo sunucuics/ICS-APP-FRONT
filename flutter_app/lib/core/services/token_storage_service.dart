@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/logger.dart';
 
 /// Token'ları güvenli bir şekilde saklamak için servis
@@ -114,9 +116,11 @@ class TokenStorageService {
     try {
       final expiresAt = await getExpiresAt();
       if (expiresAt == null) {
-        // Expire zamanı bilinmiyorsa, refresh gerekli
-        AppLogger.debug('TokenStorageService: No expires_at found, refresh needed');
-        return true;
+        // Expire zamanı bilinmiyorsa optimistik davran: token geçerli kabul et.
+        // Gerçekten expire olduysa interceptor 401→refresh→retry ile halleder.
+        // true döndürmek çift refresh bug'ına neden oluyordu (proaktif + interceptor).
+        AppLogger.debug('TokenStorageService: No expires_at found, assuming valid (interceptor will handle 401)');
+        return false;
       }
       // 5 dakika kala refresh yap
       final refreshThreshold = expiresAt.subtract(const Duration(minutes: 5));
@@ -191,6 +195,45 @@ class TokenStorageService {
       AppLogger.debug('TokenStorageService: Access token cleared');
     } catch (e) {
       AppLogger.error('TokenStorageService: Failed to clear access token', e);
+    }
+  }
+
+  // --- Cached User Profile (SharedPreferences — hızlı okuma, startup fast path) ---
+
+  static const String _cachedUserKey = 'cached_user_profile';
+
+  /// User profile'ı SharedPreferences'a JSON olarak kaydet
+  static Future<void> saveUserProfile(Map<String, dynamic> userJson) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_cachedUserKey, jsonEncode(userJson));
+      AppLogger.debug('TokenStorageService: User profile cached');
+    } catch (e) {
+      AppLogger.warning('TokenStorageService: Failed to cache user profile', e);
+    }
+  }
+
+  /// Cached user profile'ı oku (hızlı, ağ çağrısı yok)
+  static Future<Map<String, dynamic>?> getCachedUserProfile() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = prefs.getString(_cachedUserKey);
+      if (jsonStr == null) return null;
+      return jsonDecode(jsonStr) as Map<String, dynamic>;
+    } catch (e) {
+      AppLogger.warning('TokenStorageService: Failed to read cached user profile', e);
+      return null;
+    }
+  }
+
+  /// Cached user profile'ı sil (logout sırasında)
+  static Future<void> clearCachedUserProfile() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_cachedUserKey);
+      AppLogger.debug('TokenStorageService: Cached user profile cleared');
+    } catch (e) {
+      AppLogger.warning('TokenStorageService: Failed to clear cached user profile', e);
     }
   }
 }

@@ -121,7 +121,14 @@ class AdminApiService {
   Future<List<Product>> getProducts() async {
     try {
       final response = await _apiClient.get(ApiEndpoints.products);
-      final productList = (response.data as List)
+      final rawData = response.data;
+      final List<dynamic> itemsList;
+      if (rawData is Map<String, dynamic>) {
+        itemsList = rawData['items'] as List<dynamic>? ?? [];
+      } else {
+        itemsList = rawData as List<dynamic>;
+      }
+      final productList = itemsList
           .map((item) => Product.fromJson(item as Map<String, dynamic>))
           .toList();
       return productList;
@@ -536,7 +543,14 @@ class AdminApiService {
   Future<List<Service>> getServices() async {
     try {
       final response = await _apiClient.get(ApiEndpoints.services);
-      final serviceList = (response.data as List)
+      final rawData = response.data;
+      final List<dynamic> itemsList;
+      if (rawData is Map<String, dynamic>) {
+        itemsList = rawData['items'] as List<dynamic>? ?? [];
+      } else {
+        itemsList = rawData as List<dynamic>;
+      }
+      final serviceList = itemsList
           .map((item) => Service.fromJson(item as Map<String, dynamic>))
           .toList();
       return serviceList;
