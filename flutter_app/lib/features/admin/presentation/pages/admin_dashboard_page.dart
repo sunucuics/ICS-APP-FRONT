@@ -579,13 +579,6 @@ class AdminDashboardPage extends ConsumerWidget {
     final authState = ref.watch(authProvider);
     final isAdmin = ref.watch(isAdminProvider);
 
-    // Debug: Print user info
-    print('🔍 Admin Dashboard Debug:');
-    print('   - isAuthenticated: ${authState.isAuthenticated}');
-    print('   - isAdmin: $isAdmin');
-    print('   - user: ${authState.user?.toJson()}');
-    print('   - user role: ${authState.user?.role}');
-
     // Listen to auth state changes and navigate when user logs out
     ref.listen<AuthState>(authProvider, (previous, next) {
       if (previous?.isAuthenticated == true && next.isAuthenticated == false) {

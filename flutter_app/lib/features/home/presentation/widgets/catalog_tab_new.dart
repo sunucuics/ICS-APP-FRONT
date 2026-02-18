@@ -415,19 +415,11 @@ class _CatalogTabNewState extends ConsumerState<CatalogTabNew>
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: categoriesAsync.when(
         data: (categories) {
-          // Add "Tümü" category and other categories from backend
-          // Filter out test categories
-          final filteredCategories = categories
-              .where((cat) =>
-                  !cat.name.toLowerCase().contains('deneme') &&
-                  !cat.name.toLowerCase().contains('test'))
-              .toList();
-
           // Fixed categories should appear first
           final fixedCategories =
-              filteredCategories.where((cat) => cat.isFixed).toList();
+              categories.where((cat) => cat.isFixed).toList();
           final regularCategories =
-              filteredCategories.where((cat) => !cat.isFixed).toList();
+              categories.where((cat) => !cat.isFixed).toList();
 
           final allCategories = [
             ...fixedCategories,

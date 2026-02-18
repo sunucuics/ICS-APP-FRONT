@@ -23,10 +23,6 @@ class OrdersApiService {
     String? checkoutId,
   }) async {
     try {
-      // According to backend documentation, POST /orders has no body
-      // Backend reads cart from user_id automatically
-      print('🔍 [ORDER CREATE DEBUG] Sending POST /orders (no body, backend reads from cart)');
-
       final response = await _dio.post(
         ApiEndpoints.orders,
         // No body according to backend docs
@@ -42,12 +38,9 @@ class OrdersApiService {
         },
       );
 
-      print('🔍 [ORDER CREATE DEBUG] Response: ${response.data}');
       final data = Map<String, dynamic>.from(response.data);
       return Order.fromJson(_sanitizeOrderJson(data));
     } on DioException catch (e) {
-      print('🔍 [ORDER CREATE DEBUG] Error: ${e.response?.data}');
-      print('🔍 [ORDER CREATE DEBUG] Status code: ${e.response?.statusCode}');
       throw ApiException.fromDioException(e);
     }
   }

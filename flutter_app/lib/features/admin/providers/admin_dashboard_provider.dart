@@ -14,19 +14,17 @@ final adminRepositoryProvider = Provider<AdminRepository>((ref) {
   return AdminRepository(apiService: apiService);
 });
 
-// Dashboard Stats Provider
+// Dashboard Stats Provider — derives from main data provider (no separate API call)
 final adminDashboardStatsProvider = FutureProvider<AdminStats>((ref) async {
-  final repository = ref.watch(adminRepositoryProvider);
-  final statsData = await repository.getDashboardStats();
-  return AdminStats.fromJson(statsData);
+  final dashboardData = await ref.watch(adminDashboardDataProvider.future);
+  return dashboardData.stats;
 });
 
-// Dashboard Data Provider (includes stats + recent data)
+// Dashboard Data Provider (single source of truth — ONE API call)
 final adminDashboardDataProvider =
     FutureProvider<AdminDashboardData>((ref) async {
   final repository = ref.watch(adminRepositoryProvider);
   final statsData = await repository.getDashboardStats();
-
   return AdminDashboardData.fromJson(statsData);
 });
 

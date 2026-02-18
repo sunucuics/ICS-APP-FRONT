@@ -740,17 +740,13 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     }
 
     try {
-      // Get the full service details
-      final servicesAsync = await ref.read(servicesProvider.future);
-      final service = servicesAsync.firstWhere(
-        (s) => s.id == featuredService.id,
-        orElse: () => Service(
-          id: featuredService.id,
-          title: featuredService.title ?? 'Hizmet',
-          description: featuredService.description ?? '',
-          image: featuredService.image,
-          isUpcoming: featuredService.isUpcoming ?? false,
-        ),
+      // Build Service directly from FeaturedService data (no extra API call)
+      final service = Service(
+        id: featuredService.id,
+        title: featuredService.title ?? 'Hizmet',
+        description: featuredService.description ?? '',
+        image: featuredService.image,
+        isUpcoming: featuredService.isUpcoming ?? false,
       );
 
       // Navigate to appointment booking page

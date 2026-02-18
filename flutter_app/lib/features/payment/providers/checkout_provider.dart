@@ -280,11 +280,11 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
     state = state.copyWith(status: CheckoutStatus.verifyingPayment);
 
     try {
-      // Sipariş durumunu backend'den al (polling)
+      // Sipariş durumunu backend'den al (polling with exponential backoff)
       // PayTR callback backend'e geldiğinde sipariş oluşturulur/güncellenir
       int attempts = 0;
-      const maxAttempts = 15; // 15 saniye (local'de daha kısa)
-      const delay = Duration(seconds: 1);
+      const maxAttempts = 12; // ~45 saniye toplam (exponential backoff ile)
+      int delayMs = 1000; // İlk bekleme 1 saniye, sonra artacak
 
       while (attempts < maxAttempts) {
         try {
@@ -294,8 +294,6 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
           final paymentStatus = order.payment?.status;
 
           if (paymentStatus == 'succeeded' || paymentStatus == 'paid') {
-            print('✅ Checkout Provider: Payment verified successfully');
-
             // Sepeti temizle
             await _ref.read(cartProvider.notifier).clearCart();
 
@@ -312,20 +310,29 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
             return;
           }
         } catch (e) {
-          // Sipariş henüz oluşturulmamış olabilir - devam et
+          // Sipariş henüz oluşturulmamış olabilir — ilk birkaç denemede normal
+          // Ama çok fazla hata olursa erken çık
+          if (attempts > 6) {
+            // 6+ denemeden sonra hâlâ hata varsa, muhtemelen gerçek bir sorun
+            state = state.copyWith(
+              status: CheckoutStatus.failed,
+              errorMessage: 'Sipariş durumu kontrol edilemedi: $e',
+            );
+            return;
+          }
         }
 
-        // Henüz güncellenmedi, bekle ve tekrar dene
-        await Future.delayed(delay);
+        // Exponential backoff: 1s, 1.5s, 2s, 3s, 4s, 5s, 5s, 5s...
+        await Future.delayed(Duration(milliseconds: delayMs));
+        delayMs = (delayMs * 1.5).toInt().clamp(1000, 5000);
         attempts++;
       }
 
-      // Timeout - ödeme sonucu alınamadı
-      // Local geliştirme ortamında PayTR callback localhost'a ulaşamaz
+      // Timeout — ödeme sonucu alınamadı
       state = state.copyWith(
         status: CheckoutStatus.failed,
         errorMessage:
-            'Ödeme doğrulaması zaman aşımına uğradı.\n\nLocal ortamda test ediyorsanız, PayTR callback localhost\'a ulaşamaz. Production ortamında bu sorun olmayacaktır.\n\nSiparişlerim sayfasından kontrol edebilirsiniz.',
+            'Ödeme doğrulaması zaman aşımına uğradı.\n\nSiparişlerim sayfasından kontrol edebilirsiniz.',
       );
     } catch (e) {
       state = state.copyWith(

@@ -75,7 +75,6 @@ class HomePageState extends ConsumerState<HomePage> {
         break;
       case 3: // Catalog/Market tab
         ref.invalidate(categoriesProvider);
-        ref.invalidate(productsProvider(null));
         _lastRefreshTime[tabIndex] = now;
         break;
     }

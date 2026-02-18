@@ -33,16 +33,19 @@ class AdminDashboardData with _$AdminDashboardData {
 
   factory AdminDashboardData.fromJson(Map<String, dynamic> json) {
     // Backend'den gelen veri yapısını Flutter model'ine uygun hale getir
+    // Sayısal değerler double gelebilir (Firestore aggregation), güvenli cast
+    int _toInt(dynamic v) => (v is num) ? v.toInt() : 0;
+
     final stats = AdminStats(
-      totalUsers: json['total_users'] ?? 0,
-      totalOrders: json['total_orders'] ?? 0,
-      totalRevenue: (json['revenue_this_month'] ?? 0.0).toDouble(),
-      activeDiscounts: json['active_discounts'] ?? 0,
-      pendingComments: json['pending_comments'] ?? 0,
-      upcomingAppointments: json['pending_appointments'] ?? 0,
+      totalUsers: _toInt(json['total_users']),
+      totalOrders: _toInt(json['total_orders']),
+      totalRevenue: (json['revenue_this_month'] as num?)?.toDouble() ?? 0.0,
+      activeDiscounts: _toInt(json['active_discounts']),
+      pendingComments: _toInt(json['pending_comments']),
+      upcomingAppointments: _toInt(json['pending_appointments']),
       lowStockProducts: 0, // Backend'de bu alan yok, default 0
-      totalProducts: json['total_products'] ?? 0,
-      totalServices: json['total_services'] ?? 0,
+      totalProducts: _toInt(json['total_products']),
+      totalServices: _toInt(json['total_services']),
     );
 
     return AdminDashboardData(

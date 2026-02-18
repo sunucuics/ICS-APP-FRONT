@@ -28,6 +28,12 @@
 	<true/>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Bu uygulama etkinlikleri ve randevuları yönetmek için takvim erişimi gerektirir.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Bu uygulama fotoğraf çekmek ve ürün/kategori görselleri eklemek için kamera erişimi gerektirir.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Bu uygulama fotoğraf çekerken mikrofon erişimi gerektirebilir.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Bu uygulama ürün ve kategori görselleri seçmek için fotoğraf galerisi erişimi gerektirir.</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Bu uygulama kullanıcı deneyimini geliştirmek için kişi bilgilerine erişim gerektirir.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
