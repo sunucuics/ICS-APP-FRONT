@@ -131,6 +131,25 @@ class AppointmentsApiService {
         .toList();
   }
 
+  /// Admin - Tüm günü bloklar
+  Future<Map<String, dynamic>> blockEntireDay({
+    required String serviceId,
+    required String date,
+    String? notes,
+  }) async {
+    final formData = FormData.fromMap({
+      'service_id': serviceId,
+      'date': date,
+      if (notes != null && notes.isNotEmpty) 'notes': notes,
+    });
+
+    final response = await _apiClient.post(
+      ApiEndpoints.adminBlockDay,
+      data: formData,
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
   /// Admin - Manuel randevu oluşturur
   Future<Appointment> createAppointmentAdmin({
     required String serviceId,

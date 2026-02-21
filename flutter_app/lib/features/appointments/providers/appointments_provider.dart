@@ -230,3 +230,42 @@ class CreateAppointmentAdminNotifier
     state = const AsyncValue.data(null);
   }
 }
+
+// Admin - Tüm Günü Blokla Provider
+final blockEntireDayProvider = StateNotifierProvider<
+    BlockEntireDayNotifier, AsyncValue<Map<String, dynamic>?>>((ref) {
+  final repository = ref.watch(appointmentsRepositoryProvider);
+  return BlockEntireDayNotifier(repository);
+});
+
+class BlockEntireDayNotifier
+    extends StateNotifier<AsyncValue<Map<String, dynamic>?>> {
+  final AppointmentsRepository _repository;
+
+  BlockEntireDayNotifier(this._repository)
+      : super(const AsyncValue.data(null));
+
+  Future<Map<String, dynamic>> blockEntireDay({
+    required String serviceId,
+    required String date,
+    String? notes,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      final result = await _repository.blockEntireDay(
+        serviceId: serviceId,
+        date: date,
+        notes: notes,
+      );
+      state = AsyncValue.data(result);
+      return result;
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+      rethrow;
+    }
+  }
+
+  void reset() {
+    state = const AsyncValue.data(null);
+  }
+}

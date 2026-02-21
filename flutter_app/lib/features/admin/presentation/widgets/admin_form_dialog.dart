@@ -43,10 +43,14 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
     }
 
     // Check all required image fields
+    // Edit modunda mevcut görseller varsa (initialData'dan gelen URL),
+    // yeni görsel seçilmemiş olsa bile geçerli say
     for (final field in widget.fields) {
       if (field.isImageField && field.isRequired) {
         final images = _selectedImages[field.label];
-        if (images == null || images.isEmpty) {
+        final hasExistingImage =
+            widget.initialData?[field.label]?.isNotEmpty == true;
+        if ((images == null || images.isEmpty) && !hasExistingImage) {
           return false;
         }
       }
@@ -384,11 +388,14 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
     }
 
     // Validate required image fields
+    // Edit modunda mevcut görseller varsa yeni seçim zorunlu değil
     for (final field in widget.fields) {
       if (field.isImageField && field.isRequired) {
-        if (_selectedImages[field.label] == null || _selectedImages[field.label]!.isEmpty) {
+        final hasExistingImage =
+            widget.initialData?[field.label]?.isNotEmpty == true;
+        if ((_selectedImages[field.label] == null || _selectedImages[field.label]!.isEmpty) && !hasExistingImage) {
           if (mounted) {
-            SnackBarService.showSnackBar(context: context, snackBar: 
+            SnackBarService.showSnackBar(context: context, snackBar:
               SnackBar(
                 content: Text('${field.label} zorunludur'),
                 backgroundColor: Colors.red,

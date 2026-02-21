@@ -23,7 +23,7 @@ class ProductsNotifier extends StateNotifier<PaginatedListState<Product>> {
 
   /// İlk sayfa yükle (yeni kategori veya refresh).
   Future<void> loadInitial({String? categoryName}) async {
-    _categoryName = categoryName;
+    _categoryName = (categoryName == 'Tümü') ? null : categoryName;
     state = PaginatedListState.loading();
 
     try {

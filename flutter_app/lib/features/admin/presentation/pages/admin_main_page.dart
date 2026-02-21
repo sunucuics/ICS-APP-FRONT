@@ -1955,6 +1955,7 @@ class _BlockTimeBottomSheetState extends ConsumerState<_BlockTimeBottomSheet> {
   String? _selectedTimeSlot;
   final TextEditingController _notesController = TextEditingController();
   bool _isLoading = false;
+  bool _isBlockingDay = false;
 
   // Working hours (09:00 - 18:00)
   final List<String> _workingHours = List.generate(
@@ -2038,9 +2039,8 @@ class _BlockTimeBottomSheetState extends ConsumerState<_BlockTimeBottomSheet> {
     }
 
     final hour = int.parse(_selectedTimeSlot!.split(':')[0]);
-    // Local time olarak oluştur, sonra UTC'ye çevir (backend UTC bekliyor)
-    final localStart = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, hour, 0);
-    final start = localStart.toUtc();
+    // Naive local time gönder — backend _from_local_dt() ile UTC'ye çevirir
+    final start = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, hour, 0);
     final end = start.add(const Duration(hours: 1));
 
     setState(() {
@@ -2058,6 +2058,78 @@ class _BlockTimeBottomSheetState extends ConsumerState<_BlockTimeBottomSheet> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _showBlockDayConfirmation() async {
+    final dateStr = '${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Tüm Günü Blokla'),
+        content: Text('$dateStr tarihindeki tüm boş saatler bloklanacak.\n\nDevam etmek istiyor musunuz?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('İptal'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red[700],
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Blokla'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() {
+      _isBlockingDay = true;
+    });
+
+    try {
+      final dateParam =
+          '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}';
+      final result = await ref.read(blockEntireDayProvider.notifier).blockEntireDay(
+        serviceId: _selectedServiceId!,
+        date: dateParam,
+        notes: _notesController.text.isEmpty ? null : _notesController.text,
+      );
+
+      // Refresh appointments list
+      await ref.read(adminAppointmentsNotifierProvider.notifier).refresh();
+
+      if (mounted) {
+        final message = result['message'] as String? ?? 'Tüm gün bloklandı';
+        Navigator.of(context).pop();
+        SnackBarService.showSnackBar(
+          context: context,
+          snackBar: SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        SnackBarService.showSnackBar(
+          context: context,
+          snackBar: SnackBar(
+            content: Text('Hata: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isBlockingDay = false;
+        });
+      }
     }
   }
 
@@ -2246,6 +2318,45 @@ class _BlockTimeBottomSheetState extends ConsumerState<_BlockTimeBottomSheet> {
                     ],
                   ),
                 ],
+              ),
+              const SizedBox(height: 12),
+
+              // Tüm Günü Blokla Button
+              appointmentsAsync.when(
+                data: (appointments) {
+                  final serviceAppointments = _selectedServiceId != null
+                      ? appointments.where((apt) => apt.serviceId == _selectedServiceId).toList()
+                      : appointments;
+                  final busySlots = _getBusySlotsForDate(serviceAppointments);
+                  final allBusy = _workingHours.every((hour) => _isSlotBusy(hour, busySlots));
+
+                  return OutlinedButton.icon(
+                    onPressed: _selectedServiceId == null || allBusy || _isBlockingDay
+                        ? null
+                        : () => _showBlockDayConfirmation(),
+                    icon: _isBlockingDay
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.block, size: 18),
+                    label: Text(
+                      allBusy ? 'Tüm Saatler Dolu' : 'Tüm Günü Blokla',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red[700],
+                      side: BorderSide(color: allBusy ? Colors.grey : Colors.red[300]!),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
               ),
               const SizedBox(height: 16),
 

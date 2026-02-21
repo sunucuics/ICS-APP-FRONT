@@ -149,6 +149,7 @@ class ApiEndpoints {
   static const String adminAppointments = '/admin/appointments/';
   static String adminAppointment(String appointmentId) =>
       '/admin/appointments/$appointmentId';
+  static const String adminBlockDay = '/admin/appointments/block-day';
   static String adminServiceAvailability(String serviceId) =>
       '/admin/appointments/service-availability/$serviceId';
   // Discounts endpoints (mounted at /admin/discounts in backend)

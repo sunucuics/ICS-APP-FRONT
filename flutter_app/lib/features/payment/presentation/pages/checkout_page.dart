@@ -57,11 +57,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         _navigateToPayment(current.paytrResponse!);
       } else if (current.status == CheckoutStatus.completed) {
         // Ödeme başarılı - sipariş oluşturuldu
-        // Kredi kartı için _navigateToPayment dönüşünde işleniyor
-        // Havale/EFT (Manuel) için burada yönlendir
-        if (current.paymentMethod == PaymentMethod.bankTransfer) {
-          _navigateToSuccessPage();
-        }
+        // Kredi kartı completed durumu WebView dönüşünde handle ediliyor
       } else if (current.status == CheckoutStatus.failed) {
         // Hata oluştu
         // Kullanıcı iptal ettiyse bildirim gösterme
@@ -156,9 +152,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                 
                 const SizedBox(height: 16),
                 
-                // Taksit bilgisi notu (Sadece kredi kartı seçiliyse)
-                if (checkoutState.paymentMethod == PaymentMethod.creditCard)
-                  _buildInstallmentNote(),
+                // Taksit bilgisi notu
+                _buildInstallmentNote(),
               ],
             ),
           ),
@@ -350,15 +345,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                 icon: Icons.credit_card,
                 title: 'Banka / Kredi Kartı',
                 subtitle: 'PayTR güvencesi ile öde',
-              ),
-              Divider(color: Colors.white.withOpacity(0.1), height: 1),
-              // Havale/EFT Seçeneği
-              _buildPaymentOption(
-                state: state,
-                method: PaymentMethod.bankTransfer,
-                icon: Icons.account_balance,
-                title: 'Havale / EFT',
-                subtitle: 'Sipariş sonrası IBAN bilgileri gösterilir',
               ),
             ],
           ),
@@ -669,10 +655,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                         ),
                       )
                     : Text(
-                        hasAddress 
-                            ? (checkoutState.paymentMethod == PaymentMethod.bankTransfer 
-                                ? 'Siparişi Tamamla' 
-                                : 'Ödemeye Geç') 
+                        hasAddress
+                            ? 'Ödemeye Geç'
                             : 'Önce Adres Ekleyin',
                         style: const TextStyle(
                           fontSize: 16,
@@ -738,15 +722,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   }
 
   void _startCheckout(Cart cart) {
-    final checkoutState = ref.read(checkoutProvider);
-    
-    if (checkoutState.paymentMethod == PaymentMethod.bankTransfer) {
-      // Havale / EFT -> Manuel Sipariş
-      ref.read(checkoutProvider.notifier).processManualPayment();
-    } else {
-      // Kredi Kartı -> PayTR
-      ref.read(checkoutProvider.notifier).startCheckout(cart: cart);
-    }
+    ref.read(checkoutProvider.notifier).startCheckout(cart: cart);
   }
 
   void _navigateToPayment(PayTRInitResponse paytrResponse) async {

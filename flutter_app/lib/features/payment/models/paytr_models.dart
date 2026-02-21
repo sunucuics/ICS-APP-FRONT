@@ -261,7 +261,6 @@ enum CheckoutStatus {
 /// Ödeme yöntemi
 enum PaymentMethod {
   creditCard,
-  bankTransfer,
 }
 
 /// Checkout state - tüm checkout akışını yönetir

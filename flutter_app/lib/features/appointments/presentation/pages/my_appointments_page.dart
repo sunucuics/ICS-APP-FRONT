@@ -323,82 +323,12 @@ class _MyAppointmentsPageState extends ConsumerState<MyAppointmentsPage>
             const SizedBox(height: 12),
             _buildStatusDescription(appointment.status),
             
-            // Durum güncelleme butonu (sadece approved durumundaki randevular için)
-            if (appointment.status == 'approved') ...[
-              const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: () => _showCompleteAppointmentDialog(context, ref, appointment),
-                icon: const Icon(Icons.check_circle),
-                label: const Text('Randevuyu Tamamlandı Olarak İşaretle'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 48),
-                ),
-              ),
-            ],
           ],
         ),
       ),
     );
   }
   
-  void _showCompleteAppointmentDialog(
-      BuildContext context, WidgetRef ref, AppointmentWithDetails appointment) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Randevuyu Tamamlandı Olarak İşaretle'),
-        content: const Text(
-          'Bu randevuyu tamamlandı olarak işaretlemek istediğinizden emin misiniz?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('İptal'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              try {
-                await ref
-                    .read(appointmentStatusUpdateProvider.notifier)
-                    .updateAppointmentStatus(
-                      appointmentId: appointment.id,
-                      status: 'completed',
-                    );
-                // Randevu listesini yenile
-                ref.invalidate(myAppointmentsProvider);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Randevu tamamlandı olarak işaretlendi'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                }
-              } catch (error) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Hata: ${error.toString()}'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Tamamlandı Olarak İşaretle'),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildStatusChip(String status) {
     Color backgroundColor;
     Color textColor;

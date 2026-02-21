@@ -84,6 +84,19 @@ class AppointmentsRepository {
     return await _apiService.getAllAppointments(status: status);
   }
 
+  /// Admin - Tüm günü bloklar
+  Future<Map<String, dynamic>> blockEntireDay({
+    required String serviceId,
+    required String date,
+    String? notes,
+  }) async {
+    return await _apiService.blockEntireDay(
+      serviceId: serviceId,
+      date: date,
+      notes: notes,
+    );
+  }
+
   /// Admin - Manuel randevu oluşturur
   Future<Appointment> createAppointmentAdmin({
     required String serviceId,

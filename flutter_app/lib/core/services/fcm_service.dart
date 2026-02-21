@@ -252,12 +252,16 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     await LocalNotificationService.initialize();
     debugPrint('✅ LocalNotificationService initialized in background handler');
 
-    // Show notification if notification payload exists
-    if (message.notification != null) {
+    // Background'da notification payload varsa FCM zaten otomatik gösterir.
+    // Sadece data-only mesajlar için local notification göster,
+    // aksi halde aynı bildirim 2 kez görünür.
+    if (message.notification == null && message.data.isNotEmpty) {
       await LocalNotificationService.showNotification(message);
-      debugPrint('✅ Background notification shown: ${message.notification?.title}');
+      debugPrint('✅ Background data-only notification shown');
+    } else if (message.notification != null) {
+      debugPrint('ℹ️ Background notification payload exists, FCM handles display automatically');
     } else {
-      debugPrint('⚠️ Background message has no notification payload');
+      debugPrint('⚠️ Background message has no notification or data payload');
     }
   } catch (e, stackTrace) {
     debugPrint('❌ Error in background message handler: $e');
