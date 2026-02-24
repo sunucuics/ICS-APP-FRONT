@@ -787,32 +787,34 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
           const SizedBox(height: 16),
 
           // Peşin ve 3 Taksit seçenekleri yan yana
-          Row(
-            children: [
-              // Peşin
-              Expanded(
-                child: _buildInstallmentCard(
-                  isSelected: _selectedInstallment == 0,
-                  title: 'PEŞİN',
-                  totalAmount: pesinOption?.totalAmount ?? _baseAmount,
-                  perMonth: null,
-                  surchargePercent: 0,
-                  onTap: () => _onInstallmentSelected(0),
+          IntrinsicHeight(
+            child: Row(
+              children: [
+                // Peşin
+                Expanded(
+                  child: _buildInstallmentCard(
+                    isSelected: _selectedInstallment == 0,
+                    title: 'PEŞİN',
+                    totalAmount: pesinOption?.totalAmount ?? _baseAmount,
+                    perMonth: null,
+                    surchargePercent: 0,
+                    onTap: () => _onInstallmentSelected(0),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              // 3 Taksit
-              Expanded(
-                child: _buildInstallmentCard(
-                  isSelected: _selectedInstallment == 3,
-                  title: '3 TAKSİT',
-                  totalAmount: taksit3Option?.totalAmount ?? 0,
-                  perMonth: taksit3Option?.perInstallmentAmount,
-                  surchargePercent: taksit3Option?.ratePercent ?? 15,
-                  onTap: () => _onInstallmentSelected(3),
+                const SizedBox(width: 12),
+                // 3 Taksit
+                Expanded(
+                  child: _buildInstallmentCard(
+                    isSelected: _selectedInstallment == 3,
+                    title: '3 TAKSİT',
+                    totalAmount: taksit3Option?.totalAmount ?? 0,
+                    perMonth: taksit3Option?.perInstallmentAmount,
+                    surchargePercent: taksit3Option?.ratePercent ?? 15,
+                    onTap: () => _onInstallmentSelected(3),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
 
           // Seçim bilgisi
@@ -873,6 +875,8 @@ class _PayTRWebViewPageState extends ConsumerState<PayTRWebViewPage> {
           ),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             // Başlık
             Text(

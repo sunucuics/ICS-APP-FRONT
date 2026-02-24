@@ -131,21 +131,21 @@ class AppointmentsApiService {
         .toList();
   }
 
-  /// Admin - Tüm günü bloklar
+  /// Admin - Tüm günü bloklar (JSON body — token refresh retry desteği için)
   Future<Map<String, dynamic>> blockEntireDay({
     required String serviceId,
     required String date,
     String? notes,
   }) async {
-    final formData = FormData.fromMap({
+    final body = <String, dynamic>{
       'service_id': serviceId,
       'date': date,
       if (notes != null && notes.isNotEmpty) 'notes': notes,
-    });
+    };
 
     final response = await _apiClient.post(
       ApiEndpoints.adminBlockDay,
-      data: formData,
+      data: body,
     );
     return response.data as Map<String, dynamic>;
   }
