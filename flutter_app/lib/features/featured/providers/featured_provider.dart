@@ -22,12 +22,15 @@ class FeaturedProductsNotifier
     // Don't load immediately - wait until first access (lazy loading)
   }
 
-  Future<void> loadFeaturedProducts() async {
+  Future<void> loadFeaturedProducts({bool force = false}) async {
     // Prevent multiple simultaneous loads
-    if (_hasLoaded && state.hasValue) return;
+    if (!force && _hasLoaded && state.hasValue) return;
 
     try {
-      state = const AsyncValue.loading();
+      // İlk yüklemede loading göster, force refresh'te mevcut datayı koru
+      if (!_hasLoaded) {
+        state = const AsyncValue.loading();
+      }
       final products = await _repository.getFeaturedProducts();
       state = AsyncValue.data(products);
       _hasLoaded = true;
@@ -37,40 +40,48 @@ class FeaturedProductsNotifier
     }
   }
 
-  // Lazy load on first access
-  void _ensureLoaded() {
-    if (!_hasLoaded && !state.isLoading) {
-      loadFeaturedProducts();
-    }
-  }
-
   Future<void> refresh() async {
-    await loadFeaturedProducts();
+    await loadFeaturedProducts(force: true);
   }
 
   Future<FeaturedProduct> featureProduct(String productId) async {
+    // Optimistic update: hemen listeye ekle
+    final currentList = state.valueOrNull ?? [];
+    final optimistic = FeaturedProduct(id: productId);
+    state = AsyncValue.data([...currentList, optimistic]);
+
     try {
       final featuredProduct = await _repository.featureProduct(productId);
-      // Refresh the list
-      await loadFeaturedProducts();
+      // Sunucudan güncel listeyi al
+      await loadFeaturedProducts(force: true);
       return featuredProduct;
     } catch (error) {
+      // Hata durumunda eski listeye geri dön
+      state = AsyncValue.data(currentList);
       rethrow;
     }
   }
 
   Future<void> unfeatureProduct(String productId) async {
+    // Optimistic update: hemen listeden çıkar
+    final currentList = state.valueOrNull ?? [];
+    state = AsyncValue.data(
+      currentList.where((p) => p.id != productId).toList(),
+    );
+
     try {
       await _repository.unfeatureProduct(productId);
-      // Refresh the list
-      await loadFeaturedProducts();
+      // Sunucudan güncel listeyi al
+      await loadFeaturedProducts(force: true);
     } catch (error) {
+      // Hata durumunda eski listeye geri dön
+      state = AsyncValue.data(currentList);
       rethrow;
     }
   }
 }
 
-final featuredProductsProvider = StateNotifierProvider.autoDispose<
+final featuredProductsProvider = StateNotifierProvider<
     FeaturedProductsNotifier, AsyncValue<List<FeaturedProduct>>>((ref) {
   final repository = ref.read(featuredRepositoryProvider);
   final notifier = FeaturedProductsNotifier(repository);
@@ -90,12 +101,15 @@ class FeaturedServicesNotifier
     // Don't load immediately - wait until first access (lazy loading)
   }
 
-  Future<void> loadFeaturedServices() async {
+  Future<void> loadFeaturedServices({bool force = false}) async {
     // Prevent multiple simultaneous loads
-    if (_hasLoaded && state.hasValue) return;
+    if (!force && _hasLoaded && state.hasValue) return;
 
     try {
-      state = const AsyncValue.loading();
+      // İlk yüklemede loading göster, force refresh'te mevcut datayı koru
+      if (!_hasLoaded) {
+        state = const AsyncValue.loading();
+      }
       final services = await _repository.getFeaturedServices();
       state = AsyncValue.data(services);
       _hasLoaded = true;
@@ -105,40 +119,48 @@ class FeaturedServicesNotifier
     }
   }
 
-  // Lazy load on first access
-  void _ensureLoaded() {
-    if (!_hasLoaded && !state.isLoading) {
-      loadFeaturedServices();
-    }
-  }
-
   Future<void> refresh() async {
-    await loadFeaturedServices();
+    await loadFeaturedServices(force: true);
   }
 
   Future<FeaturedService> featureService(String serviceId) async {
+    // Optimistic update: hemen listeye ekle
+    final currentList = state.valueOrNull ?? [];
+    final optimistic = FeaturedService(id: serviceId);
+    state = AsyncValue.data([...currentList, optimistic]);
+
     try {
       final featuredService = await _repository.featureService(serviceId);
-      // Refresh the list
-      await loadFeaturedServices();
+      // Sunucudan güncel listeyi al
+      await loadFeaturedServices(force: true);
       return featuredService;
     } catch (error) {
+      // Hata durumunda eski listeye geri dön
+      state = AsyncValue.data(currentList);
       rethrow;
     }
   }
 
   Future<void> unfeatureService(String serviceId) async {
+    // Optimistic update: hemen listeden çıkar
+    final currentList = state.valueOrNull ?? [];
+    state = AsyncValue.data(
+      currentList.where((s) => s.id != serviceId).toList(),
+    );
+
     try {
       await _repository.unfeatureService(serviceId);
-      // Refresh the list
-      await loadFeaturedServices();
+      // Sunucudan güncel listeyi al
+      await loadFeaturedServices(force: true);
     } catch (error) {
+      // Hata durumunda eski listeye geri dön
+      state = AsyncValue.data(currentList);
       rethrow;
     }
   }
 }
 
-final featuredServicesProvider = StateNotifierProvider.autoDispose<
+final featuredServicesProvider = StateNotifierProvider<
     FeaturedServicesNotifier, AsyncValue<List<FeaturedService>>>((ref) {
   final repository = ref.read(featuredRepositoryProvider);
   final notifier = FeaturedServicesNotifier(repository);
@@ -158,12 +180,14 @@ class FeaturedContentNotifier
     // Don't load immediately - wait until first access (lazy loading)
   }
 
-  Future<void> loadFeaturedContent() async {
+  Future<void> loadFeaturedContent({bool force = false}) async {
     // Prevent multiple simultaneous loads
-    if (_hasLoaded && state.hasValue) return;
+    if (!force && _hasLoaded && state.hasValue) return;
 
     try {
-      state = const AsyncValue.loading();
+      if (!_hasLoaded) {
+        state = const AsyncValue.loading();
+      }
       final content = await _repository.getFeaturedContent();
       state = AsyncValue.data(content);
       _hasLoaded = true;
@@ -173,19 +197,12 @@ class FeaturedContentNotifier
     }
   }
 
-  // Lazy load on first access
-  void _ensureLoaded() {
-    if (!_hasLoaded && !state.isLoading) {
-      loadFeaturedContent();
-    }
-  }
-
   Future<void> refresh() async {
-    await loadFeaturedContent();
+    await loadFeaturedContent(force: true);
   }
 }
 
-final featuredContentProvider = StateNotifierProvider.autoDispose<
+final featuredContentProvider = StateNotifierProvider<
     FeaturedContentNotifier, AsyncValue<FeaturedListResponse>>((ref) {
   final repository = ref.read(featuredRepositoryProvider);
   final notifier = FeaturedContentNotifier(repository);
@@ -205,12 +222,14 @@ class FeaturedStatisticsNotifier
     // Don't load immediately - wait until first access (lazy loading)
   }
 
-  Future<void> loadStatistics() async {
+  Future<void> loadStatistics({bool force = false}) async {
     // Prevent multiple simultaneous loads
-    if (_hasLoaded && state.hasValue) return;
+    if (!force && _hasLoaded && state.hasValue) return;
 
     try {
-      state = const AsyncValue.loading();
+      if (!_hasLoaded) {
+        state = const AsyncValue.loading();
+      }
       final statistics = await _repository.getFeaturedStatistics();
       state = AsyncValue.data(statistics);
       _hasLoaded = true;
@@ -220,19 +239,12 @@ class FeaturedStatisticsNotifier
     }
   }
 
-  // Lazy load on first access
-  void _ensureLoaded() {
-    if (!_hasLoaded && !state.isLoading) {
-      loadStatistics();
-    }
-  }
-
   Future<void> refresh() async {
-    await loadStatistics();
+    await loadStatistics(force: true);
   }
 }
 
-final featuredStatisticsProvider = StateNotifierProvider.autoDispose<
+final featuredStatisticsProvider = StateNotifierProvider<
     FeaturedStatisticsNotifier, AsyncValue<FeaturedStatistics>>((ref) {
   final repository = ref.read(featuredRepositoryProvider);
   final notifier = FeaturedStatisticsNotifier(repository);

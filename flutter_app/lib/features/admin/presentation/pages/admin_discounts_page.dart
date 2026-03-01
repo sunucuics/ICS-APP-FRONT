@@ -13,6 +13,12 @@ import '../../../../core/services/snackbar_service.dart';
 class AdminDiscountsPage extends ConsumerWidget {
   const AdminDiscountsPage({super.key});
 
+  // Helper methods for theme-aware colors
+  static bool _isDarkTheme(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
+  static Color _textColor(BuildContext context) => _isDarkTheme(context) ? Colors.white : Colors.black87;
+  static Color _secondaryTextColor(BuildContext context) => _isDarkTheme(context) ? Colors.white70 : Colors.grey[600]!;
+  static Color _iconColor(BuildContext context) => _isDarkTheme(context) ? Colors.white70 : Colors.grey[600]!;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final discountsAsync = ref.watch(adminDiscountsNotifierProvider);
@@ -109,9 +115,10 @@ class AdminDiscountsPage extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     'İndirim #${discount.id.substring(0, 8)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: _textColor(context),
                     ),
                   ),
                 ),
@@ -139,7 +146,7 @@ class AdminDiscountsPage extends ConsumerWidget {
                       Text(
                         'İndirim Oranı:',
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: _secondaryTextColor(context),
                           fontSize: 14,
                         ),
                       ),
@@ -170,15 +177,16 @@ class AdminDiscountsPage extends ConsumerWidget {
                           Text(
                             'Hedef:',
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: _secondaryTextColor(context),
                               fontSize: 14,
                             ),
                           ),
                           Flexible(
                             child: Text(
                               '${discount.targetType == 'product' ? 'Ürün' : 'Kategori'}: $targetName',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w500,
+                                color: _textColor(context),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -197,12 +205,12 @@ class AdminDiscountsPage extends ConsumerWidget {
             if (discount.startAt != null || discount.endAt != null)
               Row(
                 children: [
-                  Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                  Icon(Icons.calendar_today, size: 16, color: _iconColor(context)),
                   const SizedBox(width: 4),
                   Text(
                     'Başlangıç: ${discount.startAt != null ? _formatDate(discount.startAt!) : 'Sınırsız'}',
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: _secondaryTextColor(context),
                       fontSize: 12,
                     ),
                   ),
@@ -210,7 +218,7 @@ class AdminDiscountsPage extends ConsumerWidget {
                   Text(
                     'Bitiş: ${discount.endAt != null ? _formatDate(discount.endAt!) : 'Sınırsız'}',
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: _secondaryTextColor(context),
                       fontSize: 12,
                     ),
                   ),
@@ -223,13 +231,13 @@ class AdminDiscountsPage extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: _isDarkTheme(context) ? Colors.white.withOpacity(0.1) : Colors.grey[100],
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   discount.description!,
                   style: TextStyle(
-                    color: Colors.grey[700],
+                    color: _secondaryTextColor(context),
                     fontSize: 12,
                   ),
                 ),
@@ -304,20 +312,20 @@ class AdminDiscountsPage extends ConsumerWidget {
           Icon(
             Icons.local_offer_outlined,
             size: 80,
-            color: Colors.grey[400],
+            color: _isDarkTheme(context) ? Colors.white38 : Colors.grey[400],
           ),
           const SizedBox(height: 16),
           Text(
             'Henüz indirim eklenmemiş',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.grey[600],
+                  color: _secondaryTextColor(context),
                 ),
           ),
           const SizedBox(height: 8),
           Text(
             'İlk indiriminizi eklemek için + butonuna tıklayın',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[500],
+                  color: _secondaryTextColor(context),
                 ),
             textAlign: TextAlign.center,
           ),
@@ -761,6 +769,8 @@ class AdminDiscountsPage extends ConsumerWidget {
           
           final targetName = _getTargetName(discount, products, categories);
           
+          final detailTextStyle = TextStyle(color: _textColor(context));
+
           return AlertDialog(
             title: Text('İndirim Detayları: #${discount.id.substring(0, 8)}'),
             content: SingleChildScrollView(
@@ -768,18 +778,18 @@ class AdminDiscountsPage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('İndirim Oranı: %${discount.percent.toStringAsFixed(0)}'),
-                  Text('Hedef Tip: ${discount.targetType == 'product' ? 'Ürün' : 'Kategori'}'),
-                  Text('Hedef: $targetName'),
+                  Text('İndirim Oranı: %${discount.percent.toStringAsFixed(0)}', style: detailTextStyle),
+                  Text('Hedef Tip: ${discount.targetType == 'product' ? 'Ürün' : 'Kategori'}', style: detailTextStyle),
+                  Text('Hedef: $targetName', style: detailTextStyle),
                   Text(
-                      'Başlangıç: ${discount.startAt != null ? _formatDate(discount.startAt!) : 'Sınırsız'}'),
+                      'Başlangıç: ${discount.startAt != null ? _formatDate(discount.startAt!) : 'Sınırsız'}', style: detailTextStyle),
                   Text(
-                      'Bitiş: ${discount.endAt != null ? _formatDate(discount.endAt!) : 'Sınırsız'}'),
-                  Text('Durum: ${discount.active ? 'Aktif' : 'Pasif'}'),
+                      'Bitiş: ${discount.endAt != null ? _formatDate(discount.endAt!) : 'Sınırsız'}', style: detailTextStyle),
+                  Text('Durum: ${discount.active ? 'Aktif' : 'Pasif'}', style: detailTextStyle),
                   if (discount.description != null)
-                    Text('Açıklama: ${discount.description}'),
+                    Text('Açıklama: ${discount.description}', style: detailTextStyle),
                   if (discount.createdAt != null)
-                    Text('Oluşturulma: ${_formatDate(discount.createdAt!)}'),
+                    Text('Oluşturulma: ${_formatDate(discount.createdAt!)}', style: detailTextStyle),
                 ],
               ),
             ),

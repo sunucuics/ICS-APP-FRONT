@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../auth/providers/auth_provider.dart';
-import '../../../featured/providers/featured_provider.dart' show featuredServicesListProvider, featuredProductsListProvider;
+import '../../../featured/providers/featured_provider.dart' show featuredServicesListProvider, featuredProductsListProvider, featuredProductsProvider, featuredServicesProvider;
 import '../../../cart/providers/cart_provider.dart';
 import '../../../services/providers/services_provider.dart' show servicesProvider;
 import '../../../appointments/presentation/pages/appointment_booking_page.dart';
@@ -123,7 +123,15 @@ class _HomeTabState extends ConsumerState<HomeTab> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await Future.wait([
+            ref.read(featuredProductsProvider.notifier).refresh(),
+            ref.read(featuredServicesProvider.notifier).refresh(),
+          ]);
+        },
+        child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -675,6 +683,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
           ],
         ),
       ),
+      ),
     );
   }
 
@@ -899,32 +908,34 @@ class _FeaturedProductCard extends ConsumerWidget {
                   const SizedBox(height: 4),
                   // Product price
                   if (featuredProduct.price != null) ...[
-                    Row(
-                      children: [
-                        Text(
-                          '₺${displayPrice?.toStringAsFixed(2) ?? '0.00'}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primaryOrange,
-                            fontSize:
-                                14, // Larger font size for better readability
-                          ),
-                        ),
-                        if (hasDiscount && originalPrice != null) ...[
-                          const SizedBox(width: 4),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Row(
+                        children: [
                           Text(
-                            '₺${originalPrice.toStringAsFixed(0)}',
-                            style: TextStyle(
-                              decoration: TextDecoration.lineThrough,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                              fontSize:
-                                  11, // Larger font size for better readability
+                            '₺${displayPrice?.toStringAsFixed(2) ?? '0.00'}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primaryOrange,
+                              fontSize: 14,
                             ),
                           ),
+                          if (hasDiscount && originalPrice != null) ...[
+                            const SizedBox(width: 4),
+                            Text(
+                              '₺${originalPrice.toStringAsFixed(0)}',
+                              style: TextStyle(
+                                decoration: TextDecoration.lineThrough,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                     const SizedBox(height: 4),
                   ],
@@ -1018,11 +1029,14 @@ class _FeaturedProductCard extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            child: Text(
-                              isLoading ? 'Ekleniyor...' : 'Sepete Ekle',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                isLoading ? 'Ekleniyor...' : 'Sepete Ekle',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           );

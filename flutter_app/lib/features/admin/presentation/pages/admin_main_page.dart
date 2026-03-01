@@ -39,6 +39,7 @@ import '../../../../core/utils/price_utils.dart';
 import '../../providers/admin_users_provider.dart';
 import '../../../../features/auth/providers/auth_provider.dart';
 import '../../../../core/providers/theme_provider.dart';
+import '../../../featured/providers/featured_provider.dart';
 
 class AdminMainPage extends ConsumerStatefulWidget {
   const AdminMainPage({super.key});
@@ -3446,6 +3447,9 @@ class AdminServicesPageContent extends ConsumerWidget {
 
   Widget _buildServiceCard(
       BuildContext context, WidgetRef ref, Service service) {
+    final featuredServices = ref.watch(featuredServicesListProvider);
+    final isFeatured = featuredServices.any((fs) => fs.id == service.id);
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 4,
@@ -3560,16 +3564,18 @@ class AdminServicesPageContent extends ConsumerWidget {
                     ),
                   ],
                   const SizedBox(height: 8),
-                  Row(
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
                     children: [
                       _buildStatusChip(
                         !service.isDeleted ? 'Aktif' : 'Pasif',
                         !service.isDeleted ? Colors.green : Colors.red,
                       ),
-                      const SizedBox(width: 8),
                       if (service.isUpcoming)
                         _buildStatusChip('Yakında', Colors.orange),
-                      const SizedBox(width: 8),
+                      if (isFeatured)
+                        _buildStatusChip('Öne Çıkan', Colors.amber),
                       Text(
                         'Tür: ${service.kind}',
                         style: TextStyle(
@@ -3585,13 +3591,65 @@ class AdminServicesPageContent extends ConsumerWidget {
 
             // Actions
             PopupMenuButton<String>(
-              onSelected: (value) {
+              onSelected: (value) async {
                 switch (value) {
                   case 'edit':
                     _showEditServiceDialog(context, ref, service);
                     break;
                   case 'delete':
                     _showDeleteConfirmation(context, ref, service);
+                    break;
+                  case 'feature':
+                    try {
+                      await ref
+                          .read(featuredServicesProvider.notifier)
+                          .featureService(service.id);
+                      if (context.mounted) {
+                        SnackBarService.showSnackBar(
+                          context: context,
+                          snackBar: SnackBar(
+                            content: Text(
+                                '${service.title} öne çıkan hizmetlere eklendi'),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        SnackBarService.showSnackBar(
+                          context: context,
+                          snackBar: SnackBar(
+                            content: Text('Hata: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                    break;
+                  case 'unfeature':
+                    try {
+                      await ref
+                          .read(featuredServicesProvider.notifier)
+                          .unfeatureService(service.id);
+                      if (context.mounted) {
+                        SnackBarService.showSnackBar(
+                          context: context,
+                          snackBar: SnackBar(
+                            content: Text(
+                                '${service.title} öne çıkan hizmetlerden kaldırıldı'),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        SnackBarService.showSnackBar(
+                          context: context,
+                          snackBar: SnackBar(
+                            content: Text('Hata: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
                     break;
                 }
               },
@@ -3603,6 +3661,22 @@ class AdminServicesPageContent extends ConsumerWidget {
                       Icon(Icons.edit, size: 20),
                       SizedBox(width: 8),
                       Text('Düzenle'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: isFeatured ? 'unfeature' : 'feature',
+                  child: Row(
+                    children: [
+                      Icon(
+                        isFeatured ? Icons.star : Icons.star_border,
+                        size: 20,
+                        color: Colors.amber,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(isFeatured
+                          ? 'Öne Çıkarmayı Kaldır'
+                          : 'Öne Çıkar'),
                     ],
                   ),
                 ),

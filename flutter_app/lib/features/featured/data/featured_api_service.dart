@@ -79,10 +79,8 @@ class FeaturedApiService {
   /// Get featured content for public display
   Future<FeaturedListResponse> getFeaturedContent() async {
     try {
-      // Since we don't have public endpoints, we'll use admin endpoints
-      // In a real app, you'd have public endpoints like /featured/products and /featured/services
-      final products = await listFeaturedProducts();
-      final services = await listFeaturedServices();
+      final products = await getFeaturedProducts();
+      final services = await getFeaturedServices();
 
       return FeaturedListResponse(
         products: products,
@@ -93,13 +91,12 @@ class FeaturedApiService {
     }
   }
 
-  /// Get featured products for public display (using regular products endpoint)
+  /// Get featured products for public display
   Future<List<FeaturedProduct>> getFeaturedProducts() async {
     try {
-      // Use regular products endpoint since featured endpoint doesn't exist
-      final response = await _dio.get('/products');
-      return (response.data as List)
-          .take(3) // Get first 3 products as featured
+      final response = await _dio.get(ApiEndpoints.featuredProducts);
+      final List<dynamic> productsJson = response.data;
+      return productsJson
           .map((json) => FeaturedProduct.fromJson(json))
           .toList();
     } on DioException catch (e) {
@@ -107,13 +104,12 @@ class FeaturedApiService {
     }
   }
 
-  /// Get featured services for public display (using regular services endpoint)
+  /// Get featured services for public display
   Future<List<FeaturedService>> getFeaturedServices() async {
     try {
-      // Use regular services endpoint since featured endpoint doesn't exist
-      final response = await _dio.get('/services');
-      return (response.data as List)
-          .take(3) // Get first 3 services as featured
+      final response = await _dio.get(ApiEndpoints.featuredServices);
+      final List<dynamic> servicesJson = response.data;
+      return servicesJson
           .map((json) => FeaturedService.fromJson(json))
           .toList();
     } on DioException catch (e) {

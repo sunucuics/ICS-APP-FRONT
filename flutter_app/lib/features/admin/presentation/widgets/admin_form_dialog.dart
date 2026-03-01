@@ -186,14 +186,18 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
   }
 
   Widget _buildFormField(AdminFormField field) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final labelColor = isDark ? Colors.white : Colors.black87;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           field.label,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 14,
+            color: labelColor,
           ),
         ),
         if (field.isRequired)
@@ -355,29 +359,37 @@ class _AdminFormDialogState extends State<AdminFormDialog> {
           });
         }
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey[600]!),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                _controllers[field.label]!.text.isEmpty
-                    ? field.hint
-                    : _controllers[field.label]!.text,
-                style: TextStyle(
-                  color: _controllers[field.label]!.text.isEmpty
-                      ? Colors.grey[400]
-                      : Colors.white,
-                ),
-              ),
+      child: Builder(
+        builder: (context) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final textColor = isDark ? Colors.white : Colors.black87;
+          final iconColor = isDark ? Colors.white : Colors.grey[700]!;
+
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[600]!),
+              borderRadius: BorderRadius.circular(8),
             ),
-            const Icon(Icons.calendar_today, color: Colors.white),
-          ],
-        ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _controllers[field.label]!.text.isEmpty
+                        ? field.hint
+                        : _controllers[field.label]!.text,
+                    style: TextStyle(
+                      color: _controllers[field.label]!.text.isEmpty
+                          ? Colors.grey[400]
+                          : textColor,
+                    ),
+                  ),
+                ),
+                Icon(Icons.calendar_today, color: iconColor),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

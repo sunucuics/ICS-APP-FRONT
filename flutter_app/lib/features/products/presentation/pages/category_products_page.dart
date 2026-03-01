@@ -439,7 +439,7 @@ class _CategoryProductsPageState extends ConsumerState<CategoryProductsPage>
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.65,
+                childAspectRatio: 0.58,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
               ),
@@ -519,7 +519,6 @@ class _ProductCard extends ConsumerWidget {
               children: [
                 // Product Image
                 Expanded(
-                  flex: 3,
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
@@ -569,19 +568,16 @@ class _ProductCard extends ConsumerWidget {
                 const SizedBox(height: 12),
 
                 // Product Title
-                Expanded(
-                  flex: 1,
-                  child: Text(
-                    product.title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurface,
-                      height: 1.2,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                Text(
+                  product.title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    height: 1.2,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
 
                 const SizedBox(height: 8),
@@ -591,31 +587,34 @@ class _ProductCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Price Row
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Row(
+                        children: [
+                          Text(
                             '₺${displayPrice.toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                               color: AppTheme.primaryOrange,
                             ),
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        if (hasDiscount)
-                          Text(
-                            '₺${originalPrice.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              decoration: TextDecoration.lineThrough,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                              fontSize: 12,
+                          if (hasDiscount) ...[
+                            const SizedBox(width: 4),
+                            Text(
+                              '₺${originalPrice.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                decoration: TextDecoration.lineThrough,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                                fontSize: 12,
+                              ),
                             ),
-                          ),
-                      ],
+                          ],
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 6),
 
@@ -723,13 +722,16 @@ class _ProductCard extends ConsumerWidget {
                               }
                             : null,
                         icon: const Icon(Icons.shopping_cart, size: 16),
-                        label: Text(
-                          product.isUpcoming
-                              ? 'Yakında Satışta'
-                              : product.stock > 0
-                                  ? 'Sepete Ekle'
-                                  : 'Stokta Yok',
-                          style: const TextStyle(fontSize: 12),
+                        label: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            product.isUpcoming
+                                ? 'Yakında Satışta'
+                                : product.stock > 0
+                                    ? 'Sepete Ekle'
+                                    : 'Stokta Yok',
+                            style: const TextStyle(fontSize: 12),
+                          ),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:

@@ -487,12 +487,16 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                                       ),
                                     ),
                                     const SizedBox(height: 4),
-                                    Text(
-                                      '₺${displayPrice.toStringAsFixed(2)}',
-                                      style: const TextStyle(
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.primaryOrange,
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        '₺${displayPrice.toStringAsFixed(2)}',
+                                        style: const TextStyle(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.primaryOrange,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -959,12 +963,16 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text(
-                          '₺${(displayPrice * quantity).toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primaryOrange,
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            '₺${(displayPrice * quantity).toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primaryOrange,
+                            ),
                           ),
                         ),
                       ],
@@ -996,17 +1004,20 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                                 ),
                               )
                             : const Icon(Icons.shopping_cart, size: 20),
-                        label: Text(
-                          isLoading
-                              ? 'Ekleniyor...'
-                              : product.isUpcoming
-                                  ? 'Yakında Satışta'
-                                  : product.stock > 0
-                                      ? 'Sepete Ekle'
-                                      : 'Stokta Yok',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                        label: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            isLoading
+                                ? 'Ekleniyor...'
+                                : product.isUpcoming
+                                    ? 'Yakında Satışta'
+                                    : product.stock > 0
+                                        ? 'Sepete Ekle'
+                                        : 'Stokta Yok',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
