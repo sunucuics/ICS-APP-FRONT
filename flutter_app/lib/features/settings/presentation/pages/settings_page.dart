@@ -450,23 +450,12 @@ class SettingsPage extends ConsumerWidget {
     final uri = Uri.parse('https://wa.me/$phone');
     
     try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        if (context.mounted) {
-          SnackBarService.showSnackBar(
-            context: context,
-            snackBar: const SnackBar(
-              content: Text('WhatsApp açılamadı'),
-            ),
-          );
-        }
-      }
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
       if (context.mounted) {
         SnackBarService.showSnackBar(
           context: context,
-          snackBar: SnackBar(content: Text('Hata: $e')),
+          snackBar: SnackBar(content: Text('WhatsApp açılamadı: $e')),
         );
       }
     }

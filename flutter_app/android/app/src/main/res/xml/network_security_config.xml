@@ -7,13 +7,15 @@
         <domain includeSubdomains="true">googleapis.com</domain>
     </domain-config>
     
-    <!-- Debug için HTTP'ye izin ver (local backend için) -->
+    <!-- Debug için local backend domainleri (cleartext HTTP) -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">192.168.1.169</domain>
+    </domain-config>
+
+    <!-- Debug için user sertifikalarına güven -->
     <debug-overrides>
-        <domain-config cleartextTrafficPermitted="true">
-            <domain includeSubdomains="true">localhost</domain>
-            <domain includeSubdomains="true">10.0.2.2</domain>
-            <domain includeSubdomains="true">192.168.1.169</domain>
-        </domain-config>
         <trust-anchors>
             <certificates src="system"/>
             <certificates src="user"/>

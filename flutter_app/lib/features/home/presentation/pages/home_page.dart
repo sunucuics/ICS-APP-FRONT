@@ -27,6 +27,7 @@ class HomePageState extends ConsumerState<HomePage> {
   int _currentIndex = 0;
   final Map<int, Widget> _tabCache = {};
   final Map<int, DateTime> _lastRefreshTime = {}; // Tab refresh throttle
+  DateTime? _lastBackPressTime;
 
   @override
   void initState() {
@@ -42,6 +43,30 @@ class HomePageState extends ConsumerState<HomePage> {
       _instance = null;
     }
     super.dispose();
+  }
+
+  Future<bool> _onBackPressed() async {
+    if (_currentIndex != 0) {
+      switchToTab(0);
+      return false;
+    }
+
+    final now = DateTime.now();
+    if (_lastBackPressTime != null &&
+        now.difference(_lastBackPressTime!).inSeconds < 2) {
+      return true;
+    }
+
+    _lastBackPressTime = now;
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Çıkmak için tekrar basın'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+    return false;
   }
 
   void switchToTab(int tabIndex) {
@@ -132,7 +157,16 @@ class HomePageState extends ConsumerState<HomePage> {
       return AdminMainPage();
     }
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldPop = await _onBackPressed();
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
       body: IndexedStack(
         index: _currentIndex,
         children: _getTabs(),
@@ -340,6 +374,7 @@ class HomePageState extends ConsumerState<HomePage> {
           ),
         ),
       ),
+    ),
     );
   }
 }

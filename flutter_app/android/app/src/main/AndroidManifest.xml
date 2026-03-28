@@ -96,5 +96,11 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- URL Launcher desteği (WhatsApp, web linkleri vb.) -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
+        <package android:name="com.whatsapp"/>
     </queries>
 </manifest>

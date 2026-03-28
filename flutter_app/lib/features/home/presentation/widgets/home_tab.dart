@@ -706,20 +706,17 @@ class _HomeTabState extends ConsumerState<HomeTab> {
 
     try {
       final uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        throw 'WhatsApp açılamadı';
-      }
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
-      // Fallback: Show error message
-      SnackBarService.showSnackBar(
-        context: context,
-        snackBar: SnackBar(
-          content: Text('WhatsApp açılamadı: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (context.mounted) {
+        SnackBarService.showSnackBar(
+          context: context,
+          snackBar: SnackBar(
+            content: Text('WhatsApp açılamadı: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
